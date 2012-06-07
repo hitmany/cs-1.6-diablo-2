@@ -659,11 +659,11 @@ public plugin_init()
 	
 	register_menucmd(register_menuid("Выбери Скилл"), 1023, "skill_menu")
 	register_menucmd(register_menuid("Опции"), 1023, "option_menu")
-	register_menucmd(register_menuid("Выбери Класс"), 1023, "select_class_menu")
+	register_menucmd(register_menuid("ChooseClass"), 1023, "select_class_menu")
 	register_menucmd(register_menuid("Магазин рун"), 1023, "select_rune_menu")
 	register_menucmd(register_menuid("Новые Предметы"), 1023, "nowe_itemy")
 	register_menucmd(register_menuid("Демоны"), 1023, "PressedKlasy")
-	register_menucmd(register_menuid("Герои"), 1023, "PokazMeni")
+	register_menucmd(register_menuid("Heroes"), 1023, "PokazMeni")
 	register_menucmd(register_menuid("Животные"), 1023, "PokazZwierz")
 	register_menucmd(register_menuid("Премиум"), 1023, "PokazPremium")
 	gmsgDeathMsg = get_user_msgid("DeathMsg")
@@ -1005,7 +1005,62 @@ public create_klass(id)
 	else sql_start()
 }
 
+public create_klass2(id)
+{
+	if(g_boolsqlOK)
+	{	
+		if(!is_user_bot(id) && database_user_created[id]==0)
+		{
+			new name[64]
+			new ip[64]
+			new sid[64]
+			
+			get_user_name(id,name,63)
+			replace_all ( name, 63, "'", "Q" )
+			replace_all ( name, 63, "`", "Q" )
+			
+			get_user_ip ( id, ip, 63, 1 )
+			get_user_authid(id, sid ,63)
+			
+			log_to_file("addons/amxmodx/logs/test_log.log","*** %s %s *** Create Class2 ***",name,sid)
+			
+			for(new i=9;i<28;i++)
+			{
+				new q_command[512]
+				format(q_command,511,"INSERT INTO `%s` (`nick`,`ip`,`sid`,`class`,`lvl`,`exp`) VALUES ('%s','%s','%s',%i,%i,%i ) ",g_sqlTable,name,ip,sid,i,srv_avg[i],LevelXP[srv_avg[i]-1])
+				SQL_ThreadQuery(g_SqlTuple,"create_klass_Handle2",q_command)
+			}
+			database_user_created[id]=1
+		}
+	}
+	else sql_start()
+}
+
 public create_klass_Handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
+{
+	// lots of error checking
+	if(Errcode)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","Error on create class query: %s",Error)
+		
+	}
+	if(FailState == TQUERY_CONNECT_FAILED)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		return PLUGIN_CONTINUE
+	}
+	else if(FailState == TQUERY_QUERY_FAILED)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","create class Query failed.")
+		return PLUGIN_CONTINUE
+	}
+	   
+	
+	   
+	return PLUGIN_CONTINUE
+}
+
+public create_klass_Handle2(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 {
 	// lots of error checking
 	if(Errcode)
@@ -1048,6 +1103,8 @@ public load_xp(id)
 				new q_command[512]
 				format(q_command,511,"SELECT `class` FROM `%s` WHERE `nick`='%s' ",g_sqlTable,name)
 				SQL_ThreadQuery(g_SqlTuple,"SelectHandle",q_command,data,1)
+				format(q_command,511,"SELECT * FROM `%s` WHERE `nick` LIKE '%s' AND `class` =9",g_sqlTable,name)
+				SQL_ThreadQuery(g_SqlTuple,"SelectHandle2",q_command,data,1)
 			}
 			else if(get_cvar_num("diablo_sql_save")==1)
 			{
@@ -1089,6 +1146,30 @@ public SelectHandle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 	
 	if(SQL_MoreResults(Query)) return PLUGIN_CONTINUE
 	else create_klass(Data[0])		
+   
+	return PLUGIN_CONTINUE
+}
+
+public SelectHandle2(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
+{
+	if(Errcode)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","Error on load_xp query: %s",Error)
+	}
+	if(FailState == TQUERY_CONNECT_FAILED)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		return PLUGIN_CONTINUE
+	}
+	else if(FailState == TQUERY_QUERY_FAILED)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","load_xp Query failed.")
+		return PLUGIN_CONTINUE
+	}
+	   
+	
+	if(SQL_MoreResults(Query)) return PLUGIN_CONTINUE
+	else create_klass2(Data[0])		
    
 	return PLUGIN_CONTINUE
 }
@@ -5814,9 +5895,9 @@ public select_class(id,lx[])
 new text4[512]  
 format(text4, 511,"\yВыбери Класс: ^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n\r4. \wПремиум^n^n\d Описание мода на сайте^n\yРазработал: \rHiTmanY^n^n\y/mana,/m - магазин маны^n\dlp.hitmany.net^n\dСайт сервера") 
 
-new keysczwarta
-keysczwarta = (1<<0)|(1<<1)|(1<<2)|(1<<3)
-show_menu(id, keysczwarta,text4, -1, "Выберите класс")
+new keys
+keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
+show_menu(id, keys,text4, -1, "ChooseClass")
 }
 
 public select_class_menu(id, key) 
@@ -5883,13 +5964,13 @@ new text3[512]
 asked_klass[id]=0
 for(new i=0;i<8;i++)  //Tego masz nigdy nie zmieniaж!!!!
 {
-    format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yНазад^n^n\yЖдите5 сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+    format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите5 сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
     player_class_lvl[id][1],player_class_lvl[id][2],player_class_lvl[id][3],player_class_lvl[id][4],player_class_lvl[id][5],player_class_lvl[id][6],player_class_lvl[id][7],player_class_lvl[id][8])
 }
 
 new keyspiata
 keyspiata = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<9)
-show_menu(id, keyspiata, text3, -1, "Герои")
+show_menu(id, keyspiata, text3, -1, "Heroes")
 }
 
 public PokazMeni(id, key)
@@ -5982,12 +6063,12 @@ return PLUGIN_HANDLED
 public ShowKlasy(id,lx[]) {
 new text2[512]
 asked_klass[id]=0
-format(text2, 511,"\yДемоны: ^n\w1. \yAndariel^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yMephisto^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yBaal^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yНазад^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+format(text2, 511,"\yДемоны: ^n\w1. \yAndariel^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yMephisto^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yBaal^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
 player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 new szosta
 szosta = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<9)
-show_menu(id, szosta,text2, -1, "Демоны")
+show_menu(id, szosta,text2)
 
 }
 public PressedKlasy(id, key) {
@@ -6096,12 +6177,12 @@ return PLUGIN_HANDLED
 public PokazZwierze(id,lx[]) {
 new text5[512]
 asked_klass[id]=0
-format(text5, 511,"\yЖивотные: ^n\w1. \yIzual^t\wУровень: \r%i^n\w2. \yJumper^t\wУровень: \r%i^n\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yKernel^t\wУровень: \r%i^n\w5. \yPoison Creeper^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n\w7. \ySnow Wanderer^t\wУровень: \r%i^n\w0. \yНазад^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+format(text5, 511,"\yЖивотные: ^n\w1. \yIzual^t\wУровень: \r%i^n\w2. \yJumper^t\wУровень: \r%i^n\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yKernel^t\wУровень: \r%i^n\w5. \yPoison Creeper^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n\w7. \ySnow Wanderer^t\wУровень: \r%i^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
 player_class_lvl[id][17],player_class_lvl[id][18],player_class_lvl[id][19],player_class_lvl[id][20],player_class_lvl[id][21],player_class_lvl[id][22],player_class_lvl[id][23])
 
 new siodma
 siodma = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
-show_menu(id, siodma,text5, -1, "Животные")
+show_menu(id, siodma,text5)
 
 }
 public PokazZwierz(id, key) {
@@ -6172,7 +6253,7 @@ switch (key) {
 	c_piorun[id]=1
         LoadXP(id, player_class[id])
     }
-   case 8: 
+   case 9: 
     { 
         select_class(id,lx)
     }
@@ -6186,11 +6267,11 @@ return PLUGIN_HANDLED
 public PokazPremiumy(id,lx[]) {
 new text6[512]
 asked_klass[id]=0
-format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yНазад^n^n\rДоступ к премиум классам.^n\dкупить на lp.hitmany.net^n\dСайт сервера",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
+format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\rДоступ к премиум классам.^n\rкупить на lp.hitmany.net",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
 
 new usma
 usma = (1<<0)|(1<<1)|(1<<2)|(1<<9)
-show_menu(id, usma,text6, -1, "Премиум")
+show_menu(id, usma,text6)
 
 }
 public PokazPremium(id, key) {
