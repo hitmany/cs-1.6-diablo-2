@@ -185,6 +185,7 @@ new Float:player_damreduction[33]
 new player_dextery[33]
 new player_class[33]		
 new Float:player_huddelay[33]
+new player_premium[33] = 0  //Holds players premium
 
 //Item attributes
 new player_b_vampire[33] = 1	//Vampyric damage
@@ -306,6 +307,7 @@ new bool:gUpdate[33] = {false, ...}
 
 new gHooksUsed[33] // Used with sv_hookmax
 new bool:g_bHookAllowed[33] // Used with sv_hookadminonly
+new bool:g_bWeaponsDisabled = false; //disable give weapon skills
 
 /////////////////////////////////////////////////////////////////////
 new player_ultra_armor[33]
@@ -523,6 +525,8 @@ new questy_zabil[][]={
 }
 
 new mod_version[16] = "LP 2.0 beta"
+
+
 public plugin_init()
 {
 	new map[32]
@@ -530,10 +534,11 @@ public plugin_init()
 	new times[64]
 	get_time("%m/%d/%Y - %H:%M:%S" ,times,63)
 	log_to_file("addons/amxmodx/logs/diablo.log","%s ### MAP: %s ### ",times,map)
+	WC3_MapDisableCheck("weapons.cfg")
 	
 	register_cvar("diablo_sql_host","localhost",FCVAR_PROTECTED)
 	register_cvar("diablo_sql_user","root",FCVAR_PROTECTED)
-	register_cvar("diablo_sql_pass","Ahluxi5AeC",FCVAR_PROTECTED)
+	register_cvar("diablo_sql_pass","",FCVAR_PROTECTED)
 	register_cvar("diablo_sql_database","dbmod",FCVAR_PROTECTED)
 	
 	register_cvar("diablo_sql_table","dbmod_table222",FCVAR_PROTECTED)
@@ -660,7 +665,7 @@ public plugin_init()
 	register_menucmd(register_menuid("Выбери Скилл"), 1023, "skill_menu")
 	register_menucmd(register_menuid("Опции"), 1023, "option_menu")
 	register_menucmd(register_menuid("ChooseClass"), 1023, "select_class_menu")
-	register_menucmd(register_menuid("Магазин рун"), 1023, "select_rune_menu")
+	register_menucmd(register_menuid("ChooseRune"), 1023, "select_rune_menu")
 	register_menucmd(register_menuid("Новые Предметы"), 1023, "nowe_itemy")
 	register_menucmd(register_menuid("Демоны"), 1023, "PressedKlasy")
 	register_menucmd(register_menuid("Heroes"), 1023, "PokazMeni")
@@ -790,6 +795,39 @@ public plugin_init()
 	
 	return PLUGIN_CONTINUE  
 }
+
+bool:WC3_MapDisableCheck( szFileName[] )
+{
+	// Format the Orc Nade Disable File
+	new szFile[128];
+	new amxbasedir[64]
+	get_basedir(amxbasedir,63)
+	formatex( szFile, 127, "%s/diablo/disable/%s", amxbasedir, szFileName );
+
+	if ( !file_exists( szFile ) )
+	{
+		return g_bWeaponsDisabled = false;
+	}
+
+	new iLineNum, szData[64], iTextLen, iLen;
+	new szMapName[64], szRestrictName[64];
+	get_mapname( szMapName, 63 );
+
+	while ( read_file( szFile, iLineNum, szData, 63, iTextLen ) )
+	{
+		iLen = copyc( szRestrictName, 63, szData, '*' );
+
+		if ( equali( szMapName, szRestrictName, iLen ) )
+		{
+      return g_bWeaponsDisabled = true;
+		}
+
+		iLineNum++;
+	}
+
+	return false;
+}
+
 public menu_questow(id){
 	if(quest_gracza[id] == -1 || quest_gracza[id] == -2){
 		
@@ -896,8 +934,8 @@ public menu_questow_handle2(id,menu,item){
 		}
 		ile2++;
 	}
-	if(questy[item][4] && !(get_user_flags(id) & ADMIN_LEVEL_H)){
-		client_print(id,print_chat,"Этот квест только для VIP! Покупка VIP на lp.hitmany.net");
+	if(questy[item][4] && (!player_premium[id])){
+		client_print(id,print_chat,"Этот квест только для Премиум! Покупка премиум на lp.hitmany.net");
 		menu_questow(id)
 		menu_destroy(menu);
 		return PLUGIN_CONTINUE;
@@ -1266,6 +1304,16 @@ public plugin_precache()
 	precache_sound("weapons/knife_hit4.wav")
 	precache_sound("weapons/knife_deploy1.wav")
 	precache_sound(gszSound);
+	precache_sound("diablo_lp/fallen_1.wav");
+	precache_sound("diablo_lp/levelup.wav");
+	precache_sound("diablo_lp/questdone.wav");
+	precache_sound("diablo_lp/identify.wav");
+	precache_sound("diablo_lp/itembroken.wav");
+	precache_sound("diablo_lp/repair.wav");
+	precache_sound("diablo_lp/flippy.wav");
+	precache_sound("diablo_lp/ring.wav");
+	precache_sound("diablo_lp/diablo_1.wav");
+	precache_sound("diablo_lp/fireball2.wav");
 	precache_model("models/diablomod/w_throwingknife.mdl")
 	precache_model("models/diablomod/bm_block_platform.mdl")
 	
@@ -1432,7 +1480,7 @@ public LoadXP(id, class){
 	}
 	else sql_start()
 	return PLUGIN_HANDLED
-} 
+}
 
 public Load_xp_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 {
@@ -1471,6 +1519,55 @@ public Load_xp_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 		player_point[id]=(player_lvl[id]-1)*2-player_intelligence[id]-player_strength[id]-player_dextery[id]-player_agility[id]	
 		if(player_point[id]<0) player_point[id]=0
 		player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)		
+	}
+	return PLUGIN_CONTINUE
+}
+
+public LoadPremium(id){
+	
+	if(player_premium[id]==1) return PLUGIN_HANDLED
+	
+	if(g_boolsqlOK )
+	{
+			
+		new name[64]
+		new data[2]
+		data[0]=id
+		get_user_name(id,name,63)
+		replace_all ( name, 63, "'", "Q" )
+		replace_all ( name, 63, "`", "Q" )
+			
+		new q_command[512]
+		format(q_command,511,"SELECT *  FROM `premium` WHERE `nick` LIKE '%s'", name)
+			
+		SQL_ThreadQuery(g_SqlTuple,"Load_premium_handle",q_command,data,2)
+	}
+	else sql_start()
+	return PLUGIN_HANDLED
+}
+
+public Load_premium_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
+{
+	new id = Data[0]
+	
+	if(Errcode)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","Error on Load_xp query: %s",Error)
+	}
+	if(FailState == TQUERY_CONNECT_FAILED)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		return PLUGIN_CONTINUE
+	}
+	else if(FailState == TQUERY_QUERY_FAILED)
+	{
+		log_to_file("addons/amxmodx/logs/diablo.log","Load_xp Query failed.")
+		return PLUGIN_CONTINUE
+	}
+	   
+	if(SQL_MoreResults(Query))
+	{
+		player_premium[id] = 1
 	}
 	return PLUGIN_CONTINUE
 }
@@ -1615,96 +1712,166 @@ public RoundStart(){
 		else g_haskit[i]=0
 		if(player_class[i] == Amazon)
 		{
-			fm_give_item(i,"weapon_deagle")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_deagle")       
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == Jumper)
 		{
-			fm_give_item(i,"weapon_deagle")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"weapon_ak47")
-			fm_give_item(i,"ammo_762nato")
-			fm_give_item(i,"ammo_762nato")
-			fm_give_item(i,"ammo_762nato")
-			fm_give_item(i,"ammo_762nato")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_deagle")       
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"weapon_ak47")
+			 fm_give_item(i,"ammo_762nato")
+			 fm_give_item(i,"ammo_762nato")
+			 fm_give_item(i,"ammo_762nato")
+			 fm_give_item(i,"ammo_762nato")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == Enslaved)
 		{
-			fm_give_item(i,"weapon_m4a1")
-			fm_give_item(i,"ammo_556nato")
-			fm_give_item(i,"ammo_556nato")
-			fm_give_item(i,"ammo_556nato")
-			fm_give_item(i,"ammo_556nato")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_m4a1")
+			 fm_give_item(i,"ammo_556nato")
+			 fm_give_item(i,"ammo_556nato")
+			 fm_give_item(i,"ammo_556nato")
+			 fm_give_item(i,"ammo_556nato")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == SnowWanderer)
 		{
-			fm_give_item(i,"weapon_famas")
-			fm_give_item(i,"ammo_556nato")
-			fm_give_item(i,"ammo_556nato")
-			fm_give_item(i,"ammo_556nato")
-			fm_give_item(i,"ammo_556nato")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_famas")
+			 fm_give_item(i,"ammo_556nato")
+			 fm_give_item(i,"ammo_556nato")
+			 fm_give_item(i,"ammo_556nato")
+			 fm_give_item(i,"ammo_556nato")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == PoisonCreeper)
 		{
-			fm_give_item(i,"weapon_awp")
-			fm_give_item(i,"ammo_338magnum")
-			fm_give_item(i,"ammo_338magnum")
-			fm_give_item(i,"ammo_338magnum")
-			fm_give_item(i,"ammo_338magnum")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_awp")
+			 fm_give_item(i,"ammo_338magnum")
+			 fm_give_item(i,"ammo_338magnum")
+			 fm_give_item(i,"ammo_338magnum")
+			 fm_give_item(i,"ammo_338magnum")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == Kernel)
 		{
-			fm_give_item(i,"weapon_p90")
-			fm_give_item(i,"ammo_57mm")
-			fm_give_item(i,"ammo_57mm")
-			fm_give_item(i,"ammo_57mm")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_p90")
+			 fm_give_item(i,"ammo_57mm")
+			 fm_give_item(i,"ammo_57mm")
+			 fm_give_item(i,"ammo_57mm")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == Imp)
 		{
-			fm_give_item(i,"weapon_hegrenade")
-			fm_give_item(i,"weapon_flashbang")
-			fm_give_item(i,"weapon_flasgbang")
-			fm_give_item(i,"weapon_smokegrenade")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_hegrenade")
+			 fm_give_item(i,"weapon_flashbang")
+			 fm_give_item(i,"weapon_flasgbang")
+			 fm_give_item(i,"weapon_smokegrenade")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == Baal)
 		{
-			fm_give_item(i,"weapon_m3")
-			fm_give_item(i,"ammo_buckshot")
-			fm_give_item(i,"ammo_buckshot")
-			fm_give_item(i,"ammo_buckshot")
-			fm_give_item(i,"ammo_buckshot")
-			fm_give_item(i,"ammo_buckshot")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_m3")
+			 fm_give_item(i,"ammo_buckshot")
+			 fm_give_item(i,"ammo_buckshot")
+			 fm_give_item(i,"ammo_buckshot")
+			 fm_give_item(i,"ammo_buckshot")
+			 fm_give_item(i,"ammo_buckshot")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == Diablo)
 		{
-			fm_give_item(i,"weapon_elite")
-			fm_give_item(i,"ammo_9mm")
-			fm_give_item(i,"ammo_9mm")
-			fm_give_item(i,"ammo_9mm")
-			fm_give_item(i,"ammo_9mm")
-			fm_give_item(i,"ammo_9mm")
-			fm_give_item(i,"ammo_9mm")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_elite")
+			 fm_give_item(i,"ammo_9mm")
+			 fm_give_item(i,"ammo_9mm")
+			 fm_give_item(i,"ammo_9mm")
+			 fm_give_item(i,"ammo_9mm")
+			 fm_give_item(i,"ammo_9mm")
+			 fm_give_item(i,"ammo_9mm")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		if(player_class[i] == Hephasto)
 		{
-			fm_give_item(i,"weapon_hegrenade")
-			fm_give_item(i,"weapon_deagle")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
-			fm_give_item(i,"ammo_50ae")
+			if(!g_bWeaponsDisabled)
+      {
+       fm_give_item(i,"weapon_hegrenade")
+			 fm_give_item(i,"weapon_deagle")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			 fm_give_item(i,"ammo_50ae")
+			}
+			else
+			{
+       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		
 		golden_bulet[i]=0
@@ -2018,6 +2185,7 @@ public DeathMsg(id)
 			}
 			if(ile_juz[kid] == questy[quest_gracza[kid]][1]){
 				client_print(kid,print_chat,"Выполнил задание %s полученно %i exp!",questy_info[quest_gracza[kid]],questy[quest_gracza[kid]][3])
+				emit_sound(kid,CHAN_STATIC,"diablo_lp/questdone.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 				zapisz_questa(kid,quest_gracza[kid])
 				Give_Xp(kid,questy[quest_gracza[kid]][3]);
 				quest_gracza[kid] = -1;
@@ -2681,8 +2849,9 @@ public Give_Xp(id,amount)
 			{
 				player_lvl[id]+=1
 				player_point[id]+=2
-				set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 2.0, 0.1, 0.2, 2)
+				set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 4.0, 0.1, 0.2, 2)
 				show_hudmessage(id, "Повышен до %i уровня", player_lvl[id])
+				emit_sound(id,CHAN_STATIC,"diablo_lp/levelup.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 				new name[32]
 				get_user_name(id, name, 31)
 				ColorChat(0, TEAM_COLOR, "%s^x01 повышен до^x03 %i^x01 уровня (^x04%s^x01)", name, player_lvl[id], Race[player_class[id]])
@@ -2694,7 +2863,7 @@ public Give_Xp(id,amount)
 			{
 				player_lvl[id]-=1
 				player_point[id]-=2
-				set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 2.0, 0.1, 0.2, 2)
+				set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 4.0, 0.1, 0.2, 2)
 				show_hudmessage(id, "Понижен до %i уровня", player_lvl[id]) 
 				savexpcom(id)
 				player_class_lvl[id][player_class[id]]=player_lvl[id]
@@ -2712,7 +2881,8 @@ public client_connect(id)
 	asked_sql[id]=0
 	flashbattery[id] = MAX_FLASH
 	player_xp[id] = 0		
-	player_lvl[id] = 1		
+	player_lvl[id] = 1	
+  player_premium[id] = 0	
 	player_point[id] = 0	
 	player_item_id[id] = 0			
 	player_agility[id] = 0
@@ -2806,7 +2976,7 @@ public write_hud(id)
 	if(player_class[id]!=Paladin)
 {
     set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nМана: %i",get_user_health(id), Race[player_class[id]], player_lvl[id], perc,"%%", player_item_name[id],item_durability[id],mana_gracza[id])
+    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nМана: %i",get_user_health(id), Race[player_class[id]], player_lvl[id], perc,"%", player_item_name[id],item_durability[id],mana_gracza[id])
 }
 	else
 {
@@ -2898,11 +3068,13 @@ public dropitem(id)
 	if (item_durability[id] <= 0) 
 	{
 		hudmsg(id,3.0,"Item потерял свою силу!")
+		emit_sound(id,CHAN_STATIC,"diablo_lp/itembroken.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	}
 	else 
 	{
-		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 2.0, 0.2, 0.3, 5)
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
 		show_hudmessage(id, "Item выброшенн")
+		emit_sound(id,CHAN_STATIC,"diablo_lp/flippy.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	}
 	player_item_id[id] = 0
 	player_item_name[id] = "Нет"
@@ -2936,16 +3108,19 @@ public dropitem(id)
 
 public pfn_touch ( ptr, ptd )
 {	
-	if (ptd == 0)
-		return PLUGIN_CONTINUE
+	if(!ptd)
+       return PLUGIN_CONTINUE;
 	
-	new szClassName[32]
-	if(pev_valid(ptd)){
+	new szClassName[32], szClassNameOther[32];
 		entity_get_string(ptd, EV_SZ_classname, szClassName, 31)
-	}
-	else return PLUGIN_HANDLED
 	
-	if(equal(szClassName, "fireball"))
+	if(ptr && pev_valid(ptr)) {
+                if(pev(ptr, pev_solid) == SOLID_TRIGGER)
+                        return PLUGIN_CONTINUE;
+
+                entity_get_string(ptr, EV_SZ_classname, szClassNameOther, 31);
+        }
+  if(equal(szClassName, "fireball"))
 		{
 			new owner = pev(ptd,pev_owner)
 			//Touch
@@ -3046,9 +3221,16 @@ public Explode_Origin(id,Float:origin[3],damage,dist)
 				
 		if (get_user_team(id) != get_user_team(a) && get_distance_f(aOrigin,origin) < dist+0.0)
 		{
-			new dam = damage-player_dextery[a]*2
-			change_health(a,-dam,id,"grenade")
+			new dam = damage-player_dextery[a]
+			if (get_user_health(a)-dam < 5)
+			{
+				UTIL_Kill(id,a,"grenade")
+			}
+			else
+			{
+			set_user_health(a,get_user_health(a)-dam)
 			Effect_Bleed(a,248)		
+			}	
 		}
 		
 	}
@@ -3194,7 +3376,7 @@ public auto_help(id)
 {
 	new rnd = random_num(1,5+player_lvl[id])
 	if (rnd <= 5)
-		set_hudmessage(0, 180, 0, -1.0, 0.70, 0, 10.0, 5.0, 0.1, 0.5, 11) 	
+		set_hudmessage(0, 180, 0, -1.0, 0.70, 0, 10.0, 10.0, 0.1, 0.5, 11) 	
 	if (rnd == 1)
 		show_hudmessage(id, "Выкинуть item можно набрав /drop также можно посмотреть информацию о них /item")
 	if (rnd == 2)
@@ -3323,7 +3505,7 @@ public iteminfo(id)
 	new itemEffect[200]
 	
 	new TempSkill[11]					//There must be a smarter way
-	
+	emit_sound(id,CHAN_STATIC,"diablo_lp/identify.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	if (player_b_vampire[id] > 0) 
 	{
 		num_to_str(player_b_vampire[id],TempSkill,10)
@@ -3590,7 +3772,7 @@ public iteminfo(id)
 	if (player_b_kasaqtotem[id] > 0)
 	{
 		num_to_str(player_b_kasaqtotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который притягивает кассету врага.")
+		add(itemEffect,199,"Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_hook[id] > 0)
@@ -3658,7 +3840,7 @@ public award_item(id, itemnum)
 	if (player_item_id[id] != 0)
 		return PLUGIN_HANDLED
 	
-	set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 4.0, 0.2, 0.3, 5)
+	set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 8.0, 0.2, 0.3, 5)
 	new rannum = random_num(1,125)
 	
 	new maxfind = player_agility[id]
@@ -3677,6 +3859,7 @@ public award_item(id, itemnum)
 	
 	//Set durability, make this item dependant?
 	item_durability[id] = 250
+	emit_sound(id,CHAN_STATIC,"diablo_lp/ring.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	switch(rannum)
 	{
 		case 1:
@@ -3957,14 +4140,14 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Fireball staff"
 			player_item_id[id] = rannum
 			player_b_fireball[id] = random_num(50,100)
-			show_hudmessage(id, "Вы нашли item: %s :: Запускает ракету, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Вы нашли item: %s :: Запускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 39:
 		{
 			player_item_name[id] = "Fireball scepter"
 			player_item_id[id] = rannum
 			player_b_fireball[id] = random_num(100,200)
-			show_hudmessage(id, "Вы нашли item: %s :: Запускает ракету, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Вы нашли item: %s :: Запускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 40:
 		{
@@ -4280,7 +4463,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 10
 			player_b_fireball[id] = 5
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 10 прыжков в воздух и пускать до 5 ракет",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
+			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 10 прыжков в воздух и пускать до 5 огненных шаров",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
 		}
 		case 85:
 		{
@@ -4591,7 +4774,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Thief Totem"
 			player_item_id[id] = rannum
 			player_b_kasaqtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который притягивает кассету врага.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
 		}
 		case 124:
 		{
@@ -4665,7 +4848,7 @@ public award_unique_item(id)
 	
 	item_durability[id] = 350
 	
-	set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 2.0, 0.2, 0.3, 5)
+	set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 4.0, 0.2, 0.3, 5)
 	show_hudmessage(id, "Вы нашли Уникальный Item: %s", Unique_name)
 	
 }
@@ -4768,6 +4951,10 @@ public add_redhealth_bonus(id)
 		change_health(id,-player_b_reduceH[id],0,"")
 	if(player_item_id[id]==17)	//stalker ring
 		set_user_health(id,5)
+	if(player_item_id[id]==88)	//own invisible
+		set_user_health(id,45)
+	if(player_item_id[id]==89)	//mega invisible
+		set_user_health(id,10)
 }
 
 /* ==================================================================================================== */
@@ -4957,7 +5144,7 @@ public add_bonus_gamble(id)
 		new durba=item_durability[id]
 		reset_item_skills(id)
 		item_durability[id]=durba
-		set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 2.0, 0.2, 0.3, 5)
+		set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
 		new roll = random_num(1,player_b_gamble[id])
 		if (roll == 1)
 		{
@@ -5089,14 +5276,15 @@ public item_fireball(id)
 		
 		//Send forward
 		new Float:fl_iNewVelocity[3]
-		VelocityByAim(id, 500, fl_iNewVelocity)
+		VelocityByAim(id, 700, fl_iNewVelocity)
 		entity_set_vector(fEntity, EV_VEC_velocity, fl_iNewVelocity)
+		emit_sound(fEntity, CHAN_VOICE, "diablo_lp/fireball2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 		
 		
 		message_begin(MSG_BROADCAST, SVC_TEMPENTITY) 
 		write_byte(22) 
 		write_short(fEntity) 
-		write_short(sprite_beam) 
+		write_short(sprite_fire) 
 		write_byte(45) 
 		write_byte(4) 
 		write_byte(255) 
@@ -5946,7 +6134,8 @@ switch(key)
 		PokazPremiumy(id,lx)
 	}
 }
-LoadXP(id, player_class[id]) 
+LoadXP(id, player_class[id])
+LoadPremium(id) 
 
 CurWeapon(id)
         
@@ -6140,6 +6329,7 @@ switch (key) {
 	c_silent[id]=1
 	c_blind[id] = 20
         LoadXP(id, player_class[id])
+        emit_sound(id,CHAN_STATIC,"diablo_lp/diablo_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
     }
    case 5: 
     {    
@@ -6155,6 +6345,7 @@ switch (key) {
 	anty_flesh[id]=1
 	c_shaked[id]=5
         LoadXP(id, player_class[id])
+        emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
     }
    case 7: 
     {    
@@ -6294,7 +6485,7 @@ niewidka[id]=0
 
 switch (key) {
     case 0: 
-    if( get_user_flags(id) & ADMIN_LEVEL_F)
+    if(player_premium[id]==1)
     {    
     player_class[id] = Griswold
     c_antymeek[id]=1
@@ -6304,8 +6495,12 @@ switch (key) {
     c_vampire[id]=random_num(1,2)
     LoadXP(id, player_class[id])
     }
+    else
+    {
+    hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
+    }
     case 1: 
-    if( get_user_flags(id) & ADMIN_LEVEL_F)
+    if(player_premium[id]==1)
     {    
         player_class[id] = TheSmith
 	c_antymeek[id]=1
@@ -6317,8 +6512,12 @@ switch (key) {
 	c_vampire[id]=random_num(1,2)
         LoadXP(id, player_class[id])
     }
+    else
+    {
+    hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
+    }
    case 2: 
-   if( get_user_flags(id) & ADMIN_LEVEL_F)
+   if(player_premium[id]==1)
     {    
     	
         player_class[id] = Demonolog
@@ -6328,6 +6527,10 @@ switch (key) {
 	c_jump[id]=2
 	c_vampire[id]=random_num(1,2)
         LoadXP(id, player_class[id])
+    }
+    else
+    {
+    hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
     }
    case 9: 
     { 
@@ -6574,7 +6777,7 @@ public buyrune(id)
 	format(text, 512, "\yМагазин item - ^n\w1. \yКупить случайный Item! \r$5000^n^n\w0. \yВыход^n\y/mana,/m - магазин маны") 
 	
 	new keys = (1<<0)|(1<<9)
-	show_menu(id, keys, text) 
+	show_menu(id, keys, text, -1, "ChooseRune") 
 	return PLUGIN_HANDLED  
 } 
 
@@ -8375,7 +8578,7 @@ public Effect_Healing_Totem_Think(ent)
 	
 	//If this object is almost dead, apply some render to make it fade out
 	if (pev(ent,pev_ltime)-2.0 < halflife_time())
-		set_rendering ( ent, kRenderFxNone, 255,255,255, kRenderTransAlpha, 100 ) 
+		set_rendering ( ent, kRenderFxNone, 255,255,255, kRenderTransTexture, 100 ) 
 		
 	new Float:forigin[3], origin[3]
 	pev(ent,pev_origin,forigin)	
@@ -8500,7 +8703,7 @@ if (player_class[id] == Ninja)
 				
 				if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target)) render*=2	
 				
-				set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, render)
+				set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransTexture, render)
 			}
 			else if (player_class[id] == Monk)
 			{
@@ -8562,20 +8765,20 @@ if (player_class[id] == Ninja)
 			}
 			else if(invisible_cast[id]==1)
 			{
-				if(player_b_inv[id]>0) set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, floatround((10.0/255.0)*(255-player_b_inv[id])))
-				else set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 10)
+				if(player_b_inv[id]>0) set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransTexture, floatround((10.0/255.0)*(255-player_b_inv[id])))
+				else set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransTexture, 10)
 			}
 			else if(niewidka[id]==1)
 			{
-				if(player_b_inv[id]>0) set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, floatround((10.0/255.0)*(255-player_b_inv[id])))
-				else set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 20)
+				if(player_b_inv[id]>0) set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransTexture, floatround((10.0/255.0)*(255-player_b_inv[id])))
+				else set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransTexture, 20)
 			}
 			else
 			{
 				render = 255 
 				if(player_b_inv[id]>0) render = player_b_inv[id]
 				
-				set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, render)
+				set_user_rendering(id, kRenderFxNone, 0, 0, 0, kRenderTransTexture, render)
 			}
 			
 		}	
@@ -9198,7 +9401,14 @@ public task_setplayer(args[])
 	
 	if(args[1]==1)
 	{
-		fm_give_item(id, "weapon_mp5navy")
+		if(!g_bWeaponsDisabled)
+    {
+    fm_give_item(id, "weapon_mp5navy")
+    }
+		else
+		{
+    hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+    }
 		change_health(id,9999,0,"")		
 		set_user_godmode(id, 1)
 		
@@ -9970,7 +10180,7 @@ public call_cast(id)
 	{
 		case Mag:
 		{
-			show_hudmessage(id, "[Mag] Попадание огненного шара") 
+			show_hudmessage(id, "[Mag] Выстрел огненным шаром") 
 			fired[id]=0
 			item_fireball(id)
 		}
@@ -10008,21 +10218,35 @@ public call_cast(id)
 		}
 		case Necromancer:
 		{
-			fm_give_item(id, "weapon_mp5navy")
+			if(!g_bWeaponsDisabled)
+      {
+      fm_give_item(id, "weapon_mp5navy")
 			fm_give_item(id, "ammo_9mm")
 			fm_give_item(id, "ammo_9mm")
 			fm_give_item(id, "ammo_9mm")
 			fm_give_item(id, "ammo_9mm")
 			show_hudmessage(id, "[Necromancer] Вы получили MP5")
+			}
+			else
+			{
+      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		case Andariel:
 		{
-			fm_give_item(id, "weapon_galil")
+			if(!g_bWeaponsDisabled)
+      {
+      fm_give_item(id, "weapon_galil")
 			fm_give_item(id, "ammo_556nato")
 			fm_give_item(id, "ammo_556nato")
 			fm_give_item(id, "ammo_556nato")
 			fm_give_item(id, "ammo_556nato")
 			show_hudmessage(id, "[Andariel] Вы получили Galil")
+			}
+			else
+			{
+      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		case Izual:
 		{
@@ -10103,35 +10327,63 @@ public call_cast(id)
 		}
 		case Amazon: 
 		{
-			fm_give_item(id, "weapon_hegrenade")
+			if(!g_bWeaponsDisabled)
+      {
+      fm_give_item(id, "weapon_hegrenade")
 			show_hudmessage(id, "[Amazon] Вы получили HE гранату")
+			}
+			else
+			{
+      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		case Fallen: 
 		{
-			fm_give_item(id, "weapon_flashbang")
+			if(!g_bWeaponsDisabled)
+      {
+      fm_give_item(id, "weapon_flashbang")
 			fm_give_item(id, "weapon_flashbang")
 			show_hudmessage(id, "[Fallen] Вы получили 2 Flash гранаты")
+			}
+			else
+			{
+      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		case SnowWanderer: 
 		{
-			fm_give_item(id, "weapon_flashbang")
+			if(!g_bWeaponsDisabled)
+      {
+      fm_give_item(id, "weapon_flashbang")
 			fm_give_item(id, "weapon_flashbang")
 			show_hudmessage(id, "[Snow Wanderer] Вы получили 2 Flash гранаты")
+			}
+			else
+			{
+      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		case GiantSpider: 
 		{
-			fm_give_item(id, "weapon_flashbang")
-			fm_give_item(id, "weapon_flashbang")
-			fm_give_item(id, "weapon_hegrenade")
-			fm_give_item(id, "weapon_smokegrenade")
-			fm_give_item(id, "weapon_deagle")
-			fm_give_item(id,"ammo_50ae")
-			fm_give_item(id,"ammo_50ae")
-			fm_give_item(id,"ammo_50ae")
-			fm_give_item(id,"ammo_50ae")
-			fm_give_item(id,"ammo_50ae")
-			fm_give_item(id,"ammo_50ae")
-			show_hudmessage(id, "[Giant Spider] Вы получили полный набор гранат и Deagle")
+			if(!g_bWeaponsDisabled)
+      {
+        fm_give_item(id, "weapon_flashbang")
+			  fm_give_item(id, "weapon_flashbang")
+			  fm_give_item(id, "weapon_hegrenade")
+			  fm_give_item(id, "weapon_smokegrenade")
+			  fm_give_item(id, "weapon_deagle")
+			  fm_give_item(id,"ammo_50ae")
+			  fm_give_item(id,"ammo_50ae")
+			  fm_give_item(id,"ammo_50ae")
+			  fm_give_item(id,"ammo_50ae")
+			  fm_give_item(id,"ammo_50ae")
+			  fm_give_item(id,"ammo_50ae")
+			  show_hudmessage(id, "[Giant Spider] Вы получили полный набор гранат и Deagle")
+			}
+			else
+			{
+        hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 	}	
 }
@@ -10321,7 +10573,8 @@ public native_get_user_item(id)
 
 public native_set_user_item(id, item)
 {
-	switch(item)
+	emit_sound(id,CHAN_STATIC,"diablo_lp/ring.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+  switch(item)
 	{
 		case 1:
 		{
@@ -11115,7 +11368,7 @@ public native_set_user_item(id, item)
 		{
 			player_item_name[id] = "Thief Totem"
 			player_b_kasaqtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который притягивает кассету врага.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
 		}
 		case 124:
 		{
@@ -11911,7 +12164,7 @@ public itminfo(id,cel){  // po najechaniu na item pokazuje co to za item :D
         
         if (!equali(clas,"przedmiot")) return PLUGIN_CONTINUE
         set_hudmessage(255, 170, 0, 0.3, 0.56, 0, 6.0, 0.1)
-        show_hudmessage(id, "Имя Item: %s ",item_name[cel])
+        show_hudmessage(id, "Item: %s ",item_name[cel])
         
         return PLUGIN_CONTINUE
 }
@@ -13305,7 +13558,14 @@ public mana1a(id, menu, item){
 	switch(item){
 		case 0:
 		{
-			mana2(id)
+			if(!g_bWeaponsDisabled)
+      {
+      mana2(id)
+      }
+			else
+			{
+      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+      }
 		}
 		case 1:
 		{
@@ -14402,6 +14662,7 @@ public mana4a(id, menu, item){
 			}
 			if (mana_gracza[id]>=koszt)
 			{
+			emit_sound(id,CHAN_STATIC,"diablo_lp/repair.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 			mana_gracza[id] -= koszt;
 			upgrade_item(id)
 			}
