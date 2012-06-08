@@ -3128,7 +3128,7 @@ public pfn_touch ( ptr, ptd )
 			{
 				new Float:origin[3]
 				pev(ptd,pev_origin,origin)
-				Explode_Origin(owner,origin,55+player_intelligence[owner],150)
+				Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250)
 				remove_entity(ptd)
 			}
 		}
@@ -4628,7 +4628,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "M4A1 Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_m4master[id] = random_num(1,8)
+			player_b_m4master[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
 		}
 		case 105:
@@ -4636,7 +4636,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "AK47 Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_akmaster[id] = random_num(1,8)
+			player_b_akmaster[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
 		}
 		case 106:
@@ -4644,7 +4644,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "AWP Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_awpmaster[id] = random_num(1,8)
+			player_b_awpmaster[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
 		}
 		case 107:
@@ -4652,7 +4652,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Deagle Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_dglmaster[id] = random_num(1,8)
+			player_b_dglmaster[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
 		}
 		case 108:
@@ -4660,7 +4660,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "M3 Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_m3master[id] = random_num(1,8)
+			player_b_m3master[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
 		}
 		case 109:
@@ -4668,13 +4668,13 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Full Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_m3master[id] = random_num(1,8)
-			player_b_dglmaster[id] = random_num(1,8)
-			player_b_awpmaster[id] = random_num(1,8)
-			player_b_akmaster[id] = random_num(1,8)
-			player_b_m4master[id] = random_num(1,8)
-			player_b_grenade[id] = random_num(1,8)
-			player_b_sniper[id] = random_num(1,8)
+			player_b_m3master[id] = random_num(3,8)
+			player_b_dglmaster[id] = random_num(3,8)
+			player_b_awpmaster[id] = random_num(3,8)
+			player_b_akmaster[id] = random_num(3,8)
+			player_b_m4master[id] = random_num(3,8)
+			player_b_grenade[id] = random_num(3,8)
+			player_b_sniper[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
 		}
 		case 110:
@@ -9425,6 +9425,8 @@ public task_setplayer(args[])
 	}
 	
 	if(player_item_id[id]==17) fm_set_user_health(id,5)
+	if(player_item_id[id]==88) fm_set_user_health(id,45)
+	if(player_item_id[id]==89) fm_set_user_health(id,10)
 }
 
 public god_off(args[])
@@ -9986,6 +9988,14 @@ public change_health(id,hp,attacker,weapon[])
 			{
 				set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
 			}
+			else if(player_item_id[id]==88 &&hp>0)
+			{
+        set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
+			}
+	  	else if(player_item_id[id]==89 &&hp>0)
+	  	{
+        set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
+      }
 			else if (hp+health>m_health) set_user_health(id,m_health)
 			else set_user_health(id,get_user_health(id)+hp)
 		}
@@ -11241,48 +11251,48 @@ public native_set_user_item(id, item)
 		{
 			player_item_name[id] = "M4A1 Special"
 			item_durability[id] = 100
-			player_b_m4master[id] = random_num(1,8)
+			player_b_m4master[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
 		}
 		case 105:
 		{
 			player_item_name[id] = "AK47 Special"
 			item_durability[id] = 100
-			player_b_akmaster[id] = random_num(1,8)
+			player_b_akmaster[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
 		}
 		case 106:
 		{
 			player_item_name[id] = "AWP Special"
 			item_durability[id] = 100
-			player_b_awpmaster[id] = random_num(1,8)
+			player_b_awpmaster[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
 		}
 		case 107:
 		{
 			player_item_name[id] = "Deagle Special"
 			item_durability[id] = 100
-			player_b_dglmaster[id] = random_num(1,8)
+			player_b_dglmaster[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
 		}
 		case 108:
 		{
 			player_item_name[id] = "M3 Special"
 			item_durability[id] = 100
-			player_b_m3master[id] = random_num(1,8)
+			player_b_m3master[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
 		}
 		case 109:
 		{
 			player_item_name[id] = "Full Special"
 			item_durability[id] = 100
-			player_b_m3master[id] = random_num(1,8)
-			player_b_dglmaster[id] = random_num(1,8)
-			player_b_awpmaster[id] = random_num(1,8)
-			player_b_akmaster[id] = random_num(1,8)
-			player_b_m4master[id] = random_num(1,8)
-			player_b_grenade[id] = random_num(1,8)
-			player_b_sniper[id] = random_num(1,8)
+			player_b_m3master[id] = random_num(3,8)
+			player_b_dglmaster[id] = random_num(3,8)
+			player_b_awpmaster[id] = random_num(3,8)
+			player_b_akmaster[id] = random_num(3,8)
+			player_b_m4master[id] = random_num(3,8)
+			player_b_grenade[id] = random_num(3,8)
+			player_b_sniper[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
 		}
 		case 110:
