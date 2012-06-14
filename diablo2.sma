@@ -96,6 +96,25 @@ new SOUND_FINISHED[] 	= "items/smallmedkit2.wav"
 new SOUND_FAILED[] 	= "items/medshotno1.wav"
 new SOUND_EQUIP[]	= "items/ammopickup2.wav"
 
+
+enum _:MUSIC_ID
+{
+        MUSIC_1,
+        MUSIC_2,
+        MUSIC_3,
+        MUSIC_4,
+        MUSIC_5
+} 
+
+new const fallensound[] = 
+{
+        "diablo_lp/fallen_hit1.wav",
+        "diablo_lp/fallen_hit2.wav",
+        "diablo_lp/fallen_hit3.wav",
+        "diablo_lp/fallen_hit6.wav",
+        "diablo_lp/fallen_hit7.wav"
+}
+
 enum
 {
 	ICON_HIDE = 0,
@@ -169,6 +188,8 @@ new sprite_lgt = 0
 new sprite_laser = 0
 new sprite_ignite = 0
 new sprite_smoke = 0
+//new sound_fireball = 0
+//new sound_explode = 0
 new sprite_blast;
 new sprite;
 
@@ -1314,6 +1335,13 @@ public plugin_precache()
 	precache_sound("diablo_lp/ring.wav");
 	precache_sound("diablo_lp/diablo_1.wav");
 	precache_sound("diablo_lp/fireball2.wav");
+	precache_sound("diablo_lp/fireball3.wav");
+	precache_sound("diablo_lp/fallen_hit1.wav");
+  precache_sound("diablo_lp/fallen_hit2.wav");
+  precache_sound("diablo_lp/fallen_hit3.wav");
+  precache_sound("diablo_lp/fallen_hit6.wav");
+  precache_sound("diablo_lp/fallen_hit7.wav");
+	precache_sound("weapons/explode3.wav");
 	precache_model("models/diablomod/w_throwingknife.mdl")
 	precache_model("models/diablomod/bm_block_platform.mdl")
 	
@@ -2238,6 +2266,17 @@ public Damage(id)
 				add_bonus_shake(attacker_id,id)
 				add_bonus_shaked(attacker_id,id)
 				item_take_damage(id,damage)
+				if(player_class[id] == Fallen)
+		    {
+		      switch(random(4))
+          {
+               case 0: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_1], 1.0, ATTN_NORM, 0, PITCH_NORM)
+               case 1: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_2], 1.0, ATTN_NORM, 0, PITCH_NORM)
+               case 2: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_3], 1.0, ATTN_NORM, 0, PITCH_NORM)
+               case 3: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_4], 1.0, ATTN_NORM, 0, PITCH_NORM)
+               case 4: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_5], 1.0, ATTN_NORM, 0, PITCH_NORM)
+          }
+		    }
 				
 				if(player_sword[attacker_id] == 1 && weapon==CSW_KNIFE ){
 
@@ -2882,7 +2921,7 @@ public client_connect(id)
 	flashbattery[id] = MAX_FLASH
 	player_xp[id] = 0		
 	player_lvl[id] = 1	
-  player_premium[id] = 0	
+  player_premium[id] = 1	
 	player_point[id] = 0	
 	player_item_id[id] = 0			
 	player_agility[id] = 0
@@ -3128,7 +3167,7 @@ public pfn_touch ( ptr, ptd )
 			{
 				new Float:origin[3]
 				pev(ptd,pev_origin,origin)
-				Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250)
+				Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250,1)
 				remove_entity(ptd)
 			}
 		}
@@ -3152,7 +3191,7 @@ public pfn_touch ( ptr, ptd )
 			{
 				new Float:origin[3]
 				pev(ptd,pev_origin,origin)
-				Explode_Origin(owner,origin,15+player_intelligence[owner],150)
+				Explode_Origin(owner,origin,15+player_intelligence[owner],150,2)
 				remove_entity(ptd)
 			}
 		}
@@ -3196,18 +3235,34 @@ public pfn_touch ( ptr, ptd )
 
 /* ==================================================================================================== */
 
-public Explode_Origin(id,Float:origin[3],damage,dist)
+public Explode_Origin(id,Float:origin[3],damage,dist,index)
 {
 	message_begin(MSG_BROADCAST, SVC_TEMPENTITY)
 	write_byte(3)
 	write_coord(floatround(origin[0]))
 	write_coord(floatround(origin[1]))
 	write_coord(floatround(origin[2]))
+	if(index = 1)
+	{
 	write_short(sprite_boom)
+	}
+	else if(index = 2)
+	{
+  write_short(sprite_boom)
+  }
 	write_byte(50)
 	write_byte(15)
-	write_byte(0)
+	write_byte(TE_EXPLFLAG_NOSOUND)
 	message_end()
+	if(index = 1)
+	{
+	engfunc(EngFunc_EmitAmbientSound, 0, origin, "diablo_lp/fireball3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	}
+	else if(index = 2)
+	{
+	engfunc(EngFunc_EmitAmbientSound, 0, origin, "weapons/explode3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	}
+	
 	
 	new Players[32], playerCount, a
 	get_players(Players, playerCount, "ah") 
@@ -3222,13 +3277,14 @@ public Explode_Origin(id,Float:origin[3],damage,dist)
 		if (get_user_team(id) != get_user_team(a) && get_distance_f(aOrigin,origin) < dist+0.0)
 		{
 			new dam = damage-player_dextery[a]
-			if (get_user_health(a)-dam < 5)
+			new total = get_user_health(a)-dam
+			if (total < 5)
 			{
 				UTIL_Kill(id,a,"grenade")
 			}
 			else
 			{
-			set_user_health(a,get_user_health(a)-dam)
+			set_user_health(a,total)
 			Effect_Bleed(a,248)		
 			}	
 		}
@@ -4628,7 +4684,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "M4A1 Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_m4master[id] = random_num(3,8)
+			player_b_m4master[id] = random_num(5,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
 		}
 		case 105:
@@ -4636,7 +4692,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "AK47 Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_akmaster[id] = random_num(3,8)
+			player_b_akmaster[id] = random_num(5,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
 		}
 		case 106:
@@ -4652,7 +4708,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Deagle Special"
 			player_item_id[id] = rannum
 			item_durability[id] = 100
-			player_b_dglmaster[id] = random_num(3,8)
+			player_b_dglmaster[id] = random_num(5,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
 		}
 		case 108:
@@ -4669,10 +4725,10 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_m3master[id] = random_num(3,8)
-			player_b_dglmaster[id] = random_num(3,8)
+			player_b_dglmaster[id] = random_num(5,8)
 			player_b_awpmaster[id] = random_num(3,8)
-			player_b_akmaster[id] = random_num(3,8)
-			player_b_m4master[id] = random_num(3,8)
+			player_b_akmaster[id] = random_num(5,8)
+			player_b_m4master[id] = random_num(5,8)
 			player_b_grenade[id] = random_num(3,8)
 			player_b_sniper[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
@@ -6135,7 +6191,7 @@ switch(key)
 	}
 }
 LoadXP(id, player_class[id])
-LoadPremium(id) 
+//LoadPremium(id) 
 
 CurWeapon(id)
         
@@ -6885,21 +6941,15 @@ public upgrade_item(id)
 	}
 	if(player_b_dglmaster[id]>0)
 	{
-		if(player_b_dglmaster[id]>5) player_b_dglmaster[id]-=random_num(0,2)
-		else if(player_b_dglmaster[id]>2) player_b_dglmaster[id]-=random_num(0,1)
-		else if(player_b_dglmaster[id]>1) player_b_dglmaster[id]-=random_num(-1,1)
+    player_b_dglmaster[id]-=random_num(5,8)
 	}
 	if(player_b_m4master[id]>0)
 	{
-		if(player_b_m4master[id]>5) player_b_m4master[id]-=random_num(0,2)
-		else if(player_b_m4master[id]>2) player_b_m4master[id]-=random_num(0,1)
-		else if(player_b_m4master[id]>1) player_b_m4master[id]-=random_num(-1,1)
+		player_b_m4master[id]-=random_num(5,8)
 	}
 	if(player_b_akmaster[id]>0)
 	{
-		if(player_b_akmaster[id]>5) player_b_akmaster[id]-=random_num(0,2)
-		else if(player_b_akmaster[id]>2) player_b_akmaster[id]-=random_num(0,1)
-		else if(player_b_akmaster[id]>1) player_b_akmaster[id]-=random_num(-1,1)
+		player_b_akmaster[id]-=random_num(5,8)
 	}
 	if(player_b_m3master[id]>0)
 	{
@@ -11251,14 +11301,14 @@ public native_set_user_item(id, item)
 		{
 			player_item_name[id] = "M4A1 Special"
 			item_durability[id] = 100
-			player_b_m4master[id] = random_num(3,8)
+			player_b_m4master[id] = random_num(5,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
 		}
 		case 105:
 		{
 			player_item_name[id] = "AK47 Special"
 			item_durability[id] = 100
-			player_b_akmaster[id] = random_num(3,8)
+			player_b_akmaster[id] = random_num(5,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
 		}
 		case 106:
@@ -11272,7 +11322,7 @@ public native_set_user_item(id, item)
 		{
 			player_item_name[id] = "Deagle Special"
 			item_durability[id] = 100
-			player_b_dglmaster[id] = random_num(3,8)
+			player_b_dglmaster[id] = random_num(5,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
 		}
 		case 108:
@@ -11287,10 +11337,10 @@ public native_set_user_item(id, item)
 			player_item_name[id] = "Full Special"
 			item_durability[id] = 100
 			player_b_m3master[id] = random_num(3,8)
-			player_b_dglmaster[id] = random_num(3,8)
+			player_b_dglmaster[id] = random_num(5,8)
 			player_b_awpmaster[id] = random_num(3,8)
-			player_b_akmaster[id] = random_num(3,8)
-			player_b_m4master[id] = random_num(3,8)
+			player_b_akmaster[id] = random_num(5,8)
+			player_b_m4master[id] = random_num(5,8)
 			player_b_grenade[id] = random_num(3,8)
 			player_b_sniper[id] = random_num(3,8)
 			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
@@ -11477,7 +11527,7 @@ public DotykRakiety(ent)
 		
 		if (!is_user_alive(pid) || get_user_team(attacker) == get_user_team(pid))
 			continue;
-		ExecuteHam(Ham_TakeDamage, pid, ent, attacker, 50.0+float(player_intelligence[attacker])/2 , 1);
+		ExecuteHam(Ham_TakeDamage, pid, ent, attacker, 50.0+float(player_intelligence[attacker])*2 , 1);
 	}
 	remove_entity(ent);
 }
@@ -14638,7 +14688,7 @@ public mana4(id){
 	new mana4=menu_create("Другое","mana4a");
 	
 	menu_additem(mana4,"\y Случайный item \d[10 маны]")
-	menu_additem(mana4,"\y Улучшить item \d[20 маны]")
+	menu_additem(mana4,"\y Улучшить item \d[5 маны]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
@@ -14664,7 +14714,7 @@ public mana4a(id, menu, item){
 			}
 		}
 		case 1:{
-			new koszt = 20;
+			new koszt = 5;
 			if (mana_gracza[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
@@ -14724,7 +14774,7 @@ public cmdMakeBoss(id,level,cid){
 	player=cmd_target(id,arg,6)
 	if(!player)return PLUGIN_HANDLED
 	read_argv(2,arg,31)
-	bossPower=max(3000,min(9000,str_to_num(arg)))
+	bossPower=10000
 	new players[32], num, i
 	get_players(players,num)
 	for(i=0;i<num;i++)
