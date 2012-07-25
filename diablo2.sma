@@ -501,14 +501,14 @@ new ile_juz[33];
 
 //przedzial , ile ,kogo , nagroda expa, vip 1 tak 0 nie
 new questy[][]={
-	{1,2,Ninja,500,0},
-	{1,3,Mag,1200,1},
-	{1,6,Assassin,2000,0},
-	{2,6,Amazon,5000,0},
-	{2,15,Barbarian,15000,1},
-	{2,20,Paladin,20000,1},
-	{3,65,Barbarian,150000,1},
-	{3,120,Paladin,200000,1}
+	{1,2,Izual,500,0},
+	{1,3,Imp,1200,1},
+	{1,6,Fallen,2000,0},
+	{2,6,Diablo,5000,0},
+	{2,15,Jumper,15000,1},
+	{2,20,Andariel,20000,1},
+	{3,65,Imp,150000,1},
+	{3,120,Baal,200000,1}
 }
 
 new vault_questy;
@@ -518,20 +518,20 @@ new vault_questy2;
 new prze[][]={
 	{1,50,20},
 	{51,80,40},
-	{81,140,60}
+	{81,101,60}
 }
 
 new prze_wybrany[33]
 
 new questy_info[][]={
-	"Убей 2 Ninja (Получи 500 опыта)",
-	"Убей 3 Mag (Получи 1200 опыта)",
-	"Убей 6 Assassin (Получи 2000 опыта)",
-	"Убей 6 Amazon (Получи 5000 опыта)",
-	"Убей 15 Barbarian (Получи 15000 опыта)",
-	"Убей 20 Paladin (Получи 20000 опыта)",
-	"Убей 65 Barbarian (Получи 150000 опыта)",
-	"Убей 120 Paladin (Получи 200000 опыта)"
+	"Убей 2 Izual (Получи 500 опыта)",
+	"Убей 3 Imp (Получи 1200 опыта)",
+	"Убей 6 Fallen (Получи 2000 опыта)",
+	"Убей 6 Diablo (Получи 5000 опыта)",
+	"Убей 15 Jumper (Получи 15000 опыта)",
+	"Убей 20 Andariel (Получи 20000 опыта)",
+	"Убей 65 Imp (Получи 150000 опыта)",
+	"Убей 120 Baal (Получи 200000 опыта)"
 }
 
 new questy_zabil[][]={
@@ -783,8 +783,8 @@ public plugin_init()
 	
 	register_cvar("diablo_klass_delay","2.5")
 	pHook = 	register_cvar("sv_hook", "1")
-	pThrowSpeed = 	register_cvar("sv_hookthrowspeed", "1000")
-	pSpeed = 	register_cvar("sv_hookspeed", "300")
+	pThrowSpeed = 	register_cvar("sv_hookthrowspeed", "2000")
+	pSpeed = 	register_cvar("sv_hookspeed", "600")
 	pWidth = 	register_cvar("sv_hookwidth", "32")
 	pSound = 	register_cvar("sv_hooksound", "1")
 	pColor =	register_cvar("sv_hookcolor", "1")
@@ -2182,6 +2182,10 @@ public DeathMsg(id)
 		if(on_knife[id]){
 			if(get_user_team(kid) != get_user_team(vid)) {
 				set_user_frags(kid, get_user_frags(kid) + 1)
+        if(headshot)
+        {
+        mana_gracza[kid]+=1
+        }
 				award_kill(kid,vid)
 			}
 		}
@@ -2191,6 +2195,10 @@ public DeathMsg(id)
 		show_deadmessage(kid,vid,headshot,weaponname)
 		create_itm(vid,0,"Случайный Item")
 		award_kill(kid,vid)
+    if(headshot)
+    {
+        mana_gracza[kid]+=1
+    }
 		add_respawn_bonus(vid)
 		add_bonus_explode(vid)
 		add_barbarian_bonus(kid)
@@ -2252,7 +2260,7 @@ public Damage(id)
 				add_grenade_bonus(id,attacker_id,weapon)
 				add_theif_bonus(id,attacker_id)
 				add_bonus_blind(id,attacker_id,weapon,damage)
-				add_bonus_redirect(id)
+        if(weapon != CSW_KNIFE) { add_bonus_redirect(id); }
 				add_bonus_necromancer(attacker_id,id)
 				add_bonus_scoutdamage(attacker_id,id,weapon)
 				add_bonus_cawpmasterdamage(attacker_id,id,weapon)
@@ -2841,7 +2849,6 @@ public award_kill(killer_id,victim_id)
 	if (!is_user_connected(killer_id) || !is_user_connected(victim_id))
 		return PLUGIN_CONTINUE
 		
-	mana_gracza[killer_id]+=random_num(1,2)
 	
 		
 	new xp_award = get_cvar_num("diablo_xpbonus")
@@ -3056,7 +3063,7 @@ public UpdateHUD()
 				
 				new Msg[512]
 				set_hudmessage(255, 255, 255, 0.78, 0.65, 0, 6.0, 3.0)
-				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i",pname,player_lvl[index],Race[player_class[index]],player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index])		
+				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i^nМана: %i",pname,player_lvl[index],Race[player_class[index]],player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index], mana_gracza[id])		
 				show_hudmessage(id, Msg)
 				
 			}
@@ -6828,12 +6835,12 @@ public bool:UTIL_Buyformoney(id,amount)
 }
 public buyrune(id)
 {
-	new text[513] 
+	//new text[513] 
 	
-	format(text, 512, "\yМагазин item - ^n\w1. \yКупить случайный Item! \r$5000^n^n\w0. \yВыход^n\y/mana,/m - магазин маны") 
+	//format(text, 512, "\yМагазин item - ^n\w1. \yКупить случайный Item! \r$5000^n^n\w0. \yВыход^n\y/mana,/m - магазин маны") 
 	
-	new keys = (1<<0)|(1<<9)
-	show_menu(id, keys, text, -1, "ChooseRune") 
+	//new keys = (1<<0)|(1<<9)
+	//show_menu(id, keys, text, -1, "ChooseRune") 
 	return PLUGIN_HANDLED  
 } 
 
@@ -11527,7 +11534,9 @@ public DotykRakiety(ent)
 		
 		if (!is_user_alive(pid) || get_user_team(attacker) == get_user_team(pid))
 			continue;
-		ExecuteHam(Ham_TakeDamage, pid, ent, attacker, 50.0+float(player_intelligence[attacker])*2 , 1);
+      new float:dmg = float(player_intelligence[attacker]/2)-float(player_dextery[pid]/4);
+      if(dmg <= 1.0) { dmg = 1.0; }
+		ExecuteHam(Ham_TakeDamage, pid, ent, attacker, dmg, 1);
 	}
 	remove_entity(ent);
 }
