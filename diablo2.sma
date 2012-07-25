@@ -207,6 +207,7 @@ new player_dextery[33]
 new player_class[33]		
 new Float:player_huddelay[33]
 new player_premium[33] = 0  //Holds players premium
+new player_fallen_tr[33] = 0  //fallen shaman
 
 //Item attributes
 new player_b_vampire[33] = 1	//Vampyric damage
@@ -645,6 +646,7 @@ public plugin_init()
 	register_clcmd("say /s","speed")
 	register_clcmd("flash", "cmdBlyskawica");
 	register_concmd("rocket","StworzRakiete")
+  register_concmd("fallen","FallenShaman")
 	register_concmd("pluginflash","Flesh")
 	//register_concmd("dynamit","PolozDynamit")
 	register_concmd("paladin","check_palek")
@@ -705,6 +707,7 @@ public plugin_init()
 	set_msg_block ( gmsgDeathMsg, BLOCK_SET ) 
 	set_task(5.0, "Timed_Healing", 0, "", 0, "b")
 	set_task(1.0, "radar_scan", 0, _, _, "b"); // radar
+  set_task(1.0, "fallen_respawn", 2, _, _, "b") //falen shaman
 	set_task(1.0, "Timed_Ghost_Check", 0, "", 0, "b")
 	set_task(0.8, "UpdateHUD",0,"",0,"b")
 	register_think("PlayerCamera","Think_PlayerCamera");
@@ -1736,7 +1739,8 @@ public RoundStart(){
 		JumpsLeft[i]=JumpsMax[i]
 		kill_all_entity("przedmiot")
 		
-		if(player_class[i] == Necromancer) g_haskit[i]=1
+		player_fallen_tr[i]=1;
+    if(player_class[i] == Necromancer) g_haskit[i]=1
 		else g_haskit[i]=0
 		if(player_class[i] == Amazon)
 		{
@@ -2928,7 +2932,8 @@ public client_connect(id)
 	flashbattery[id] = MAX_FLASH
 	player_xp[id] = 0		
 	player_lvl[id] = 1	
-  player_premium[id] = 1	
+  player_premium[id] = 1
+  player_fallen_tr[id] = 0	
 	player_point[id] = 0	
 	player_item_id[id] = 0			
 	player_agility[id] = 0
@@ -3018,16 +3023,22 @@ public write_hud(id)
 	
 	last_update_xp[id] = player_xp[id]
 	last_update_perc[id] = perc
+  new Racename[18]
+  copy(Racename, charsmax(Racename), Race[player_class[id]]);
+  if(player_class[id]==Fallen && player_lvl[id]>49)
+  {
+  Racename = "Fallen Shaman"
+  }
 	
 	if(player_class[id]!=Paladin)
 {
     set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nМана: %i",get_user_health(id), Race[player_class[id]], player_lvl[id], perc,"%", player_item_name[id],item_durability[id],mana_gracza[id])
+    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nМана: %i",get_user_health(id), Racename, player_lvl[id], perc,"%", player_item_name[id],item_durability[id],mana_gracza[id])
 }
 	else
 {
     set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%0.0f%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nМана: %i",get_user_health(id), Race[player_class[id]], player_lvl[id], perc,"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
+    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%0.0f%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nМана: %i",get_user_health(id), Racename, player_lvl[id], perc,"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
 }
         message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
         write_byte(0) 
@@ -3063,7 +3074,13 @@ public UpdateHUD()
 				
 				new Msg[512]
 				set_hudmessage(255, 255, 255, 0.78, 0.65, 0, 6.0, 3.0)
-				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i^nМана: %i",pname,player_lvl[index],Race[player_class[index]],player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index], mana_gracza[id])		
+        new Racename[18]
+        copy(Racename, charsmax(Racename), Race[player_class[id]]);
+        if(player_class[id]==Fallen && player_lvl[id]>49)
+        {
+        Racename = "Fallen Shaman"
+        }
+				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i^nМана: %i",pname,player_lvl[index],Racename,player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index], mana_gracza[id])		
 				show_hudmessage(id, Msg)
 				
 			}
@@ -7672,6 +7689,26 @@ stock hudmsg(id,Float:display_time,const fmt[], {Float,Sql,Result,_}:...)
 	
 }
 
+stock hudmsg2(id,Float:display_time,const fmt[], {Float,Sql,Result,_}:...)
+{	
+	if (player_huddelay[id] >= 0.03*4)
+		return PLUGIN_CONTINUE
+	
+	new buffer[512]
+	vformat(buffer, 511, fmt, 4)
+	set_hudmessage ( 0, 255, 0, 0.03, 0.69, 0, display_time/2, display_time, 0.1, 0.2, -1 ) 	
+	show_hudmessage(id, buffer)
+	
+	player_huddelay[id]+=0.03
+	
+	remove_task(id+TASK_HUD)
+	set_task(display_time, "hudmsg_clear", id+TASK_HUD, "", 0, "a", 3)
+	
+	
+	return PLUGIN_CONTINUE
+	
+}
+
 public hudmsg_clear(id)
 {
 	new pid = id-TASK_HUD
@@ -8889,9 +8926,15 @@ public cmd_who(id)
                 else if ( get_user_team(playerid) == 2 ) team = "CT"
                         else team = "Spectator"
                 get_user_name( playerid, name, 31 )
-                get_user_name( playerid, name, 31 )
+                //get_user_name( playerid, name, 31 )
+                new Racename[18]
+                copy(Racename, charsmax(Racename), Race[player_class[id]]);
+                if(player_class[playerid]==Fallen && player_lvl[playerid]>49)
+                {
+                 Racename = "Fallen Shaman"
+                }
                 
-                len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>",name,Race[player_class[playerid]], player_lvl[playerid],team,player_item_name[playerid])
+                len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>",name,Racename, player_lvl[playerid],team,player_item_name[playerid])
         }
         len += formatex(motd[len],sizeof motd - 1 - len,"</table></center>")
         
@@ -11454,6 +11497,92 @@ public native_set_user_item(id, item)
 	player_item_id[id] = item
 	BoostRing(id)
 }
+public FallenShaman(id)
+{
+	if (!fallen_fires[id] && is_user_alive(id))
+	{
+		client_print(id, print_center, "У вас закончились ракеты!");
+		return PLUGIN_CONTINUE;
+	}
+	
+	if(falen_fires_time[id] + 3.0 > get_gametime())
+	{
+		client_print(id, print_center, "Ракеты можно использовать каждые 3 секунды!");
+		return PLUGIN_CONTINUE;
+	}
+	
+	if (is_user_alive(id))
+	{	
+		if(player_intelligence[id] < 1)
+			client_print(id, print_center, "Чтобы пускать ракеты необходим Интеллект!");
+			
+		poprzednia_rakieta_gracza[id] = get_gametime();
+		ilosc_rakiet_gracza[id]--;
+
+		new Float: Origin[3], Float: vAngle[3], Float: Velocity[3];
+		
+		entity_get_vector(id, EV_VEC_v_angle, vAngle);
+		entity_get_vector(id, EV_VEC_origin , Origin);
+	
+		new Ent = create_entity("info_target");
+	
+		entity_set_string(Ent, EV_SZ_classname, "Rocket");
+		entity_set_model(Ent, "models/rpgrocket.mdl");
+	
+		vAngle[0] *= -1.0;
+	
+		entity_set_origin(Ent, Origin);
+		entity_set_vector(Ent, EV_VEC_angles, vAngle);
+	
+		entity_set_int(Ent, EV_INT_effects, 2);
+		entity_set_int(Ent, EV_INT_solid, SOLID_BBOX);
+		entity_set_int(Ent, EV_INT_movetype, MOVETYPE_FLY);
+		entity_set_edict(Ent, EV_ENT_owner, id);
+	
+		VelocityByAim(id, 1000 , Velocity);
+		entity_set_vector(Ent, EV_VEC_velocity ,Velocity);
+	}	
+	return PLUGIN_CONTINUE;
+}
+public DFallenShaman(ent)
+{
+	if ( !is_valid_ent(ent))
+		return;
+
+	new attacker = entity_get_edict(ent, EV_ENT_owner);
+
+	new Float:fOrigin[3], iOrigin[3];
+	entity_get_vector( ent, EV_VEC_origin, fOrigin);	
+	iOrigin[0] = floatround(fOrigin[0]);
+	iOrigin[1] = floatround(fOrigin[1]);
+	iOrigin[2] = floatround(fOrigin[2]);
+
+	message_begin(MSG_BROADCAST,SVC_TEMPENTITY, iOrigin);
+	write_byte(TE_EXPLOSION);
+	write_coord(iOrigin[0]);
+	write_coord(iOrigin[1]);
+	write_coord(iOrigin[2]);
+	write_short(sprite_blast);
+	write_byte(32); // scale
+	write_byte(20); // framerate
+	write_byte(0);// flags
+	message_end();
+
+	new entlist[33];
+	new numfound = find_sphere_class(ent, "player", 230.0, entlist, 32);
+	
+	for (new i=0; i < numfound; i++)
+	{		
+		new pid = entlist[i];
+		
+		if (!is_user_alive(pid) || get_user_team(attacker) == get_user_team(pid))
+			continue;
+      new float:dmg = float(player_intelligence[attacker]/2)-float(player_dextery[pid]/4);
+      if(dmg <= 1.0) { dmg = 1.0; }
+		ExecuteHam(Ham_TakeDamage, pid, ent, attacker, dmg, 1);
+	}
+	remove_entity(ent);
+}
 public StworzRakiete(id)
 {
 	if (!ilosc_rakiet_gracza[id] && is_user_alive(id))
@@ -12510,6 +12639,56 @@ public radar_scan() {
                         message_end();
                 }
         }
+}
+
+public fallen_respawn()
+{
+    for(new i=0; i<33; i++)
+    {
+      if(player_class[i] == Fallen && player_lvl[i] > 49 && round_status==1 && is_user_alive(i))
+      {       
+       new float:time = 1515.0/player_lvl[i];
+       new falltime = floatround(time, floatround_floor);
+       //set_hudmessage(0, 255, 0, 0.03, 0.69, 0, 6.0, 1.0)
+       //client_print(i,print_chat,"falltime %d time %.2f lvl %d",falltime,time,player_lvl[i])
+       if(player_fallen_tr[i] > falltime)
+       {
+       new fplayers[32],numfplayers,i2,name[32],player,name2[32]
+       new Array:a_fallens=ArrayCreate(32) 
+       get_players(fplayers, numfplayers, "bh")
+       for (i2=0; i2<numfplayers; i2++)
+       {
+        player = fplayers[i2]
+        if(get_user_team(i) == get_user_team(player) && player_class[player] == Fallen)
+        {
+        ArrayPushCell(a_fallens, player) 
+        }
+       }
+       new a_size=ArraySize(a_fallens)
+       player=random(a_size)
+       //player=a_fallens[player]  -error
+       if(a_size != 0)
+       {
+	     player=ArrayGetCell(a_fallens,player) 
+       get_user_name(player,name,31)
+       ExecuteHamB(Ham_CS_RoundRespawn, player)
+       hudmsg2(i,1.0,"Воскрешенн Fallen ^nиз твоей команды:^n %s",name)
+       get_user_name(i,name2,31)
+       for(new i3=0; i3<33; i3++)
+       {
+       ColorChat(i3, GREEN, "Fallen Shaman^x01 %s ^x03воскресил Fallena^x01 %s",name2,name)
+       }
+       ArrayDestroy(a_fallens) 
+       }
+       player_fallen_tr[i]=1;
+       }
+       else
+       {       
+       hudmsg2(i,1.0,"Воскрешение Fallena через %i секунд",player_fallen_tr[i])
+       player_fallen_tr[i]=player_fallen_tr[i]+1;
+       }
+      }
+    }
 }
 public niesmiertelnoscon(id) {
         if(used_item[id]) {
