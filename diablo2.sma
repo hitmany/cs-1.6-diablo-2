@@ -298,6 +298,8 @@ new ilosc_rakiet_gracza[33];
 new ilosc_blyskawic[33],poprzednia_blyskawica[33];
 //new ilosc_dynamitow_gracza[33];
 new Float:g_wallorigin[33][3]
+new Float:falen_fires_time[33];
+new fallen_fires[33]
 new cel // do pokazywania statusu
 new item_info[513] //id itemu  
 new item_name[513][128] //nazwa itemu
@@ -1308,6 +1310,7 @@ public plugin_precache()
 	sprite_gibs = precache_model("models/hgibs.mdl")
 	sprite_beam = precache_model("sprites/zbeam4.spr") 
 	sprite = precache_model("sprites/lgtning.spr");
+  precache_model("sprites/xfireball3.spr")
 	
 	precache_model("models/player/arctic/arctic.mdl")
 	precache_model("models/player/terror/terror.mdl")
@@ -1905,6 +1908,11 @@ public RoundStart(){
        hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
       }
 		}
+    if(player_class[i] == Fallen && player_lvl[i] > 49)
+    {
+       new float:summa = player_lvl[i]/10.0;
+       fallen_fires[i] = floatround(summa, floatround_floor);
+	  }
 		
 		golden_bulet[i]=0
 		c_ulecz[i] = false
@@ -3075,8 +3083,8 @@ public UpdateHUD()
 				new Msg[512]
 				set_hudmessage(255, 255, 255, 0.78, 0.65, 0, 6.0, 3.0)
         new Racename[18]
-        copy(Racename, charsmax(Racename), Race[player_class[id]]);
-        if(player_class[id]==Fallen && player_lvl[id]>49)
+        copy(Racename, charsmax(Racename), Race[player_class[index]]);
+        if(player_class[index]==Fallen && player_lvl[index]>49)
         {
         Racename = "Fallen Shaman"
         }
@@ -3192,6 +3200,18 @@ public pfn_touch ( ptr, ptd )
 				new Float:origin[3]
 				pev(ptd,pev_origin,origin)
 				Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250,1)
+				remove_entity(ptd)
+			}
+		}
+  if(equal(szClassName, "fallenball"))
+		{
+			new owner = pev(ptd,pev_owner)
+			//Touch
+			if (get_user_team(owner) != get_user_team(ptr))
+			{
+				new Float:origin[3]
+				pev(ptd,pev_origin,origin)
+				Explode_Origin(owner,origin,player_intelligence[owner],250,1)
 				remove_entity(ptd)
 			}
 		}
@@ -6424,7 +6444,13 @@ switch (key) {
 	c_blind[id] = 20
 	anty_flesh[id]=1
 	c_shaked[id]=5
+  
         LoadXP(id, player_class[id])
+        if(player_lvl[id]>49)
+        {
+        new float:summa = player_lvl[id]/10.0;
+        fallen_fires[id] = floatround(summa, floatround_floor);
+        }
         emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
     }
    case 7: 
@@ -8928,7 +8954,7 @@ public cmd_who(id)
                 get_user_name( playerid, name, 31 )
                 //get_user_name( playerid, name, 31 )
                 new Racename[18]
-                copy(Racename, charsmax(Racename), Race[player_class[id]]);
+                copy(Racename, charsmax(Racename), Race[player_class[playerid]]);
                 if(player_class[playerid]==Fallen && player_lvl[playerid]>49)
                 {
                  Racename = "Fallen Shaman"
@@ -11499,48 +11525,75 @@ public native_set_user_item(id, item)
 }
 public FallenShaman(id)
 {
-	if (!fallen_fires[id] && is_user_alive(id))
+	if(player_class[id] == Fallen && player_lvl[id] > 49)
+  {    
+  
+  if(fallen_fires[id] == 0)
 	{
-		client_print(id, print_center, "У вас закончились ракеты!");
+		client_print(id, print_center, "У вас закончились шары!");
 		return PLUGIN_CONTINUE;
-	}
-	
-	if(falen_fires_time[id] + 3.0 > get_gametime())
+	}	
+	if(falen_fires_time[id] + 5.0 > get_gametime())
 	{
-		client_print(id, print_center, "Ракеты можно использовать каждые 3 секунды!");
+		client_print(id, print_center, "Шары можно использовать каждые 5 секунд!");
 		return PLUGIN_CONTINUE;
 	}
 	
 	if (is_user_alive(id))
 	{	
 		if(player_intelligence[id] < 1)
-			client_print(id, print_center, "Чтобы пускать ракеты необходим Интеллект!");
+			client_print(id, print_center, "Чтобы пускать шары необходим Интеллект!");
 			
-		poprzednia_rakieta_gracza[id] = get_gametime();
-		ilosc_rakiet_gracza[id]--;
+		falen_fires_time[id] = get_gametime();
+		fallen_fires[id]--;
 
-		new Float: Origin[3], Float: vAngle[3], Float: Velocity[3];
+    /*new Float:vOrigin[3]
+		new fEntity
+		entity_get_vector(id,EV_VEC_origin, vOrigin)
+		fEntity = create_entity("env_sprite")
+		ENT_SetModel(fEntity, "sprites/xfireball3.spr")
+		entity_set_origin(fEntity, vOrigin)
+		entity_set_int(fEntity,EV_INT_effects,64)
+		entity_set_string(fEntity,EV_SZ_classname,"fallenball")
+		entity_set_int(fEntity, EV_INT_solid, SOLID_BBOX)
+		entity_set_int(fEntity,EV_INT_movetype,5)
+		entity_set_edict(fEntity,EV_ENT_owner,id)
+    set_rendering(fEntity,kRenderFxGlowShell,0,0,0,kRenderTransAlpha,255) */
 		
-		entity_get_vector(id, EV_VEC_v_angle, vAngle);
-		entity_get_vector(id, EV_VEC_origin , Origin);
-	
-		new Ent = create_entity("info_target");
-	
-		entity_set_string(Ent, EV_SZ_classname, "Rocket");
-		entity_set_model(Ent, "models/rpgrocket.mdl");
-	
-		vAngle[0] *= -1.0;
-	
-		entity_set_origin(Ent, Origin);
-		entity_set_vector(Ent, EV_VEC_angles, vAngle);
-	
-		entity_set_int(Ent, EV_INT_effects, 2);
-		entity_set_int(Ent, EV_INT_solid, SOLID_BBOX);
-		entity_set_int(Ent, EV_INT_movetype, MOVETYPE_FLY);
-		entity_set_edict(Ent, EV_ENT_owner, id);
-	
-		VelocityByAim(id, 1000 , Velocity);
-		entity_set_vector(Ent, EV_VEC_velocity ,Velocity);
+		
+	 new Float:fOrigin[3],enOrigin[3]
+   get_user_origin(id, enOrigin)
+   new ent = create_entity("env_sprite")
+   
+   IVecFVec(enOrigin, fOrigin)
+
+   
+   entity_set_string(ent, EV_SZ_classname, "fallenball")
+   entity_set_model(ent, "sprites/xfireball3.spr")
+   entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
+   entity_set_float(ent, EV_FL_framerate, 30.0)
+
+   DispatchSpawn(ent)
+
+   entity_set_origin(ent, fOrigin)
+   //entity_set_size(ent, Float:{-25.0, -25.0, -25.0}, Float:{25.0, 25.0, 25.0})
+   entity_set_int(ent, EV_INT_solid, SOLID_TRIGGER)
+   entity_set_int(ent, EV_INT_movetype, MOVETYPE_FLY)
+   entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
+   entity_set_float(ent, EV_FL_renderamt, 255.0)
+   entity_set_float(ent, EV_FL_scale, 1.0)
+   entity_set_edict(ent,EV_ENT_owner, id)
+		//Send forward
+	 new Float:fl_iNewVelocity[3]
+	 VelocityByAim(id, 700, fl_iNewVelocity)
+	 entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
+	 emit_sound(ent, CHAN_VOICE, "diablo_lp/fireball2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	}
+  }
+  else
+  {
+    client_print(id, print_center, "Вы не Fallen Shaman!");
+		return PLUGIN_CONTINUE;
 	}	
 	return PLUGIN_CONTINUE;
 }
@@ -12676,7 +12729,7 @@ public fallen_respawn()
        get_user_name(i,name2,31)
        for(new i3=0; i3<33; i3++)
        {
-       ColorChat(i3, GREEN, "Fallen Shaman^x01 %s ^x03воскресил Fallena^x01 %s",name2,name)
+       client_print(i3, print_chat, "Fallen Shaman %s воскресил Fallena %s",name2,name)
        }
        ArrayDestroy(a_fallens) 
        }
