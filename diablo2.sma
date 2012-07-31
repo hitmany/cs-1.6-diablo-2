@@ -96,24 +96,7 @@ new SOUND_FINISHED[] 	= "items/smallmedkit2.wav"
 new SOUND_FAILED[] 	= "items/medshotno1.wav"
 new SOUND_EQUIP[]	= "items/ammopickup2.wav"
 
-
-enum _:MUSIC_ID
-{
-        MUSIC_1,
-        MUSIC_2,
-        MUSIC_3,
-        MUSIC_4,
-        MUSIC_5
-} 
-
-new const fallensound[] = 
-{
-        "diablo_lp/fallen_hit1.wav",
-        "diablo_lp/fallen_hit2.wav",
-        "diablo_lp/fallen_hit3.wav",
-        "diablo_lp/fallen_hit6.wav",
-        "diablo_lp/fallen_hit7.wav"
-}
+new rndfsound
 
 enum
 {
@@ -672,9 +655,9 @@ public plugin_init()
 	register_clcmd("menu","showmenu")
 	register_clcmd("say /commands","komendy")
 	//register_clcmd("pomoc","helpme") 
-	register_clcmd("say /rune","buyrune") 
-	register_clcmd("rune","buyrune")
-	register_clcmd("say /r","buyrune")
+	register_clcmd("say /rune","mana4") 
+	register_clcmd("rune","mana4")
+	register_clcmd("say /r","mana4")
 	register_clcmd("say /savexp","savexpcom")
 	//register_clcmd("say /loadxp","LoadXP")
 	register_clcmd("say /reset","reset_skill")
@@ -1332,6 +1315,7 @@ public plugin_precache()
 	precache_sound("weapons/knife_deploy1.wav")
 	precache_sound(gszSound);
 	precache_sound("diablo_lp/fallen_1.wav");
+  precache_sound("diablo_lp/fallen_2.wav");
 	precache_sound("diablo_lp/levelup.wav");
 	precache_sound("diablo_lp/questdone.wav");
 	precache_sound("diablo_lp/identify.wav");
@@ -1342,11 +1326,30 @@ public plugin_precache()
 	precache_sound("diablo_lp/diablo_1.wav");
 	precache_sound("diablo_lp/fireball2.wav");
 	precache_sound("diablo_lp/fireball3.wav");
+  precache_sound("diablo_lp/fallen_fireball.wav");
 	precache_sound("diablo_lp/fallen_hit1.wav");
   precache_sound("diablo_lp/fallen_hit2.wav");
   precache_sound("diablo_lp/fallen_hit3.wav");
   precache_sound("diablo_lp/fallen_hit6.wav");
   precache_sound("diablo_lp/fallen_hit7.wav");
+  precache_sound("diablo_lp/fallen_roar2.wav");
+  precache_sound("diablo_lp/fallen_roar3.wav");
+  precache_sound("diablo_lp/fallen_roar6.wav");
+  precache_sound("diablo_lp/fallens_gethit1.wav");
+  precache_sound("diablo_lp/fallens_gethit2.wav");
+  precache_sound("diablo_lp/fallens_gethit3.wav");
+  precache_sound("diablo_lp/fallens_gethit4.wav");
+  precache_sound("diablo_lp/resurrect.wav");
+  precache_sound("diablo_lp/resurrectcast.wav");
+  precache_sound("diablo_lp/fallens_neutral1.wav");
+  precache_sound("diablo_lp/fallens_neutral2.wav");
+  precache_sound("diablo_lp/fallens_neutral3.wav");
+  precache_sound("diablo_lp/fallens_neutral4.wav");
+  precache_sound("diablo_lp/fallen_neutral1.wav");
+  precache_sound("diablo_lp/fallen_neutral2.wav");
+  precache_sound("diablo_lp/fallen_neutral3.wav");
+  precache_sound("diablo_lp/fallen_neutral4.wav");
+  precache_sound("diablo_lp/fallen_neutral5.wav");
 	precache_sound("weapons/explode3.wav");
 	precache_model("models/diablomod/w_throwingknife.mdl")
 	precache_model("models/diablomod/bm_block_platform.mdl")
@@ -1908,10 +1911,16 @@ public RoundStart(){
        hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
       }
 		}
+    remove_task(i+2000)
     if(player_class[i] == Fallen && player_lvl[i] > 49)
     {
        new float:summa = player_lvl[i]/10.0;
        fallen_fires[i] = floatround(summa, floatround_floor);
+       set_task(random_float(25.0, 35.0), "fallen_play_idle", i+2000, _, _, "b")
+	  }
+    if(player_class[i] == Fallen && player_lvl[i] < 49)
+    {
+       set_task(random_float(10.0, 15.0), "fallen_play_idle", i+2000, _, _, "b")
 	  }
 		
 		golden_bulet[i]=0
@@ -2288,13 +2297,28 @@ public Damage(id)
 				item_take_damage(id,damage)
 				if(player_class[id] == Fallen)
 		    {
-		      switch(random(4))
+		      rndfsound = random(4);
+          if(player_lvl[id] < 50)
           {
-               case 0: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_1], 1.0, ATTN_NORM, 0, PITCH_NORM)
-               case 1: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_2], 1.0, ATTN_NORM, 0, PITCH_NORM)
-               case 2: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_3], 1.0, ATTN_NORM, 0, PITCH_NORM)
-               case 3: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_4], 1.0, ATTN_NORM, 0, PITCH_NORM)
-               case 4: emit_sound(id,CHAN_STATIC, fallensound[MUSIC_5], 1.0, ATTN_NORM, 0, PITCH_NORM)
+          switch(rndfsound)
+          {
+               case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+               case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+               case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+               case 3: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+               case 4: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+          }
+          }
+          else
+          {
+          switch(rndfsound)
+          {
+               case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+               case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+               case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+               case 3: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+               case 4: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+          }
           }
 		    }
 				
@@ -3088,7 +3112,7 @@ public UpdateHUD()
         {
         Racename = "Fallen Shaman"
         }
-				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i^nМана: %i",pname,player_lvl[index],Racename,player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index], mana_gracza[id])		
+				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i^nМана: %i",pname,player_lvl[index],Racename,player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index], mana_gracza[index])		
 				show_hudmessage(id, Msg)
 				
 			}
@@ -3211,7 +3235,7 @@ public pfn_touch ( ptr, ptd )
 			{
 				new Float:origin[3]
 				pev(ptd,pev_origin,origin)
-				Explode_Origin(owner,origin,player_intelligence[owner],250,1)
+				Explode_Origin(owner,origin,player_intelligence[owner],125,1)
 				remove_entity(ptd)
 			}
 		}
@@ -3320,7 +3344,15 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 				
 		if (get_user_team(id) != get_user_team(a) && get_distance_f(aOrigin,origin) < dist+0.0)
 		{
-			new dam = damage-player_dextery[a]
+			new dam
+      if(player_class[id] != Fallen)
+      {
+        dam = damage-player_dextery[a]
+      }
+      else
+      {
+        dam = damage-floatround(player_dextery[a]/4)
+      }
 			new total = get_user_health(a)-dam
 			if (total < 5)
 			{
@@ -3474,19 +3506,23 @@ public changeskin_id_1(id)
 
 public auto_help(id)
 {
-	new rnd = random_num(1,5+player_lvl[id])
-	if (rnd <= 5)
+	if(player_lvl[id]<8)
+  {
+    new rnd = random_num(1,6)
 		set_hudmessage(0, 180, 0, -1.0, 0.70, 0, 10.0, 10.0, 0.1, 0.5, 11) 	
 	if (rnd == 1)
-		show_hudmessage(id, "Выкинуть item можно набрав /drop также можно посмотреть информацию о них /item")
+		show_hudmessage(id, "Зеленные бутылочки,рядом с трупами - это предметы,их можно подобрать нажав кнопку присесть")
 	if (rnd == 2)
-		show_hudmessage(id, "Вы можете активировать активные item кнопкой E")
+		show_hudmessage(id, "Чтобы сменить класс/герой набери в чате class,или say class в консоли")
 	if (rnd == 3)
 		show_hudmessage(id, "Вы можете получить более подоробную информацию набери в консоли say /help")
 	if (rnd == 4)
 		show_hudmessage(id, "Главное меню мода say /menu")
 	if (rnd == 5)
-		show_hudmessage(id, "Некоторые item могут быть улучшенны руной. Наберите /rune чтобы открыть магазин с рунами")
+		show_hudmessage(id, "За ману можно купить предметы,телепорты,улучшить/починить предметы,оружие")
+  if (rnd == 6)
+		show_hudmessage(id, "Ману вы получаете за хедшоты,купить ману оптом можно на сайте")
+  }
 }
 
 /* ==================================================================================================== */
@@ -5978,7 +6014,7 @@ public showmenu(id)
 	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<9)
 	
 	
-	format(text, 512, "\rОпции\R^n^n\y1.\w Инфо^n\y2.\w Выкинуть текущий item^n\y3.\w Помощь^n\y4.\w Использовать силу item^n\y5.\w Магазин Рун^n\y6.\w Инфо о скиллах^n^n\y0.\w Закрыть") 
+	format(text, 512, "\rОпции\R^n^n\y1.\w Инфо о предмете^n\y2.\w Выкинуть текущий item^n\y3.\w Помощь^n\y4.\w Использовать силу item^n\y5.\w Магазин Рун^n\y6.\w Инфо о скиллах^n\y7.\w Выбор/Смена Класса^n\y0.\w Закрыть") 
 	
 	show_menu(id, keys, text) 
 	return PLUGIN_HANDLED  
@@ -6013,6 +6049,10 @@ public option_menu(id, key)
 		case 5:
 		{
 			showskills(id)
+		}
+    case 6:
+		{
+			changerace(id)
 		}
 		case 9:
 		{
@@ -6451,8 +6491,20 @@ switch (key) {
         new float:summa = player_lvl[id]/10.0;
         fallen_fires[id] = floatround(summa, floatround_floor);
         }
-        emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-    }
+        new rnds = random(1);
+        switch(rnds)
+        {
+          case 0:
+          {
+          emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+          }
+          case 1:
+          {
+          emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+          }
+          default: emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+        }
+        }
    case 7: 
     {    
         player_class[id] = Imp
@@ -11576,18 +11628,25 @@ public FallenShaman(id)
    DispatchSpawn(ent)
 
    entity_set_origin(ent, fOrigin)
-   //entity_set_size(ent, Float:{-25.0, -25.0, -25.0}, Float:{25.0, 25.0, 25.0})
-   entity_set_int(ent, EV_INT_solid, SOLID_TRIGGER)
-   entity_set_int(ent, EV_INT_movetype, MOVETYPE_FLY)
+   entity_set_size(ent, Float:{-5.0, -5.0, -5.0}, Float:{5.0, 5.0, 5.0})
+   entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
+   entity_set_int(ent, EV_INT_movetype, 5)
    entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
    entity_set_float(ent, EV_FL_renderamt, 255.0)
    entity_set_float(ent, EV_FL_scale, 1.0)
    entity_set_edict(ent,EV_ENT_owner, id)
 		//Send forward
 	 new Float:fl_iNewVelocity[3]
-	 VelocityByAim(id, 700, fl_iNewVelocity)
+	 VelocityByAim(id, 800, fl_iNewVelocity)
 	 entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
-	 emit_sound(ent, CHAN_VOICE, "diablo_lp/fireball2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+   rndfsound = random(2);
+   switch(rndfsound)
+   {
+     case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+     case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+     case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+   }
+	 emit_sound(ent, CHAN_VOICE, "diablo_lp/fallen_fireball.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 	}
   }
   else
@@ -12726,6 +12785,9 @@ public fallen_respawn()
        get_user_name(player,name,31)
        ExecuteHamB(Ham_CS_RoundRespawn, player)
        hudmsg2(i,1.0,"Воскрешенн Fallen ^nиз твоей команды:^n %s",name)
+       player_fallen_tr[i]=1;
+       emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+       emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
        get_user_name(i,name2,31)
        for(new i3=0; i3<33; i3++)
        {
@@ -12733,7 +12795,6 @@ public fallen_respawn()
        }
        ArrayDestroy(a_fallens) 
        }
-       player_fallen_tr[i]=1;
        }
        else
        {       
@@ -12742,6 +12803,37 @@ public fallen_respawn()
        }
       }
     }
+}
+public fallen_play_idle(taskid)
+{
+ new TASK_BLOOD = taskid - 2000;
+ if(round_status==1 && player_class[TASK_BLOOD] == Fallen && is_user_alive(TASK_BLOOD))
+ {
+   if(player_lvl[TASK_BLOOD] > 49)
+   {
+   rndfsound = random(3);
+   switch(rndfsound)
+   {
+      case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+      case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+      case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+      case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+   }
+   }
+   else
+   {
+   rndfsound = random(4);
+   switch(rndfsound)
+   {
+      case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+      case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+      case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+      case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+      case 4: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+   }
+   } 
+ }
+
 }
 public niesmiertelnoscon(id) {
         if(used_item[id]) {
@@ -14926,7 +15018,7 @@ public mana3a(id, menu, item){
 	return PLUGIN_HANDLED;
 }
 public mana4(id){
-	new mana4=menu_create("Другое","mana4a");
+	new mana4=menu_create("Предметы - Другое","mana4a");
 	
 	menu_additem(mana4,"\y Случайный item \d[10 маны]")
 	menu_additem(mana4,"\y Улучшить item \d[5 маны]")
