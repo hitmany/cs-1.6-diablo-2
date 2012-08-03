@@ -81,6 +81,7 @@ new DemageTake1[33]
 #define TASKID_CHECKST 	13310
 #define TASKID_ORIGIN 	13311
 #define TASKID_SETUSER 	13312
+#define TASKID_SQLFETCH 13313
 #define FL_ONGROUND (1<<9)
 #define message_begin_f(%1,%2,%3,%4) engfunc(EngFunc_MessageBegin, %1, %2, %3, %4)
 #define write_coord_f(%1) engfunc(EngFunc_WriteCoord, %1)
@@ -91,6 +92,9 @@ new DemageTake1[33]
 #define OFFSET_CAN_LONGJUMP    356
 
 #define MAX_FLASH 15		//pojemnosc barejii maga (sekund)
+
+#define MAX_SKILLS		7
+#define MAX_RACES		28
 
 new SOUND_START[] 	= "items/medshot4.wav"
 new SOUND_FINISHED[] 	= "items/smallmedkit2.wav"
@@ -184,9 +188,13 @@ new player_item_name[33][128]   //The items name
 new player_intelligence[33]
 new player_strength[33]
 new player_agility[33]
-new mana_gracza[33]
-new Float:player_damreduction[33]
+new player_agility_best[33]
 new player_dextery[33]
+new player_stamina[33]
+new player_durabilty[33]
+new mana_gracza[33]
+new player_TotalLVL[33]
+new Float:player_damreduction[33]
 new player_class[33]		
 new Float:player_huddelay[33]
 new player_premium[33] = 0  //Holds players premium
@@ -372,24 +380,20 @@ new bool:bDBAvailable = false;
 // Player's Unique ID
 new g_iDBPlayerUniqueID[33];
 new g_iDBPlayerSavedBy[33];
-// Lets us store what level the skill was the last time we saved (so we don't save more than necessary)
-#define MAX_SKILLS		7
-#define MAX_RACES		28
-new g_iDBPlayerSkillStore[33][MAX_SKILLS];
-new g_iDBPlayerXPInfoStore[33][MAX_RACES];
 // SQLX
 new Handle:g_DBTuple;
 new Handle:g_DBConn;
+//new bool:bDBXPRetrieved[33];
 
 #define TOTAL_TABLES		5
 
 new const szTables[TOTAL_TABLES][] = 
 {
 	"CREATE TABLE IF NOT EXISTS `player` ( `id` int(8) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(33) NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'ON UPDATE CURRENT_TIMESTAMP', PRIMARY KEY (`id`), UNIQUE KEY `id` (`id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
-	"CREATE TABLE IF NOT EXISTS `extra` ( `id` int(8) unsigned NOT NULL, `gold` int(11) NOT NULL DEFAULT '0', `total_lvl` int(8) NOT NULL DEFAULT '0') ENGINE=MyISAM DEFAULT CHARSET=utf8;",
-	"CREATE TABLE IF NOT EXISTS `class` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `xp` int(8) NOT NULL DEFAULT '0') ENGINE=MyISAM DEFAULT CHARSET=utf8;",
-	"CREATE TABLE IF NOT EXISTS `skill` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `str` int(2) unsigned NOT NULL DEFAULT '0', `agi_best` int(2) unsigned NOT NULL DEFAULT '0', `agi_dmg` int(2) unsigned NOT NULL DEFAULT '0', `sta` int(2) unsigned NOT NULL DEFAULT '0', `dur` int(2) unsigned NOT NULL DEFAULT '0', `int` int(2) unsigned NOT NULL DEFAULT '0', `dex_dmg` int(2) unsigned NOT NULL DEFAULT '0') ENGINE=MyISAM DEFAULT CHARSET=utf8;",
-	"CREATE TABLE IF NOT EXISTS `item` ( `id` int(8) unsigned NOT NULL, `item` int(3) unsigned NOT NULL, `expire_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+	"CREATE TABLE IF NOT EXISTS `extra` ( `id` int(8) unsigned NOT NULL, `gold` int(11) NOT NULL DEFAULT '0', `total_lvl` int(8) NOT NULL DEFAULT '0', PRIMARY KEY ( `id` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+	"CREATE TABLE IF NOT EXISTS `class` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `xp` int(8) NOT NULL DEFAULT '0', PRIMARY KEY ( `id`,`class` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+	"CREATE TABLE IF NOT EXISTS `skill` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `str` int(2) unsigned NOT NULL DEFAULT '0', `agi_best` int(2) unsigned NOT NULL DEFAULT '0', `agi_dmg` int(2) unsigned NOT NULL DEFAULT '0', `sta` int(2) unsigned NOT NULL DEFAULT '0', `dur` int(2) unsigned NOT NULL DEFAULT '0', `int` int(2) unsigned NOT NULL DEFAULT '0', `dex_dmg` int(2) unsigned NOT NULL DEFAULT '0', PRIMARY KEY ( `id`,`class` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+	"CREATE TABLE IF NOT EXISTS `item` ( `id` int(8) unsigned NOT NULL, `item` int(3) unsigned NOT NULL, `expire_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`,`item`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
 };
 
 
@@ -405,8 +409,7 @@ new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800
 
 new player_class_lvl[33][28]
 new player_class_lvl_save[33]
-
-new player_xp_old[33]
+new player_class_xp[33][28]
 
 new database_user_created[33]
 
@@ -570,15 +573,15 @@ public plugin_init()
 	get_mapname(map,31)
 	new times[64]
 	get_time("%m/%d/%Y - %H:%M:%S" ,times,63)
-	D2_Log( true, "%s ### MAP: %s ### ",times,map)
+	//D2_Log( true, "%s ### MAP: %s ### ",times,map)
 	WC3_MapDisableCheck("weapons.cfg")
 	
 	register_cvar("diablo_sql_host","localhost",FCVAR_PROTECTED)
 	register_cvar("diablo_sql_user","root",FCVAR_PROTECTED)
 	register_cvar("diablo_sql_pass","",FCVAR_PROTECTED)
-	register_cvar("diablo_sql_database","dbmod",FCVAR_PROTECTED)
+	register_cvar("diablo_sql_database","dbmod2",FCVAR_PROTECTED)
 	
-	register_cvar("diablo_sql_table","dbmod_table222",FCVAR_PROTECTED)
+	//register_cvar("diablo_sql_table","dbmod_table222",FCVAR_PROTECTED)
 	register_cvar("diablo_sql_save","0",FCVAR_PROTECTED)	// 0 - nick
 								// 1 - ip
 								// 2 - steam id	
@@ -690,8 +693,7 @@ public plugin_init()
 	register_clcmd("say /rune","mana4") 
 	register_clcmd("rune","mana4")
 	register_clcmd("say /r","mana4")
-	register_clcmd("say /savexp","savexpcom")
-	//register_clcmd("say /loadxp","LoadXP")
+	//register_clcmd("say /savexp","savexpcom")
 	register_clcmd("say /reset","reset_skill")
 	register_clcmd("say /exp", "exp")
 	register_clcmd("say exp", "exp")
@@ -744,6 +746,7 @@ public plugin_init()
 	register_think("HealBot4", "HealBotThink4");
         CreateHealBot4();
 	register_logevent("RoundStart", 2, "0=World triggered", "1=Round_Start")
+	register_logevent( "on_EndRound"			, 2		, "0=World triggered"	, "1=Round_End"		);
 	register_clcmd("fullupdate","fullupdate")
 	register_clcmd("amx_dajitem",  "giveitem",     ADMIN_IMMUNITY, "Uzycie <amx_dajitem NICK idITemku")
 	register_forward(FM_WriteString, "FW_WriteString")
@@ -835,6 +838,7 @@ public plugin_init()
 	
 	register_clcmd("quest","menu_questow")
 	register_clcmd("say /quest","menu_questow")
+	sql_start()
 	
 	return PLUGIN_CONTINUE  
 }
@@ -1167,7 +1171,7 @@ public sql_start()
 	g_SqlTuple = SQL_MakeDbTuple(host,user,pass,database)
 	
 	// Attempt to connect
-	g_DBConn = SQL_Connect( g_DBTuple, iErrNum, szError, 255 );
+	g_DBConn = SQL_Connect( g_SqlTuple, iErrNum, szError, 255 );
 	
 	if ( !g_DBConn )
 	{
@@ -1254,7 +1258,7 @@ public MYSQLX_FetchUniqueID( id )
 
 		// Insert this player!
 		new szQuery[512];
-		format( szQuery, 511, "INSERT INTO `player` ( `id` , `%s` , `time` ) VALUES ( NULL , '%s', NOW() );", szKeyName, szKey );
+		format( szQuery, 511, "INSERT INTO `player` ( `id` , `name` , `time` ) VALUES ( NULL , '%s', NOW() );", szName );
 		new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
 
 		if ( !SQL_Execute( query ) )
@@ -1269,7 +1273,7 @@ public MYSQLX_FetchUniqueID( id )
 		// Since we have the ID - lets insert extra data here...
 		//  Basically insert whatever data we don't have yet on this player in the extra table 
 		//  (this will only be used for the webpage)
-		new szName[70], szSteamID[30], szIP[20];
+		/*new szName[70], szSteamID[30], szIP[20];
 		get_user_name( id, szName, 69 );
 		DB_FormatString( szName, 69 );
 		get_user_ip( id, szIP, 19, 1 );
@@ -1283,7 +1287,7 @@ public MYSQLX_FetchUniqueID( id )
 			MYSQLX_Error( query, szQuery, 20 );
 
 			return;
-		}
+		}*/
 	}
 
 	// They have been here before - store their ID
@@ -1309,30 +1313,24 @@ public MYSQLX_GetAllXP( id )
 	// Then we have a problem and cannot retreive the user's XP
 	if ( iUniqueID <= 0 )
 	{
-		client_print( id, print_chat, "%s Unable to retreive your XP from the database, please attempt to changerace later", g_MODclient );
+		client_print( id, print_chat, "Unable to retreive your XP from the database, please attempt to changerace later");
 
-		WC3_Log( true, "[ERROR] Unable to retreive user's Unique ID" );
+		D2_Log( true, "[ERROR] Unable to retreive user's Unique ID" );
 
 		return;
 	}
 
 	new szQuery[256];
-	format(szQuery, 255, "SELECT `race_id`, `race_xp` FROM `wc3_player_race` WHERE ( `player_id` = '%d' );", iUniqueID );
+	format(szQuery, 255, "SELECT `class`, `xp` FROM `class` WHERE ( `id` = '%d' );", iUniqueID );
 	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
 
 	if ( !SQL_Execute( query ) )
 	{
-		client_print( id, print_chat, "%s Error, unable to retrieve XP, please contact a server administrator", g_MODclient );
+		client_print( id, print_chat, "Error, unable to retrieve XP, please contact a server administrator");
 
 		MYSQLX_Error( query, szQuery, 6 );
 
 		return;
-	}
-
-	// Set last saved XP to 0
-	for ( new i = 0; i < MAX_RACES; i++ )
-	{
-		g_iDBPlayerXPInfoStore[id][i] = 0;
 	}
 
 	// Get the XP!
@@ -1343,11 +1341,23 @@ public MYSQLX_GetAllXP( id )
 	{
 		iRace	= SQL_ReadResult( query, 0 );
 		iXP		= SQL_ReadResult( query, 1 );
+		for (new i = 1; i <= sizeof(LevelXP); i++ )
+		{
+			// User has enough XP to advance to the next level
+			if ( iXP >= LevelXP[i] )
+			{
+				player_class_lvl[id][iRace] = i+1;
+			}
+			else
+			{
+				break;
+			}
+		}
 		
 		// Save the user's XP in an array
 		if ( iRace > 0 && iRace < MAX_RACES + 1 )
 		{
-			g_iDBPlayerXPInfoStore[id][iRace-1] = iXP;
+			player_class_xp[id][iRace] = iXP
 		}
 
 		SQL_NextRow( query );
@@ -1355,12 +1365,309 @@ public MYSQLX_GetAllXP( id )
 
 	// Free the handle
 	SQL_FreeHandle( query );
+	
+	//Get total lvl and gold
+	format(szQuery, 255, "SELECT `gold`, `total_lvl` FROM `extra` WHERE ( `id` = '%d' );", iUniqueID );
+	query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		MYSQLX_Error( query, szQuery, 2 );
+
+		return;
+	}
+
+	// If no rows we need to insert!
+	if ( SQL_NumResults( query ) == 0 )
+	{
+		// Free the last handle!
+		SQL_FreeHandle( query );
+
+		// Insert this player!
+		new szQuery[512];
+		format( szQuery, 511, "INSERT INTO `extra` ( `id`) VALUES ( '%d' );", iUniqueID );
+		new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+		if ( !SQL_Execute( query ) )
+		{
+			MYSQLX_Error( query, szQuery, 3 );
+
+			return;
+		}
+	}
+	else
+	{
+		mana_gracza[id] = SQL_ReadResult( query, 0 );
+		player_TotalLVL[id] = SQL_ReadResult( query, 1 );
+	}
+
+	// Free the last handle!
+	SQL_FreeHandle( query );
 
 	// Call the function that will display the "select a race" menu
-	WC3_ChangeRaceShowMenu( id, g_iDBPlayerXPInfoStore[id] );
+	//D2_ChangeRaceShowMenu( id, g_iDBPlayerXPInfoStore[id] );
+	select_class(id)
+	
+	return;
+}
+
+public MYSQLX_Save( id )
+{
+	// Make sure our connection is working
+	if ( !MYSQLX_Connection_Available() )
+	{
+		return;
+	}
+
+	new iUniqueID = DB_GetUniqueID( id );
+
+	// Error checking when saving
+	if ( iUniqueID <= 0 )
+	{
+		new szName[128];
+		get_user_name( id, szName, 127 );
+
+		D2_Log( true, "Unable to save XP for user '%s', unique ID: %d", szName, iUniqueID );
+
+		return;
+	}
+
+	// Save the user's XP!
+	new szQuery[512];
+	format( szQuery, 511, "REPLACE INTO `class` ( `id` , `class` , `xp` ) VALUES ( '%d', '%d', '%d');", iUniqueID, player_class[id], player_xp[id] );
+	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		client_print( id, print_chat, "Error, unable to save your XP, please contact a server administrator" );
+
+		MYSQLX_Error( query, szQuery, 4 );
+
+		return;
+	}
+
+	
+	// Then we need to save this!
+	if ( player_lvl[id] >= 0 )
+	{
+		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_durabilty[id], player_intelligence[id], player_dextery[id] );
+		query = SQL_PrepareQuery( g_DBConn, szQuery );
+	
+		if ( !SQL_Execute( query ) )
+		{
+			client_print( id, print_chat, "Error, unable to save your skills, please contact a server administrator" );
+	
+			MYSQLX_Error( query, szQuery, 5 );
+	
+			return;
+		}
+	}
+	
+	if( (player_TotalLVL[id] > 0) || (mana_gracza[id] > 0) )
+	{
+		format( szQuery, 511, "REPLACE INTO `extra` (`id`, `gold`, `total_lvl`) VALUES ('%d', '%d', '%d');", iUniqueID, mana_gracza[id], player_TotalLVL[id]);
+		query = SQL_PrepareQuery( g_DBConn, szQuery );
+	
+		if ( !SQL_Execute( query ) )
+		{
+			client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
+	
+			MYSQLX_Error( query, szQuery, 5 );
+	
+			return;
+		}
+	}
+	
+	return;
+}
+
+public MYSQLX_Save_T( id )
+{
+	// Make sure our connection is working
+	if ( !MYSQLX_Connection_Available() )
+	{
+		return;
+	}
+
+	new iUniqueID = DB_GetUniqueID( id );
+
+	// Error checking when saving
+	if ( iUniqueID <= 0 )
+	{
+		new szName[128];
+		get_user_name( id, szName, 127 );
+
+		D2_Log( true, "Unable to save XP for user '%s', unique ID: %d", szName, iUniqueID );
+
+		return;
+	}
+
+	// Save the user's XP!
+	new szQuery[512];
+	format( szQuery, 511, "REPLACE INTO `class` ( `id` , `class` , `xp` ) VALUES ( '%d', '%d', '%d');", iUniqueID, player_class[id], player_xp[id] );
+	SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
+
+
+	// Only save skill levels if the user does NOT play chameleon
+	// Then we need to save this!
+	if ( player_lvl[id] >= 0 )
+	{
+		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_durabilty[id], player_intelligence[id], player_dextery[id] );
+		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
+	}
+	
+	if( (player_TotalLVL[id] > 0) || (mana_gracza[id] > 0) )
+	{
+		format( szQuery, 511, "REPLACE INTO `extra` (`id`, `gold`, `total_lvl`) VALUES ('%d', '%d', '%d');", iUniqueID, mana_gracza[id], player_TotalLVL[id]);
+		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
+	}
+	
+	return;
+}
+
+public _MYSQLX_Save_T( failstate, Handle:query, error[], errnum, data[], size )
+{
+
+	// Error during the query
+	if ( failstate )
+	{
+		new szQuery[256];
+		SQL_GetQueryString( query, szQuery, 255 );
+		
+		MYSQLX_ThreadError( query, szQuery, error, errnum, failstate, 1 );
+	}
+}
+
+public MYSQLX_SetDataForRace( id )
+{
+	// Make sure our connection is working
+	if ( !MYSQLX_Connection_Available() )
+	{
+		return;
+	}
+
+	new iUniqueID = DB_GetUniqueID( id );
+	
+	new szQuery[256];
+	format( szQuery, 255, "SELECT `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int` ,`dex_dmg` FROM `skill` WHERE `id` = '%d' AND `class` = '%d';", iUniqueID, player_class[id] );
+	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
+	
+	if ( !SQL_Execute( query ) )
+	{
+		MYSQLX_Error( query, szQuery, 2 );
+
+		return;
+	}
+
+	if ( SQL_NumResults( query ) == 0 )
+	{
+	
+	}
+	else
+	{
+		player_strength[id] = SQL_ReadResult( query, 0 );
+		player_agility_best[id] = SQL_ReadResult( query, 1 );
+		player_agility[id] = SQL_ReadResult( query, 2 );
+		player_stamina[id] = SQL_ReadResult( query, 3 );
+		player_durabilty[id] = SQL_ReadResult( query, 4 );
+		player_intelligence[id] = SQL_ReadResult( query, 5 );
+		player_dextery[id] = SQL_ReadResult( query, 6 );
+		
+		player_point[id]=(player_lvl[id]-1)*2-player_intelligence[id]-player_strength[id]-player_dextery[id]-player_agility[id]	
+		if(player_point[id]<0) 
+		{
+			player_point[id]=0
+			player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
+		}
+	}
+	
+	// While we have a result!
+	/*while ( SQL_MoreResults( query ) )
+	{
+		player_strength[id] = SQL_ReadResult( query, 0 );
+		player_agility_best[id] = SQL_ReadResult( query, 1 );
+		player_agility[id] = SQL_ReadResult( query, 2 );
+		player_stamina[id] = SQL_ReadResult( query, 3 );
+		player_durabilty[id] = SQL_ReadResult( query, 4 );
+		player_intelligence[id] = SQL_ReadResult( query, 5 );
+		player_dextery[id] = SQL_ReadResult( query, 6 );
+		D2_Log( true, "Set data for race", szName, iUniqueID );
+		
+		player_point[id]=(player_lvl[id]-1)*2-player_intelligence[id]-player_strength[id]-player_dextery[id]-player_agility[id]	
+		if(player_point[id]<0) 
+		{
+			player_point[id]=0
+			player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
+		}
+	}*/
+
+	// Free the handle
+	SQL_FreeHandle( query );
+	player_lvl[id] = player_class_lvl[id][player_class[id]];
+	player_xp[id] = player_class_xp[id][player_class[id]];
+
+	// This user's XP has been set + retrieved! We can save now
+	//bDBXPRetrieved[id] = true;
+
 
 	return;
 }
+
+public DB_SaveAll(thread)
+{
+
+	new players[32], numofplayers, i;
+	get_players( players, numofplayers );
+
+	for ( i = 0; i < numofplayers; i++ )
+	{
+		if(thread == 1)
+		{
+			if (player_class[players[i]] != 0)
+			{
+				MYSQLX_Save_T( players[i] );
+			}
+		}
+		else if(thread == 2)
+		{
+			if (player_class[players[i]] != 0)
+			{
+				MYSQLX_Save( players[i] );
+			}
+		}
+	}
+
+	return;
+}
+
+public SHARED_IsOnTeam( id )
+{
+	new iTeam = get_user_team( id );
+	if ( iTeam == 1 || iTeam == 2 )
+	{
+		return true;
+	}
+
+	return false;
+}
+
+// Function will grab XP for the user
+public D2_ChangeRaceStart( id )
+{
+	
+	// Make sure the user is on a team!
+	if ( SHARED_IsOnTeam( id ) )
+	{
+			// This function will also display the changerace menu
+			MYSQLX_GetAllXP( id );
+	}
+	else
+	{
+		client_print( id, print_center, "Пожалуйста выйдите из спектатора!" );
+	}
+}
+
+/*
 
 public create_klass(id)
 {
@@ -1470,7 +1777,7 @@ public create_klass_Handle2(FailState,Handle:Query,Error[],Errcode,Data[],DataSi
 
 public load_xp(id)
 {
-	if(g_boolsqlOK /*&& */)
+	if(g_boolsqlOK)
 	{
 		if(!is_user_bot(id))
 		{
@@ -1558,7 +1865,7 @@ public SelectHandle2(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 	return PLUGIN_CONTINUE
 }
 
-//sql//
+//sql// */
 
 public Health(id) 
 { 
@@ -1732,7 +2039,7 @@ public plugin_natives()
 	register_native("db_set_user_item", "native_set_user_item", 1)
 }
 
-public savexpcom(id)
+/*public savexpcom(id)
 {
 	if(get_cvar_num("SaveXP") == 1 && player_class[id]!=0 && player_class_lvl[id][player_class[id]]==player_lvl[id] ) 
 	{
@@ -1900,7 +2207,7 @@ public Load_xp_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 		player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)		
 	}
 	return PLUGIN_CONTINUE
-}
+}*/
 
 public LoadPremium(id){
 	
@@ -2023,7 +2330,7 @@ public look_for_none()
 		{
 			if(player_class[i]==0)
 			{
-				select_class_query(i)
+				MYSQLX_GetAllXP( i )
 			}
 		}
 	}
@@ -2063,6 +2370,13 @@ public freeze_begin()
 	freeze_ended = false
 }
 
+public on_EndRound()
+{
+	// Threaded saves on end round!
+	DB_SaveAll(1);
+	
+	return;
+}
 
 public RoundStart(){
 	for (new i=0; i < 33; i++){
@@ -2514,7 +2828,7 @@ public ResetHUD(id)
 		}
 		
 		if (player_point[id] > 0 ) skilltree(id)
-		if (player_class[id] == 0) select_class_query(id)
+		if (player_class[id] == 0) MYSQLX_GetAllXP( id )
 		
 		add_bonus_gamble(id)				//MUST be first
 		c4state[id] = 0
@@ -2582,7 +2896,7 @@ public DeathMsg(id)
 				set_user_frags(kid, get_user_frags(kid) + 1)
 				if(headshot)
 				{
-					mana_gracza[kid]+=1
+					mana_gracza[kid]+=3
 				}
 				award_kill(kid,vid)
 			}
@@ -2595,7 +2909,7 @@ public DeathMsg(id)
 		award_kill(kid,vid)
 		if(headshot)
 		{
-			mana_gracza[kid]+=1
+			mana_gracza[kid]+=3
 		}
 	
 		add_respawn_bonus(vid)
@@ -2612,7 +2926,7 @@ public DeathMsg(id)
 		if (player_class[kid] == Demonolog)
 		refill_ammo(kid)
 		set_renderchange(kid)
-		savexpcom(vid)
+		//savexpcom(vid)
 		if(quest_gracza[kid] != -1)
 		{
 			if(player_class[vid] == questy[quest_gracza[kid]][2])
@@ -3315,11 +3629,12 @@ public Give_Xp(id,amount)
 				player_point[id]+=2
 				set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 4.0, 0.1, 0.2, 2)
 				show_hudmessage(id, "Повышен до %i уровня", player_lvl[id])
+				player_TotalLVL[id]++
 				emit_sound(id,CHAN_STATIC,"diablo_lp/levelup.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 				new name[32]
 				get_user_name(id, name, 31)
 				ColorChat(0, TEAM_COLOR, "%s^x01 повышен до^x03 %i^x01 уровня (^x04%s^x01)", name, player_lvl[id], Race[player_class[id]])
-				savexpcom(id)
+				MYSQLX_Save(id)
 				player_class_lvl[id][player_class[id]]=player_lvl[id]
 			}
 			
@@ -3329,7 +3644,8 @@ public Give_Xp(id,amount)
 				player_point[id]-=2
 				set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 4.0, 0.1, 0.2, 2)
 				show_hudmessage(id, "Понижен до %i уровня", player_lvl[id]) 
-				savexpcom(id)
+				player_TotalLVL[id]--
+				MYSQLX_Save(id)
 				player_class_lvl[id][player_class[id]]=player_lvl[id]
 			}
 			write_hud(id)
@@ -3342,6 +3658,14 @@ public Give_Xp(id,amount)
 public client_connect(id)
 {
 //	reset_item_skills(id)  - nie tutaj bo nie loaduje poziomow O.o
+	g_iDBPlayerUniqueID[id]=0
+	for(new iRace=1;iRace<MAX_RACES;iRace++)
+	{
+		player_class_lvl[id][iRace] = 1
+		player_class_xp[id][iRace] = 0
+	}
+	mana_gracza[id] = 0
+	player_TotalLVL[id] = 0
 	asked_sql[id]=0
 	flashbattery[id] = MAX_FLASH
 	player_xp[id] = 0		
@@ -3386,6 +3710,9 @@ public client_putinserver(id)
 	database_user_created[id]=0
 	count_jumps(id)
 	JumpsLeft[id]=JumpsMax[id]
+	
+	// Get the user's ID!
+	DB_FetchUniqueID( id );
 }
 
 public client_disconnect(id)
@@ -3400,7 +3727,10 @@ public client_disconnect(id)
 	player_dc_name[id] = playername
 	player_dc_item[id] = player_item_id[id]	
 	if (player_b_oldsen[id] > 0.0) client_cmd(id,"sensitivity %f",player_b_oldsen[id])
-	savexpcom(id)
+	if (player_class[id] != 0)
+	{
+		MYSQLX_Save(id)
+	}
 	
 	remove_task(TASK_CHARGE+id)     
      
@@ -3409,6 +3739,11 @@ public client_disconnect(id)
 	
 	player_class_lvl_save[id]=0
 	loaded_xp[id]=0
+	for(new race=1;race<MAX_RACES;race++)
+	{
+		player_class_lvl[id][race]=1
+		player_class_xp[id][race]=0
+	}
 }
 
 /* ==================================================================================================== */
@@ -6093,30 +6428,13 @@ public Prethink_Blink(id)
 
 /* ==================================================================================================== */
 
-/*
-Called on end or mapchange -- Save items for players
+
+//Called on end or mapchange -- Save items for players
 public plugin_end() 
 {
-	new Datafile[64], amxbasedir[64]
-	//build_path(Datafile,63,"$basedir/diablo/datafile.txt") 
-	
-	get_basedir(amxbasedir,63)
-	format(Datafile,63,"%s/diablo/datafile.txt",amxbasedir)
-	
-	if(file_exists(Datafile)) delete_file(Datafile)
-	
-	//Write name and item for each player
-	for (new i=0; i < MAX; i++)
-	{
-		if (player_dc_item[i] > 0 && player_dc_item[i] != 100) //unique
-		{
-			new data[100]
-			format(data,99,"%s^"%i^"",player_dc_name[i],player_dc_item[i])
-			write_file(Datafile,data)
-		}
-	}
+	DB_SaveAll(2);
+	MYSQLX_Close();
 }
-*/
 
 /* ==================================================================================================== */
 
@@ -6505,7 +6823,7 @@ public Prethink_froglegs(id)
 
 /* ==================================================================================================== */
 
-public select_class_query(id)
+/*public select_class_query(id)
 {
 	if(is_user_bot(id) || asked_klass[id]!=0) return PLUGIN_HANDLED
 	if(loaded_xp[id]==0)
@@ -6547,34 +6865,6 @@ public select_class_query(id)
 				format(q_command,511,"SELECT `class`,`lvl` FROM `%s` WHERE `sid`='%s' ",g_sqlTable,name)
 				SQL_ThreadQuery(g_SqlTuple,"select_class_handle",q_command,data,1)
 			}
-		/*
-			
-			if(ret == RESULT_FAILED)
-			{
-				new szError[126]
-				dbi_error(sql,szError,125)
-				log_to_file("addons/amxmodx/logs/diablo.log","[Command Log] nie moglem wczytac lvl'i dla %s | klasy :*** %s",name,szError)
-				dbi_free_result(ret)
-				g_boolsqlOK=0
-				player_class_lvl_save[id]=0
-				dbi_close(sql)
-				return PLUGIN_HANDLED
-			}
-			else if(ret == RESULT_NONE)
-			{
-				log_to_file("addons/amxmodx/logs/diablo.log","[Command Log] nie ma danych dla /class")
-				create_klass(id)
-				return PLUGIN_HANDLED
-			}
-			else while(ret && dbi_nextrow(ret)>0)
-			{
-				new i = dbi_result(ret, "class")
-				lx[i] = dbi_result(ret, "lvl")
-				player_class_lvl[id][i] = lx[i]
-			}
-			dbi_free_result(ret)
-			player_class_lvl_save[id]=1
-		*/
 		}
 		else
 		{
@@ -6629,12 +6919,12 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 		
 	}
 	return PLUGIN_CONTINUE
-}
+}*/
 
-public select_class(id,lx[])
+public select_class(id)
 {
 new text4[512]  
-format(text4, 511,"\yВыбери Класс: ^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n\r4. \wПремиум^n^n\d Описание мода на сайте^n\yРазработал: \rHiTmanY^n^n\y/gold,/g - магазин золота^n\dlp.hitmany.net^n\dСайт сервера") 
+format(text4, 511,"\yВыбери Класс: ^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n\r4. \wПремиум^n^n^n\yРазработал: \rHiTmanY^n\dlp.hitmany.net^n\dСайт сервера^nВаш общий уровень: %d^nУ вас %d золота.", player_TotalLVL[id], mana_gracza[id]) 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -6643,7 +6933,7 @@ show_menu(id, keys,text4, -1, "ChooseClass")
 
 public select_class_menu(id, key) 
 { 
-new lx[28] // <-- w nawiasie wpisz liczbк swoich klas + 1(none)
+//new lx[28] // <-- w nawiasie wpisz liczbк swoich klas + 1(none)
 g_haskit[id] = 0
 c_shake[id]=0
 c_shaked[id]=0
@@ -6670,24 +6960,24 @@ zmiana_skinu[id]=0
 c_piorun[id]=0
 switch(key) 
 { 
-        case 0: 
-        {       
-                PokazKlasy(id,lx)               
-        }
-        case 1: 
-        {       
-                ShowKlasy(id,lx)
-        }
+    case 0: 
+    {
+		PokazKlasy(id)               
+    }
+    case 1: 
+    {       
+		ShowKlasy(id)
+    }
 	case 2:
 	{
-		PokazZwierze(id,lx)
+		PokazZwierze(id)
 	}
 	case 3:
 	{
-		PokazPremiumy(id,lx)
+		PokazPremiumy(id)
 	}
 }
-LoadXP(id, player_class[id])
+//LoadXP(id, player_class[id])
 //LoadPremium(id) 
 
 CurWeapon(id)
@@ -6698,17 +6988,14 @@ changeskin(id,1)
         
 return PLUGIN_HANDLED
 }
-public PokazKlasy(id,lx[])
+public PokazKlasy(id)
 {
 new flags[28]
 get_cvar_string("diablo_classes",flags,27) //<--- tu, gdzie jest 16 wpisz liczbк swoich klas
 new text3[512]
 asked_klass[id]=0
-for(new i=0;i<8;i++)  //Tego masz nigdy nie zmieniaж!!!!
-{
-    format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите5 сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
-    player_class_lvl[id][1],player_class_lvl[id][2],player_class_lvl[id][3],player_class_lvl[id][4],player_class_lvl[id][5],player_class_lvl[id][6],player_class_lvl[id][7],player_class_lvl[id][8])
-}
+format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите5 сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+player_class_lvl[id][1],player_class_lvl[id][2],player_class_lvl[id][3],player_class_lvl[id][4],player_class_lvl[id][5],player_class_lvl[id][6],player_class_lvl[id][7],player_class_lvl[id][8])
 
 new keyspiata
 keyspiata = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<9)
@@ -6729,7 +7016,7 @@ public PokazMeni(id, key)
 * 8:Amazon
 * 0:Wstecz
 */
-new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
 g_haskit[id] = 0
 c_shake[id]=0
 c_damage[id]=0
@@ -6744,7 +7031,7 @@ switch(key)
     {    
         player_class[id] = Mag
 	c_shake[id]=20
-        LoadXP(id, player_class[id])        
+        MYSQLX_SetDataForRace( id )       
     }
     case 1: 
     {    
@@ -6752,19 +7039,19 @@ switch(key)
 	c_damage[id]=3
 	zmiana_skinu[id]=1
 	changeskin(id,0)
-        LoadXP(id, player_class[id])
+        MYSQLX_SetDataForRace( id )
     }
     case 2: 
     {    
         player_class[id] =  Paladin
-        LoadXP(id, player_class[id])
+        MYSQLX_SetDataForRace( id )
     }
     case 3: 
     {    
         player_class[id] = Assassin
 	c_jump[id]=1
 	c_mine[id]=2
-        LoadXP(id, player_class[id])
+        MYSQLX_SetDataForRace( id )
     }
     case 4: 
     {            
@@ -6772,27 +7059,27 @@ switch(key)
         g_haskit[id] = 1
 	c_respawn[id]=4
 	c_vampire[id]=random_num(1,3)
-        LoadXP(id, player_class[id])
+        MYSQLX_SetDataForRace( id )
     }
     case 5: 
     {    
         player_class[id] = Barbarian      
-        LoadXP(id, player_class[id])
+        MYSQLX_SetDataForRace( id )
     }
     case 6: 
     {    
         player_class[id] = Ninja
-        LoadXP(id, player_class[id])
+        MYSQLX_SetDataForRace( id )
     }
     case 7: 
     {    
         player_class[id] = Amazon
         g_GrenadeTrap[id] = 1    
-        LoadXP(id, player_class[id])
+        MYSQLX_SetDataForRace( id )
     }
     case 9: 
     { 
-        select_class(id,lx)
+        select_class(id)
     }
 }
 CurWeapon(id)
@@ -6802,7 +7089,7 @@ give_knife(id)
 return PLUGIN_HANDLED
 }
 
-public ShowKlasy(id,lx[]) {
+public ShowKlasy(id) {
 new text2[512]
 asked_klass[id]=0
 format(text2, 511,"\yДемоны: ^n\w1. \yAndariel^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yMephisto^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yBaal^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
@@ -6827,7 +7114,7 @@ public PressedKlasy(id, key)
 	* 8:Imp
 	* 0:Wstecz
 	*/
-	new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
 	g_haskit[id] = 0
 	c_vampire[id]=0
 	c_silent[id]=0
@@ -6856,26 +7143,26 @@ public PressedKlasy(id, key)
 			c_antymeek[id]=1
 			c_antyorb[id]=1
 			c_antyfs[id]=1
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 1: 
 		{    
 			player_class[id] = Duriel
 			niewidzialnosc_kucanie[id] = 1;
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 2: 
 		{    
 			player_class[id] = Mephisto
 			c_silent[id]=1
 			c_jump[id]=2
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 3: 
 		{    
 			player_class[id] = Hephasto
 			c_grenade[id] = 6
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 4: 
 		{    
@@ -6883,14 +7170,14 @@ public PressedKlasy(id, key)
 			c_jump[id]=1
 			c_silent[id]=1
 			c_blind[id] = 20
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 			emit_sound(id,CHAN_STATIC,"diablo_lp/diablo_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 		}
 		case 5: 
 		{    
 			player_class[id] = Baal
 			c_antyarchy[id]=0
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 6: 
 		{    
@@ -6900,7 +7187,7 @@ public PressedKlasy(id, key)
 			anty_flesh[id]=1
 			c_shaked[id]=5
 	  
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 			if(player_lvl[id]>49)
 			{
 				//new float:summa = player_lvl[id]/10.0;
@@ -6924,11 +7211,11 @@ public PressedKlasy(id, key)
 		{    
 			player_class[id] = Imp
 			c_blink[id] = floatround(halflife_time())
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 9: 
 		{ 
-			select_class(id,lx)
+			select_class(id)
 		}
 	}
 	CurWeapon(id)
@@ -6939,7 +7226,7 @@ public PressedKlasy(id, key)
 	return PLUGIN_HANDLED
 }
 
-public PokazZwierze(id,lx[]) 
+public PokazZwierze(id) 
 {
 	new text5[512]
 	asked_klass[id]=0
@@ -6965,7 +7252,7 @@ public PokazZwierz(id, key)
 	8.Piekielna Krowa
 	* 0:Wstecz
 	*/
-	new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
 	g_haskit[id] = 0
 	c_redirect[id]=0
 	c_antymeek[id]=0
@@ -6981,24 +7268,24 @@ public PokazZwierz(id, key)
 			player_class[id] = Izual
 			c_redirect[id]=4
 			c_antymeek[id]=1
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 1: 
 		{    
 			player_class[id] = Jumper
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 2: 
 		{    
 			player_class[id] = Enslaved
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 3: 
 		{    
 			player_class[id] = Kernel
 			c_silent[id]=1
 			c_piorun[id]=1
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 4: 
 		{    
@@ -7007,22 +7294,22 @@ public PokazZwierz(id, key)
 			c_silent[id]=1
 			c_jump[id]=1
 			c_vampire[id]=1
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 5: 
 		{    
 			player_class[id] = GiantSpider
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 6: 
 		{    
 			player_class[id] = SnowWanderer
 			c_piorun[id]=1
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		case 9: 
 		{ 
-			select_class(id,lx)
+			select_class(id)
 		}
 	}
 	CurWeapon(id)
@@ -7032,7 +7319,7 @@ public PokazZwierz(id, key)
 	return PLUGIN_HANDLED
 }
 
-public PokazPremiumy(id,lx[])
+public PokazPremiumy(id)
 {
 	new text6[512]
 	asked_klass[id]=0
@@ -7053,7 +7340,7 @@ public PokazPremium(id, key)
 	* 4:VipCztery
 	* 0:Wstecz
 	*/
-	new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
 	g_haskit[id] = 0
 	c_antymeek[id]=0
 	c_silent[id]=0
@@ -7073,7 +7360,7 @@ public PokazPremium(id, key)
 			c_antyarchy[id]=1
 			c_jump[id]=2
 			c_vampire[id]=random_num(1,2)
-			LoadXP(id, player_class[id])
+			MYSQLX_SetDataForRace( id )
 		}
 		else
 		{
@@ -7091,7 +7378,7 @@ public PokazPremium(id, key)
 				niewidka[id]=1
 				c_piorun[id]=1
 				c_vampire[id]=random_num(1,2)
-				LoadXP(id, player_class[id])
+				MYSQLX_SetDataForRace( id )
 			}
 			else
 			{
@@ -7109,7 +7396,7 @@ public PokazPremium(id, key)
 				c_antyarchy[id]=1
 				c_jump[id]=2
 				c_vampire[id]=random_num(1,2)
-				LoadXP(id, player_class[id])
+				MYSQLX_SetDataForRace( id )
 			}
 			else
 			{
@@ -7118,7 +7405,7 @@ public PokazPremium(id, key)
 		}
 		case 9: 
 		{ 
-			select_class(id,lx)
+			select_class(id)
 		}
 	}
 	CurWeapon(id)
@@ -7791,7 +8078,7 @@ public SelectBotRace(id)
 	
 	if (player_class[id] == 0)
 	{
-		player_class[id] = random_num(1,7)
+		player_class[id] = random_num(1,24)
 		//load_xp(id)
 	}
 	
@@ -8138,11 +8425,14 @@ public Greet_Player(id)
 
 public changerace(id)
 {
-	if(freeze_ended && player_class[id]!=NONE ) set_user_health(id,0)
-	if(player_class[id]!=NONE) savexpcom(id)
-	player_class[id]=NONE
-	client_connect(id) 
-	select_class_query(id)
+	if(freeze_ended && player_class[id]!=0) set_user_health(id,0)
+	if(player_class[id]!=0) 
+	{
+		MYSQLX_Save(id)
+		player_class[id]=0
+		client_connect(id) 
+		D2_ChangeRaceStart(id)
+	}
 }
 
 /* ==================================================================================================== */
@@ -10548,7 +10838,10 @@ public think_Bot(bot)
 		
 		for(new i=0;i<num;i++)
 		{
-			savexpcom(play[i])
+			if (player_class[i] != 0)
+			{
+				MYSQLX_Save(i)
+			}
 		}
 		map_end=1
 	}
@@ -11152,7 +11445,7 @@ public native_set_user_xp(id, amount)
 		player_point[id]+=2
 		set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 2.0, 0.1, 0.2, 2)
 		show_hudmessage(id, "Уровень повышен до %i", player_lvl[id]) 
-		savexpcom(id)
+		MYSQLX_Save(id)
 		player_class_lvl[id][player_class[id]]=player_lvl[id]
 	}
 	
@@ -11162,7 +11455,7 @@ public native_set_user_xp(id, amount)
 		player_point[id]-=2
 		set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 2.0, 0.1, 0.2, 2)
 		show_hudmessage(id, "Уровень понижен до %i", player_lvl[id]) 
-		savexpcom(id)
+		MYSQLX_Save(id)
 		player_class_lvl[id][player_class[id]]=player_lvl[id]
 	}
 	write_hud(id)
@@ -11188,7 +11481,7 @@ public native_set_user_class(id, class)
 	g_haskit[id] = 0
 	player_class[id] = class		
 
-	LoadXP(id, player_class[id])
+	MYSQLX_SetDataForRace( id )
 	CurWeapon(id)
 	
 	give_knife(id)
