@@ -33,6 +33,7 @@ new Basepath[128]	//Path from Cstrike base directory
 
 #include <amxmodx>
 #include <amxmisc>
+#include <string>
 
 #include <engine>
 #include <fakemeta> 
@@ -191,6 +192,12 @@ new player_class[33]
 new Float:player_huddelay[33]
 new player_premium[33] = 0  //Holds players premium
 new player_fallen_tr[33] = 0  //fallen shaman
+new player_portal[33] = 0 //has portal
+new player_portals[33] = 0 //how much portals setted
+new player_portal1[33] = 0 //portal1
+new player_portal2[33] = 0 //portal2
+new player_portal12[33] = 0
+new player_portal22[33] = 0
 
 //Item attributes
 new player_b_vampire[33] = 1	//Vampyric damage
@@ -633,6 +640,7 @@ public plugin_init()
 	register_concmd("rocket","StworzRakiete")
   register_concmd("fallen","FallenShaman")
 	register_concmd("pluginflash","Flesh")
+  register_clcmd("say /portal","cmd_place_portal")
 	//register_concmd("dynamit","PolozDynamit")
 	register_concmd("paladin","check_palek")
 	register_concmd("setmine","item_mine")
@@ -764,6 +772,8 @@ public plugin_init()
 	register_touch("xbow_arrow", "func_breakable",		"touchbreakable")
 	register_touch("func_breakable", "xbow_arrow",		"touchbreakable")
 	register_touch("Rocket", "*" , "DotykRakiety");
+  register_touch("info_target", "player", "portal_touch")
+  register_touch("iportal", "player", "portal_touch")
 	
 	register_cvar("diablo_arrow","120.0")
 	register_cvar("diablo_arrow_multi","2.0")
@@ -1294,6 +1304,7 @@ public plugin_precache()
 	sprite_beam = precache_model("sprites/zbeam4.spr") 
 	sprite = precache_model("sprites/lgtning.spr");
   precache_model("sprites/xfireball3.spr")
+  precache_model("models/portal/portal.mdl")
 	
 	precache_model("models/player/arctic/arctic.mdl")
 	precache_model("models/player/terror/terror.mdl")
@@ -2980,6 +2991,7 @@ public client_connect(id)
 	DemageTake[id]=0
 	player_b_gamble[id]=0
 	lustrzany_pocisk[id] = 0
+  player_portal[id] = 0
 	
 	g_GrenadeTrap[id] = 0
 	g_TrapMode[id] = 0
@@ -3203,17 +3215,17 @@ public dropitem(id)
 
 public pfn_touch ( ptr, ptd )
 {	
-	if(!ptd)
+ 
+  if(!ptd)
        return PLUGIN_CONTINUE;
 	
 	new szClassName[32], szClassNameOther[32];
 		entity_get_string(ptd, EV_SZ_classname, szClassName, 31)
-	
 	if(ptr && pev_valid(ptr)) {
                 if(pev(ptr, pev_solid) == SOLID_TRIGGER)
                         return PLUGIN_CONTINUE;
-
-                entity_get_string(ptr, EV_SZ_classname, szClassNameOther, 31);
+                      entity_get_string(ptr, EV_SZ_classname, szClassNameOther, 31);
+                
         }
   if(equal(szClassName, "fireball"))
 		{
@@ -11695,6 +11707,140 @@ public DFallenShaman(ent)
 	}
 	remove_entity(ent);
 }
+public cmd_place_portal(id){
+	if (player_portal[id] == 0)
+	{
+		client_print(id, print_center, "У вас нет Портала!");
+		return PLUGIN_CONTINUE;
+	}
+  if (player_portals[id] == 2)
+	{
+		client_print(id, print_center, "Вы уже установили все порталы!");
+		return PLUGIN_CONTINUE;
+	}
+  new cmd_place_portal=menu_create("Меню Портала","cmd_place_portal2");
+	
+	menu_additem(cmd_place_portal,"\yУстановить Портал");//item=0
+	
+	menu_display(id, cmd_place_portal,0);
+	return PLUGIN_HANDLED;
+}
+public cmd_place_portal2(id, menu, item){
+	switch(item){
+		case 0:
+		{
+      set_portal(id)
+		}
+	}
+	menu_destroy(menu);
+	return PLUGIN_HANDLED;
+}
+stock fm_get_aim_origin_normal(index, Float:origin[3], Float:normal[3])
+{
+	static Float:start[3], Float:view_ofs[3]
+	pev(index, pev_origin, start)
+	pev(index, pev_view_ofs, view_ofs)
+	xs_vec_add(start, view_ofs, start)
+	
+	static Float:dest[3]
+	pev(index, pev_v_angle, dest)
+	engfunc(EngFunc_MakeVectors, dest)
+	global_get(glb_v_forward, dest)
+	xs_vec_mul_scalar(dest, 9999.0, dest)
+	xs_vec_add(start, dest, dest)
+	
+	static tr, Float:dist
+	tr = create_tr2()
+	engfunc(EngFunc_TraceLine, start, dest, DONT_IGNORE_MONSTERS, index, tr)
+	get_tr2(tr, TR_vecEndPos, origin)
+	dist = get_distance_f(start, origin)
+	origin[0] -= (origin[0] - start[0])/dist
+	origin[1] -= (origin[1] - start[1])/dist
+	origin[2] -= (origin[2] - start[2])/dist
+	get_tr2(tr, TR_vecPlaneNormal, normal)
+	free_tr2(tr)
+}
+public set_portal(id)
+{
+
+    new g_ent
+    new Float:g_aim_origin[3]
+    new Float:g_ent_angles[3]
+    set_pev(g_ent, pev_scale, 1.0 )
+    g_ent = create_entity("info_target")
+	  entity_set_string(g_ent, EV_SZ_classname, "iportal")
+	  engfunc(EngFunc_SetModel, g_ent, "models/portal/portal.mdl")
+    set_pev(g_ent,pev_solid,SOLID_TRIGGER)
+		set_pev(g_ent,pev_movetype,MOVETYPE_FLY)
+    set_pev(g_ent,pev_skin,1)
+    
+    static Float:normal[3]
+    
+    fm_get_aim_origin_normal(id, g_aim_origin, normal)
+		normal[0] *= -1.0
+		normal[1] *= -1.0
+		normal[2] *= -1.0
+		vector_to_angle(normal, g_ent_angles)
+		engfunc(EngFunc_SetOrigin, g_ent, g_aim_origin)
+		set_pev(g_ent, pev_angles, g_ent_angles)
+    engfunc(EngFunc_SetSize, g_ent,Float:{0.0,0.0,0.0},Float:{30.0,30.0,30.0})
+    //set_pev(g_ent, pev_rendermode, kRenderTransAdd)
+    //set_pev(g_ent, pev_renderamt, 220.0)
+    //set_pev(g_ent, pev_framerate, 15.0 )
+    //set_pev(g_ent, pev_spawnflags, SF_SPRITE_STARTON)
+    //DispatchSpawn(g_ent)
+    //set_pev(g_ent, pev_angles, g_ent_angles)
+    entity_set_edict(g_ent,EV_ENT_owner, id)
+    entity_set_string(g_ent, EV_SZ_classname, "iportal")
+    player_portals[id]++
+    if(player_portal[id] == 1)
+    {
+    player_portal1[id] = g_ent
+    client_print(id,print_chat, "POR %d",player_portal1[id])
+    }
+    else if(player_portal[id] == 2)
+    {
+    player_portal2[id] = g_ent
+    client_print(id,print_chat, "POR %d",player_portal2[id])
+    }
+
+
+  return PLUGIN_CONTINUE;
+}
+parseAngle(id, in, out){
+		new Float:fAngles[3];
+		pev(id, pev_v_angle, fAngles);
+		angle_vector(fAngles, ANGLEVECTOR_FORWARD, fAngles);
+		
+		new Float:fNormalIn[3];
+		pev(in, pev_vuser1, fNormalIn);
+		xs_vec_neg(fNormalIn, fNormalIn);
+		
+		new Float:fNormalOut[3];
+		pev(out, pev_vuser1, fNormalOut);
+		
+		xs_vec_sub(fAngles, fNormalIn, fAngles);
+		xs_vec_add(fAngles, fNormalOut, fAngles);
+		
+		//fAngles[2] = -fAngles[2];
+		
+		vector_to_angle(fAngles, fAngles);
+		
+		set_pev(id, pev_angles, fAngles);
+		set_pev(id, pev_fixangle, 1);
+		
+		
+		pev(id, pev_velocity, fAngles);
+		new Float:fSpeed = vector_length(fAngles);
+		xs_vec_normalize(fAngles,  fAngles);
+		
+		xs_vec_sub(fAngles, fNormalIn, fAngles);
+		xs_vec_add(fAngles, fNormalOut, fAngles);
+		
+		xs_vec_normalize(fAngles, fAngles);
+		xs_vec_mul_scalar(fAngles, fSpeed, fAngles);
+		set_pev(id, pev_velocity, fAngles);
+}
 public StworzRakiete(id)
 {
 	if (!ilosc_rakiet_gracza[id] && is_user_alive(id))
@@ -11966,6 +12112,41 @@ public Restart()
 		if (is_user_connected(id))
 			gRestart[id] = true
 	}
+}
+
+public portal_touch(ptr,id)
+{
+ if(is_user_alive(id))
+ {
+  static szClassName[32]
+  pev(ptr, pev_classname, szClassName, sizeof szClassName - 1)
+  
+  if(!equal(szClassName, "iportal"))
+    return FMRES_IGNORED
+    
+  if(player_portal1[id] == ptr)
+        {
+        new Float:fOrigin[3];
+			  pev(player_portal2[id], pev_origin, fOrigin);
+        //set_pev(id, pev_origin, fOrigin);
+        set_user_origin(id,fOrigin)
+        parseAngle(id, player_portal1[id], player_portal2[id]);
+        client_print(id,print_chat, "POR %d",player_portal2[id])
+        }
+        else if(player_portal2[id] == ptr)
+        {
+        new Float:fOrigin[3];
+			  pev(player_portal1[id], pev_origin, fOrigin);
+        //set_pev(id, pev_origin, fOrigin);
+        set_user_origin(id,fOrigin)
+        parseAngle(id, player_portal2[id], player_portal1[id]);
+        client_print(id,print_chat, "POR %d",player_portal1[id])
+        }    
+  
+   }
+   server_cmd("say Touch ID: %d",id) 
+   
+ return FMRES_IGNORED
 }
 public fwTouch(ptr, ptd)
 {
@@ -15022,6 +15203,7 @@ public mana4(id){
 	
 	menu_additem(mana4,"\y Случайный item \d[10 маны]")
 	menu_additem(mana4,"\y Улучшить item \d[5 маны]")
+  menu_additem(mana4,"\y Свиток Портала \d[50 маны]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
@@ -15058,6 +15240,21 @@ public mana4a(id, menu, item){
 			emit_sound(id,CHAN_STATIC,"diablo_lp/repair.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 			mana_gracza[id] -= koszt;
 			upgrade_item(id)
+			}
+    }
+    case 2:{
+			new koszt = 50;
+			if (mana_gracza[id]<koszt)
+			{
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				return PLUGIN_CONTINUE;
+			}
+			if (mana_gracza[id]>=koszt)
+			{
+			mana_gracza[id] -= koszt;
+      player_portal[id] = 1;
+      player_portals[id] = 0;
+      //ColorChat(id,GREEN,"[Портал]^x01 Портал say /protal в консоли.");
 			}
 		}
 	}
