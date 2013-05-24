@@ -194,10 +194,10 @@ new player_premium[33] = 0  //Holds players premium
 new player_fallen_tr[33] = 0  //fallen shaman
 new player_portal[33] = 0 //has portal
 new player_portals[33] = 0 //how much portals setted
-new player_portal1[33] = 0 //portal1
-new player_portal2[33] = 0 //portal2
-new player_portal12[33] = 0
-new player_portal22[33] = 0
+new player_portal_infotrg_1[33] = 0 //portal1
+new player_portal_infotrg_2[33] = 0 //portal2
+new player_portal_sprite_1[33] = 0
+new player_portal_sprite_2[33] = 0
 
 //Item attributes
 new player_b_vampire[33] = 1	//Vampyric damage
@@ -638,9 +638,10 @@ public plugin_init()
 	register_clcmd("say /s","speed")
 	register_clcmd("flash", "cmdBlyskawica");
 	register_concmd("rocket","StworzRakiete")
-  register_concmd("fallen","FallenShaman")
+	register_concmd("fallen","FallenShaman")
 	register_concmd("pluginflash","Flesh")
-  register_clcmd("say /portal","cmd_place_portal")
+	register_clcmd("say /portal","cmd_place_portal")
+	register_clcmd("say portal","cmd_place_portal")
 	//register_concmd("dynamit","PolozDynamit")
 	register_concmd("paladin","check_palek")
 	register_concmd("setmine","item_mine")
@@ -772,8 +773,8 @@ public plugin_init()
 	register_touch("xbow_arrow", "func_breakable",		"touchbreakable")
 	register_touch("func_breakable", "xbow_arrow",		"touchbreakable")
 	register_touch("Rocket", "*" , "DotykRakiety");
-  register_touch("info_target", "player", "portal_touch")
-  register_touch("iportal", "player", "portal_touch")
+	//register_touch("info_target", "player", "portal_touch")
+	register_touch("iportal", "player", "portal_touch")
 	
 	register_cvar("diablo_arrow","120.0")
 	register_cvar("diablo_arrow_multi","2.0")
@@ -1303,8 +1304,10 @@ public plugin_precache()
 	sprite_gibs = precache_model("models/hgibs.mdl")
 	sprite_beam = precache_model("sprites/zbeam4.spr") 
 	sprite = precache_model("sprites/lgtning.spr");
-  precache_model("sprites/xfireball3.spr")
-  precache_model("models/portal/portal.mdl")
+	precache_model("sprites/xfireball3.spr")
+	precache_model("models/portal/portal.mdl")
+	precache_model("sprites/diablo_lp/portal_tt.spr")
+	precache_model("sprites/diablo_lp/portal_ct.spr")
 	
 	precache_model("models/player/arctic/arctic.mdl")
 	precache_model("models/player/terror/terror.mdl")
@@ -1326,7 +1329,7 @@ public plugin_precache()
 	precache_sound("weapons/knife_deploy1.wav")
 	precache_sound(gszSound);
 	precache_sound("diablo_lp/fallen_1.wav");
-  precache_sound("diablo_lp/fallen_2.wav");
+	precache_sound("diablo_lp/fallen_2.wav");
 	precache_sound("diablo_lp/levelup.wav");
 	precache_sound("diablo_lp/questdone.wav");
 	precache_sound("diablo_lp/identify.wav");
@@ -1337,31 +1340,33 @@ public plugin_precache()
 	precache_sound("diablo_lp/diablo_1.wav");
 	precache_sound("diablo_lp/fireball2.wav");
 	precache_sound("diablo_lp/fireball3.wav");
-  precache_sound("diablo_lp/fallen_fireball.wav");
+	precache_sound("diablo_lp/fallen_fireball.wav");
 	precache_sound("diablo_lp/fallen_hit1.wav");
-  precache_sound("diablo_lp/fallen_hit2.wav");
-  precache_sound("diablo_lp/fallen_hit3.wav");
-  precache_sound("diablo_lp/fallen_hit6.wav");
-  precache_sound("diablo_lp/fallen_hit7.wav");
-  precache_sound("diablo_lp/fallen_roar2.wav");
-  precache_sound("diablo_lp/fallen_roar3.wav");
-  precache_sound("diablo_lp/fallen_roar6.wav");
-  precache_sound("diablo_lp/fallens_gethit1.wav");
-  precache_sound("diablo_lp/fallens_gethit2.wav");
-  precache_sound("diablo_lp/fallens_gethit3.wav");
-  precache_sound("diablo_lp/fallens_gethit4.wav");
-  precache_sound("diablo_lp/resurrect.wav");
-  precache_sound("diablo_lp/resurrectcast.wav");
-  precache_sound("diablo_lp/fallens_neutral1.wav");
-  precache_sound("diablo_lp/fallens_neutral2.wav");
-  precache_sound("diablo_lp/fallens_neutral3.wav");
-  precache_sound("diablo_lp/fallens_neutral4.wav");
-  precache_sound("diablo_lp/fallen_neutral1.wav");
-  precache_sound("diablo_lp/fallen_neutral2.wav");
-  precache_sound("diablo_lp/fallen_neutral3.wav");
-  precache_sound("diablo_lp/fallen_neutral4.wav");
-  precache_sound("diablo_lp/fallen_neutral5.wav");
+	precache_sound("diablo_lp/fallen_hit2.wav");
+	precache_sound("diablo_lp/fallen_hit3.wav");
+	precache_sound("diablo_lp/fallen_hit6.wav");
+	precache_sound("diablo_lp/fallen_hit7.wav");
+	precache_sound("diablo_lp/fallen_roar2.wav");
+	precache_sound("diablo_lp/fallen_roar3.wav");
+	precache_sound("diablo_lp/fallen_roar6.wav");
+	precache_sound("diablo_lp/fallens_gethit1.wav");
+	precache_sound("diablo_lp/fallens_gethit2.wav");
+	precache_sound("diablo_lp/fallens_gethit3.wav");
+	precache_sound("diablo_lp/fallens_gethit4.wav");
+	precache_sound("diablo_lp/resurrect.wav");
+	precache_sound("diablo_lp/resurrectcast.wav");
+	precache_sound("diablo_lp/fallens_neutral1.wav");
+	precache_sound("diablo_lp/fallens_neutral2.wav");
+	precache_sound("diablo_lp/fallens_neutral3.wav");
+	precache_sound("diablo_lp/fallens_neutral4.wav");
+	precache_sound("diablo_lp/fallen_neutral1.wav");
+	precache_sound("diablo_lp/fallen_neutral2.wav");
+	precache_sound("diablo_lp/fallen_neutral3.wav");
+	precache_sound("diablo_lp/fallen_neutral4.wav");
+	precache_sound("diablo_lp/fallen_neutral5.wav");
 	precache_sound("weapons/explode3.wav");
+	precache_sound("diablo_lp/portalcast.wav");
+	precache_sound("diablo_lp/portalenter.wav");
 	precache_model("models/diablomod/w_throwingknife.mdl")
 	precache_model("models/diablomod/bm_block_platform.mdl")
 	
@@ -1735,6 +1740,23 @@ public freeze_begin()
 
 public RoundStart(){
 	for (new i=0; i < 33; i++){
+		if(player_portals[i] > 0)
+		{
+			if(get_user_team(i) == 1)
+			{
+				engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_tt.spr")
+				engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_tt.spr")
+			}
+			else if(get_user_team(i) == 2)
+			{
+				engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_ct.spr")
+				engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_ct.spr")
+			}
+		}
+		
+		
+		
+		
 		if(player_class[i] == Baal) {
 			zmiana_skinu[i] = random(5)
 			if(zmiana_skinu[i] == 1) {
@@ -2975,8 +2997,8 @@ public client_connect(id)
 	flashbattery[id] = MAX_FLASH
 	player_xp[id] = 0		
 	player_lvl[id] = 1	
-  player_premium[id] = 1
-  player_fallen_tr[id] = 0	
+	player_premium[id] = 1
+	player_fallen_tr[id] = 0	
 	player_point[id] = 0	
 	player_item_id[id] = 0			
 	player_agility[id] = 0
@@ -2991,7 +3013,12 @@ public client_connect(id)
 	DemageTake[id]=0
 	player_b_gamble[id]=0
 	lustrzany_pocisk[id] = 0
-  player_portal[id] = 0
+	player_portal[id] = 0
+	player_portal_infotrg_1[id] = 0
+	player_portal_sprite_1[id] = 0
+	player_portals[id] = 0
+	player_portal_infotrg_2[id] = 0
+	player_portal_sprite_2[id] = 0
 	
 	g_GrenadeTrap[id] = 0
 	g_TrapMode[id] = 0
@@ -3000,7 +3027,7 @@ public client_connect(id)
 	
 	reset_item_skills(id) // Juz zaladowalo xp wiec juz nic nie zepsuje <lol2>
 	reset_player(id)
-	set_task(10.0, "Greet_Player", id+TASK_GREET, "", 0, "a", 1)
+	set_task(10.0, "Greet_Player", id+TASK_GREET, "", 0, "a", 1)	
 }
 
 public client_putinserver(id)
@@ -3016,6 +3043,10 @@ public client_disconnect(id)
 {
 	new ent
 	new playername[40]
+	while((ent = fm_find_ent_by_owner(ent, "iportal", id)) != 0)
+		fm_remove_entity(ent)
+	while((ent = fm_find_ent_by_owner(ent, "2iportal", id)) != 0)
+		fm_remove_entity(ent)
 	get_user_name(id,playername,39)
 	player_dc_name[id] = playername
 	player_dc_item[id] = player_item_id[id]	
@@ -3071,18 +3102,18 @@ public write_hud(id)
   copy(Racename, charsmax(Racename), Race[player_class[id]]);
   if(player_class[id]==Fallen && player_lvl[id]>49)
   {
-  Racename = "Fallen Shaman"
+  Racename = "ArrayGetCell"
   }
 	
 	if(player_class[id]!=Paladin)
 {
     set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nМана: %i",get_user_health(id), Racename, player_lvl[id], perc,"%", player_item_name[id],item_durability[id],mana_gracza[id])
+    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], perc,"%", player_item_name[id],item_durability[id],mana_gracza[id])
 }
 	else
 {
     set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%0.0f%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nМана: %i",get_user_health(id), Racename, player_lvl[id], perc,"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
+    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%0.0f%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], perc,"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
 }
         message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
         write_byte(0) 
@@ -6056,13 +6087,13 @@ public option_menu(id, key)
 		}
 		case 4:
 		{
-			buyrune(id)
+			mana1(id)
 		}
 		case 5:
 		{
 			showskills(id)
 		}
-    case 6:
+		case 6:
 		{
 			changerace(id)
 		}
@@ -11713,14 +11744,11 @@ public cmd_place_portal(id){
 		client_print(id, print_center, "У вас нет Портала!");
 		return PLUGIN_CONTINUE;
 	}
-  if (player_portals[id] == 2)
-	{
-		client_print(id, print_center, "Вы уже установили все порталы!");
-		return PLUGIN_CONTINUE;
-	}
   new cmd_place_portal=menu_create("Меню Портала","cmd_place_portal2");
 	
-	menu_additem(cmd_place_portal,"\yУстановить Портал");//item=0
+	menu_additem(cmd_place_portal,"\yУстановить портал");
+	menu_additem(cmd_place_portal,"\wУдалить все порталы");
+	menu_setprop(cmd_place_portal,MPROP_EXITNAME,"Выход")
 	
 	menu_display(id, cmd_place_portal,0);
 	return PLUGIN_HANDLED;
@@ -11729,7 +11757,33 @@ public cmd_place_portal2(id, menu, item){
 	switch(item){
 		case 0:
 		{
-      set_portal(id)
+			if (player_portals[id] == 2)
+			{
+				client_print(id, print_center, "Вы уже установили все порталы!");
+				return PLUGIN_CONTINUE;
+			}
+			set_portal(id)
+			
+			if (player_portals[id] == 1)
+			{
+				cmd_place_portal(id)
+			}
+		}
+		case 1:
+		{
+			if(player_portals[id] > 0)
+			{
+				remove_entity(player_portal_infotrg_1[id]);
+				remove_entity(player_portal_sprite_1[id]);
+				player_portal_infotrg_1[id] = 0
+				player_portal_sprite_1[id] = 0
+				remove_entity(player_portal_infotrg_2[id]);
+				remove_entity(player_portal_sprite_2[id]);
+				player_portal_infotrg_2[id] = 0
+				player_portal_sprite_2[id] = 0
+				player_portals[id] = 0
+				player_portal[id] = 0
+			}
 		}
 	}
 	menu_destroy(menu);
@@ -11763,50 +11817,129 @@ stock fm_get_aim_origin_normal(index, Float:origin[3], Float:normal[3])
 public set_portal(id)
 {
 
-    new g_ent
+    new g_ent,g_ent2
     new Float:g_aim_origin[3]
-    new Float:g_ent_angles[3]
+    new Float:g_ent_angles[3],pSize[3]
+	
     set_pev(g_ent, pev_scale, 1.0 )
     g_ent = create_entity("info_target")
-	  entity_set_string(g_ent, EV_SZ_classname, "iportal")
-	  engfunc(EngFunc_SetModel, g_ent, "models/portal/portal.mdl")
+    g_ent2 = create_entity("env_sprite")
+	
+	entity_set_string(g_ent, EV_SZ_classname, "iportal")
+	engfunc(EngFunc_SetModel, g_ent, "models/portal/portal.mdl")
+	
+    entity_set_string(g_ent2, EV_SZ_classname, "2iportal")
+	if(get_user_team(id) == 1)
+	{
+		engfunc(EngFunc_SetModel, g_ent2, "sprites/diablo_lp/portal_tt.spr")
+	}
+	else if(get_user_team(id) == 2)
+	{
+		engfunc(EngFunc_SetModel, g_ent2, "sprites/diablo_lp/portal_ct.spr")
+	}
+	else
+	{
+		remove_entity(g_ent);
+		remove_entity(g_ent2);
+		client_print(id, print_center, "ОШИБКА: Поставьте портал на ровной стене!^n Или порталу не хватает свободного места");
+		cmd_place_portal(id)
+		return PLUGIN_CONTINUE;
+	}
+	
     set_pev(g_ent,pev_solid,SOLID_TRIGGER)
-		set_pev(g_ent,pev_movetype,MOVETYPE_FLY)
+	set_pev(g_ent,pev_movetype,MOVETYPE_FLY)
     set_pev(g_ent,pev_skin,1)
+
     
     static Float:normal[3]
     
     fm_get_aim_origin_normal(id, g_aim_origin, normal)
-		normal[0] *= -1.0
-		normal[1] *= -1.0
-		normal[2] *= -1.0
-		vector_to_angle(normal, g_ent_angles)
-		engfunc(EngFunc_SetOrigin, g_ent, g_aim_origin)
-		set_pev(g_ent, pev_angles, g_ent_angles)
-    engfunc(EngFunc_SetSize, g_ent,Float:{0.0,0.0,0.0},Float:{30.0,30.0,30.0})
-    //set_pev(g_ent, pev_rendermode, kRenderTransAdd)
-    //set_pev(g_ent, pev_renderamt, 220.0)
-    //set_pev(g_ent, pev_framerate, 15.0 )
-    //set_pev(g_ent, pev_spawnflags, SF_SPRITE_STARTON)
-    //DispatchSpawn(g_ent)
-    //set_pev(g_ent, pev_angles, g_ent_angles)
+	normal[0] *= -1.0
+	normal[1] *= -1.0
+	normal[2] *= -1.0
+	vector_to_angle(normal, g_ent_angles)
+	
+	if(!validWall(g_aim_origin,g_ent_angles) || !checkPlace(g_aim_origin,id))
+	{	
+		remove_entity(g_ent);
+		remove_entity(g_ent2);
+		client_print(id, print_center, "ОШИБКА: Поставьте портал на ровной стене!^n Или порталу не хватает свободного места");
+		cmd_place_portal(id)
+		return PLUGIN_CONTINUE;
+	}
+	
+	player_portals[id]++
+	
+    if(player_portals[id] == 1)
+    {
+		player_portal_infotrg_1[id] = g_ent;
+		player_portal_sprite_1[id] = g_ent2;
+    }
+    if(player_portals[id] == 2)
+    {
+		player_portal_infotrg_2[id] = g_ent;
+		player_portal_sprite_2[id] = g_ent2;
+    }
+	engfunc(EngFunc_SetOrigin, g_ent, g_aim_origin)
+	set_pev(g_ent, pev_angles, g_ent_angles)
+    engfunc(EngFunc_SetOrigin, g_ent2, g_aim_origin)
+	set_pev(g_ent2, pev_angles, g_ent_angles)
+    set_rendering(g_ent, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 0 )
+    set_pev(g_ent2, pev_rendermode, kRenderTransAdd)
+    set_pev(g_ent2, pev_renderamt, 220.0)
+    set_pev(g_ent2, pev_framerate, 15.0 )
+    set_pev(g_ent2, pev_spawnflags, SF_SPRITE_STARTON)
+    DispatchSpawn(g_ent2)
+    set_pev(g_ent2, pev_angles, g_ent_angles)
     entity_set_edict(g_ent,EV_ENT_owner, id)
+    entity_set_edict(g_ent2,EV_ENT_owner, id)
     entity_set_string(g_ent, EV_SZ_classname, "iportal")
-    player_portals[id]++
-    if(player_portal[id] == 1)
-    {
-    player_portal1[id] = g_ent
-    client_print(id,print_chat, "POR %d",player_portal1[id])
-    }
-    else if(player_portal[id] == 2)
-    {
-    player_portal2[id] = g_ent
-    client_print(id,print_chat, "POR %d",player_portal2[id])
-    }
+	set_pev(g_ent,pev_owner,id);
+	set_pev(g_ent2,pev_owner,id);
+	
+	new Float:fOldNormal[3];
+	xs_vec_copy(g_ent_angles, fOldNormal);
+	vector_to_angle(g_ent_angles, g_ent_angles);
+	set_pev(g_ent2, pev_vuser1, fOldNormal);
+	emit_sound(g_ent, CHAN_VOICE, "diablo_lp/portalcast.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	new Float:fMins[3],Float:fMaxs[3];
+	pev(g_ent, pev_mins, fMins)
+	pev(g_ent, pev_maxs, fMaxs)
+	fMins[0] = fMins[0] + 0.15;
+	fMins[1] = fMins[1] + 0.15;
+	fMins[2] = fMins[2] + 0.15;
+	
+	fMaxs[0] = fMaxs[0] + 0.15;
+	fMaxs[1] = fMaxs[1] + 0.15;
+	fMaxs[2] = fMaxs[2] + 0.15;
+	engfunc(EngFunc_SetSize, g_ent,fMins, fMaxs)
+	
+	
+	/*new Float:fMins[3],Float:fMax[3],Float:mul[3];
+		
+	mul[0] = floatabs(floatabs(fOldNormal[0])-1.0)
+	mul[0] = mul[0] + 0.1 > 1.0 ? mul[0]:mul[0]+0.1
+		
+	mul[1] = floatabs(floatabs(fOldNormal[1])-1.0)
+	mul[1] = mul[1] + 0.1 > 1.0 ? mul[1]:mul[1]+0.1
+		
+	mul[2] = floatabs(floatabs(fOldNormal[2])-1.0)
+	mul[2] = mul[2] + 0.1 > 1.0 ? mul[2]:mul[2]+0.1
+		
+	fMins[0] = floatmul(mul[0],-5.0)-2.0;
+	fMins[1] = floatmul(mul[1],-2.5)-2.0;
+	fMins[2] = floatmul(mul[2],-4.0)-2.0
+		
+	fMax[0] = floatmul(mul[0],5.0)+2.0;
+	fMax[1] = floatmul(mul[1],2.5)+2.0;
+	fMax[2] = floatmul(mul[2],4.0)+2.0
+		
+	engfunc(EngFunc_SetSize, g_ent,fMins, fMax)*/
 
 
   return PLUGIN_CONTINUE;
 }
+
 parseAngle(id, in, out){
 		new Float:fAngles[3];
 		pev(id, pev_v_angle, fAngles);
@@ -11841,6 +11974,7 @@ parseAngle(id, in, out){
 		xs_vec_mul_scalar(fAngles, fSpeed, fAngles);
 		set_pev(id, pev_velocity, fAngles);
 }
+
 public StworzRakiete(id)
 {
 	if (!ilosc_rakiet_gracza[id] && is_user_alive(id))
@@ -12116,38 +12250,247 @@ public Restart()
 
 public portal_touch(ptr,id)
 {
- if(is_user_alive(id))
- {
-  static szClassName[32]
-  pev(ptr, pev_classname, szClassName, sizeof szClassName - 1)
-  
-  if(!equal(szClassName, "iportal"))
-    return FMRES_IGNORED
+	if(is_user_alive(id))
+	{
+	static szClassName[32]
+	pev(ptr, pev_classname, szClassName, sizeof szClassName - 1)
+	
+	if(!equal(szClassName, "iportal"))
+	{
+		return FMRES_IGNORED
+	}
+	
+	if(player_portals[id] < 2)
+	{
+		return PLUGIN_CONTINUE;
+	}
     
-  if(player_portal1[id] == ptr)
+        if(player_portal_infotrg_1[id] == ptr)
         {
-        new Float:fOrigin[3];
-			  pev(player_portal2[id], pev_origin, fOrigin);
-        //set_pev(id, pev_origin, fOrigin);
-        set_user_origin(id,fOrigin)
-        parseAngle(id, player_portal1[id], player_portal2[id]);
-        client_print(id,print_chat, "POR %d",player_portal2[id])
+			static Float:fOrigin[3],Float:fOrigin2[3],Float:flAng[3];
+			static Float:fDistance = 0.1;
+			static entity;
+			
+			entity = player_portal_sprite_2[id]
+			pev(entity, pev_origin, fOrigin);
+			pev(entity, pev_angles, flAng)      
+			
+			
+			static Float:fAngles[3];
+			pev(entity, pev_vuser1, fAngles);
+			xs_vec_mul_scalar(fAngles, fDistance, fAngles);
+			xs_vec_add(fOrigin, fAngles, fOrigin);
+			static Float:fMins[3],Float:fMaxs[3];
+			pev(id,pev_mins,fMins);
+			pev(id,pev_maxs,fMaxs);
+			if(checkPortalPlace(fOrigin,fMins,fMaxs))
+			{
+				set_pev(id, pev_origin, fOrigin);
+				parseAngle(id, player_portal_infotrg_1[id], entity);
+				emit_sound(entity, CHAN_VOICE, "diablo_lp/portalenter.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+			}
+			
+        }        
+        if(player_portal_infotrg_2[id] == ptr)
+        {
+        
+			static Float:fOrigin[3],Float:fOrigin2[3],Float:flAng[3];
+			static Float:fDistance = 0.1;
+			static entity;
+			
+			entity = player_portal_sprite_1[id]
+			pev(entity, pev_origin, fOrigin);
+			pev(entity, pev_angles, flAng)
+			//set_pev(id, pev_angles, flAng)
+			
+			static Float:fAngles[3];
+			pev(entity, pev_vuser1, fAngles);
+			xs_vec_mul_scalar(fAngles, fDistance, fAngles);
+			xs_vec_add(fOrigin, fAngles, fOrigin);
+			//set_pev(id, pev_origin, fOrigin);
+			static Float:fMins[3],Float:fMaxs[3];
+			pev(id,pev_mins,fMins);
+			pev(id,pev_maxs,fMaxs);
+			if(checkPortalPlace(fOrigin,fMins,fMaxs))
+			{
+				set_pev(id, pev_origin, fOrigin);
+				parseAngle(id, player_portal_infotrg_2[id], entity);
+				emit_sound(entity, CHAN_VOICE, "diablo_lp/portalenter.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+			}
+			
         }
-        else if(player_portal2[id] == ptr)
-        {
-        new Float:fOrigin[3];
-			  pev(player_portal1[id], pev_origin, fOrigin);
-        //set_pev(id, pev_origin, fOrigin);
-        set_user_origin(id,fOrigin)
-        parseAngle(id, player_portal2[id], player_portal1[id]);
-        client_print(id,print_chat, "POR %d",player_portal1[id])
-        }    
-  
-   }
-   server_cmd("say Touch ID: %d",id) 
+	} 
    
- return FMRES_IGNORED
 }
+
+bool:traceToWall(const Float:fOrigin[3], const Float:fVec[3]){
+		new Float:fOrigin2[3];
+		xs_vec_add(fOrigin, fVec, fOrigin2);
+		xs_vec_add(fOrigin2, fVec, fOrigin2);
+		
+		new tr = create_tr2();
+		engfunc(EngFunc_TraceLine, fOrigin, fOrigin2, IGNORE_MISSILE | IGNORE_MONSTERS | IGNORE_GLASS, 0, tr);
+		new Float:fFrac;
+		get_tr2(tr, TR_flFraction, fFrac);
+		free_tr2(tr);
+		
+		if( floatabs(fFrac - 0.5) <= 0.02 ){
+			return true;
+		}
+		
+		return false;
+	}
+
+stock bool:validWall(const Float:fOrigin[3], Float:fNormal[3], Float:width=56.0, Float:height = 84.0)
+{
+		new Float:fInvNormal[3];
+		xs_vec_neg(fNormal, fInvNormal);
+		
+		new Float:fPoint[3];
+		xs_vec_add(fOrigin, fNormal, fPoint);
+		
+		new Float:fNormalUp[3];
+		new Float:fNormalRight[3];
+		vector_to_angle(fNormal, fNormalUp);
+		
+		fNormalUp[0] = -fNormalUp[0];
+		
+		angle_vector(fNormalUp, ANGLEVECTOR_RIGHT, fNormalRight);
+		angle_vector(fNormalUp, ANGLEVECTOR_UP, fNormalUp);
+		
+		xs_vec_mul_scalar(fNormalUp, height/2, fNormalUp);
+		xs_vec_mul_scalar(fNormalRight, width/2, fNormalRight);
+		
+		new Float:fPoint2[3];
+		xs_vec_add(fPoint, fNormalUp, fPoint2);
+		xs_vec_add(fPoint2, fNormalRight, fPoint2);
+		if(!traceToWall(fPoint2, fInvNormal))
+		return false;
+		
+		xs_vec_add(fPoint, fNormalUp, fPoint2);
+		xs_vec_sub(fPoint2, fNormalRight, fPoint2);
+		if(!traceToWall(fPoint2, fInvNormal))
+		return false;
+		
+		xs_vec_sub(fPoint, fNormalUp, fPoint2);
+		xs_vec_sub(fPoint2, fNormalRight, fPoint2);
+		if(!traceToWall(fPoint2, fInvNormal))
+		return false;
+		
+		xs_vec_sub(fPoint, fNormalUp, fPoint2);
+		xs_vec_add(fPoint2, fNormalRight, fPoint2);
+		if(!traceToWall(fPoint2, fInvNormal))
+		return false;
+		
+		return true;
+}
+
+bool:checkPlace(Float:fOrigin[3],id){
+		new ent = -1;
+		new szClass[64]
+		while((ent = find_ent_in_sphere(ent,fOrigin,45.0))){
+			pev(ent,pev_classname,szClass,charsmax(szClass));
+			if(equal(szClass,"iportal") || equal(szClass,"iportal")){
+				if(equal(szClass,"iportal") && pev(ent,pev_owner) == id){
+					continue;
+				}
+				else{
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+bool:traceTo(const Float:fFrom[3],const Float:fTo[3]){
+		new tr = create_tr2();
+		
+		engfunc(EngFunc_TraceLine, fFrom, fTo,0, 0, tr);
+		
+		new Float:fFrac;
+		get_tr2(tr, TR_flFraction, fFrac);
+		free_tr2(tr);
+		
+		return (fFrac == 1.0) 
+		
+	}
+
+bool:checkPortalPlace(Float: fOrigin[3],Float: fMins[3],Float: fMaxs[3])
+	{
+		new Float:fOriginTmp[3]
+		
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		
+		fOriginTmp[0] += fMins[0];
+		fOriginTmp[1] += fMaxs[1];
+		fOriginTmp[2] += fMaxs[2];
+		if(!traceTo(fOrigin,fOriginTmp)){
+			return false;
+		}
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		
+		fOriginTmp[0] += fMaxs[0];
+		fOriginTmp[1] += fMaxs[1];
+		fOriginTmp[2] += fMaxs[2];
+		if(!traceTo(fOrigin,fOriginTmp)){
+			return false;
+		}
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		
+		fOriginTmp[0] += fMins[0];
+		fOriginTmp[1] += fMins[1];
+		fOriginTmp[2] += fMaxs[2];
+		if(!traceTo(fOrigin,fOriginTmp)){
+			return false;
+		}
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		fOriginTmp[0] += fMaxs[0];
+		fOriginTmp[1] += fMins[1];
+		fOriginTmp[2] += fMaxs[2];
+		if(!traceTo(fOrigin,fOriginTmp)){
+			return false;
+		}
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		fOriginTmp[0] += fMins[0];
+		fOriginTmp[1] += fMaxs[1];
+		fOriginTmp[2] += fMins[2];
+		if(!traceTo(fOrigin,fOriginTmp)){
+			return false;
+		}
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		fOriginTmp[0] += fMaxs[0];
+		fOriginTmp[1] += fMaxs[1];
+		fOriginTmp[2] += fMins[2];
+		if(!traceTo(fOrigin,fOriginTmp)){
+			return false;
+		}
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		fOriginTmp[0] += fMins[0];
+		fOriginTmp[1] += fMins[1];
+		fOriginTmp[2] += fMins[2];
+		if(!traceTo(fOrigin,fOriginTmp)){
+			return false;
+		}
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		fOriginTmp[0] += fMaxs[0];
+		fOriginTmp[1] += fMins[1];
+		fOriginTmp[2] += fMins[2];
+		if(!traceTo(fOrigin,fOriginTmp)){
+			return false;
+		}
+		xs_vec_copy(fOrigin,fOriginTmp)
+		
+		return true;
+	}
+
 public fwTouch(ptr, ptd)
 {
 	if (!pev_valid(ptr))
@@ -15203,7 +15546,7 @@ public mana4(id){
 	
 	menu_additem(mana4,"\y Случайный item \d[10 маны]")
 	menu_additem(mana4,"\y Улучшить item \d[5 маны]")
-  menu_additem(mana4,"\y Свиток Портала \d[50 маны]")
+  menu_additem(mana4,"\y Свиток Портала \d[25 маны]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
@@ -15243,7 +15586,7 @@ public mana4a(id, menu, item){
 			}
     }
     case 2:{
-			new koszt = 50;
+			new koszt = 25;
 			if (mana_gracza[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
@@ -15251,10 +15594,12 @@ public mana4a(id, menu, item){
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-      player_portal[id] = 1;
-      player_portals[id] = 0;
-      //ColorChat(id,GREEN,"[Портал]^x01 Портал say /protal в консоли.");
+				mana_gracza[id] -= koszt;
+				player_portal[id] = 1;
+				player_portals[id] = 0;
+				client_print(id,print_chat,"Наведите прицел на место размещения портала и нажмите установить.");
+				client_print(id,print_chat,"Чтобы снова открыть меню портала наберите say portal");
+				cmd_place_portal(id);
 			}
 		}
 	}
