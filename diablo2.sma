@@ -165,7 +165,6 @@ new sprite_blood_spray = 0
 new sprite_gibs = 0
 new sprite_white = 0
 new sprite_fire = 0
-new sprite_beam = 0
 new sprite_boom = 0
 new sprite_line = 0
 new sprite_lgt = 0
@@ -365,10 +364,34 @@ new JumpsLeft[33]
 new JumpsMax[33]
 
 new loaded_xp[33]
-new sqlstart = 30 // Tyle prob jest na mape na poprawne polaczenie - bo cos sie zapetla gdy wylancza sie serwer (zmiena mapy?)
 new asked_sql[33]
 new asked_klass[33]
 new olny_one_time=0
+// Lets us know that the DB is ready
+new bool:bDBAvailable = false;
+// Player's Unique ID
+new g_iDBPlayerUniqueID[33];
+new g_iDBPlayerSavedBy[33];
+// Lets us store what level the skill was the last time we saved (so we don't save more than necessary)
+#define MAX_SKILLS		7
+#define MAX_RACES		28
+new g_iDBPlayerSkillStore[33][MAX_SKILLS];
+new g_iDBPlayerXPInfoStore[33][MAX_RACES];
+// SQLX
+new Handle:g_DBTuple;
+new Handle:g_DBConn;
+
+#define TOTAL_TABLES		5
+
+new const szTables[TOTAL_TABLES][] = 
+{
+	"CREATE TABLE IF NOT EXISTS `player` ( `id` int(8) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(33) NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'ON UPDATE CURRENT_TIMESTAMP', PRIMARY KEY (`id`), UNIQUE KEY `id` (`id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
+	"CREATE TABLE IF NOT EXISTS `extra` ( `id` int(8) unsigned NOT NULL, `gold` int(11) NOT NULL DEFAULT '0', `total_lvl` int(8) NOT NULL DEFAULT '0') ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+	"CREATE TABLE IF NOT EXISTS `class` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `xp` int(8) NOT NULL DEFAULT '0') ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+	"CREATE TABLE IF NOT EXISTS `skill` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `str` int(2) unsigned NOT NULL DEFAULT '0', `agi_best` int(2) unsigned NOT NULL DEFAULT '0', `agi_dmg` int(2) unsigned NOT NULL DEFAULT '0', `sta` int(2) unsigned NOT NULL DEFAULT '0', `dur` int(2) unsigned NOT NULL DEFAULT '0', `int` int(2) unsigned NOT NULL DEFAULT '0', `dex_dmg` int(2) unsigned NOT NULL DEFAULT '0') ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+	"CREATE TABLE IF NOT EXISTS `item` ( `id` int(8) unsigned NOT NULL, `item` int(3) unsigned NOT NULL, `expire_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+};
+
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, Andariel, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Izual, Jumper, Enslaved, Kernel, PoisonCreeper, GiantSpider, SnowWanderer, Griswold, TheSmith, Demonolog, VipCztery }
 new Race[28][18] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Andariel", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Izual", "Jumper", "Enslaved", "Kernel", "Poison Creeper", "Giant Spider", "Snow Wanderer","Griswold","The Smith","Demonolog","VipCztery" }
@@ -547,7 +570,7 @@ public plugin_init()
 	get_mapname(map,31)
 	new times[64]
 	get_time("%m/%d/%Y - %H:%M:%S" ,times,63)
-	log_to_file("addons/amxmodx/logs/diablo.log","%s ### MAP: %s ### ",times,map)
+	D2_Log( true, "%s ### MAP: %s ### ",times,map)
 	WC3_MapDisableCheck("weapons.cfg")
 	
 	register_cvar("diablo_sql_host","localhost",FCVAR_PROTECTED)
@@ -674,8 +697,8 @@ public plugin_init()
 	register_clcmd("say exp", "exp")
 	register_clcmd("reset","reset_skill")	 
 	//register_clcmd("/reset","reset_skill")
-	register_clcmd("say /mana","mana1")
-	register_clcmd("say /m","mana1")
+	register_clcmd("say /gold","mana1")
+	register_clcmd("say /g","mana1")
 		
 	register_clcmd("mod","mod_info")
 	
@@ -701,7 +724,7 @@ public plugin_init()
 	set_msg_block ( gmsgDeathMsg, BLOCK_SET ) 
 	set_task(5.0, "Timed_Healing", 0, "", 0, "b")
 	set_task(1.0, "radar_scan", 0, _, _, "b"); // radar
-  set_task(1.0, "fallen_respawn", 2, _, _, "b") //falen shaman
+	set_task(1.0, "fallen_respawn", 2, _, _, "b") //falen shaman
 	set_task(1.0, "Timed_Ghost_Check", 0, "", 0, "b")
 	set_task(0.8, "UpdateHUD",0,"",0,"b")
 	register_think("PlayerCamera","Think_PlayerCamera");
@@ -870,7 +893,8 @@ public menu_questow_handle(id,menu,item){
 		menu_destroy(menu);
 		return PLUGIN_CONTINUE;
 	}
-	if(player_lvl[id] < prze[item][0]){
+	if(player_lvl[id] < prze[item][0])
+	{
 		client_print(id,print_chat,"Ваш уровень меньше требуемого!");
 		menu_questow(id)
 		menu_destroy(menu);
@@ -879,7 +903,8 @@ public menu_questow_handle(id,menu,item){
 	new formats[128]
 	formatex(formats,127,"Квесты от %d до %d уровня",prze[item][0],prze[item][1]);
 	new menu2 = menu_create(formats,"menu_questow_handle2")
-	for(new i = 0;i<sizeof(questy);i++){
+	for(new i = 0;i<sizeof(questy);i++)
+	{
 		if(questy[i][0] == item+1){
 			menu_additem(menu2,questy_info[i]);
 		}
@@ -892,7 +917,8 @@ public menu_questow_handle(id,menu,item){
 	return PLUGIN_CONTINUE;
 }
 
-public zapisz_questa(id,quest){
+public zapisz_questa(id,quest)
+{
 	new name[64];
 	get_user_name(id,name,63)
 	strtolower(name)
@@ -901,7 +927,8 @@ public zapisz_questa(id,quest){
 	nvault_set(vault_questy,key,"1");
 }
 
-public zapisz_aktualny_quest(id){
+public zapisz_aktualny_quest(id)
+{
 	new name[64];
 	get_user_name(id,name,63)
 	strtolower(name)
@@ -912,7 +939,8 @@ public zapisz_aktualny_quest(id){
 	nvault_set(vault_questy2,key,data);
 }
 
-public wczytaj_aktualny_quest(id){
+public wczytaj_aktualny_quest(id)
+{
 	new name[64];
 	get_user_name(id,name,63)
 	strtolower(name)
@@ -927,7 +955,8 @@ public wczytaj_aktualny_quest(id){
 	return str_to_num(questt)-1
 }
 
-public wczytaj_questa(id,quest){
+public wczytaj_questa(id,quest)
+{
 	new name[64];
 	get_user_name(id,name,63)
 	strtolower(name)
@@ -938,7 +967,8 @@ public wczytaj_questa(id,quest){
 	return str_to_num(data);
 }
 
-public menu_questow_handle2(id,menu,item){
+public menu_questow_handle2(id,menu,item)
+{
 	if(item == MENU_EXIT){
 		menu_destroy(menu);
 		return PLUGIN_CONTINUE;
@@ -975,15 +1005,159 @@ public menu_questow_handle2(id,menu,item){
 	return PLUGIN_CONTINUE;
 }
 
+// Verifies that the database connection is ok
+bool:MYSQLX_Connection_Available()
+{
+	if ( !bDBAvailable || !g_DBConn )
+	{
+		return false;
+	}
+
+	return true;
+}
+
+// Function will simply log to a file as well as amxx log
+public D2_Log( bool:bAmxx, const fmt[], ... )
+{
+	static szFormattedText[512];
+	vformat( szFormattedText, 511, fmt, 3 );
+
+	// Write to amxx log file
+	if ( bAmxx )
+	{
+		log_amx( szFormattedText );
+	}
+
+	new szLogFile[128];
+	get_configsdir( szLogFile, 127 );
+	formatex( szLogFile, 127, "%s/diablo/d2_error.log", szLogFile );
+
+	// Write to the war3ft log file as well
+	log_to_file( szLogFile, szFormattedText );
+}
+
+public MYSQLX_Close()
+{
+	if ( g_DBTuple )
+	{
+		SQL_FreeHandle( g_DBTuple );
+	}
+
+	if ( g_DBConn )
+	{
+		SQL_FreeHandle( g_DBConn );
+	}
+
+	bDBAvailable = false;
+}
+
+// The id should be a unique number, so we know what function called it (useful for debugging)
+public MYSQLX_Error( Handle:query, szQuery[], id )
+{
+	new szError[256];
+	new iErrNum = SQL_QueryError( query, szError, 255 );
+
+	D2_Log( true, "[MYSQLX] Error in querying database, location: %d", id );
+	D2_Log( true, "[MYSQLX] Message: %s (%d)", szError, iErrNum );
+	D2_Log( true, "[MYSQLX] Query statement: %s ", szQuery );
+
+	// Free the handle
+	SQL_FreeHandle( query );
+
+	// MySQL server has gone away (2006)
+	if ( iErrNum == 2006 )
+	{
+		D2_Log( true, "[MYSQLX] Attempting to re-establish connection to MySQL server" );
+		// Close the connection
+		MYSQLX_Close();
+
+		// Re-open the connection
+		sql_start();
+	}
+}
+
+public MYSQLX_ThreadError( Handle:query, szQuery[], szError[], iErrNum, failstate, id )
+{
+	D2_Log( true, "[MYSQLX] Threaded query error, location: %d", id );
+	D2_Log( true, "[MYSQLX] Message: %s (%d)", szError, iErrNum );
+	D2_Log( true, "[MYSQLX] Query statement: %s ", szQuery );
+
+	// Connection failed
+	if ( failstate == TQUERY_CONNECT_FAILED )
+	{	
+		D2_Log( true, "[MYSQLX] Fail state: Connection Failed" );
+	}
+
+	// Query failed
+	else if ( failstate == TQUERY_QUERY_FAILED )
+	{
+		D2_Log( true, "[MYSQLX] Fail state: Query Failed" );
+	}
+
+	// Free the handle
+	SQL_FreeHandle( query );
+}
+
+public MYSQLX_UpdateTimestamp( id )
+{
+	// Make sure our connection is working
+	if ( !MYSQLX_Connection_Available() )
+	{
+		return;
+	}
+
+	new szQuery[256];
+	format( szQuery, 255, "UPDATE `player` SET time = NOW() WHERE ( `id` = '%d' );", DB_GetUniqueID( id ) );
+
+	SQL_ThreadQuery( g_DBTuple, "_MYSQLX_UpdateTimestamp", szQuery );	
+}
+
+public _MYSQLX_UpdateTimestamp( failstate, Handle:query, error[], errnum, data[], size )
+{
+	// Error during the query
+	if ( failstate )
+	{
+		new szQuery[256];
+		SQL_GetQueryString( query, szQuery, 255 );
+		
+		MYSQLX_ThreadError( query, szQuery, error, errnum, failstate, 4 );
+	}
+
+	// Query successful, we can do stuff!
+	else
+	{
+		// Free the handle
+		SQL_FreeHandle( query );
+	}
+
+	return;
+}
+
+// Create all of our tables!
+public MYSQLX_CreateTables()
+{
+	new Handle:query;
+
+	// Create the default tables if we need to
+	for ( new i = 0; i < TOTAL_TABLES; i++ )
+	{
+		query = SQL_PrepareQuery( g_DBConn, szTables[i] );
+
+		if ( !SQL_Execute( query ) )
+		{
+			MYSQLX_Error( query, szTables[i], 1 );
+
+			return;
+		}
+
+		SQL_FreeHandle( query );
+	}
+}
+
 public sql_start()
 {
-	if(sqlstart<0) return
-	if(g_boolsqlOK) return
 	
-	new host[128]
-	new user[64]
-	new pass[64]
-	new database[64]
+	new host[128], user[64], pass[64], database[64], szError[256], iErrNum;
 	
 	get_cvar_string("diablo_sql_database",database,63)
 	get_cvar_string("diablo_sql_host",host,127)
@@ -992,45 +1166,201 @@ public sql_start()
 	
 	g_SqlTuple = SQL_MakeDbTuple(host,user,pass,database)
 	
+	// Attempt to connect
+	g_DBConn = SQL_Connect( g_DBTuple, iErrNum, szError, 255 );
 	
-		
-	get_cvar_string("diablo_sql_table",g_sqlTable,63)
+	if ( !g_DBConn )
+	{
+		D2_Log( true, "Database Connection Failed: [%d] %s", iErrNum, szError )
+
+		return;
+	}
+
+	server_print( "[Diablo] MySQL X database connection successful" );
 	
-	new q_command[512]
-	format(q_command,511,"CREATE TABLE IF NOT EXISTS `%s` ( `nick` VARCHAR( 64 ),`ip` VARCHAR( 64 ),`sid` VARCHAR( 64 ), `class` integer( 2 ) , `lvl` integer( 3 ) DEFAULT 1, `exp` integer( 9 ) DEFAULT 0,  `str` integer( 3 ) DEFAULT 0, `int` integer( 3 ) DEFAULT 0, `dex` integer( 3 ) DEFAULT 0, `agi` integer( 3 ) DEFAULT 0, `man` integer( 3 ) DEFAULT 0 ) ",g_sqlTable)
+	bDBAvailable = true;
 	
-	SQL_ThreadQuery(g_SqlTuple,"TableHandle",q_command)
+	// Create tables!
+	MYSQLX_CreateTables();
+	
 }
 
-//sql//
-
-public TableHandle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
+public DB_GetUniqueID( id )
 {
-	// lots of error checking
-	g_boolsqlOK=1
-	if(Errcode)
+	// Then we need to determine this player's ID!
+	if ( g_iDBPlayerUniqueID[id] <= 0 )
 	{
-		g_boolsqlOK=0
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on Table query: %s",Error)
+		DB_FetchUniqueID( id );
 	}
-	if(FailState == TQUERY_CONNECT_FAILED)
-	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
-		g_boolsqlOK=0
-		return PLUGIN_CONTINUE
-	}
-	else if(FailState == TQUERY_QUERY_FAILED)
-	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Table Query failed.")
-		g_boolsqlOK=0
-		return PLUGIN_CONTINUE
-	}
-	 	
-	LoadAVG()
-	   
-	return PLUGIN_CONTINUE
+
+	return g_iDBPlayerUniqueID[id];
 }
 
+public bool:DB_Connection_Available()
+{
+
+	MYSQLX_Connection_Available();
+
+	return false;
+}
+
+public DB_FetchUniqueID( id )
+{
+	MYSQLX_FetchUniqueID( id );
+	
+	// Nothing was found - try again in a bit
+	if ( g_iDBPlayerUniqueID[id] == 0 )
+	{
+		// No connection available!
+		if ( !DB_Connection_Available() )
+		{
+			return;
+		}
+
+		set_task( 1.0, "DB_FetchUniqueID", id );
+	}
+
+	return;
+}
+
+public MYSQLX_FetchUniqueID( id )
+{
+	// Make sure our connection is working
+	if ( !MYSQLX_Connection_Available() )
+	{
+		return;
+	}
+
+	// Remember how we got this ID
+	g_iDBPlayerSavedBy[id] = 2;
+
+	new szQuery[512], szName[70];
+	get_user_name( id, szName, 69 );
+	format( szQuery, 511, "SELECT `id` FROM `player` WHERE `name` = '%s';", szName);
+	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		MYSQLX_Error( query, szQuery, 2 );
+
+		return;
+	}
+
+	// If no rows we need to insert!
+	if ( SQL_NumResults( query ) == 0 )
+	{
+		// Free the last handle!
+		SQL_FreeHandle( query );
+
+		// Insert this player!
+		new szQuery[512];
+		format( szQuery, 511, "INSERT INTO `player` ( `id` , `%s` , `time` ) VALUES ( NULL , '%s', NOW() );", szKeyName, szKey );
+		new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+		if ( !SQL_Execute( query ) )
+		{
+			MYSQLX_Error( query, szQuery, 3 );
+
+			return;
+		}
+
+		g_iDBPlayerUniqueID[id] = SQL_GetInsertId( query );
+
+		// Since we have the ID - lets insert extra data here...
+		//  Basically insert whatever data we don't have yet on this player in the extra table 
+		//  (this will only be used for the webpage)
+		new szName[70], szSteamID[30], szIP[20];
+		get_user_name( id, szName, 69 );
+		DB_FormatString( szName, 69 );
+		get_user_ip( id, szIP, 19, 1 );
+		get_user_authid( id, szSteamID, 29 );
+
+		format( szQuery, 511, "INSERT INTO `wc3_player_extra` ( `player_id` , `player_steamid` , `player_ip` , `player_name` ) VALUES ( '%d', '%s', '%s', '%s' );", g_iDBPlayerUniqueID[id], szSteamID, szIP, szName );
+		query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+		if ( !SQL_Execute( query ) )
+		{
+			MYSQLX_Error( query, szQuery, 20 );
+
+			return;
+		}
+	}
+
+	// They have been here before - store their ID
+	else
+	{
+		g_iDBPlayerUniqueID[id] = SQL_ReadResult( query, 0 );
+	}
+
+	// Free the last handle!
+	SQL_FreeHandle( query );
+}
+
+public MYSQLX_GetAllXP( id )
+{
+	// Make sure our connection is working
+	if ( !MYSQLX_Connection_Available() )
+	{
+		return;
+	}
+	
+	new iUniqueID = DB_GetUniqueID( id );
+
+	// Then we have a problem and cannot retreive the user's XP
+	if ( iUniqueID <= 0 )
+	{
+		client_print( id, print_chat, "%s Unable to retreive your XP from the database, please attempt to changerace later", g_MODclient );
+
+		WC3_Log( true, "[ERROR] Unable to retreive user's Unique ID" );
+
+		return;
+	}
+
+	new szQuery[256];
+	format(szQuery, 255, "SELECT `race_id`, `race_xp` FROM `wc3_player_race` WHERE ( `player_id` = '%d' );", iUniqueID );
+	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		client_print( id, print_chat, "%s Error, unable to retrieve XP, please contact a server administrator", g_MODclient );
+
+		MYSQLX_Error( query, szQuery, 6 );
+
+		return;
+	}
+
+	// Set last saved XP to 0
+	for ( new i = 0; i < MAX_RACES; i++ )
+	{
+		g_iDBPlayerXPInfoStore[id][i] = 0;
+	}
+
+	// Get the XP!
+	new iXP, iRace;
+
+	// Loop through all of the records to find the XP data
+	while ( SQL_MoreResults( query ) )
+	{
+		iRace	= SQL_ReadResult( query, 0 );
+		iXP		= SQL_ReadResult( query, 1 );
+		
+		// Save the user's XP in an array
+		if ( iRace > 0 && iRace < MAX_RACES + 1 )
+		{
+			g_iDBPlayerXPInfoStore[id][iRace-1] = iXP;
+		}
+
+		SQL_NextRow( query );
+	}
+
+	// Free the handle
+	SQL_FreeHandle( query );
+
+	// Call the function that will display the "select a race" menu
+	WC3_ChangeRaceShowMenu( id, g_iDBPlayerXPInfoStore[id] );
+
+	return;
+}
 
 public create_klass(id)
 {
@@ -1048,8 +1378,6 @@ public create_klass(id)
 			
 			get_user_ip ( id, ip, 63, 1 )
 			get_user_authid(id, sid ,63)
-			
-			log_to_file("addons/amxmodx/logs/test_log.log","*** %s %s *** Create Class ***",name,sid)
 			
 			for(new i=1;i<28;i++)
 			{
@@ -1080,8 +1408,6 @@ public create_klass2(id)
 			get_user_ip ( id, ip, 63, 1 )
 			get_user_authid(id, sid ,63)
 			
-			log_to_file("addons/amxmodx/logs/test_log.log","*** %s %s *** Create Class2 ***",name,sid)
-			
 			for(new i=9;i<28;i++)
 			{
 				new q_command[512]
@@ -1099,17 +1425,17 @@ public create_klass_Handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 	// lots of error checking
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on create class query: %s",Error)
+		D2_Log( true, "Error on create class query: %s",Error)
 		
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","create class Query failed.")
+		D2_Log( true, "create class Query failed.")
 		return PLUGIN_CONTINUE
 	}
 	   
@@ -1123,17 +1449,17 @@ public create_klass_Handle2(FailState,Handle:Query,Error[],Errcode,Data[],DataSi
 	// lots of error checking
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on create class query: %s",Error)
+		D2_Log( true, "Error on create class query: %s",Error)
 		
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","create class Query failed.")
+		D2_Log( true, "create class Query failed.")
 		return PLUGIN_CONTINUE
 	}
 	   
@@ -1188,16 +1514,16 @@ public SelectHandle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 {
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on load_xp query: %s",Error)
+		D2_Log( true, "Error on load_xp query: %s",Error)
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","load_xp Query failed.")
+		D2_Log( true, "load_xp Query failed.")
 		return PLUGIN_CONTINUE
 	}
 	   
@@ -1212,16 +1538,16 @@ public SelectHandle2(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 {
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on load_xp query: %s",Error)
+		D2_Log( true, "Error on load_xp query: %s",Error)
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","load_xp Query failed.")
+		D2_Log( true, "load_xp Query failed.")
 		return PLUGIN_CONTINUE
 	}
 	   
@@ -1302,7 +1628,7 @@ public plugin_precache()
 	sprite_white = precache_model("sprites/white.spr") 
 	sprite_fire = precache_model("sprites/explode1.spr") 
 	sprite_gibs = precache_model("models/hgibs.mdl")
-	sprite_beam = precache_model("sprites/zbeam4.spr") 
+	precache_model("sprites/zbeam4.spr") 
 	sprite = precache_model("sprites/lgtning.spr");
 	precache_model("sprites/xfireball3.spr")
 	precache_model("models/portal/portal.mdl")
@@ -1469,16 +1795,16 @@ public Save_xp_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 {
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on Save_xp query: %s",Error)
+		D2_Log( true, "Error on Save_xp query: %s",Error)
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Save_xp Query failed.")
+		D2_Log( true, "Save_xp Query failed.")
 		return PLUGIN_CONTINUE
 	}
 	   
@@ -1542,16 +1868,16 @@ public Load_xp_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 	
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on Load_xp query: %s",Error)
+		D2_Log( true, "Error on Load_xp query: %s",Error)
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Load_xp Query failed.")
+		D2_Log( true, "Load_xp Query failed.")
 		return PLUGIN_CONTINUE
 	}
 	   
@@ -1605,16 +1931,16 @@ public Load_premium_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 	
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on Load_xp query: %s",Error)
+		D2_Log( true, "Error on Load_xp query: %s",Error)
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Load_xp Query failed.")
+		D2_Log( true, "Load_xp Query failed.")
 		return PLUGIN_CONTINUE
 	}
 	   
@@ -1654,16 +1980,16 @@ public Load_AVG_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 {
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on Load_AVG query: %s",Error)
+		D2_Log( true, "Error on Load_AVG query: %s",Error)
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Load_AVG Query failed.")
+		D2_Log( true, "Load_AVG Query failed.")
 		return PLUGIN_CONTINUE
 	}
 	/*   
@@ -1752,22 +2078,26 @@ public RoundStart(){
 				engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_ct.spr")
 				engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_ct.spr")
 			}
-		}
+		}		
 		
-		
-		
-		
-		if(player_class[i] == Baal) {
+		if(player_class[i] == Baal) 
+		{
 			zmiana_skinu[i] = random(5)
-			if(zmiana_skinu[i] == 1) {
+			if(zmiana_skinu[i] == 1) 
+			{
 				changeskin(i,0)
 				ColorChat(i, TEAM_COLOR, "[Хамелеон] Вы выглядите как враг!")
-						}
-							else
-								changeskin(i,1)
-								}
-								else
-								zmiana_skinu[i] = 0
+			}
+			else
+			{
+				changeskin(i,1)
+			}
+		}
+		else
+		{
+			zmiana_skinu[i] = 0
+		}
+		
 		used_item[i] = false
 		naswietlony[i] = 0;
 		losowe_itemy[i] = 0
@@ -1779,182 +2109,189 @@ public RoundStart(){
 		kill_all_entity("przedmiot")
 		
 		player_fallen_tr[i]=1;
-    if(player_class[i] == Necromancer) g_haskit[i]=1
-		else g_haskit[i]=0
+		
+		if(player_class[i] == Necromancer)
+		{
+			g_haskit[i]=1
+		}
+		else 
+		{	
+			g_haskit[i]=0
+		}
 		if(player_class[i] == Amazon)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_deagle")       
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
+			{
+				fm_give_item(i,"weapon_deagle")       
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == Jumper)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_deagle")       
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"weapon_ak47")
-			 fm_give_item(i,"ammo_762nato")
-			 fm_give_item(i,"ammo_762nato")
-			 fm_give_item(i,"ammo_762nato")
-			 fm_give_item(i,"ammo_762nato")
+			{
+				fm_give_item(i,"weapon_deagle")       
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"weapon_ak47")
+				fm_give_item(i,"ammo_762nato")
+				fm_give_item(i,"ammo_762nato")
+				fm_give_item(i,"ammo_762nato")
+				fm_give_item(i,"ammo_762nato")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == Enslaved)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_m4a1")
-			 fm_give_item(i,"ammo_556nato")
-			 fm_give_item(i,"ammo_556nato")
-			 fm_give_item(i,"ammo_556nato")
-			 fm_give_item(i,"ammo_556nato")
+			{
+				fm_give_item(i,"weapon_m4a1")
+				fm_give_item(i,"ammo_556nato")
+				fm_give_item(i,"ammo_556nato")
+				fm_give_item(i,"ammo_556nato")
+				fm_give_item(i,"ammo_556nato")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == SnowWanderer)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_famas")
-			 fm_give_item(i,"ammo_556nato")
-			 fm_give_item(i,"ammo_556nato")
-			 fm_give_item(i,"ammo_556nato")
-			 fm_give_item(i,"ammo_556nato")
+			{
+				fm_give_item(i,"weapon_famas")
+				fm_give_item(i,"ammo_556nato")
+				fm_give_item(i,"ammo_556nato")
+				fm_give_item(i,"ammo_556nato")
+				fm_give_item(i,"ammo_556nato")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == PoisonCreeper)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_awp")
-			 fm_give_item(i,"ammo_338magnum")
-			 fm_give_item(i,"ammo_338magnum")
-			 fm_give_item(i,"ammo_338magnum")
-			 fm_give_item(i,"ammo_338magnum")
+			{
+				fm_give_item(i,"weapon_awp")
+				fm_give_item(i,"ammo_338magnum")
+				fm_give_item(i,"ammo_338magnum")
+				fm_give_item(i,"ammo_338magnum")
+				fm_give_item(i,"ammo_338magnum")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == Kernel)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_p90")
-			 fm_give_item(i,"ammo_57mm")
-			 fm_give_item(i,"ammo_57mm")
-			 fm_give_item(i,"ammo_57mm")
+			{
+				fm_give_item(i,"weapon_p90")
+				fm_give_item(i,"ammo_57mm")
+				fm_give_item(i,"ammo_57mm")
+				fm_give_item(i,"ammo_57mm")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == Imp)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_hegrenade")
-			 fm_give_item(i,"weapon_flashbang")
-			 fm_give_item(i,"weapon_flasgbang")
-			 fm_give_item(i,"weapon_smokegrenade")
+			{
+				fm_give_item(i,"weapon_hegrenade")
+				fm_give_item(i,"weapon_flashbang")
+				fm_give_item(i,"weapon_flasgbang")
+				fm_give_item(i,"weapon_smokegrenade")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == Baal)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_m3")
-			 fm_give_item(i,"ammo_buckshot")
-			 fm_give_item(i,"ammo_buckshot")
-			 fm_give_item(i,"ammo_buckshot")
-			 fm_give_item(i,"ammo_buckshot")
-			 fm_give_item(i,"ammo_buckshot")
+			{
+				fm_give_item(i,"weapon_m3")
+				fm_give_item(i,"ammo_buckshot")
+				fm_give_item(i,"ammo_buckshot")
+				fm_give_item(i,"ammo_buckshot")
+				fm_give_item(i,"ammo_buckshot")
+				fm_give_item(i,"ammo_buckshot")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == Diablo)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_elite")
-			 fm_give_item(i,"ammo_9mm")
-			 fm_give_item(i,"ammo_9mm")
-			 fm_give_item(i,"ammo_9mm")
-			 fm_give_item(i,"ammo_9mm")
-			 fm_give_item(i,"ammo_9mm")
-			 fm_give_item(i,"ammo_9mm")
+			{
+				fm_give_item(i,"weapon_elite")
+				fm_give_item(i,"ammo_9mm")
+				fm_give_item(i,"ammo_9mm")
+				fm_give_item(i,"ammo_9mm")
+				fm_give_item(i,"ammo_9mm")
+				fm_give_item(i,"ammo_9mm")
+				fm_give_item(i,"ammo_9mm")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		if(player_class[i] == Hephasto)
 		{
 			if(!g_bWeaponsDisabled)
-      {
-       fm_give_item(i,"weapon_hegrenade")
-			 fm_give_item(i,"weapon_deagle")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
-			 fm_give_item(i,"ammo_50ae")
+			{
+				fm_give_item(i,"weapon_hegrenade")
+				fm_give_item(i,"weapon_deagle")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
+				fm_give_item(i,"ammo_50ae")
 			}
 			else
 			{
-       hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
-    remove_task(i+2000)
-    if(player_class[i] == Fallen && player_lvl[i] > 49)
-    {
-       new float:summa = player_lvl[i]/10.0;
-       fallen_fires[i] = floatround(summa, floatround_floor);
-       set_task(random_float(25.0, 35.0), "fallen_play_idle", i+2000, _, _, "b")
-	  }
-    if(player_class[i] == Fallen && player_lvl[i] < 49)
-    {
-       set_task(random_float(10.0, 15.0), "fallen_play_idle", i+2000, _, _, "b")
-	  }
+		//Fallen Code
+		remove_task(i+2000)
+		if(player_class[i] == Fallen && player_lvl[i] > 49)
+		{
+			fallen_fires[i] = floatround(player_lvl[i]/10.0, floatround_floor);
+			set_task(random_float(25.0, 35.0), "fallen_play_idle", i+2000, _, _, "b")
+		}
+		if(player_class[i] == Fallen && player_lvl[i] < 49)
+		{
+			set_task(random_float(10.0, 15.0), "fallen_play_idle", i+2000, _, _, "b")
+		}
 		
 		golden_bulet[i]=0
 		c_ulecz[i] = false
@@ -1963,18 +2300,18 @@ public RoundStart(){
 		else if(player_class[i] == Demonolog) ilosc_rakiet_gracza[i]=3
 		if(player_class[i] == Kernel)
 		{
-		ilosc_blyskawic[i]=3;
-		poprzednia_blyskawica[i]=0
+			ilosc_blyskawic[i]=3;
+			poprzednia_blyskawica[i]=0
 		}	
 		else if(player_class[i] == SnowWanderer)
 		{
-		ilosc_blyskawic[i]=3;
-		poprzednia_blyskawica[i]=0
+			ilosc_blyskawic[i]=3;
+			poprzednia_blyskawica[i]=0
 		}
 		else if(player_class[i] == TheSmith)
 		{
-		ilosc_blyskawic[i]=3;
-		poprzednia_blyskawica[i]=0
+			ilosc_blyskawic[i]=3;
+			poprzednia_blyskawica[i]=0
 		}
 		//else ilosc_rakiet_gracza[i]=0
 		/*if(player_class[i] == Kernel) ilosc_dynamitow_gracza[i]=1
@@ -2223,23 +2560,30 @@ public DeathMsg(id)
 	static Float:minsize[3]
 	pev(vid, pev_mins, minsize)
 	if(minsize[2] == -18.0)
+	{
 		g_wasducking[vid] = true
+	}
 	else
+	{
 		g_wasducking[vid] = false
+	}
 	
 	set_task(0.5, "task_check_dead_flag", vid)
 
 	flashbattery[vid] = MAX_FLASH;
 	flashlight[vid] = 0;
 	
-	if(player_sword[id] == 1){
-		if(on_knife[id]){
-			if(get_user_team(kid) != get_user_team(vid)) {
+	if(player_sword[id] == 1)
+	{
+		if(on_knife[id])
+		{
+			if(get_user_team(kid) != get_user_team(vid)) 
+			{
 				set_user_frags(kid, get_user_frags(kid) + 1)
-        if(headshot)
-        {
-        mana_gracza[kid]+=1
-        }
+				if(headshot)
+				{
+					mana_gracza[kid]+=1
+				}
 				award_kill(kid,vid)
 			}
 		}
@@ -2249,10 +2593,11 @@ public DeathMsg(id)
 		show_deadmessage(kid,vid,headshot,weaponname)
 		create_itm(vid,0,"Случайный Item")
 		award_kill(kid,vid)
-    if(headshot)
-    {
-        mana_gracza[kid]+=1
-    }
+		if(headshot)
+		{
+			mana_gracza[kid]+=1
+		}
+	
 		add_respawn_bonus(vid)
 		add_bonus_explode(vid)
 		add_barbarian_bonus(kid)
@@ -2268,12 +2613,15 @@ public DeathMsg(id)
 		refill_ammo(kid)
 		set_renderchange(kid)
 		savexpcom(vid)
-		if(quest_gracza[kid] != -1){
-			if(player_class[vid] == questy[quest_gracza[kid]][2]){
+		if(quest_gracza[kid] != -1)
+		{
+			if(player_class[vid] == questy[quest_gracza[kid]][2])
+			{
 				ile_juz[kid]++;
 				zapisz_aktualny_quest(kid)
 			}
-			if(ile_juz[kid] == questy[quest_gracza[kid]][1]){
+			if(ile_juz[kid] == questy[quest_gracza[kid]][1])
+			{
 				client_print(kid,print_chat,"Выполнил задание %s полученно %i exp!",questy_info[quest_gracza[kid]],questy[quest_gracza[kid]][3])
 				emit_sound(kid,CHAN_STATIC,"diablo_lp/questdone.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 				zapisz_questa(kid,quest_gracza[kid])
@@ -2314,7 +2662,7 @@ public Damage(id)
 				add_grenade_bonus(id,attacker_id,weapon)
 				add_theif_bonus(id,attacker_id)
 				add_bonus_blind(id,attacker_id,weapon,damage)
-        if(weapon != CSW_KNIFE) { add_bonus_redirect(id); }
+				if(weapon != CSW_KNIFE) { add_bonus_redirect(id); }
 				add_bonus_necromancer(attacker_id,id)
 				add_bonus_scoutdamage(attacker_id,id,weapon)
 				add_bonus_cawpmasterdamage(attacker_id,id,weapon)
@@ -2329,31 +2677,32 @@ public Damage(id)
 				add_bonus_shaked(attacker_id,id)
 				item_take_damage(id,damage)
 				if(player_class[id] == Fallen)
-		    {
-		      rndfsound = random(4);
-          if(player_lvl[id] < 50)
-          {
-          switch(rndfsound)
-          {
-               case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-               case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-               case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-               case 3: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-               case 4: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-          }
-          }
-          else
-          {
-          switch(rndfsound)
-          {
-               case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-               case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-               case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-               case 3: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-               case 4: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-          }
-          }
-		    }
+				{
+					rndfsound = random(4);
+					if(player_lvl[id] < 50)
+					{
+						switch(rndfsound)
+						{
+							case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+							case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+							case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+							case 3: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+							case 4: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_hit7.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+						}
+					}
+					else
+					{
+						switch(rndfsound)
+						{
+							case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+							case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+							case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+							case 3: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+							case 4: emit_sound(id,CHAN_STATIC, "diablo_lp/fallens_gethit3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+						}
+					
+					}
+				}
 				
 				if(player_sword[attacker_id] == 1 && weapon==CSW_KNIFE ){
 
@@ -3067,8 +3416,9 @@ public client_disconnect(id)
 public write_hud(id)
 {
 	if (player_lvl[id] == 0)
+	{
 		player_lvl[id] = 1
-			
+	}			
 	new tpstring[1024] 
 	
 	new Float:xp_now
@@ -3098,27 +3448,28 @@ public write_hud(id)
 	
 	last_update_xp[id] = player_xp[id]
 	last_update_perc[id] = perc
-  new Racename[18]
-  copy(Racename, charsmax(Racename), Race[player_class[id]]);
-  if(player_class[id]==Fallen && player_lvl[id]>49)
-  {
-  Racename = "ArrayGetCell"
-  }
+	new Racename[18]
+	copy(Racename, charsmax(Racename), Race[player_class[id]]);
+	if(player_class[id]==Fallen && player_lvl[id]>49)
+	{
+		Racename = "ArrayGetCell"
+	}
 	
 	if(player_class[id]!=Paladin)
-{
-    set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], perc,"%", player_item_name[id],item_durability[id],mana_gracza[id])
-}
+	{
+		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], perc,"%", player_item_name[id],item_durability[id],mana_gracza[id])
+	}
 	else
-{
-    set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-    show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%0.0f%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], perc,"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
-}
-        message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
-        write_byte(0) 
-        write_string(tpstring) 
-        message_end() 
+	{
+		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%0.0f%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], perc,"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
+	}
+	
+	message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
+	write_byte(0)
+	write_string(tpstring)
+	message_end() 
 }
 
 /* ==================================================================================================== */
@@ -3140,7 +3491,9 @@ public UpdateHUD()
 			new index,bodypart 
 			get_user_aiming(id,index,bodypart)
 			if (!gUpdate[id])
-		gUpdate[id] = true
+			{
+				gUpdate[id] = true
+			}
 			
 			if(index >= 0 && index < MAX && is_user_connected(index) && is_user_alive(index)) 
 			{
@@ -3149,13 +3502,13 @@ public UpdateHUD()
 				
 				new Msg[512]
 				set_hudmessage(255, 255, 255, 0.78, 0.65, 0, 6.0, 3.0)
-        new Racename[18]
-        copy(Racename, charsmax(Racename), Race[player_class[index]]);
-        if(player_class[index]==Fallen && player_lvl[index]>49)
-        {
-        Racename = "Fallen Shaman"
-        }
-				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i^nМана: %i",pname,player_lvl[index],Racename,player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index], mana_gracza[index])		
+				new Racename[18]
+				copy(Racename, charsmax(Racename), Race[player_class[index]]);
+				if(player_class[index]==Fallen && player_lvl[index]>49)
+				{
+					Racename = "Fallen Shaman"
+				}
+				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i^nЗолото: %i",pname,player_lvl[index],Racename,player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index], mana_gracza[index])		
 				show_hudmessage(id, Msg)
 				
 			}
@@ -3247,41 +3600,45 @@ public dropitem(id)
 public pfn_touch ( ptr, ptd )
 {	
  
-  if(!ptd)
-       return PLUGIN_CONTINUE;
+	if(!ptd)
+	{
+		return PLUGIN_CONTINUE;
+	}
 	
 	new szClassName[32], szClassNameOther[32];
-		entity_get_string(ptd, EV_SZ_classname, szClassName, 31)
-	if(ptr && pev_valid(ptr)) {
-                if(pev(ptr, pev_solid) == SOLID_TRIGGER)
-                        return PLUGIN_CONTINUE;
-                      entity_get_string(ptr, EV_SZ_classname, szClassNameOther, 31);
-                
-        }
-  if(equal(szClassName, "fireball"))
+	entity_get_string(ptd, EV_SZ_classname, szClassName, 31)
+	if(ptr && pev_valid(ptr)) 
+	{
+		if(pev(ptr, pev_solid) == SOLID_TRIGGER)
 		{
-			new owner = pev(ptd,pev_owner)
-			//Touch
-			if (get_user_team(owner) != get_user_team(ptr))
-			{
-				new Float:origin[3]
-				pev(ptd,pev_origin,origin)
-				Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250,1)
-				remove_entity(ptd)
-			}
-		}
-  if(equal(szClassName, "fallenball"))
+			return PLUGIN_CONTINUE;
+		}		
+		entity_get_string(ptr, EV_SZ_classname, szClassNameOther, 31);                
+    }
+	if(equal(szClassName, "fireball"))
+	{
+		new owner = pev(ptd,pev_owner)
+		//Touch
+		if (get_user_team(owner) != get_user_team(ptr))
 		{
-			new owner = pev(ptd,pev_owner)
-			//Touch
-			if (get_user_team(owner) != get_user_team(ptr))
-			{
-				new Float:origin[3]
-				pev(ptd,pev_origin,origin)
-				Explode_Origin(owner,origin,player_intelligence[owner],125,1)
-				remove_entity(ptd)
-			}
+			new Float:origin[3]
+			pev(ptd,pev_origin,origin)
+			Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250,1)
+			remove_entity(ptd)
 		}
+	}
+	if(equal(szClassName, "fallenball"))
+	{
+		new owner = pev(ptd,pev_owner)
+		//Touch
+		if (get_user_team(owner) != get_user_team(ptr))
+		{
+			new Float:origin[3]
+			pev(ptd,pev_origin,origin)
+			Explode_Origin(owner,origin,player_intelligence[owner],125,1)
+			remove_entity(ptd)
+		}
+	}
 	
 	if (ptr != 0 && pev_valid(ptr))
 	{
@@ -3353,25 +3710,25 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 	write_coord(floatround(origin[0]))
 	write_coord(floatround(origin[1]))
 	write_coord(floatround(origin[2]))
-	if(index = 1)
+	if(index == 1)
 	{
-	write_short(sprite_boom)
+		write_short(sprite_boom)
 	}
-	else if(index = 2)
+	else if(index == 2)
 	{
-  write_short(sprite_boom)
-  }
+		write_short(sprite_boom)
+	}
 	write_byte(50)
 	write_byte(15)
 	write_byte(TE_EXPLFLAG_NOSOUND)
 	message_end()
-	if(index = 1)
+	if(index == 1)
 	{
-	engfunc(EngFunc_EmitAmbientSound, 0, origin, "diablo_lp/fireball3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+		engfunc(EngFunc_EmitAmbientSound, 0, origin, "diablo_lp/fireball3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 	}
-	else if(index = 2)
+	else if(index == 2)
 	{
-	engfunc(EngFunc_EmitAmbientSound, 0, origin, "weapons/explode3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+		engfunc(EngFunc_EmitAmbientSound, 0, origin, "weapons/explode3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 	}
 	
 	
@@ -3388,14 +3745,15 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 		if (get_user_team(id) != get_user_team(a) && get_distance_f(aOrigin,origin) < dist+0.0)
 		{
 			new dam
-      if(player_class[id] != Fallen)
-      {
-        dam = damage-player_dextery[a]
-      }
-      else
-      {
-        dam = damage-floatround(player_dextery[a]/4)
-      }
+			if(player_class[id] != Fallen)
+			{
+				dam = damage-player_dextery[a]
+			}
+			else
+			{
+				new Float:dexterity = float(player_dextery[a])/4
+				dam = damage - floatround(dexterity)
+			}
 			new total = get_user_health(a)-dam
 			if (total < 5)
 			{
@@ -3403,11 +3761,10 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 			}
 			else
 			{
-			set_user_health(a,total)
-			Effect_Bleed(a,248)		
+				set_user_health(a,total)
+				Effect_Bleed(a,248)		
 			}	
-		}
-		
+		}		
 	}
 }
 
@@ -3472,7 +3829,8 @@ public Timed_Ghost_Check(id)
 	}
 }
 
-public reset_item_skills(id){
+public reset_item_skills(id)
+{
 	item_boosted[id] = 0
 	item_durability[id] = 0
 	jumps[id] = 0
@@ -3537,7 +3895,9 @@ public reset_item_skills(id){
 public changeskin_id_1(id)
 {
     if(zmiana_skinu[id] != 1)
-        changeskin(id,1)
+	{
+		changeskin(id,1)
+	}
 }
 /* =================================================================================================== */
 
@@ -3550,22 +3910,34 @@ public changeskin_id_1(id)
 public auto_help(id)
 {
 	if(player_lvl[id]<8)
-  {
-    new rnd = random_num(1,6)
+	{
+		new rnd = random_num(1,6)
 		set_hudmessage(0, 180, 0, -1.0, 0.70, 0, 10.0, 10.0, 0.1, 0.5, 11) 	
-	if (rnd == 1)
-		show_hudmessage(id, "Зеленные бутылочки,рядом с трупами - это предметы,их можно подобрать нажав кнопку присесть")
-	if (rnd == 2)
-		show_hudmessage(id, "Чтобы сменить класс/герой набери в чате class,или say class в консоли")
-	if (rnd == 3)
-		show_hudmessage(id, "Вы можете получить более подоробную информацию набери в консоли say /help")
-	if (rnd == 4)
-		show_hudmessage(id, "Главное меню мода say /menu")
-	if (rnd == 5)
-		show_hudmessage(id, "За ману можно купить предметы,телепорты,улучшить/починить предметы,оружие")
-  if (rnd == 6)
-		show_hudmessage(id, "Ману вы получаете за хедшоты,купить ману оптом можно на сайте")
-  }
+		if (rnd == 1)
+		{
+			show_hudmessage(id, "Зеленные бутылочки,рядом с трупами - это предметы,их можно подобрать нажав кнопку присесть")
+		}
+		if (rnd == 2)
+		{
+			show_hudmessage(id, "Чтобы сменить класс/герой набери в чате class,или say class в консоли")
+		}
+		if (rnd == 3)
+		{
+			show_hudmessage(id, "Вы можете получить более подоробную информацию набери в консоли say /help")
+		}
+		if (rnd == 4)
+		{
+			show_hudmessage(id, "Главное меню мода say /menu")
+		}
+		if (rnd == 5)
+		{
+			show_hudmessage(id, "За золото можно купить предметы,телепорты,улучшить/починить предметы,оружие")
+		}
+		if (rnd == 6)
+		{
+			show_hudmessage(id, "Золото вы получаете за хедшоты,её можно собрать на ежедневных ивентах")
+		}
+	}
 }
 
 /* ==================================================================================================== */
@@ -5475,8 +5847,6 @@ public item_fireball(id)
 	return PLUGIN_HANDLED
 }
 
-/* ==================================================================================================== */
-
 public add_bonus_redirect(id)
 {
 	if (player_b_redirect[id] > 0)
@@ -6223,18 +6593,18 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 	new id=Data[0]
 	if(Errcode)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Error on select_class_handle query: %s",Error)
+		D2_Log( true, "Error on select_class_handle query: %s",Error)
 		asked_klass[id]=0
 	}
 	if(FailState == TQUERY_CONNECT_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","Could not connect to SQL database.")
+		D2_Log( true, "Could not connect to SQL database.")
 		asked_klass[id]=0
 		return PLUGIN_CONTINUE
 	}
 	else if(FailState == TQUERY_QUERY_FAILED)
 	{
-		log_to_file("addons/amxmodx/logs/diablo.log","select_class_handle Query failed.")
+		D2_Log( true, "select_class_handle Query failed.")
 		asked_klass[id]=0
 		return PLUGIN_CONTINUE
 	}	 	
@@ -6264,7 +6634,7 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 public select_class(id,lx[])
 {
 new text4[512]  
-format(text4, 511,"\yВыбери Класс: ^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n\r4. \wПремиум^n^n\d Описание мода на сайте^n\yРазработал: \rHiTmanY^n^n\y/mana,/m - магазин маны^n\dlp.hitmany.net^n\dСайт сервера") 
+format(text4, 511,"\yВыбери Класс: ^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n\r4. \wПремиум^n^n\d Описание мода на сайте^n\yРазработал: \rHiTmanY^n^n\y/gold,/g - магазин золота^n\dlp.hitmany.net^n\dСайт сервера") 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -6443,306 +6813,319 @@ szosta = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<9)
 show_menu(id, szosta,text2)
 
 }
-public PressedKlasy(id, key) {
-/* Menu:
-* Demony:
-* 1:Andariel
-* 2:Duriel
-* 3:Mephisto
-* 4:Hephasto
-* 5:Diablo
-* 6:Baal
-* 7:Fallen
-* 8:Imp
-* 0:Wstecz
-*/
-new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
-g_haskit[id] = 0
-c_vampire[id]=0
-c_silent[id]=0
-c_jump[id]=0
-c_antyarchy[id]=0
-c_antymeek[id]=0
-c_antyorb[id]=0
-c_antyfs[id]=0
-niewidzialnosc_kucanie[id] = 0;
-c_silent[id]=0
-c_grenade[id] = 0
-c_darksteel[id]=0
-c_shaked[id]=0
-c_blink[id]=0
-
-
-switch (key) {
-    case 0:
-    {    
-        player_class[id] = Andariel
-	c_vampire[id]=random_num(1,3)
-	c_silent[id]=1
-	c_jump[id]=1
-	c_antyarchy[id]=1
-	c_antymeek[id]=1
-	c_antyorb[id]=1
-	c_antyfs[id]=1
-        LoadXP(id, player_class[id])
-    }
-    case 1: 
-    {    
-        player_class[id] = Duriel
-	niewidzialnosc_kucanie[id] = 1;
-        LoadXP(id, player_class[id])
-    }
-   case 2: 
-    {    
-        player_class[id] = Mephisto
-	c_silent[id]=1
-	c_jump[id]=2
-        LoadXP(id, player_class[id])
-    }
-   case 3: 
-    {    
-        player_class[id] = Hephasto
-	c_grenade[id] = 6
-        LoadXP(id, player_class[id])
-    }
-   case 4: 
-    {    
-        player_class[id] = Diablo
-	c_jump[id]=1
-	c_silent[id]=1
-	c_blind[id] = 20
-        LoadXP(id, player_class[id])
-        emit_sound(id,CHAN_STATIC,"diablo_lp/diablo_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-    }
-   case 5: 
-    {    
-        player_class[id] = Baal
+public PressedKlasy(id, key)
+{
+	/* Menu:
+	* Demony:
+	* 1:Andariel
+	* 2:Duriel
+	* 3:Mephisto
+	* 4:Hephasto
+	* 5:Diablo
+	* 6:Baal
+	* 7:Fallen
+	* 8:Imp
+	* 0:Wstecz
+	*/
+	new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+	g_haskit[id] = 0
+	c_vampire[id]=0
+	c_silent[id]=0
+	c_jump[id]=0
 	c_antyarchy[id]=0
-        LoadXP(id, player_class[id])
-    }
-   case 6: 
-    {    
-        player_class[id] = Fallen
-	c_darksteel[id]=29
-	c_blind[id] = 20
-	anty_flesh[id]=1
-	c_shaked[id]=5
-  
-        LoadXP(id, player_class[id])
-        if(player_lvl[id]>49)
-        {
-        new float:summa = player_lvl[id]/10.0;
-        fallen_fires[id] = floatround(summa, floatround_floor);
-        }
-        new rnds = random(1);
-        switch(rnds)
-        {
-          case 0:
-          {
-          emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-          }
-          case 1:
-          {
-          emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-          }
-          default: emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-        }
-        }
-   case 7: 
-    {    
-        player_class[id] = Imp
-	c_blink[id] = floatround(halflife_time())
-        LoadXP(id, player_class[id])
-    }
-   case 9: 
-    { 
-        select_class(id,lx)
-    }
-}
-CurWeapon(id)
-give_knife(id)
-quest_gracza[id] = wczytaj_aktualny_quest(id);
-changeskin(id,1)
+	c_antymeek[id]=0
+	c_antyorb[id]=0
+	c_antyfs[id]=0
+	niewidzialnosc_kucanie[id] = 0;
+	c_silent[id]=0
+	c_grenade[id] = 0
+	c_darksteel[id]=0
+	c_shaked[id]=0
+	c_blink[id]=0
+
+
+	switch (key) 
+	{
+		case 0:
+		{    
+			player_class[id] = Andariel
+			c_vampire[id]=random_num(1,3)
+			c_silent[id]=1
+			c_jump[id]=1
+			c_antyarchy[id]=1
+			c_antymeek[id]=1
+			c_antyorb[id]=1
+			c_antyfs[id]=1
+			LoadXP(id, player_class[id])
+		}
+		case 1: 
+		{    
+			player_class[id] = Duriel
+			niewidzialnosc_kucanie[id] = 1;
+			LoadXP(id, player_class[id])
+		}
+		case 2: 
+		{    
+			player_class[id] = Mephisto
+			c_silent[id]=1
+			c_jump[id]=2
+			LoadXP(id, player_class[id])
+		}
+		case 3: 
+		{    
+			player_class[id] = Hephasto
+			c_grenade[id] = 6
+			LoadXP(id, player_class[id])
+		}
+		case 4: 
+		{    
+			player_class[id] = Diablo
+			c_jump[id]=1
+			c_silent[id]=1
+			c_blind[id] = 20
+			LoadXP(id, player_class[id])
+			emit_sound(id,CHAN_STATIC,"diablo_lp/diablo_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+		}
+		case 5: 
+		{    
+			player_class[id] = Baal
+			c_antyarchy[id]=0
+			LoadXP(id, player_class[id])
+		}
+		case 6: 
+		{    
+			player_class[id] = Fallen
+			c_darksteel[id]=29
+			c_blind[id] = 20
+			anty_flesh[id]=1
+			c_shaked[id]=5
+	  
+			LoadXP(id, player_class[id])
+			if(player_lvl[id]>49)
+			{
+				//new float:summa = player_lvl[id]/10.0;
+				fallen_fires[id] = floatround(player_lvl[id]/10.0, floatround_floor);
+			}
+			new rnds = random(1);
+			switch(rnds)
+			{
+			  case 0:
+			  {
+				emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+			  }
+			  case 1:
+			  {
+				emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+			  }
+			  default: emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+			}
+		}
+		case 7: 
+		{    
+			player_class[id] = Imp
+			c_blink[id] = floatround(halflife_time())
+			LoadXP(id, player_class[id])
+		}
+		case 9: 
+		{ 
+			select_class(id,lx)
+		}
+	}
+	CurWeapon(id)
+	give_knife(id)
+	quest_gracza[id] = wczytaj_aktualny_quest(id);
+	changeskin(id,1)
     
-return PLUGIN_HANDLED
+	return PLUGIN_HANDLED
 }
-public PokazZwierze(id,lx[]) {
-new text5[512]
-asked_klass[id]=0
-format(text5, 511,"\yЖивотные: ^n\w1. \yIzual^t\wУровень: \r%i^n\w2. \yJumper^t\wУровень: \r%i^n\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yKernel^t\wУровень: \r%i^n\w5. \yPoison Creeper^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n\w7. \ySnow Wanderer^t\wУровень: \r%i^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
-player_class_lvl[id][17],player_class_lvl[id][18],player_class_lvl[id][19],player_class_lvl[id][20],player_class_lvl[id][21],player_class_lvl[id][22],player_class_lvl[id][23])
 
-new siodma
-siodma = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
-show_menu(id, siodma,text5)
+public PokazZwierze(id,lx[]) 
+{
+	new text5[512]
+	asked_klass[id]=0
+	format(text5, 511,"\yЖивотные: ^n\w1. \yIzual^t\wУровень: \r%i^n\w2. \yJumper^t\wУровень: \r%i^n\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yKernel^t\wУровень: \r%i^n\w5. \yPoison Creeper^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n\w7. \ySnow Wanderer^t\wУровень: \r%i^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+	player_class_lvl[id][17],player_class_lvl[id][18],player_class_lvl[id][19],player_class_lvl[id][20],player_class_lvl[id][21],player_class_lvl[id][22],player_class_lvl[id][23])
 
-}
-public PokazZwierz(id, key) {
-/* Menu:
----.Zwierzeta
-1.Izual
-2.Jumper
-3.Enslaved
-4.Kernel
-5.PoisonCreeper
-6.Gigantyczny Pajak
-7.Sniegowy Tulacz
-8.Piekielna Krowa
-* 0:Wstecz
-*/
-new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
-g_haskit[id] = 0
-c_redirect[id]=0
-c_antymeek[id]=0
-c_silent[id]=0
-c_awp[id]=0
-c_jump[id]=0
-c_piorun[id]=0
-c_vampire[id]=0
-
-switch (key) {
-    case 0:
-    {    
-        player_class[id] = Izual
-	c_redirect[id]=4
-	c_antymeek[id]=1
-        LoadXP(id, player_class[id])
-    }
-    case 1: 
-    {    
-        player_class[id] = Jumper
-        LoadXP(id, player_class[id])
-    }
-   case 2: 
-    {    
-        player_class[id] = Enslaved
-        LoadXP(id, player_class[id])
-    }
-   case 3: 
-    {    
-        player_class[id] = Kernel
-	c_silent[id]=1
-	c_piorun[id]=1
-        LoadXP(id, player_class[id])
-    }
-   case 4: 
-    {    
-        player_class[id] = PoisonCreeper
-	c_awp[id]=5
-	c_silent[id]=1
-	c_jump[id]=1
-	c_vampire[id]=1
-        LoadXP(id, player_class[id])
-    }
-   case 5: 
-    {    
-        player_class[id] = GiantSpider
-        LoadXP(id, player_class[id])
-    }
-   case 6: 
-    {    
-        player_class[id] = SnowWanderer
-	c_piorun[id]=1
-        LoadXP(id, player_class[id])
-    }
-   case 9: 
-    { 
-        select_class(id,lx)
-    }
-}
-CurWeapon(id)
-give_knife(id)
-quest_gracza[id] = wczytaj_aktualny_quest(id);
-    
-return PLUGIN_HANDLED
-}
-public PokazPremiumy(id,lx[]) {
-new text6[512]
-asked_klass[id]=0
-format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\rДоступ к премиум классам.^n\rкупить на lp.hitmany.net",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
-
-new usma
-usma = (1<<0)|(1<<1)|(1<<2)|(1<<9)
-show_menu(id, usma,text6)
+	new siodma
+	siodma = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
+	show_menu(id, siodma,text5)
 
 }
-public PokazPremium(id, key) {
-/* Menu:
-* Wybierz klase:
-* 1:Griswold
-* 2:TheSmith
-* 3:Demonolog
-* 4:VipCztery
-* 0:Wstecz
-*/
-new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
-g_haskit[id] = 0
-c_antymeek[id]=0
-c_silent[id]=0
-c_antyarchy[id]=0
-c_jump[id]=0
-c_vampire[id]=0
-niewidka[id]=0
+public PokazZwierz(id, key) 
+{
+	/* Menu:
+	---.Zwierzeta
+	1.Izual
+	2.Jumper
+	3.Enslaved
+	4.Kernel
+	5.PoisonCreeper
+	6.Gigantyczny Pajak
+	7.Sniegowy Tulacz
+	8.Piekielna Krowa
+	* 0:Wstecz
+	*/
+	new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+	g_haskit[id] = 0
+	c_redirect[id]=0
+	c_antymeek[id]=0
+	c_silent[id]=0
+	c_awp[id]=0
+	c_jump[id]=0
+	c_piorun[id]=0
+	c_vampire[id]=0
 
-switch (key) {
-    case 0: 
-    if(player_premium[id]==1)
-    {    
-    player_class[id] = Griswold
-    c_antymeek[id]=1
-    c_silent[id]=1
-    c_antyarchy[id]=1
-    c_jump[id]=2
-    c_vampire[id]=random_num(1,2)
-    LoadXP(id, player_class[id])
-    }
-    else
-    {
-    hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
-    }
-    case 1: 
-    if(player_premium[id]==1)
-    {    
-        player_class[id] = TheSmith
-	c_antymeek[id]=1
-	c_silent[id]=1
-	c_antyarchy[id]=1
-	c_jump[id]=2
-	niewidka[id]=1
-	c_piorun[id]=1
-	c_vampire[id]=random_num(1,2)
-        LoadXP(id, player_class[id])
-    }
-    else
-    {
-    hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
-    }
-   case 2: 
-   if(player_premium[id]==1)
-    {    
-    	
-        player_class[id] = Demonolog
-	c_antymeek[id]=1
-	c_silent[id]=1
-	c_antyarchy[id]=1
-	c_jump[id]=2
-	c_vampire[id]=random_num(1,2)
-        LoadXP(id, player_class[id])
-    }
-    else
-    {
-    hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
-    }
-   case 9: 
-    { 
-        select_class(id,lx)
-    }
+	switch (key) {
+		case 0:
+		{    
+			player_class[id] = Izual
+			c_redirect[id]=4
+			c_antymeek[id]=1
+			LoadXP(id, player_class[id])
+		}
+		case 1: 
+		{    
+			player_class[id] = Jumper
+			LoadXP(id, player_class[id])
+		}
+		case 2: 
+		{    
+			player_class[id] = Enslaved
+			LoadXP(id, player_class[id])
+		}
+		case 3: 
+		{    
+			player_class[id] = Kernel
+			c_silent[id]=1
+			c_piorun[id]=1
+			LoadXP(id, player_class[id])
+		}
+		case 4: 
+		{    
+			player_class[id] = PoisonCreeper
+			c_awp[id]=5
+			c_silent[id]=1
+			c_jump[id]=1
+			c_vampire[id]=1
+			LoadXP(id, player_class[id])
+		}
+		case 5: 
+		{    
+			player_class[id] = GiantSpider
+			LoadXP(id, player_class[id])
+		}
+		case 6: 
+		{    
+			player_class[id] = SnowWanderer
+			c_piorun[id]=1
+			LoadXP(id, player_class[id])
+		}
+		case 9: 
+		{ 
+			select_class(id,lx)
+		}
+	}
+	CurWeapon(id)
+	give_knife(id)
+	quest_gracza[id] = wczytaj_aktualny_quest(id);
+		
+	return PLUGIN_HANDLED
 }
-CurWeapon(id)
-give_knife(id)
-quest_gracza[id] = wczytaj_aktualny_quest(id);
-    
-return PLUGIN_HANDLED
+
+public PokazPremiumy(id,lx[])
+{
+	new text6[512]
+	asked_klass[id]=0
+	format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\rДоступ к премиум классам.^n\rкупить на lp.hitmany.net",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
+
+	new usma
+	usma = (1<<0)|(1<<1)|(1<<2)|(1<<9)
+	show_menu(id, usma,text6)
+
+}
+public PokazPremium(id, key) 
+{
+	/* Menu:
+	* Wybierz klase:
+	* 1:Griswold
+	* 2:TheSmith
+	* 3:Demonolog
+	* 4:VipCztery
+	* 0:Wstecz
+	*/
+	new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+	g_haskit[id] = 0
+	c_antymeek[id]=0
+	c_silent[id]=0
+	c_antyarchy[id]=0
+	c_jump[id]=0
+	c_vampire[id]=0
+	niewidka[id]=0
+
+	switch (key)
+	{
+		case 0: 
+		if(player_premium[id]==1)
+		{    
+			player_class[id] = Griswold
+			c_antymeek[id]=1
+			c_silent[id]=1
+			c_antyarchy[id]=1
+			c_jump[id]=2
+			c_vampire[id]=random_num(1,2)
+			LoadXP(id, player_class[id])
+		}
+		else
+		{
+			hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
+		}
+		case 1:
+		{
+			if(player_premium[id]==1)
+			{    
+				player_class[id] = TheSmith
+				c_antymeek[id]=1
+				c_silent[id]=1
+				c_antyarchy[id]=1
+				c_jump[id]=2
+				niewidka[id]=1
+				c_piorun[id]=1
+				c_vampire[id]=random_num(1,2)
+				LoadXP(id, player_class[id])
+			}
+			else
+			{
+				hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
+			}
+		}
+		case 2:
+		{
+			if(player_premium[id]==1)
+			{    
+				
+				player_class[id] = Demonolog
+				c_antymeek[id]=1
+				c_silent[id]=1
+				c_antyarchy[id]=1
+				c_jump[id]=2
+				c_vampire[id]=random_num(1,2)
+				LoadXP(id, player_class[id])
+			}
+			else
+			{
+				hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
+			}
+		}
+		case 9: 
+		{ 
+			select_class(id,lx)
+		}
+	}
+	CurWeapon(id)
+	give_knife(id)
+	quest_gracza[id] = wczytaj_aktualny_quest(id);
+		
+	return PLUGIN_HANDLED
 } 
 
 /* ==================================================================================================== */
@@ -6752,8 +7135,6 @@ public check_class()
 	{
   		if((player_class[id] == Ninja) && (is_user_connected(id)))
 		{
-			
-			
 			if (is_user_alive(id)) set_user_armor(id,100)	
 		}
 		set_gravitychange(id)
@@ -6975,7 +7356,7 @@ public buyrune(id)
 {
 	//new text[513] 
 	
-	//format(text, 512, "\yМагазин item - ^n\w1. \yКупить случайный Item! \r$5000^n^n\w0. \yВыход^n\y/mana,/m - магазин маны") 
+	//format(text, 512, "\yМагазин item - ^n\w1. \yКупить случайный Item! \r$5000^n^n\w0. \yВыход^n\y/gold,/g - магазин золота") 
 	
 	//new keys = (1<<0)|(1<<9)
 	//show_menu(id, keys, text, -1, "ChooseRune") 
@@ -10211,12 +10592,12 @@ public change_health(id,hp,attacker,weapon[])
 			}
 			else if(player_item_id[id]==88 &&hp>0)
 			{
-        set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
+				set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
 			}
-	  	else if(player_item_id[id]==89 &&hp>0)
-	  	{
-        set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
-      }
+			else if(player_item_id[id]==89 &&hp>0)
+			{
+				set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
+			}
 			else if (hp+health>m_health) set_user_health(id,m_health)
 			else set_user_health(id,get_user_health(id)+hp)
 		}
@@ -10450,34 +10831,34 @@ public call_cast(id)
 		case Necromancer:
 		{
 			if(!g_bWeaponsDisabled)
-      {
-      fm_give_item(id, "weapon_mp5navy")
-			fm_give_item(id, "ammo_9mm")
-			fm_give_item(id, "ammo_9mm")
-			fm_give_item(id, "ammo_9mm")
-			fm_give_item(id, "ammo_9mm")
-			show_hudmessage(id, "[Necromancer] Вы получили MP5")
+			{
+				fm_give_item(id, "weapon_mp5navy")
+				fm_give_item(id, "ammo_9mm")
+				fm_give_item(id, "ammo_9mm")
+				fm_give_item(id, "ammo_9mm")
+				fm_give_item(id, "ammo_9mm")
+				show_hudmessage(id, "[Necromancer] Вы получили MP5")
 			}
 			else
 			{
-      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		case Andariel:
 		{
 			if(!g_bWeaponsDisabled)
-      {
-      fm_give_item(id, "weapon_galil")
-			fm_give_item(id, "ammo_556nato")
-			fm_give_item(id, "ammo_556nato")
-			fm_give_item(id, "ammo_556nato")
-			fm_give_item(id, "ammo_556nato")
-			show_hudmessage(id, "[Andariel] Вы получили Galil")
+			{
+				fm_give_item(id, "weapon_galil")
+				fm_give_item(id, "ammo_556nato")
+				fm_give_item(id, "ammo_556nato")
+				fm_give_item(id, "ammo_556nato")
+				fm_give_item(id, "ammo_556nato")
+				show_hudmessage(id, "[Andariel] Вы получили Galil")
 			}
 			else
 			{
-      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		case Izual:
 		{
@@ -10512,44 +10893,62 @@ public call_cast(id)
 		case Griswold:
 		{
 			if(player_item_id[id] != 0)
+			{
 			show_hudmessage(id, "[Griswold] У вас уже есть Item")
-			else {
+			}
+			else 
+			{
 				losowe_itemy[id]++
-				if(losowe_itemy[id] > 3) {
-				losowe_itemy[id] = 3
-				show_hudmessage(id, "[Griswold] Полученно предметов - %i", losowe_itemy[id])
+				if(losowe_itemy[id] > 3) 
+				{
+					losowe_itemy[id] = 3
+					show_hudmessage(id, "[Griswold] Полученно предметов - %i", losowe_itemy[id])
 				}
 				else
-				award_item(id, 0)
-		}
+				{
+					award_item(id, 0)
+				}
+			}
 		}
 		case TheSmith:
 		{
 			if(player_item_id[id] != 0)
+			{
 			show_hudmessage(id, "[The Smith] У вас уже есть Item")
-			else {
+			}
+			else 
+			{
 				losowe_itemy[id]++
-				if(losowe_itemy[id] > 3) {
-				losowe_itemy[id] = 3
-				show_hudmessage(id, "[The Smith] Полученно предметов - %i", losowe_itemy[id])
+				if(losowe_itemy[id] > 3) 
+				{
+					losowe_itemy[id] = 3
+					show_hudmessage(id, "[The Smith] Полученно предметов - %i", losowe_itemy[id])
 				}
 				else
-				award_item(id, 0)
-		}
+				{
+					award_item(id, 0)
+				}
+			}
 		}
 		case Demonolog:
 		{
 			if(player_item_id[id] != 0)
+			{
 			show_hudmessage(id, "[Demonolog] У вас уже есть Item")
-			else {
+			}
+			else 
+			{
 				losowe_itemy[id]++
-				if(losowe_itemy[id] > 3) {
-				losowe_itemy[id] = 3
-				show_hudmessage(id, "[Demonolog] Полученно предметов - %i", losowe_itemy[id])
+				if(losowe_itemy[id] > 3) 
+				{
+					losowe_itemy[id] = 3
+					show_hudmessage(id, "[Demonolog] Полученно предметов - %i", losowe_itemy[id])
 				}
 				else
-				award_item(id, 0)
-		}
+				{
+					award_item(id, 0)
+				}
+			}
 		}
 		case Enslaved: 
 		{
@@ -10559,62 +10958,62 @@ public call_cast(id)
 		case Amazon: 
 		{
 			if(!g_bWeaponsDisabled)
-      {
-      fm_give_item(id, "weapon_hegrenade")
-			show_hudmessage(id, "[Amazon] Вы получили HE гранату")
+			{
+				fm_give_item(id, "weapon_hegrenade")
+				show_hudmessage(id, "[Amazon] Вы получили HE гранату")
 			}
 			else
 			{
-      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		case Fallen: 
 		{
 			if(!g_bWeaponsDisabled)
-      {
-      fm_give_item(id, "weapon_flashbang")
-			fm_give_item(id, "weapon_flashbang")
-			show_hudmessage(id, "[Fallen] Вы получили 2 Flash гранаты")
+			{
+				fm_give_item(id, "weapon_flashbang")
+				fm_give_item(id, "weapon_flashbang")
+				show_hudmessage(id, "[Fallen] Вы получили 2 Flash гранаты")
 			}
 			else
 			{
-      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		case SnowWanderer: 
 		{
 			if(!g_bWeaponsDisabled)
-      {
-      fm_give_item(id, "weapon_flashbang")
-			fm_give_item(id, "weapon_flashbang")
-			show_hudmessage(id, "[Snow Wanderer] Вы получили 2 Flash гранаты")
+			{
+				fm_give_item(id, "weapon_flashbang")
+				fm_give_item(id, "weapon_flashbang")
+				show_hudmessage(id, "[Snow Wanderer] Вы получили 2 Flash гранаты")
 			}
 			else
 			{
-      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		case GiantSpider: 
 		{
 			if(!g_bWeaponsDisabled)
-      {
-        fm_give_item(id, "weapon_flashbang")
-			  fm_give_item(id, "weapon_flashbang")
-			  fm_give_item(id, "weapon_hegrenade")
-			  fm_give_item(id, "weapon_smokegrenade")
-			  fm_give_item(id, "weapon_deagle")
-			  fm_give_item(id,"ammo_50ae")
-			  fm_give_item(id,"ammo_50ae")
-			  fm_give_item(id,"ammo_50ae")
-			  fm_give_item(id,"ammo_50ae")
-			  fm_give_item(id,"ammo_50ae")
-			  fm_give_item(id,"ammo_50ae")
-			  show_hudmessage(id, "[Giant Spider] Вы получили полный набор гранат и Deagle")
+			{
+				fm_give_item(id, "weapon_flashbang")
+				fm_give_item(id, "weapon_flashbang")
+				fm_give_item(id, "weapon_hegrenade")
+				fm_give_item(id, "weapon_smokegrenade")
+				fm_give_item(id, "weapon_deagle")
+				fm_give_item(id,"ammo_50ae")
+				fm_give_item(id,"ammo_50ae")
+				fm_give_item(id,"ammo_50ae")
+				fm_give_item(id,"ammo_50ae")
+				fm_give_item(id,"ammo_50ae")
+				fm_give_item(id,"ammo_50ae")
+				show_hudmessage(id, "[Giant Spider] Вы получили полный набор гранат и Deagle")
 			}
 			else
 			{
-        hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 	}	
 }
@@ -10805,7 +11204,7 @@ public native_get_user_item(id)
 public native_set_user_item(id, item)
 {
 	emit_sound(id,CHAN_STATIC,"diablo_lp/ring.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-  switch(item)
+	switch(item)
 	{
 		case 1:
 		{
@@ -11621,84 +12020,74 @@ public native_set_user_item(id, item)
 public FallenShaman(id)
 {
 	if(player_class[id] == Fallen && player_lvl[id] > 49)
-  {    
+	{    
   
-  if(fallen_fires[id] == 0)
-	{
-		client_print(id, print_center, "У вас закончились шары!");
-		return PLUGIN_CONTINUE;
-	}	
-	if(falen_fires_time[id] + 5.0 > get_gametime())
-	{
-		client_print(id, print_center, "Шары можно использовать каждые 5 секунд!");
-		return PLUGIN_CONTINUE;
-	}
-	
-	if (is_user_alive(id))
-	{	
-		if(player_intelligence[id] < 1)
-			client_print(id, print_center, "Чтобы пускать шары необходим Интеллект!");
+		if(fallen_fires[id] == 0)
+		{
+			client_print(id, print_center, "У вас закончились шары!");
+			return PLUGIN_CONTINUE;
+		}	
+		if(falen_fires_time[id] + 5.0 > get_gametime())
+		{
+			client_print(id, print_center, "Шары можно использовать каждые 5 секунд!");
+			return PLUGIN_CONTINUE;
+		}
+		
+		if (is_user_alive(id))
+		{	
+			if(player_intelligence[id] < 1)
+			{
+				client_print(id, print_center, "Чтобы пускать шары необходим Интеллект!");
+			}
+				
+			falen_fires_time[id] = get_gametime();
+			fallen_fires[id]--;
 			
-		falen_fires_time[id] = get_gametime();
-		fallen_fires[id]--;
+			
+			new Float:fOrigin[3],enOrigin[3]
+			get_user_origin(id, enOrigin)
+			new ent = create_entity("env_sprite")
+	   
+			IVecFVec(enOrigin, fOrigin)
 
-    /*new Float:vOrigin[3]
-		new fEntity
-		entity_get_vector(id,EV_VEC_origin, vOrigin)
-		fEntity = create_entity("env_sprite")
-		ENT_SetModel(fEntity, "sprites/xfireball3.spr")
-		entity_set_origin(fEntity, vOrigin)
-		entity_set_int(fEntity,EV_INT_effects,64)
-		entity_set_string(fEntity,EV_SZ_classname,"fallenball")
-		entity_set_int(fEntity, EV_INT_solid, SOLID_BBOX)
-		entity_set_int(fEntity,EV_INT_movetype,5)
-		entity_set_edict(fEntity,EV_ENT_owner,id)
-    set_rendering(fEntity,kRenderFxGlowShell,0,0,0,kRenderTransAlpha,255) */
-		
-		
-	 new Float:fOrigin[3],enOrigin[3]
-   get_user_origin(id, enOrigin)
-   new ent = create_entity("env_sprite")
-   
-   IVecFVec(enOrigin, fOrigin)
+	   
+			entity_set_string(ent, EV_SZ_classname, "fallenball")
+			entity_set_model(ent, "sprites/xfireball3.spr")
+			entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
+			entity_set_float(ent, EV_FL_framerate, 30.0)
 
-   
-   entity_set_string(ent, EV_SZ_classname, "fallenball")
-   entity_set_model(ent, "sprites/xfireball3.spr")
-   entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
-   entity_set_float(ent, EV_FL_framerate, 30.0)
+			DispatchSpawn(ent)
 
-   DispatchSpawn(ent)
-
-   entity_set_origin(ent, fOrigin)
-   entity_set_size(ent, Float:{-5.0, -5.0, -5.0}, Float:{5.0, 5.0, 5.0})
-   entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
-   entity_set_int(ent, EV_INT_movetype, 5)
-   entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
-   entity_set_float(ent, EV_FL_renderamt, 255.0)
-   entity_set_float(ent, EV_FL_scale, 1.0)
-   entity_set_edict(ent,EV_ENT_owner, id)
-		//Send forward
-	 new Float:fl_iNewVelocity[3]
-	 VelocityByAim(id, 800, fl_iNewVelocity)
-	 entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
-   rndfsound = random(2);
-   switch(rndfsound)
-   {
-     case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-     case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-     case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-   }
-	 emit_sound(ent, CHAN_VOICE, "diablo_lp/fallen_fireball.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+			entity_set_origin(ent, fOrigin)
+			entity_set_size(ent, Float:{-5.0, -5.0, -5.0}, Float:{5.0, 5.0, 5.0})
+			entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
+			entity_set_int(ent, EV_INT_movetype, 5)
+			entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
+			entity_set_float(ent, EV_FL_renderamt, 255.0)
+			entity_set_float(ent, EV_FL_scale, 1.0)
+			entity_set_edict(ent,EV_ENT_owner, id)
+			//Send forward
+			new Float:fl_iNewVelocity[3]
+			VelocityByAim(id, 800, fl_iNewVelocity)
+			entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
+			rndfsound = random(2);
+			switch(rndfsound)
+			{
+				case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+			}
+			emit_sound(ent, CHAN_VOICE, "diablo_lp/fallen_fireball.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+		}
 	}
-  }
-  else
-  {
-    client_print(id, print_center, "Вы не Fallen Shaman!");
+	else
+	{
+		client_print(id, print_center, "Вы не Fallen Shaman!");
 		return PLUGIN_CONTINUE;
 	}	
 	return PLUGIN_CONTINUE;
 }
+
 public DFallenShaman(ent)
 {
 	if ( !is_valid_ent(ent))
@@ -11731,10 +12120,16 @@ public DFallenShaman(ent)
 		new pid = entlist[i];
 		
 		if (!is_user_alive(pid) || get_user_team(attacker) == get_user_team(pid))
+		{
 			continue;
-      new float:dmg = float(player_intelligence[attacker]/2)-float(player_dextery[pid]/4);
-      if(dmg <= 1.0) { dmg = 1.0; }
-		ExecuteHam(Ham_TakeDamage, pid, ent, attacker, dmg, 1);
+		}
+		new plint = floatround(player_intelligence[attacker]/2.0,floatround_floor);
+		new pldex = floatround(player_dextery[pid]/4.0,floatround_floor);
+		new dmg = plint - pldex
+		if(dmg <= 1) { dmg = 1; }
+		{
+			ExecuteHam(Ham_TakeDamage, pid, ent, attacker, dmg, 1);
+		}
 	}
 	remove_entity(ent);
 }
@@ -11744,7 +12139,7 @@ public cmd_place_portal(id){
 		client_print(id, print_center, "У вас нет Портала!");
 		return PLUGIN_CONTINUE;
 	}
-  new cmd_place_portal=menu_create("Меню Портала","cmd_place_portal2");
+	new cmd_place_portal=menu_create("Меню Портала","cmd_place_portal2");
 	
 	menu_additem(cmd_place_portal,"\yУстановить портал");
 	menu_additem(cmd_place_portal,"\wУдалить все порталы");
@@ -11816,19 +12211,16 @@ stock fm_get_aim_origin_normal(index, Float:origin[3], Float:normal[3])
 }
 public set_portal(id)
 {
-
-    new g_ent,g_ent2
-    new Float:g_aim_origin[3]
-    new Float:g_ent_angles[3],pSize[3]
+	new g_ent,g_ent2
+	new Float:g_aim_origin[3]
+	new Float:g_ent_angles[3]
 	
-    set_pev(g_ent, pev_scale, 1.0 )
-    g_ent = create_entity("info_target")
-    g_ent2 = create_entity("env_sprite")
-	
+	set_pev(g_ent, pev_scale, 1.0 )
+	g_ent = create_entity("info_target")
+	g_ent2 = create_entity("env_sprite")
 	entity_set_string(g_ent, EV_SZ_classname, "iportal")
 	engfunc(EngFunc_SetModel, g_ent, "models/portal/portal.mdl")
-	
-    entity_set_string(g_ent2, EV_SZ_classname, "2iportal")
+	entity_set_string(g_ent2, EV_SZ_classname, "2iportal")
 	if(get_user_team(id) == 1)
 	{
 		engfunc(EngFunc_SetModel, g_ent2, "sprites/diablo_lp/portal_tt.spr")
@@ -11845,15 +12237,12 @@ public set_portal(id)
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
 	}
-	
-    set_pev(g_ent,pev_solid,SOLID_TRIGGER)
+	set_pev(g_ent,pev_solid,SOLID_TRIGGER)
 	set_pev(g_ent,pev_movetype,MOVETYPE_FLY)
-    set_pev(g_ent,pev_skin,1)
-
-    
-    static Float:normal[3]
-    
-    fm_get_aim_origin_normal(id, g_aim_origin, normal)
+	set_pev(g_ent,pev_skin,1)
+	
+	static Float:normal[3]
+	fm_get_aim_origin_normal(id, g_aim_origin, normal)
 	normal[0] *= -1.0
 	normal[1] *= -1.0
 	normal[2] *= -1.0
@@ -11870,30 +12259,30 @@ public set_portal(id)
 	
 	player_portals[id]++
 	
-    if(player_portals[id] == 1)
-    {
+	if(player_portals[id] == 1)
+	{
 		player_portal_infotrg_1[id] = g_ent;
 		player_portal_sprite_1[id] = g_ent2;
-    }
-    if(player_portals[id] == 2)
-    {
+	}
+	if(player_portals[id] == 2)
+	{
 		player_portal_infotrg_2[id] = g_ent;
 		player_portal_sprite_2[id] = g_ent2;
-    }
+	}
 	engfunc(EngFunc_SetOrigin, g_ent, g_aim_origin)
 	set_pev(g_ent, pev_angles, g_ent_angles)
-    engfunc(EngFunc_SetOrigin, g_ent2, g_aim_origin)
+	engfunc(EngFunc_SetOrigin, g_ent2, g_aim_origin)
 	set_pev(g_ent2, pev_angles, g_ent_angles)
-    set_rendering(g_ent, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 0 )
-    set_pev(g_ent2, pev_rendermode, kRenderTransAdd)
-    set_pev(g_ent2, pev_renderamt, 220.0)
-    set_pev(g_ent2, pev_framerate, 15.0 )
-    set_pev(g_ent2, pev_spawnflags, SF_SPRITE_STARTON)
-    DispatchSpawn(g_ent2)
-    set_pev(g_ent2, pev_angles, g_ent_angles)
-    entity_set_edict(g_ent,EV_ENT_owner, id)
-    entity_set_edict(g_ent2,EV_ENT_owner, id)
-    entity_set_string(g_ent, EV_SZ_classname, "iportal")
+	set_rendering(g_ent, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 0 )
+	set_pev(g_ent2, pev_rendermode, kRenderTransAdd)
+	set_pev(g_ent2, pev_renderamt, 220.0)
+	set_pev(g_ent2, pev_framerate, 15.0 )
+	set_pev(g_ent2, pev_spawnflags, SF_SPRITE_STARTON)
+	DispatchSpawn(g_ent2)
+	set_pev(g_ent2, pev_angles, g_ent_angles)
+	entity_set_edict(g_ent,EV_ENT_owner, id)
+	entity_set_edict(g_ent2,EV_ENT_owner, id)
+	entity_set_string(g_ent, EV_SZ_classname, "iportal")
 	set_pev(g_ent,pev_owner,id);
 	set_pev(g_ent2,pev_owner,id);
 	
@@ -11915,32 +12304,11 @@ public set_portal(id)
 	engfunc(EngFunc_SetSize, g_ent,fMins, fMaxs)
 	
 	
-	/*new Float:fMins[3],Float:fMax[3],Float:mul[3];
-		
-	mul[0] = floatabs(floatabs(fOldNormal[0])-1.0)
-	mul[0] = mul[0] + 0.1 > 1.0 ? mul[0]:mul[0]+0.1
-		
-	mul[1] = floatabs(floatabs(fOldNormal[1])-1.0)
-	mul[1] = mul[1] + 0.1 > 1.0 ? mul[1]:mul[1]+0.1
-		
-	mul[2] = floatabs(floatabs(fOldNormal[2])-1.0)
-	mul[2] = mul[2] + 0.1 > 1.0 ? mul[2]:mul[2]+0.1
-		
-	fMins[0] = floatmul(mul[0],-5.0)-2.0;
-	fMins[1] = floatmul(mul[1],-2.5)-2.0;
-	fMins[2] = floatmul(mul[2],-4.0)-2.0
-		
-	fMax[0] = floatmul(mul[0],5.0)+2.0;
-	fMax[1] = floatmul(mul[1],2.5)+2.0;
-	fMax[2] = floatmul(mul[2],4.0)+2.0
-		
-	engfunc(EngFunc_SetSize, g_ent,fMins, fMax)*/
-
-
-  return PLUGIN_CONTINUE;
+	return PLUGIN_CONTINUE;
 }
 
-parseAngle(id, in, out){
+parseAngle(id, in, out)
+{
 		new Float:fAngles[3];
 		pev(id, pev_v_angle, fAngles);
 		angle_vector(fAngles, ANGLEVECTOR_FORWARD, fAngles);
@@ -12054,9 +12422,13 @@ public DotykRakiety(ent)
 		new pid = entlist[i];
 		
 		if (!is_user_alive(pid) || get_user_team(attacker) == get_user_team(pid))
+		{
 			continue;
-      new float:dmg = float(player_intelligence[attacker]/2)-float(player_dextery[pid]/4);
-      if(dmg <= 1.0) { dmg = 1.0; }
+		}
+		new plint = floatround(player_intelligence[attacker]/2.0,floatround_floor);
+		new pldex = floatround(player_dextery[pid]/4.0,floatround_floor);
+		new dmg = plint - pldex
+		if(dmg <= 1) { dmg = 1; }
 		ExecuteHam(Ham_TakeDamage, pid, ent, attacker, dmg, 1);
 	}
 	remove_entity(ent);
@@ -12267,7 +12639,7 @@ public portal_touch(ptr,id)
     
         if(player_portal_infotrg_1[id] == ptr)
         {
-			static Float:fOrigin[3],Float:fOrigin2[3],Float:flAng[3];
+			static Float:fOrigin[3],Float:flAng[3];
 			static Float:fDistance = 0.1;
 			static entity;
 			
@@ -12289,12 +12661,11 @@ public portal_touch(ptr,id)
 				parseAngle(id, player_portal_infotrg_1[id], entity);
 				emit_sound(entity, CHAN_VOICE, "diablo_lp/portalenter.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 			}
-			
-        }        
+		}        
         if(player_portal_infotrg_2[id] == ptr)
         {
         
-			static Float:fOrigin[3],Float:fOrigin2[3],Float:flAng[3];
+			static Float:fOrigin[3],Float:flAng[3];
 			static Float:fDistance = 0.1;
 			static entity;
 			
@@ -12317,10 +12688,9 @@ public portal_touch(ptr,id)
 				parseAngle(id, player_portal_infotrg_2[id], entity);
 				emit_sound(entity, CHAN_VOICE, "diablo_lp/portalenter.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 			}
-			
-        }
-	} 
-   
+		}
+	}
+	return PLUGIN_HANDLED
 }
 
 bool:traceToWall(const Float:fOrigin[3], const Float:fVec[3]){
@@ -12388,13 +12758,17 @@ stock bool:validWall(const Float:fOrigin[3], Float:fNormal[3], Float:width=56.0,
 bool:checkPlace(Float:fOrigin[3],id){
 		new ent = -1;
 		new szClass[64]
-		while((ent = find_ent_in_sphere(ent,fOrigin,45.0))){
+		while((ent = find_ent_in_sphere(ent,fOrigin,45.0)))
+		{
 			pev(ent,pev_classname,szClass,charsmax(szClass));
-			if(equal(szClass,"iportal") || equal(szClass,"iportal")){
-				if(equal(szClass,"iportal") && pev(ent,pev_owner) == id){
+			if(equal(szClass,"iportal") || equal(szClass,"iportal"))
+			{
+				if(equal(szClass,"iportal") && pev(ent,pev_owner) == id)
+				{
 					continue;
 				}
-				else{
+				else
+				{
 					return false;
 				}
 			}
@@ -12402,18 +12776,19 @@ bool:checkPlace(Float:fOrigin[3],id){
 		return true;
 	}
 
-bool:traceTo(const Float:fFrom[3],const Float:fTo[3]){
-		new tr = create_tr2();
+bool:traceTo(const Float:fFrom[3],const Float:fTo[3])
+{
+	new tr = create_tr2();
 		
-		engfunc(EngFunc_TraceLine, fFrom, fTo,0, 0, tr);
+	engfunc(EngFunc_TraceLine, fFrom, fTo,0, 0, tr);
 		
-		new Float:fFrac;
-		get_tr2(tr, TR_flFraction, fFrac);
-		free_tr2(tr);
+	new Float:fFrac;
+	get_tr2(tr, TR_flFraction, fFrac);
+	free_tr2(tr);
 		
-		return (fFrac == 1.0) 
+	return (fFrac == 1.0) 
 		
-	}
+}
 
 bool:checkPortalPlace(Float: fOrigin[3],Float: fMins[3],Float: fMaxs[3])
 	{
@@ -12516,7 +12891,9 @@ public fwTouch(ptr, ptd)
 			{
 				// Hit a player
 				if (get_pcvar_num(pSound))
+				{
 					emit_sound(ptr, CHAN_STATIC, "weapons/xbow_hitbod1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+				}
 				remove_hook(id)
 				
 				return FMRES_HANDLED
@@ -12533,7 +12910,9 @@ public fwTouch(ptr, ptd)
 				if (!get_pcvar_num(pPlayers))
 				{
 					if(get_pcvar_num(pSound))
+					{
 						emit_sound(ptr, CHAN_STATIC, "weapons/xbow_hitbod1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+					}
 					remove_hook(id)
 				}
 				return FMRES_HANDLED
@@ -12562,7 +12941,7 @@ public fwTouch(ptr, ptd)
 				
 				// No double doors.. just touch it
 				dllfunc(DLLFunc_Touch, ptd, id)
-stopdoors:				
+				stopdoors:				
 			}
 			else if (get_pcvar_num(pUseButtons) && equali(szPtdClass, "func_button"))
 			{
@@ -12578,7 +12957,9 @@ stopdoors:
 		if (!get_pcvar_num(pHookSky) && iContents == CONTENTS_SKY)
 		{
 			if(get_pcvar_num(pSound))
+			{
 				emit_sound(ptr, CHAN_STATIC, "weapons/xbow_hit2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+			}
 			remove_hook(id)
 			return FMRES_HANDLED
 		}
@@ -12601,7 +12982,9 @@ stopdoors:
 		gHooked[id] = true
 		// Play sound
 		if (get_pcvar_num(pSound))
+		{
 			emit_sound(ptr, CHAN_STATIC, "weapons/xbow_hit1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+		}
 		
 		// Make some sparks :D
 		message_begin_f(MSG_BROADCAST, SVC_TEMPENTITY, fOrigin, 0)
@@ -12909,7 +13292,9 @@ public give_hook(id, level, cid)
 		console_print(id, "[Паутина] %s Получил доступ к паутине", szName)
 	}
 	else
+	{
 		console_print(id, "[Паутина] У %s уже есть паутина", szName)
+	}
 	
 	return PLUGIN_HANDLED
 }
@@ -12992,7 +13377,8 @@ stock statusMsg(id, szMsg[], {Float,_}:...)
 	
 	return 1
 }
-public itminfo(id,cel){  // po najechaniu na item pokazuje co to za item :D 
+public itminfo(id,cel)
+{
         static clas[32];
         pev(cel,pev_classname,clas,31);
         
@@ -13003,27 +13389,28 @@ public itminfo(id,cel){  // po najechaniu na item pokazuje co to za item :D
         return PLUGIN_CONTINUE
 }
 
-public create_itm(id,id_item,name_item[128]){ 
-        new Float:origins[3]
-        pev(id,pev_origin,origins); // pobranie coordow gracza
-        new entit=create_entity("info_target") // tworzymy byt
-        origins[0]+=40.0
-        origins[2]-=32.0
-        set_pev(entit,pev_origin,origins) //ustawiamy coordy
-        entity_set_model(entit,modelitem) // oraz model
-        set_pev(entit,pev_classname,"przedmiot");  // i klase
+public create_itm(id,id_item,name_item[128])
+{ 
+    new Float:origins[3]
+    pev(id,pev_origin,origins); // pobranie coordow gracza
+    new entit=create_entity("info_target") // tworzymy byt
+    origins[0]+=40.0
+    origins[2]-=32.0
+    set_pev(entit,pev_origin,origins) //ustawiamy coordy
+    entity_set_model(entit,modelitem) // oraz model
+    set_pev(entit,pev_classname,"przedmiot");  // i klase
 
-        dllfunc(DLLFunc_Spawn, entit); 
-        set_pev(entit,pev_solid,SOLID_BBOX); 
-        set_pev(entit,pev_movetype,MOVETYPE_FLY);
+    dllfunc(DLLFunc_Spawn, entit); 
+    set_pev(entit,pev_solid,SOLID_BBOX); 
+    set_pev(entit,pev_movetype,MOVETYPE_FLY);
 
-        engfunc(EngFunc_SetSize,entit,{-1.1, -1.1, -1.1},{1.1, 1.1, 1.1});
+    engfunc(EngFunc_SetSize,entit,{-1.1, -1.1, -1.1},{1.1, 1.1, 1.1});
         
-        engfunc(EngFunc_DropToFloor,entit);
+    engfunc(EngFunc_DropToFloor,entit);
         
-        item_info[entit]=id_item //parametry przepisujemy do globalnej tablicy potrzebnej nam potem
+    item_info[entit]=id_item //parametry przepisujemy do globalnej tablicy potrzebnej nam potem
         
-        item_name[entit]=name_item      
+    item_name[entit]=name_item      
 }
 public fwd_touch(ent,id)
 {       
@@ -13034,7 +13421,8 @@ public fwd_touch(ent,id)
     pev(ent,pev_classname,classname,31); 
     
     if(!equali(classname,"przedmiot")) return FMRES_IGNORED; // jesli nie dotykamy przedmiotu to nie idziemy dalej
-    if(!player_item_id[id] && pev(id,pev_button)& IN_DUCK){ // jesli dotykamy kucamy i nie mamy itemu to go dostajemy (podnoszenie itemu - dotkniecie i duck)
+    if(!player_item_id[id] && pev(id,pev_button)& IN_DUCK)
+	{
         award_item(id,item_info[ent])
         engfunc(EngFunc_RemoveEntity,ent);
     }
@@ -13043,9 +13431,11 @@ public fwd_touch(ent,id)
 public TTWin() {
         new play[32], nr, id;
         get_players(play, nr, "h");
-        for(new i=0; i<nr; i++) {
+        for(new i=0; i<nr; i++) 
+		{
                 id = play[i];
-                if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_T) {
+                if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_T) 
+				{
                         new dziel = is_user_alive(id) ? 1 : 2;
                         Give_Xp(id, get_cvar_num("diablo_xpbonus3")/dziel);
                         ColorChat(id, GREEN, "Полученно^x03 *%i*^x01 опыта за победу твоей команды в раунде", get_cvar_num("diablo_xpbonus3")/dziel);
@@ -13053,12 +13443,15 @@ public TTWin() {
         }
 }
 
-public CTWin() {
+public CTWin() 
+{
         new play[32], nr, id;
         get_players(play, nr, "h");
-        for(new i=0; i<nr; i++) {
+        for(new i=0; i<nr; i++) 
+		{
                 id = play[i];
-                if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_CT) {
+                if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_CT) 
+				{
                         new dziel = is_user_alive(id) ? 1 : 2;
                         Give_Xp(id, get_cvar_num("diablo_xpbonus3")/dziel);
                         ColorChat(id, GREEN, "Полученно^x03 *%i*^x01 опыта за победу твоей команды в раунде", get_cvar_num("diablo_xpbonus3")/dziel);
@@ -13086,35 +13479,34 @@ public add_bonus_shaked(attacker_id,id)
 	new weapon = get_user_weapon(attacker_id,clip,ammo)
         if(c_shaked[attacker_id] > 0 && get_user_team(attacker_id) != get_user_team(id) && is_user_alive(id)) 
         {
-		if(weapon == CSW_GLOCK18 || weapon == CSW_USP || weapon == CSW_P228 || weapon == CSW_DEAGLE || weapon == CSW_ELITE || weapon == CSW_FIVESEVEN)
-		{
-			if (random_num(1,c_shaked[attacker_id]) == 1)
+			if(weapon == CSW_GLOCK18 || weapon == CSW_USP || weapon == CSW_P228 || weapon == CSW_DEAGLE || weapon == CSW_ELITE || weapon == CSW_FIVESEVEN)
 			{
-				message_begin(MSG_ONE,get_user_msgid("ScreenShake"),{0,0,0},id); 
-				write_short(7<<14); 
-				write_short(1<<13); 
-				write_short(1<<14); 
-				message_end();
+				if (random_num(1,c_shaked[attacker_id]) == 1)
+				{
+					message_begin(MSG_ONE,get_user_msgid("ScreenShake"),{0,0,0},id); 
+					write_short(7<<14); 
+					write_short(1<<13); 
+					write_short(1<<14); 
+					message_end();
+				}
 			}
-		}
         }
         return PLUGIN_HANDLED
 }
 public item_ulecz(id)
 {
-        if (used_item[id])
-        {
-                hudmsg(id,2.0,"Лечится можно 1 раз за раунд!")
-                return PLUGIN_CONTINUE  
-        }
-        new m_healthf = race_heal[player_class[id]]+player_strength[id]*2
-	new CurHealthf = get_user_health(id)
-	new NewHealthf = (CurHealthf+50<m_healthf)? CurHealthf+50:m_healthf
-        set_user_health(id, NewHealthf)
-        
-        used_item[id] = true    
-        return PLUGIN_CONTINUE
-        
+		if (used_item[id])
+		{
+			hudmsg(id,2.0,"Лечится можно 1 раз за раунд!")
+			return PLUGIN_CONTINUE
+		}
+		new m_healthf = race_heal[player_class[id]]+player_strength[id]*2
+		new CurHealthf =get_user_health(id)
+		new NewHealthf = (CurHealthf+50<m_healthf)? CurHealthf+50:m_healthf
+		set_user_health(id, NewHealthf)
+		used_item[id] = true
+		
+		return PLUGIN_CONTINUE
 }
 public check_palek(id)
 {
@@ -13126,16 +13518,19 @@ public check_palek(id)
         return PLUGIN_HANDLED
 }
 public player_Think(id){
-        if(!is_user_alive(id) || !niewidzialnosc_kucanie[id]){
-                return HAM_IGNORED;
+        if(!is_user_alive(id) || !niewidzialnosc_kucanie[id])
+		{
+            return HAM_IGNORED;
         }
         new button = get_user_button(id);
         new oldbutton = get_user_oldbutton(id);
-        if(button&IN_DUCK && !(oldbutton&IN_DUCK)){
-                        set_user_rendering(id,kRenderFxNone,255,255,255,kRenderTransAlpha,50)
+        if(button&IN_DUCK && !(oldbutton&IN_DUCK))
+		{
+            set_user_rendering(id,kRenderFxNone,255,255,255,kRenderTransAlpha,50)
         }
-        else if(!(button&IN_DUCK) && oldbutton&IN_DUCK){
-                        set_user_rendering(id,kRenderFxNone,255,255,255,kRenderTransAlpha,255)
+        else if(!(button&IN_DUCK) && oldbutton&IN_DUCK)
+		{
+			set_user_rendering(id,kRenderFxNone,255,255,255,kRenderTransAlpha,255)
         }
         return HAM_HANDLED;
 }
@@ -13153,13 +13548,13 @@ public lustrzanypocisk(this, idinflictor, idattacker, Float:damage, damagebits)
 }
 CreateHealBot()
 {
-        new Bot = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "info_target"));
-        if (Bot)
-        {
-                set_pev(Bot, pev_classname, "HealBot");
-                dllfunc(DLLFunc_Spawn, Bot);
-                set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
-        }
+		new Bot = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "info_target"));
+		if (Bot)
+		{
+			set_pev(Bot, pev_classname, "HealBot");
+			dllfunc(DLLFunc_Spawn, Bot);
+			set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
+		}
 }
 public HealBotThink(Bot)
 {
@@ -13187,76 +13582,79 @@ CreateHealBot2()
 }
 public HealBotThink2(Bot)
 {
-        new iPlayers[32], iNum, id;
-        get_players(iPlayers, iNum);
-        for(new i; i<iNum; i++)
-        {
-                id = iPlayers[i];
-                if (!is_user_alive(id)) continue;
-                if (player_class[id] != Griswold) continue;
-                
-		change_health(id,30,0,"");
-        }
-        set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
+		new iPlayers[32], iNum, id;
+		get_players(iPlayers, iNum);
+		for(new i; i<iNum; i++)
+		{
+			id = iPlayers[i];
+			if (!is_user_alive(id)) continue;
+			if (player_class[id] != Griswold) continue;			
+			
+			change_health(id,30,0,"");
+		}
+		set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
 }
 CreateHealBot3()
 {
-        new Bot = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "info_target"));
-        if (Bot)
-        {
-                set_pev(Bot, pev_classname, "HealBot3");
-                dllfunc(DLLFunc_Spawn, Bot);
-                set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
-        }
+		new Bot = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "info_target"));
+		if (Bot)
+		{
+			set_pev(Bot, pev_classname, "HealBot3");
+			dllfunc(DLLFunc_Spawn, Bot);
+			set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
+		}
 }
 public HealBotThink3(Bot)
 {
-        new iPlayers[32], iNum, id;
-        get_players(iPlayers, iNum);
-        for(new i; i<iNum; i++)
-        {
-                id = iPlayers[i];
-                if (!is_user_alive(id)) continue;
-                if (player_class[id] != TheSmith) continue;
-                
-		change_health(id,30,0,"");
-        }
-        set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
+		new iPlayers[32], iNum, id;
+		get_players(iPlayers, iNum);
+		for(new i; i<iNum; i++)
+		{
+			id = iPlayers[i];
+			if (!is_user_alive(id)) continue;
+			if (player_class[id] != TheSmith) continue;
+			
+			change_health(id,30,0,"");
+		}
+		set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
 }
 CreateHealBot4()
 {
-        new Bot = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "info_target"));
-        if (Bot)
-        {
-                set_pev(Bot, pev_classname, "HealBot4");
-                dllfunc(DLLFunc_Spawn, Bot);
-                set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
-        }
+		new Bot = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "info_target"));
+		if (Bot)
+		{
+			set_pev(Bot, pev_classname, "HealBot4");
+			dllfunc(DLLFunc_Spawn, Bot);
+			set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
+		}
 }
 public HealBotThink4(Bot)
 {
-        new iPlayers[32], iNum, id;
-        get_players(iPlayers, iNum);
-        for(new i; i<iNum; i++)
-        {
-                id = iPlayers[i];
-                if (!is_user_alive(id)) continue;
-                if (player_class[id] != Demonolog) continue;
+		new iPlayers[32], iNum, id;
+		get_players(iPlayers, iNum);
+		for(new i; i<iNum; i++)
+		{
+			id = iPlayers[i];
+			if (!is_user_alive(id)) continue;
+			if (player_class[id] != Demonolog) continue;
                 
-		change_health(id,30,0,"");
-        }
-        set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
+			change_health(id,30,0,"");
+		}
+		set_pev(Bot, pev_nextthink, get_gametime() + 10.0);
 }
 public exp(id)
 {
-ColorChat(id, GREEN, "Уровень: ^x04%i ^x01- у вас есть ^x03(%d/%d)^x01 опыта", player_lvl[id], player_xp[id], LevelXP[player_lvl[id]])
-ColorChat(id, GREEN, "До следующего уровня ^x04%d^x01 опыта", LevelXP[player_lvl[id]]-player_xp[id])
+	ColorChat(id, GREEN, "Уровень: ^x04%i ^x01- у вас есть ^x03(%d/%d)^x01 опыта", player_lvl[id], player_xp[id], LevelXP[player_lvl[id]])
+	ColorChat(id, GREEN, "До следующего уровня ^x04%d^x01 опыта", LevelXP[player_lvl[id]]-player_xp[id])
 }
-public radar_scan() {
-        for(new id=1; id<=MAX; id++) {
+public radar_scan() 
+{
+        for(new id=1; id<=MAX; id++) 
+		{
                 if(!is_user_alive(id) || !player_b_radar[id]) continue;
 
-                for(new i=1; i<=MAX; i++) {
+                for(new i=1; i<=MAX; i++) 
+				{
                         if(!is_user_alive(i) || id == i || get_user_team(id) == get_user_team(i)) continue;
 
                         new PlayerCoords[3];
@@ -13279,90 +13677,87 @@ public radar_scan() {
 
 public fallen_respawn()
 {
-    for(new i=0; i<33; i++)
-    {
-      if(player_class[i] == Fallen && player_lvl[i] > 49 && round_status==1 && is_user_alive(i))
-      {       
-       new float:time = 1515.0/player_lvl[i];
-       new falltime = floatround(time, floatround_floor);
-       //set_hudmessage(0, 255, 0, 0.03, 0.69, 0, 6.0, 1.0)
-       //client_print(i,print_chat,"falltime %d time %.2f lvl %d",falltime,time,player_lvl[i])
-       if(player_fallen_tr[i] > falltime)
-       {
-       new fplayers[32],numfplayers,i2,name[32],player,name2[32]
-       new Array:a_fallens=ArrayCreate(32) 
-       get_players(fplayers, numfplayers, "bh")
-       for (i2=0; i2<numfplayers; i2++)
-       {
-        player = fplayers[i2]
-        if(get_user_team(i) == get_user_team(player) && player_class[player] == Fallen)
-        {
-        ArrayPushCell(a_fallens, player) 
-        }
-       }
-       new a_size=ArraySize(a_fallens)
-       player=random(a_size)
-       //player=a_fallens[player]  -error
-       if(a_size != 0)
-       {
-	     player=ArrayGetCell(a_fallens,player) 
-       get_user_name(player,name,31)
-       ExecuteHamB(Ham_CS_RoundRespawn, player)
-       hudmsg2(i,1.0,"Воскрешенн Fallen ^nиз твоей команды:^n %s",name)
-       player_fallen_tr[i]=1;
-       emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-       emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-       get_user_name(i,name2,31)
-       for(new i3=0; i3<33; i3++)
-       {
-       client_print(i3, print_chat, "Fallen Shaman %s воскресил Fallena %s",name2,name)
-       }
-       ArrayDestroy(a_fallens) 
-       }
-       }
-       else
-       {       
-       hudmsg2(i,1.0,"Воскрешение Fallena через %i секунд",player_fallen_tr[i])
-       player_fallen_tr[i]=player_fallen_tr[i]+1;
-       }
-      }
+	for(new i=0; i<33; i++)
+	{
+		if(player_class[i] == Fallen && player_lvl[i] > 49 && round_status==1 && is_user_alive(i))
+		{
+			new falltime = floatround(1515.0/player_lvl[i], floatround_floor);
+			if(player_fallen_tr[i] > falltime)
+			{
+				new fplayers[32],numfplayers,i2,name[32],player,name2[32]
+				new Array:a_fallens=ArrayCreate(32) 
+				get_players(fplayers, numfplayers, "bh")
+				for (i2=0; i2<numfplayers; i2++)
+				{
+					player = fplayers[i2]
+					if(get_user_team(i) == get_user_team(player) && player_class[player] == Fallen)
+					{
+						ArrayPushCell(a_fallens, player) 
+					}
+				}
+				new a_size=ArraySize(a_fallens)
+				player=random(a_size)
+				if(a_size != 0)
+				{
+					player=ArrayGetCell(a_fallens,player) 
+					get_user_name(player,name,31)
+					ExecuteHamB(Ham_CS_RoundRespawn, player)
+					hudmsg2(i,1.0,"Воскрешенн Fallen ^nиз твоей команды:^n %s",name)
+					player_fallen_tr[i]=1;
+					emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+					emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+					get_user_name(i,name2,31)
+					for(new i3=0; i3<33; i3++)
+					{
+						client_print(i3, print_chat, "Fallen Shaman %s воскресил Fallena %s",name2,name)
+					}
+					ArrayDestroy(a_fallens) 
+				}
+			}
+			else
+			{
+				hudmsg2(i,1.0,"Воскрешение Fallena через %i секунд",player_fallen_tr[i])
+				player_fallen_tr[i]=player_fallen_tr[i]+1;
+			}
+		}
     }
 }
 public fallen_play_idle(taskid)
 {
- new TASK_BLOOD = taskid - 2000;
- if(round_status==1 && player_class[TASK_BLOOD] == Fallen && is_user_alive(TASK_BLOOD))
- {
-   if(player_lvl[TASK_BLOOD] > 49)
-   {
-   rndfsound = random(3);
-   switch(rndfsound)
-   {
-      case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-      case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-      case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-      case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-   }
-   }
-   else
-   {
-   rndfsound = random(4);
-   switch(rndfsound)
-   {
-      case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-      case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-      case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-      case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-      case 4: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-   }
-   } 
- }
-
+	new TASK_BLOOD = taskid - 2000;
+	if(round_status==1 && player_class[TASK_BLOOD] == Fallen && is_user_alive(TASK_BLOOD))
+	{
+		if(player_lvl[TASK_BLOOD] > 49)
+		{
+			rndfsound = random(3);
+			switch(rndfsound)
+			{
+				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+			}
+		}
+		else
+		{
+			rndfsound = random(4);
+			switch(rndfsound)
+			{
+				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 4: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+			}
+		} 
+	}
 }
-public niesmiertelnoscon(id) {
-        if(used_item[id]) {
-                hudmsg(id, 2.0, "Бессмертие можно использовать один раз за раунд!");
-                return PLUGIN_CONTINUE;
+public niesmiertelnoscon(id) 
+{
+        if(used_item[id]) 
+		{
+            hudmsg(id, 2.0, "Бессмертие можно использовать один раз за раунд!");
+            return PLUGIN_CONTINUE;
         }
         set_user_godmode(id, 1);
         new Float:czas = player_b_godmode[id]+0.0;
@@ -13378,16 +13773,18 @@ public niesmiertelnoscon(id) {
         return PLUGIN_CONTINUE;
 }
 
-public niesmiertelnoscoff(id) {
+public niesmiertelnoscoff(id) 
+{
         id-=TASK_GOD;
 
-        if(is_user_connected(id)) {
-                set_user_godmode(id, 0);
+        if(is_user_connected(id)) 
+		{
+            set_user_godmode(id, 0);
 
-                message_begin(MSG_ONE, gmsgBartimer, {0,0,0}, id);
-                write_byte(0);
-                write_byte(0);
-                message_end();
+            message_begin(MSG_ONE, gmsgBartimer, {0,0,0}, id);
+            write_byte(0);
+            write_byte(0);
+            message_end();
         }
 }
 public item_zamroz(id)
@@ -13442,7 +13839,8 @@ public Effect_Zamroz_Totem_Think(ent)
 			if (get_user_team(pid) == get_user_team(id))
 			continue
 			
-			if (is_user_alive(pid)){
+			if (is_user_alive(pid))
+			{
 				set_user_maxspeed(pid, 1.0)
 				set_task(15.0, "off_zamroz", pid)
 			}			
@@ -13499,7 +13897,8 @@ public Effect_Zamroz_Totem_Think(ent)
 	
 }
 
-public off_zamroz(pid){
+public off_zamroz(pid)
+{
 	set_user_maxspeed(pid, 270.0)
 }
 public giveitem(id, level, cid) 
@@ -14462,33 +14861,30 @@ public cbMyMenu(id, menu, item){
 	return PLUGIN_HANDLED;
 }*/
 public mana1(id){
-	new mana1=menu_create("Магазин маны","mana1a");
+	new mana1=menu_create("Магазин золота","mana1a");
 	
 	menu_additem(mana1,"\yОружие");//item=0
-	menu_additem(mana1,"\yПредметы");//item=1
 	menu_additem(mana1,"\yДругое");//item=2
 	
 	menu_display(id, mana1,0);
 	return PLUGIN_HANDLED;
 }
-public mana1a(id, menu, item){
-	switch(item){
+public mana1a(id, menu, item)
+{
+	switch(item)
+	{
 		case 0:
 		{
 			if(!g_bWeaponsDisabled)
-      {
-      mana2(id)
-      }
+			{
+				mana2(id)
+			}
 			else
 			{
-      hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-      }
+				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+			}
 		}
 		case 1:
-		{
-			mana3(id)
-		}
-		case 2:
 		{
 			mana4(id)
 		}
@@ -14499,21 +14895,21 @@ public mana1a(id, menu, item){
 public mana2(id){
 	new mana2=menu_create("Магазин оружия","mana2a");
 	
-	menu_additem(mana2,"\y M4A1 + Патроны \d[10 маны]")
-	menu_additem(mana2,"\y AK47 + Патроны \d[7 маны]")
-	menu_additem(mana2,"\y AWP + Патроны \d[10 маны]")
-	menu_additem(mana2,"\y Famas + Патроны \d[5 маны]")
-	menu_additem(mana2,"\y Galil + Патроны \d[5 маны]")
-	menu_additem(mana2,"\y M249 + Патроны \d[13 маны]")
-	menu_additem(mana2,"\y Mp5 + Патроны \d[4 маны]")
-	menu_additem(mana2,"\y Scout + Патроны \d[6 маны]")
-	menu_additem(mana2,"\y M3 Pompa + Патроны \d[7 маны]")
-	menu_additem(mana2,"\y XM1014 Pompa + Патроны \d[7 маны]")
-	menu_additem(mana2,"\y P90 + Патроны \d[4 маны]")
-	menu_additem(mana2,"\y Deagle + Патроны \d[2 маны]")
-	menu_additem(mana2,"\y Aug + Патроны \d[8 маны]")
-	menu_additem(mana2,"\y SG552 + Патроны \d[8 маны]")
-	menu_additem(mana2,"\y Nightvision \d[5 маны]")
+	menu_additem(mana2,"\y M4A1 + Патроны \d[10 золота]")
+	menu_additem(mana2,"\y AK47 + Патроны \d[7 золота]")
+	menu_additem(mana2,"\y AWP + Патроны \d[10 золота]")
+	menu_additem(mana2,"\y Famas + Патроны \d[5 золота]")
+	menu_additem(mana2,"\y Galil + Патроны \d[5 золота]")
+	menu_additem(mana2,"\y M249 + Патроны \d[13 золота]")
+	menu_additem(mana2,"\y Mp5 + Патроны \d[4 золота]")
+	menu_additem(mana2,"\y Scout + Патроны \d[6 золота]")
+	menu_additem(mana2,"\y M3 Pompa + Патроны \d[7 золота]")
+	menu_additem(mana2,"\y XM1014 Pompa + Патроны \d[7 золота]")
+	menu_additem(mana2,"\y P90 + Патроны \d[4 золота]")
+	menu_additem(mana2,"\y Deagle + Патроны \d[2 золота]")
+	menu_additem(mana2,"\y Aug + Патроны \d[8 золота]")
+	menu_additem(mana2,"\y SG552 + Патроны \d[8 золота]")
+	menu_additem(mana2,"\y Nightvision \d[5 золота]")
 	menu_setprop(mana2,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana2,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana2,MPROP_NEXTNAME,"Далее")
@@ -14523,20 +14919,21 @@ public mana2(id){
 	return PLUGIN_HANDLED;
 }
 public mana2a(id, menu, item){
-	switch(item){
+	switch(item)
+	{
 		case 0:
 		{
 			new koszt = 10;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id, "weapon_m4a1")
-			cs_set_user_bpammo(id, CSW_M4A1, 90)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id, "weapon_m4a1")
+				cs_set_user_bpammo(id, CSW_M4A1, 90)
 			}
 		}
 		case 1:
@@ -14544,260 +14941,274 @@ public mana2a(id, menu, item){
 			new koszt = 7;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_ak47")
-			cs_set_user_bpammo(id, CSW_AK47, 90)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_ak47")
+				cs_set_user_bpammo(id, CSW_AK47, 90)
 			}
 		}
-		case 2:{
+		case 2:
+		{
 			new koszt = 10;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_awp")
-			cs_set_user_bpammo(id, CSW_AWP, 30)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_awp")
+				cs_set_user_bpammo(id, CSW_AWP, 30)
 			}
 		}
-		case 3:{
+		case 3:
+		{
 			new koszt = 5;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_famas")
-			cs_set_user_bpammo(id, CSW_FAMAS, 90)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_famas")
+				cs_set_user_bpammo(id, CSW_FAMAS, 90)
 			}
 		}
-		case 4:{
+		case 4:
+		{
 			new koszt = 5;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_gali")
-			cs_set_user_bpammo(id, CSW_GALI, 90)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_gali")
+				cs_set_user_bpammo(id, CSW_GALI, 90)
 			}
 		}
-		case 5:{
+		case 5:
+		{
 			new koszt = 13;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_m249")
-			cs_set_user_bpammo(id, CSW_M249, 200)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_m249")
+				cs_set_user_bpammo(id, CSW_M249, 200)
 			}
 		}
-		case 6:{
+		case 6:
+		{
 			new koszt = 4;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_mp5navy")
-			cs_set_user_bpammo(id, CSW_MP5NAVY, 120)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_mp5navy")
+				cs_set_user_bpammo(id, CSW_MP5NAVY, 120)
 			}
 		}
-		case 7:{
+		case 7:
+		{
 			new koszt = 6;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_scout")
-			cs_set_user_bpammo(id, CSW_SCOUT, 90)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_scout")
+				cs_set_user_bpammo(id, CSW_SCOUT, 90)
 			}
 		}
-		case 8:{
+		case 8:
+		{
 			new koszt = 7;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_m3")
-			cs_set_user_bpammo(id, CSW_M3, 32)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_m3")
+				cs_set_user_bpammo(id, CSW_M3, 32)
 			}
 		}
-		case 9:{
+		case 9:
+		{
 			new koszt = 7;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_xm1014")
-			cs_set_user_bpammo(id, CSW_XM1014, 32)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_xm1014")
+				cs_set_user_bpammo(id, CSW_XM1014, 32)
 			}
 		}
-		case 10:{
+		case 10:
+		{
 			new koszt = 4;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_p90")
-			cs_set_user_bpammo(id, CSW_P90, 100)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_p90")
+				cs_set_user_bpammo(id, CSW_P90, 100)
 			}
 		}
-		case 11:{
+		case 11:
+		{
 			new koszt = 2;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_deagle")
-			cs_set_user_bpammo(id, CSW_DEAGLE, 35)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_deagle")
+				cs_set_user_bpammo(id, CSW_DEAGLE, 35)
 			}
 		}
-		case 12:{
+		case 12:
+		{
 			new koszt = 8;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_aug")
-			cs_set_user_bpammo(id, CSW_AUG, 90)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_aug")
+				cs_set_user_bpammo(id, CSW_AUG, 90)
 			}
 		}
-		case 13:{
+		case 13:
+		{
 			new koszt = 8;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id,"weapon_sg552")
-			cs_set_user_bpammo(id, CSW_SG550, 90)
+				mana_gracza[id] -= koszt;
+				fm_give_item(id,"weapon_sg552")
+				cs_set_user_bpammo(id, CSW_SG550, 90)
 			}
 		}
-		case 14:{
+		case 14:
+		{
 			new koszt = 5;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			fm_give_item(id, "item_nvgs")
+				mana_gracza[id] -= koszt;
+				fm_give_item(id, "item_nvgs")
 			}
 		}
 	}
 	menu_destroy(menu);
 	return PLUGIN_HANDLED;
 }
-public mana3(id){
+/*public mana3(id)
+{
 	new mana3=menu_create("Магазин Item","mana3a");
 	
-	menu_additem(mana3,"\y Vampyric Scepter \d[10 маны]")
-	menu_additem(mana3,"\y Small bronze bag \d[40 маны]")
-	menu_additem(mana3,"\y Medium silver bag \d[50 маны]")
-	menu_additem(mana3,"\y Large gold bag \d[60 маны]")
-	menu_additem(mana3,"\y Small angel wings \d[100 маны]")
-	menu_additem(mana3,"\y Arch angel wings \d[130 маны]")
-	menu_additem(mana3,"\y Firerope \d[40 маны]")
-	menu_additem(mana3,"\y Fire Amulet \d[60 маны]")
-	menu_additem(mana3,"\y Stalkers ring \d[140 маны]")
-	menu_additem(mana3,"\y Gold statue \d[25 маны]")
-	menu_additem(mana3,"\y Daylight Diamond \d[40 маны]")
-	menu_additem(mana3,"\y Blood Diamond \d[60 маны]")
-	menu_additem(mana3,"\y Wheel of Fortune \d[30 маны]")
-	menu_additem(mana3,"\y Sword of the sun \d[40 маны]")
-	menu_additem(mana3,"\y Fireshield \d[85 маны]")
-	menu_additem(mana3,"\y Stealth Shoes \d[10 маны]")
-	menu_additem(mana3,"\y Meekstone \d[70 маны]")
-	menu_additem(mana3,"\y Godly Armor \d[50 маны]")
-	menu_additem(mana3,"\y Knife Ruby \d[25 маны]")
-	menu_additem(mana3,"\y Sword \d[45 маны]")
-	menu_additem(mana3,"\y Scout Extender \d[70 маны]")
-	menu_additem(mana3,"\y Scout Amplifier \d[100 маны]")
-	menu_additem(mana3,"\y Iron Spikes \d[50 маны]")
-	menu_additem(mana3,"\y Paladin ring \d[60 маны]")
-	menu_additem(mana3,"\y Monk ring \d[80 маны]")
-	menu_additem(mana3,"\y Flashbang necklace \d[30 маны]")
-	menu_additem(mana3,"\y Khalim Eye \d[100 маны]")
-	menu_additem(mana3,"\y Hydra Blade \d[80 маны]")
-	menu_additem(mana3,"\y Exp Ring \d[70 маны]")
-	menu_additem(mana3,"\y Aegis \d[90 маны]")
-	menu_additem(mana3,"\y Heavenly Stone \d[70 маны]")
-	menu_additem(mana3,"\y Festering Essence of Destruction \d[140 маны]")
+	menu_additem(mana3,"\y Vampyric Scepter \d[10 золота]")
+	menu_additem(mana3,"\y Small bronze bag \d[40 золота]")
+	menu_additem(mana3,"\y Medium silver bag \d[50 золота]")
+	menu_additem(mana3,"\y Large gold bag \d[60 золота]")
+	menu_additem(mana3,"\y Small angel wings \d[100 золота]")
+	menu_additem(mana3,"\y Arch angel wings \d[130 золота]")
+	menu_additem(mana3,"\y Firerope \d[40 золота]")
+	menu_additem(mana3,"\y Fire Amulet \d[60 золота]")
+	menu_additem(mana3,"\y Stalkers ring \d[140 золота]")
+	menu_additem(mana3,"\y Gold statue \d[25 золота]")
+	menu_additem(mana3,"\y Daylight Diamond \d[40 золота]")
+	menu_additem(mana3,"\y Blood Diamond \d[60 золота]")
+	menu_additem(mana3,"\y Wheel of Fortune \d[30 золота]")
+	menu_additem(mana3,"\y Sword of the sun \d[40 золота]")
+	menu_additem(mana3,"\y Fireshield \d[85 золота]")
+	menu_additem(mana3,"\y Stealth Shoes \d[10 золота]")
+	menu_additem(mana3,"\y Meekstone \d[70 золота]")
+	menu_additem(mana3,"\y Godly Armor \d[50 золота]")
+	menu_additem(mana3,"\y Knife Ruby \d[25 золота]")
+	menu_additem(mana3,"\y Sword \d[45 золота]")
+	menu_additem(mana3,"\y Scout Extender \d[70 золота]")
+	menu_additem(mana3,"\y Scout Amplifier \d[100 золота]")
+	menu_additem(mana3,"\y Iron Spikes \d[50 золота]")
+	menu_additem(mana3,"\y Paladin ring \d[60 золота]")
+	menu_additem(mana3,"\y Monk ring \d[80 золота]")
+	menu_additem(mana3,"\y Flashbang necklace \d[30 золота]")
+	menu_additem(mana3,"\y Khalim Eye \d[100 золота]")
+	menu_additem(mana3,"\y Hydra Blade \d[80 золота]")
+	menu_additem(mana3,"\y Exp Ring \d[70 золота]")
+	menu_additem(mana3,"\y Aegis \d[90 золота]")
+	menu_additem(mana3,"\y Heavenly Stone \d[70 золота]")
+	menu_additem(mana3,"\y Festering Essence of Destruction \d[140 золота]")
 	menu_additem(mana3,"\y Centurion \d[170 many]","32")
 	menu_additem(mana3,"\y Dr House \d[100 many]","33")
-	menu_additem(mana3,"\y Own Invisible \d[300 маны]")
-	menu_additem(mana3,"\y Mega Invisible \d[300 маны]")
-	menu_additem(mana3,"\y Bul'Kathos Shoes \d[30 маны]")
-	menu_additem(mana3,"\y Karik's Ring \d[220 маны]")
-	menu_additem(mana3,"\y Purse Thief \d[150 маны]")
-	menu_additem(mana3,"\y Revival Ring \d[80 маны]")
+	menu_additem(mana3,"\y Own Invisible \d[300 золота]")
+	menu_additem(mana3,"\y Mega Invisible \d[300 золота]")
+	menu_additem(mana3,"\y Bul'Kathos Shoes \d[30 золота]")
+	menu_additem(mana3,"\y Karik's Ring \d[220 золота]")
+	menu_additem(mana3,"\y Purse Thief \d[150 золота]")
+	menu_additem(mana3,"\y Revival Ring \d[80 золота]")
 	menu_additem(mana3,"\y Demon Assassin \d[170 many]","41")
 	menu_additem(mana3,"\y Mystiqe \d[100 many]","42")
 	menu_additem(mana3,"\y Apocalypse Anihilation \d[240 many]","43")
-	menu_additem(mana3,"\y M4A1 Special \d[150 маны]")
-	menu_additem(mana3,"\y Ak47 Special \d[150 маны]")
-	menu_additem(mana3,"\y AWP Special \d[130 маны]")
-	menu_additem(mana3,"\y Deagle Special \d[140 маны]")
-	menu_additem(mana3,"\y M3 Special \d[145 маны]")
-	menu_additem(mana3,"\y Full Special \d[210 маны]")
-	menu_additem(mana3,"\y Hellspawn \d[50 маны]")
-	menu_additem(mana3,"\y Gheed's Fortune \d[148 маны]")
-	menu_additem(mana3,"\y Winter Totem \d[30 маны]")
-	menu_additem(mana3,"\y Cash Totem \d[40 маны]")
-	menu_additem(mana3,"\y Thief Totem \d[50 маны]")
-	menu_additem(mana3,"\y Weapon Totem \d[80 маны]")
-	menu_additem(mana3,"\y Flash Totem \d[80 маны]")
+	menu_additem(mana3,"\y M4A1 Special \d[150 золота]")
+	menu_additem(mana3,"\y Ak47 Special \d[150 золота]")
+	menu_additem(mana3,"\y AWP Special \d[130 золота]")
+	menu_additem(mana3,"\y Deagle Special \d[140 золота]")
+	menu_additem(mana3,"\y M3 Special \d[145 золота]")
+	menu_additem(mana3,"\y Full Special \d[210 золота]")
+	menu_additem(mana3,"\y Hellspawn \d[50 золота]")
+	menu_additem(mana3,"\y Gheed's Fortune \d[148 золота]")
+	menu_additem(mana3,"\y Winter Totem \d[30 золота]")
+	menu_additem(mana3,"\y Cash Totem \d[40 золота]")
+	menu_additem(mana3,"\y Thief Totem \d[50 золота]")
+	menu_additem(mana3,"\y Weapon Totem \d[80 золота]")
+	menu_additem(mana3,"\y Flash Totem \d[80 золота]")
 	menu_setprop(mana3,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana3,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana3,MPROP_NEXTNAME,"Далее")
@@ -14813,7 +15224,7 @@ public mana3a(id, menu, item){
 			new koszt = 10;
 			if (mana_gracza[id]<koszt && player_item_id[id] != 0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14826,7 +15237,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14839,7 +15250,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14852,7 +15263,7 @@ public mana3a(id, menu, item){
 			new koszt = 60;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14865,7 +15276,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14878,7 +15289,7 @@ public mana3a(id, menu, item){
 			new koszt = 130;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14891,7 +15302,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14904,7 +15315,7 @@ public mana3a(id, menu, item){
 			new koszt = 60;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14917,7 +15328,7 @@ public mana3a(id, menu, item){
 			new koszt = 140;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14930,7 +15341,7 @@ public mana3a(id, menu, item){
 			new koszt = 25;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14943,7 +15354,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14956,7 +15367,7 @@ public mana3a(id, menu, item){
 			new koszt = 60;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14969,7 +15380,7 @@ public mana3a(id, menu, item){
 			new koszt = 30;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14982,7 +15393,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -14995,7 +15406,7 @@ public mana3a(id, menu, item){
 			new koszt = 85;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15008,7 +15419,7 @@ public mana3a(id, menu, item){
 			new koszt = 10;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15021,7 +15432,7 @@ public mana3a(id, menu, item){
 			new koszt = 70;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15034,7 +15445,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15047,7 +15458,7 @@ public mana3a(id, menu, item){
 			new koszt = 25;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15060,7 +15471,7 @@ public mana3a(id, menu, item){
 			new koszt = 45;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15073,7 +15484,7 @@ public mana3a(id, menu, item){
 			new koszt = 70;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15086,7 +15497,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15099,7 +15510,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15112,7 +15523,7 @@ public mana3a(id, menu, item){
 			new koszt = 60;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15125,7 +15536,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15138,7 +15549,7 @@ public mana3a(id, menu, item){
 			new koszt = 30;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15151,7 +15562,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15164,7 +15575,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15177,7 +15588,7 @@ public mana3a(id, menu, item){
 			new koszt = 70;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15190,7 +15601,7 @@ public mana3a(id, menu, item){
 			new koszt = 90;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15203,7 +15614,7 @@ public mana3a(id, menu, item){
 			new koszt = 70;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15216,7 +15627,7 @@ public mana3a(id, menu, item){
 			new koszt = 140;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15229,7 +15640,7 @@ public mana3a(id, menu, item){
 			new koszt = 170;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15242,7 +15653,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15255,7 +15666,7 @@ public mana3a(id, menu, item){
 			new koszt = 300;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15268,7 +15679,7 @@ public mana3a(id, menu, item){
 			new koszt = 300;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15281,7 +15692,7 @@ public mana3a(id, menu, item){
 			new koszt = 30;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15294,7 +15705,7 @@ public mana3a(id, menu, item){
 			new koszt = 220;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15307,7 +15718,7 @@ public mana3a(id, menu, item){
 			new koszt = 150;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15320,7 +15731,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15333,7 +15744,7 @@ public mana3a(id, menu, item){
 			new koszt = 170;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15346,7 +15757,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15359,7 +15770,7 @@ public mana3a(id, menu, item){
 			new koszt = 240;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15372,7 +15783,7 @@ public mana3a(id, menu, item){
 			new koszt = 150;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15385,7 +15796,7 @@ public mana3a(id, menu, item){
 			new koszt = 150;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15398,7 +15809,7 @@ public mana3a(id, menu, item){
 			new koszt = 130;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15411,7 +15822,7 @@ public mana3a(id, menu, item){
 			new koszt = 140;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15424,7 +15835,7 @@ public mana3a(id, menu, item){
 			new koszt = 145;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15437,7 +15848,7 @@ public mana3a(id, menu, item){
 			new koszt = 210;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15450,7 +15861,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15463,7 +15874,7 @@ public mana3a(id, menu, item){
 			new koszt = 148;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15476,7 +15887,7 @@ public mana3a(id, menu, item){
 			new koszt = 30;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15489,7 +15900,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15502,7 +15913,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15515,7 +15926,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15528,7 +15939,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15541,12 +15952,13 @@ public mana3a(id, menu, item){
 	menu_destroy(menu);
 	return PLUGIN_HANDLED;
 }
+*/
 public mana4(id){
 	new mana4=menu_create("Предметы - Другое","mana4a");
 	
-	menu_additem(mana4,"\y Случайный item \d[10 маны]")
-	menu_additem(mana4,"\y Улучшить item \d[5 маны]")
-  menu_additem(mana4,"\y Свиток Портала \d[25 маны]")
+	menu_additem(mana4,"\y Случайный item \d[10 золота]")
+	menu_additem(mana4,"\y Улучшить\Починить item \d[2 золота]")
+	menu_additem(mana4,"\y Свиток Портала \d[25 золота]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
@@ -15555,41 +15967,45 @@ public mana4(id){
 	menu_display(id, mana4,0);
 	return PLUGIN_HANDLED;
 }
-public mana4a(id, menu, item){
-	switch(item){
+public mana4a(id, menu, item)
+{
+	switch(item)
+	{
 		case 0:
 		{
 			new koszt = 10;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			mana_gracza[id] -= koszt;
-			award_item(id,0)
+				mana_gracza[id] -= koszt;
+				award_item(id,0)
 			}
 		}
-		case 1:{
-			new koszt = 5;
+		case 1:
+		{
+			new koszt = 2;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
-			emit_sound(id,CHAN_STATIC,"diablo_lp/repair.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-			mana_gracza[id] -= koszt;
-			upgrade_item(id)
+				emit_sound(id,CHAN_STATIC,"diablo_lp/repair.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+				mana_gracza[id] -= koszt;
+				upgrade_item(id)
 			}
-    }
-    case 2:{
+		}
+		case 2:
+		{
 			new koszt = 25;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает маны.");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -15606,8 +16022,10 @@ public mana4a(id, menu, item){
 	menu_destroy(menu);
 	return PLUGIN_HANDLED;
 }
-public hook_team_select(id,key){
-	if((key==0)&&(player!=0)){
+public hook_team_select(id,key)
+{
+	if((key==0)&&(player!=0))
+	{
 		engclient_cmd(id,"chooseteam")
 		return PLUGIN_HANDLED
 	}
