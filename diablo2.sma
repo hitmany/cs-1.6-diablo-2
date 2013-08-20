@@ -300,6 +300,8 @@ new fallen_fires[33]
 new cel // do pokazywania statusu
 new item_info[513] //id itemu  
 new item_name[513][128] //nazwa itemu
+new player_artifact[33][4]
+new player_artifact_time[33][4]
 new const modelitem[]="models/winebottle.mdl" //tutaj zmieniacie model itemu
 new const gszSound[] = "ambience/thunder_clap.wav";
 //Cvars
@@ -392,13 +394,13 @@ new const szTables[TOTAL_TABLES][] =
 	"CREATE TABLE IF NOT EXISTS `player` ( `id` int(8) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(33) NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'ON UPDATE CURRENT_TIMESTAMP', PRIMARY KEY (`id`), UNIQUE KEY `id` (`id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 	"CREATE TABLE IF NOT EXISTS `extra` ( `id` int(8) unsigned NOT NULL, `gold` int(11) NOT NULL DEFAULT '0', `total_lvl` int(8) NOT NULL DEFAULT '0', PRIMARY KEY ( `id` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 	"CREATE TABLE IF NOT EXISTS `class` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `xp` int(8) NOT NULL DEFAULT '0', PRIMARY KEY ( `id`,`class` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
-	"CREATE TABLE IF NOT EXISTS `skill` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `str` int(2) unsigned NOT NULL DEFAULT '0', `agi_best` int(2) unsigned NOT NULL DEFAULT '0', `agi_dmg` int(2) unsigned NOT NULL DEFAULT '0', `sta` int(2) unsigned NOT NULL DEFAULT '0', `dur` int(2) unsigned NOT NULL DEFAULT '0', `int` int(2) unsigned NOT NULL DEFAULT '0', `dex_dmg` int(2) unsigned NOT NULL DEFAULT '0', PRIMARY KEY ( `id`,`class` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
-	"CREATE TABLE IF NOT EXISTS `item` ( `id` int(8) unsigned NOT NULL, `item` int(3) unsigned NOT NULL, `expire_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP, PRIMARY KEY (`id`,`item`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+	"CREATE TABLE IF NOT EXISTS `skill` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `str` int(2) NOT NULL, `agi_best` int(2) NOT NULL, `agi_dmg` int(2) NOT NULL, `sta` int(2) NOT NULL, `dur` int(2) NOT NULL, `int` int(2) NOT NULL, `dex_dmg` int(2) NOT NULL, `quest_cur` int(2) NOT NULL DEFAULT '0', `quest_count1` int(2) NOT NULL DEFAULT '0', `quest_count2` int(2) NOT NULL DEFAULT '0', PRIMARY KEY (`id`,`class`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
+	"CREATE TABLE IF NOT EXISTS `item`  ( `id` int(8) unsigned NOT NULL, `item` int(3) unsigned NOT NULL, `item_number` int(1) NOT NULL, `expire_time` int(14) NOT NULL, PRIMARY KEY (`id`,`item`,`item_number`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
 };
 
 
-enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, Andariel, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Izual, Jumper, Enslaved, Kernel, PoisonCreeper, GiantSpider, SnowWanderer, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][18] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Andariel", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Izual", "Jumper", "Enslaved", "Kernel", "Poison Creeper", "Giant Spider", "Snow Wanderer","Griswold","The Smith","Demonolog","VipCztery" }
+enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, Andariel, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Jumper, Enslaved, Kernel, PoisonCreeper, GiantSpider, SnowWanderer, Griswold, TheSmith, Demonolog, VipCztery }
+new Race[28][18] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Andariel", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Zakarum", "Jumper", "Enslaved", "Kernel", "Poison Creeper", "Giant Spider", "Snow Wanderer","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,170,140,110,130,120,140,130,120,123,110,135,135,127,130,140,115,135,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -520,7 +522,7 @@ new ile_juz[33];
 
 //przedzial , ile ,kogo , nagroda expa, vip 1 tak 0 nie
 new questy[][]={
-	{1,2,Izual,500,0},
+	{1,2,Zakarum,500,0},
 	{1,3,Imp,1200,1},
 	{1,6,Fallen,2000,0},
 	{2,6,Diablo,5000,0},
@@ -543,7 +545,7 @@ new prze[][]={
 new prze_wybrany[33]
 
 new questy_info[][]={
-	"Убей 2 Izual (Получи 500 опыта)",
+	"Убей 2 Zakarum (Получи 500 опыта)",
 	"Убей 3 Imp (Получи 1200 опыта)",
 	"Убей 6 Fallen (Получи 2000 опыта)",
 	"Убей 6 Diablo (Получи 5000 опыта)",
@@ -1403,10 +1405,42 @@ public MYSQLX_GetAllXP( id )
 
 	// Free the last handle!
 	SQL_FreeHandle( query );
+	
+	//Get all items
+	format(szQuery, 255, "SELECT `item`, `item_number`, `expire_time` FROM `item` WHERE `id` = '%d';", iUniqueID );
+	query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		client_print( id, print_chat, "Error, unable to retrieve XP, please contact a server administrator");
+
+		MYSQLX_Error( query, szQuery, 6 );
+
+		return;
+	}
+
+	// Get the XP!
+	new iItem, iTime, iItemID;
+
+	// Loop through all of the records to give item
+	while ( SQL_MoreResults( query ) )
+	{
+		iItem	= SQL_ReadResult( query, 0 );
+		iItemID		= SQL_ReadResult( query, 1 );
+		iTime		= SQL_ReadResult( query, 2 );
+		
+		Give_Artefact(id, iItem, iTime, iItemID)
+
+		SQL_NextRow( query );
+	}
+
+	// Free the handle
+	SQL_FreeHandle( query );
 
 	// Call the function that will display the "select a race" menu
 	//D2_ChangeRaceShowMenu( id, g_iDBPlayerXPInfoStore[id] );
 	select_class(id)
+	loaded_xp[id] = 0;
 	
 	return;
 }
@@ -1477,6 +1511,39 @@ public MYSQLX_Save( id )
 			return;
 		}
 	}
+			format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '1', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][1]);
+			query = SQL_PrepareQuery( g_DBConn, szQuery );
+		
+			if ( !SQL_Execute( query ) )
+			{
+				client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
+		
+				MYSQLX_Error( query, szQuery, 5 );
+		
+				return;
+			}
+			format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '2', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][2]);
+			query = SQL_PrepareQuery( g_DBConn, szQuery );
+		
+			if ( !SQL_Execute( query ) )
+			{
+				client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
+		
+				MYSQLX_Error( query, szQuery, 5 );
+		
+				return;
+			}
+			format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '3', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][3]);
+			query = SQL_PrepareQuery( g_DBConn, szQuery );
+		
+			if ( !SQL_Execute( query ) )
+			{
+				client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
+		
+				MYSQLX_Error( query, szQuery, 5 );
+		
+				return;
+			}
 	
 	return;
 }
@@ -1660,6 +1727,7 @@ public D2_ChangeRaceStart( id )
 	{
 			// This function will also display the changerace menu
 			MYSQLX_GetAllXP( id );
+			loaded_xp[id] = 1;
 	}
 	else
 	{
@@ -1891,6 +1959,7 @@ public speed(id)
 	new Float: sped= floatsqroot(vect[0]*vect[0]+vect[1]*vect[1]+vect[2]*vect[2])
 	
 	client_print(id,print_chat,"Сейчас: %f",sped)
+	client_print(id,print_chat,"item: %d",player_artifact_time[id][1])
 }
 
 public plugin_precache()
@@ -3654,6 +3723,40 @@ public Give_Xp(id,amount)
 	return PLUGIN_CONTINUE;
 }
 
+public Give_Artefact(id, iItem, iTime, iItemID)
+{
+	if(iItemID == 0)
+	{
+		if(player_artifact[id][1] == 0)
+		{
+			player_artifact[id][1] = iItem
+			player_artifact_time[id][1] = iTime
+		}
+		else if(player_artifact[id][2] == 0)
+		{
+			player_artifact[id][2] = iItem
+			player_artifact_time[id][2] = iTime
+		}
+		else if(player_artifact[id][3] == 0)
+		{
+			player_artifact[id][3] = iItem
+			player_artifact_time[id][3] = iTime
+		}
+		else
+		{
+			return 0;
+		}
+	}
+	else
+	{
+		player_artifact[id][iItemID] = iItem
+		player_artifact_time[id][iItemID] = iTime
+	}
+
+
+	return PLUGIN_CONTINUE;
+}
+
 /* ==================================================================================================== */
 public client_connect(id)
 {
@@ -3710,6 +3813,12 @@ public client_putinserver(id)
 	database_user_created[id]=0
 	count_jumps(id)
 	JumpsLeft[id]=JumpsMax[id]
+	player_artifact[id][1]=0
+	player_artifact[id][2]=0
+	player_artifact[id][3]=0
+	player_artifact_time[id][1]=0
+	player_artifact_time[id][2]=0
+	player_artifact_time[id][3]=0
 	
 	// Get the user's ID!
 	DB_FetchUniqueID( id );
@@ -3738,7 +3847,6 @@ public client_disconnect(id)
 		fm_remove_entity(ent)
 	
 	player_class_lvl_save[id]=0
-	loaded_xp[id]=0
 	for(new race=1;race<MAX_RACES;race++)
 	{
 		player_class_lvl[id][race]=1
@@ -3843,7 +3951,7 @@ public UpdateHUD()
 				{
 					Racename = "Fallen Shaman"
 				}
-				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nIntelligence: %i^nStrength: %i^nAgility: %i^nDextery: %i^nЗолото: %i",pname,player_lvl[index],Racename,player_item_name[index], player_intelligence[index],player_strength[index], player_dextery[index], player_agility[index], mana_gracza[index])		
+				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nЗолото: %i",pname,player_lvl[index],Racename,player_item_name[index], mana_gracza[index])		
 				show_hudmessage(id, Msg)
 				
 			}
@@ -6924,7 +7032,7 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 public select_class(id)
 {
 new text4[512]  
-format(text4, 511,"\yВыбери Класс: ^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n\r4. \wПремиум^n^n^n\yРазработал: \rHiTmanY^n\dlp.hitmany.net^n\dСайт сервера^nВаш общий уровень: %d^nУ вас %d золота.", player_TotalLVL[id], mana_gracza[id]) 
+format(text4, 511,"^n\wВаш общий уровень: %d^nУ вас %d золота.^n^n\yВыбери Класс: ^n^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n^n^n\r4. \wСоветы: Что выбрать?^n^n^n\dРазработал: HiTmanY^nСайт сервера:^nlp.hitmany.net", player_TotalLVL[id], mana_gracza[id]) 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -7230,7 +7338,7 @@ public PokazZwierze(id)
 {
 	new text5[512]
 	asked_klass[id]=0
-	format(text5, 511,"\yЖивотные: ^n\w1. \yIzual^t\wУровень: \r%i^n\w2. \yJumper^t\wУровень: \r%i^n\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yKernel^t\wУровень: \r%i^n\w5. \yPoison Creeper^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n\w7. \ySnow Wanderer^t\wУровень: \r%i^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+	format(text5, 511,"\yЗвери/Животные: ^n\w1. \yЗакарум^t\wУровень: \r%i^n\w2. \yJumper^t\wУровень: \r%i^n\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yKernel^t\wУровень: \r%i^n\w5. \yPoison Creeper^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n\w7. \ySnow Wanderer^t\wУровень: \r%i^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
 	player_class_lvl[id][17],player_class_lvl[id][18],player_class_lvl[id][19],player_class_lvl[id][20],player_class_lvl[id][21],player_class_lvl[id][22],player_class_lvl[id][23])
 
 	new siodma
@@ -8428,10 +8536,13 @@ public changerace(id)
 	if(freeze_ended && player_class[id]!=0) set_user_health(id,0)
 	if(player_class[id]!=0) 
 	{
-		MYSQLX_Save(id)
-		player_class[id]=0
-		client_connect(id) 
-		D2_ChangeRaceStart(id)
+		if(loaded_xp[id]==0)
+		{
+			MYSQLX_Save(id)
+			player_class[id]=0
+			client_connect(id) 
+			D2_ChangeRaceStart(id)
+		}
 	}
 }
 
