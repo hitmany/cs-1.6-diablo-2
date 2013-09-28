@@ -82,6 +82,7 @@ new DemageTake1[33]
 #define TASKID_ORIGIN 	13311
 #define TASKID_SETUSER 	13312
 #define TASKID_SQLFETCH 13313
+#define TASKID_GLOW 	13314
 #define FL_ONGROUND (1<<9)
 #define message_begin_f(%1,%2,%3,%4) engfunc(EngFunc_MessageBegin, %1, %2, %3, %4)
 #define write_coord_f(%1) engfunc(EngFunc_WriteCoord, %1)
@@ -136,6 +137,8 @@ new planter
 new defuser
 
 new map_end = 0
+
+new g_shock
 
 // max clip
 stock const maxClip[31] = { -1, 13, -1, 10,  1,  7,  1,  30, 30,  1,  30,  20,  25, 30, 35, 25,  12,  20,
@@ -303,7 +306,7 @@ new item_name[513][128] //nazwa itemu
 new player_artifact[33][4]
 new player_artifact_time[33][4]
 new const modelitem[]="models/winebottle.mdl" //tutaj zmieniacie model itemu
-new const gszSound[] = "ambience/thunder_clap.wav";
+new const gszSound[] = "diablo_lp/eleccast.wav";
 //Cvars
 new pHook, pThrowSpeed, pSpeed, pWidth, pSound, pColor
 new pInterrupt, pAdmin, pHookSky, pOpenDoors, pPlayers
@@ -366,6 +369,7 @@ new SE_PLAYER[] = "models/p_smokegrenade.mdl"
 new cbow_VIEW[]  = "models/diablomod/v_crossbow.mdl" 
 new cvow_PLAYER[]= "models/diablomod/p_crossbow.mdl" 
 new cbow_bolt[]  = "models/diablomod/Crossbow_bolt.mdl"
+new scythe_view[]  = "models/diablomod/v_scythe.mdl"
 
 new LeaderCT = -1
 new LeaderT = -1
@@ -400,8 +404,8 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, Andariel, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Jumper, Enslaved, Kernel, PoisonCreeper, GiantSpider, SnowWanderer, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][18] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Andariel", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Zakarum", "Jumper", "Enslaved", "Kernel", "Poison Creeper", "Giant Spider", "Snow Wanderer","Griswold","The Smith","Demonolog","VipCztery" }
-new race_heal[28] = { 100,110,150,130,140,110,120,170,140,110,130,120,140,130,120,123,110,135,135,127,130,140,115,135,145,145,145,145 }
+new Race[28][18] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Andariel", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Jumper", "Enslaved", "Kernel", "Poison Creeper", "Giant Spider", "Snow Wanderer","Griswold","The Smith","Demonolog","VipCztery" }
+new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,127,130,140,115,135,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
 14300,15730,17300,19030,20900,23000,24000,25200,26400,27700,29000,30500,32000,33600,35300,37000,39000,41000,43000,45100,//41
@@ -697,9 +701,9 @@ public plugin_init()
 	register_clcmd("say /r","mana4")
 	//register_clcmd("say /savexp","savexpcom")
 	register_clcmd("say /reset","reset_skill")
-	register_clcmd("say /exp", "exp")
-	register_clcmd("say exp", "exp")
-	register_clcmd("reset","reset_skill")	 
+	//register_clcmd("say /exp", "exp")
+	//register_clcmd("say exp", "exp")
+	//register_clcmd("reset","reset_skill")	 
 	//register_clcmd("/reset","reset_skill")
 	register_clcmd("say /gold","mana1")
 	register_clcmd("say /g","mana1")
@@ -728,7 +732,7 @@ public plugin_init()
 	set_msg_block ( gmsgDeathMsg, BLOCK_SET ) 
 	set_task(5.0, "Timed_Healing", 0, "", 0, "b")
 	set_task(1.0, "radar_scan", 0, _, _, "b"); // radar
-	set_task(1.0, "fallen_respawn", 2, _, _, "b") //falen shaman
+	set_task(1.0, "fallen_respawn", 2, _, _, "b") //falen shaman and zakarum priest
 	set_task(1.0, "Timed_Ghost_Check", 0, "", 0, "b")
 	set_task(0.8, "UpdateHUD",0,"",0,"b")
 	register_think("PlayerCamera","Think_PlayerCamera");
@@ -1482,7 +1486,7 @@ public MYSQLX_Save( id )
 
 	
 	// Then we need to save this!
-	if ( player_lvl[id] >= 0 )
+	if ( player_xp[id] >= 0 )
 	{
 		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_durabilty[id], player_intelligence[id], player_dextery[id] );
 		query = SQL_PrepareQuery( g_DBConn, szQuery );
@@ -1511,39 +1515,39 @@ public MYSQLX_Save( id )
 			return;
 		}
 	}
-			format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '1', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][1]);
-			query = SQL_PrepareQuery( g_DBConn, szQuery );
-		
-			if ( !SQL_Execute( query ) )
-			{
-				client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
-		
-				MYSQLX_Error( query, szQuery, 5 );
-		
-				return;
-			}
-			format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '2', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][2]);
-			query = SQL_PrepareQuery( g_DBConn, szQuery );
-		
-			if ( !SQL_Execute( query ) )
-			{
-				client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
-		
-				MYSQLX_Error( query, szQuery, 5 );
-		
-				return;
-			}
-			format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '3', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][3]);
-			query = SQL_PrepareQuery( g_DBConn, szQuery );
-		
-			if ( !SQL_Execute( query ) )
-			{
-				client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
-		
-				MYSQLX_Error( query, szQuery, 5 );
-		
-				return;
-			}
+	format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '1', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][1]);
+	query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
+
+		MYSQLX_Error( query, szQuery, 5 );
+
+		return;
+	}
+	format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '2', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][2]);
+	query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
+
+		MYSQLX_Error( query, szQuery, 5 );
+
+		return;
+	}
+	format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '3', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][3]);
+	query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
+
+		MYSQLX_Error( query, szQuery, 5 );
+
+		return;
+	}
 	
 	return;
 }
@@ -1577,7 +1581,7 @@ public MYSQLX_Save_T( id )
 
 	// Only save skill levels if the user does NOT play chameleon
 	// Then we need to save this!
-	if ( player_lvl[id] >= 0 )
+	if ( player_xp[id] >= 0 )
 	{
 		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_durabilty[id], player_intelligence[id], player_dextery[id] );
 		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
@@ -1959,7 +1963,6 @@ public speed(id)
 	new Float: sped= floatsqroot(vect[0]*vect[0]+vect[1]*vect[1]+vect[2]*vect[2])
 	
 	client_print(id,print_chat,"Сейчас: %f",sped)
-	client_print(id,print_chat,"item: %d",player_artifact_time[id][1])
 }
 
 public plugin_precache()
@@ -1990,7 +1993,8 @@ public plugin_precache()
 	precache_model(FL_VIEW)     
 	precache_model(FL_PLAYER)
 	precache_model(SE_VIEW)     
-	precache_model(SE_PLAYER)	
+	precache_model(SE_PLAYER)
+	precache_model(scythe_view)
 	precache_sound("weapons/xbow_hit2.wav")
 	precache_sound("weapons/xbow_fire1.wav")
 	sprite_blood_drop = precache_model("sprites/blood.spr")
@@ -2005,6 +2009,7 @@ public plugin_precache()
 	sprite_fire = precache_model("sprites/explode1.spr") 
 	sprite_gibs = precache_model("models/hgibs.mdl")
 	precache_model("sprites/zbeam4.spr") 
+	g_shock = precache_model("sprites/shockwave.spr")
 	sprite = precache_model("sprites/lgtning.spr");
 	precache_model("sprites/xfireball3.spr")
 	precache_model("models/portal/portal.mdl")
@@ -2066,9 +2071,15 @@ public plugin_precache()
 	precache_sound("diablo_lp/fallen_neutral3.wav");
 	precache_sound("diablo_lp/fallen_neutral4.wav");
 	precache_sound("diablo_lp/fallen_neutral5.wav");
+	precache_sound("diablo_lp/zakarum_neutral1.wav");
+	precache_sound("diablo_lp/zakarum_neutral2.wav");
+	precache_sound("diablo_lp/zakarum_neutral3.wav");
+	precache_sound("diablo_lp/zakarum_neutral4.wav");
 	precache_sound("weapons/explode3.wav");
 	precache_sound("diablo_lp/portalcast.wav");
 	precache_sound("diablo_lp/portalenter.wav");
+	precache_sound("diablo_lp/teleport.wav");
+	precache_sound("diablo_lp/zakarum_death1.wav");
 	precache_model("models/diablomod/w_throwingknife.mdl")
 	precache_model("models/diablomod/bm_block_platform.mdl")
 	
@@ -2492,6 +2503,8 @@ public RoundStart(){
 		kill_all_entity("przedmiot")
 		
 		player_fallen_tr[i]=1;
+		//play idle
+		remove_task(i+2000)
 		
 		if(player_class[i] == Necromancer)
 		{
@@ -2599,6 +2612,16 @@ public RoundStart(){
 				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
+		if(player_class[i] == Zakarum && player_lvl[i] > 49)
+		{
+			new Float:dmg = player_intelligence[i]/2.0;
+			ilosc_blyskawic[i] = floatround(dmg,floatround_round);
+		}
+		if(player_class[i] == Zakarum)
+		{
+			new Float:random_time = random_float(15.0, 20.0);
+			set_task(random_time, "play_idle", i+2000, _, _, "b")
+		}
 		if(player_class[i] == Imp)
 		{
 			if(!g_bWeaponsDisabled)
@@ -2665,15 +2688,16 @@ public RoundStart(){
 			}
 		}
 		//Fallen Code
-		remove_task(i+2000)
 		if(player_class[i] == Fallen && player_lvl[i] > 49)
 		{
-			fallen_fires[i] = floatround(player_lvl[i]/10.0, floatround_floor);
-			set_task(random_float(25.0, 35.0), "fallen_play_idle", i+2000, _, _, "b")
+			fallen_fires[i] = floatround(player_lvl[i]/5.0, floatround_floor);
+			new Float:random_time = random_float(25.0, 35.0);
+			set_task(random_time, "play_idle", i+2000, _, _, "b")
 		}
 		if(player_class[i] == Fallen && player_lvl[i] < 49)
 		{
-			set_task(random_float(10.0, 15.0), "fallen_play_idle", i+2000, _, _, "b")
+			new Float:random_time = random_float(10.0, 15.0);
+			set_task(random_time, "play_idle", i+2000, _, _, "b")
 		}
 		
 		golden_bulet[i]=0
@@ -2835,6 +2859,29 @@ public CurWeapon(id)
 				entity_set_string(id, EV_SZ_weaponmodel, SE_PLAYER)  
 			}			
 		}
+		if(player_class[id] == Zakarum)
+		{	
+			if(on_knife[id]){
+				entity_set_string(id, EV_SZ_viewmodel, scythe_view)  
+				entity_set_string(id, EV_SZ_weaponmodel, KNIFE_PLAYER)  
+			}
+			if(weapon == CSW_C4){
+				entity_set_string(id, EV_SZ_viewmodel, C4_VIEW)  
+				entity_set_string(id, EV_SZ_weaponmodel, C4_PLAYER)  
+			}
+			if(weapon == CSW_HEGRENADE){
+				entity_set_string(id, EV_SZ_viewmodel, HE_VIEW)  
+				entity_set_string(id, EV_SZ_weaponmodel, HE_PLAYER)  
+			}
+			if(weapon == CSW_FLASHBANG){
+				entity_set_string(id, EV_SZ_viewmodel, FL_VIEW)  
+				entity_set_string(id, EV_SZ_weaponmodel, FL_PLAYER)  
+			}
+			if(weapon == CSW_SMOKEGRENADE){
+				entity_set_string(id, EV_SZ_viewmodel, SE_VIEW)  
+				entity_set_string(id, EV_SZ_weaponmodel, SE_PLAYER)  
+			}			
+		}
 		
 		if(bow[id]==1)
 		{
@@ -2965,7 +3012,22 @@ public DeathMsg(id)
 				set_user_frags(kid, get_user_frags(kid) + 1)
 				if(headshot)
 				{
-					mana_gracza[kid]+=3
+					mana_gracza[kid]+=1
+				}
+				award_kill(kid,vid)
+			}
+		}
+	}
+	if(player_class[id] == Zakarum)
+	{
+		if(on_knife[id])
+		{
+			if(get_user_team(kid) != get_user_team(vid)) 
+			{
+				set_user_frags(kid, get_user_frags(kid) + 1)
+				if(headshot)
+				{
+					mana_gracza[kid]+=1
 				}
 				award_kill(kid,vid)
 			}
@@ -2984,6 +3046,7 @@ public DeathMsg(id)
 		add_respawn_bonus(vid)
 		add_bonus_explode(vid)
 		add_barbarian_bonus(kid)
+		add_bonus_zakarum(vid)
 		//mana_gracza[kid]+=1
 		//mana_gracza[headshot]+=2
 		if (player_class[kid] == Barbarian)
@@ -3087,9 +3150,20 @@ public Damage(id)
 					}
 				}
 				
-				if(player_sword[attacker_id] == 1 && weapon==CSW_KNIFE ){
+				if(player_sword[attacker_id] == 1 && weapon==CSW_KNIFE )
+				{
+						change_health(id,-35,attacker_id,"world")					
+				}
+				if(player_class[attacker_id] == Zakarum && weapon==CSW_KNIFE )
+				{
 
-					change_health(id,-35,attacker_id,"world")
+					if(is_user_alive(id))
+					{
+						new Float:knife_dmg = player_intelligence[attacker_id]/2.0
+						if(knife_dmg < 1.0) { knife_dmg = 1.0; }
+						new knife_dmg2 = floatround(knife_dmg,floatround_round)
+						change_health(id,-knife_dmg2,attacker_id,"world")
+					}
 					
 				}
 				if (HasFlag(attacker_id,Flag_Ignite))
@@ -3761,15 +3835,6 @@ public Give_Artefact(id, iItem, iTime, iItemID)
 public client_connect(id)
 {
 //	reset_item_skills(id)  - nie tutaj bo nie loaduje poziomow O.o
-	g_iDBPlayerUniqueID[id]=0
-	for(new iRace=1;iRace<MAX_RACES;iRace++)
-	{
-		player_class_lvl[id][iRace] = 1
-		player_class_xp[id][iRace] = 0
-	}
-	mana_gracza[id] = 0
-	player_TotalLVL[id] = 0
-	asked_sql[id]=0
 	flashbattery[id] = MAX_FLASH
 	player_xp[id] = 0		
 	player_lvl[id] = 1	
@@ -3789,12 +3854,6 @@ public client_connect(id)
 	DemageTake[id]=0
 	player_b_gamble[id]=0
 	lustrzany_pocisk[id] = 0
-	player_portal[id] = 0
-	player_portal_infotrg_1[id] = 0
-	player_portal_sprite_1[id] = 0
-	player_portals[id] = 0
-	player_portal_infotrg_2[id] = 0
-	player_portal_sprite_2[id] = 0
 	
 	g_GrenadeTrap[id] = 0
 	g_TrapMode[id] = 0
@@ -3810,6 +3869,7 @@ public client_putinserver(id)
 {
 	loaded_xp[id]=0
 	player_class_lvl_save[id]=0
+	player_class[id] = 0
 	database_user_created[id]=0
 	count_jumps(id)
 	JumpsLeft[id]=JumpsMax[id]
@@ -3819,9 +3879,48 @@ public client_putinserver(id)
 	player_artifact_time[id][1]=0
 	player_artifact_time[id][2]=0
 	player_artifact_time[id][3]=0
-	
+	player_portal[id] = 0
+	player_portal_infotrg_1[id] = 0
+	player_portal_sprite_1[id] = 0
+	player_portals[id] = 0
+	player_portal_infotrg_2[id] = 0
+	player_portal_sprite_2[id] = 0
+	player_TotalLVL[id] = 0
+	g_iDBPlayerUniqueID[id]=0
 	// Get the user's ID!
 	DB_FetchUniqueID( id );
+	for(new iRace=1;iRace<MAX_RACES;iRace++)
+	{
+		player_class_lvl[id][iRace] = 1
+		player_class_xp[id][iRace] = 0
+	}
+	mana_gracza[id] = 0
+	asked_sql[id]=0
+	reset_item_skills(id) // Juz zaladowalo xp wiec juz nic nie zepsuje <lol2>
+	reset_player(id)
+	player_xp[id] = 0		
+	player_lvl[id] = 1	
+	player_premium[id] = 1
+	player_fallen_tr[id] = 0	
+	player_point[id] = 0	
+	player_item_id[id] = 0			
+	player_agility[id] = 0
+	player_strength[id] = 0
+	player_intelligence[id] = 0
+	player_dextery[id] = 0
+	player_b_oldsen[id] = 0.0
+	player_class[id] = 0
+	player_damreduction[id] = 0.0
+	last_update_xp[id] = -1
+	player_item_name[id] = "Нет"
+	DemageTake[id]=0
+	player_b_gamble[id]=0
+	lustrzany_pocisk[id] = 0
+	
+	g_GrenadeTrap[id] = 0
+	g_TrapMode[id] = 0
+		
+	player_ring[id]=0
 }
 
 public client_disconnect(id)
@@ -3891,22 +3990,29 @@ public write_hud(id)
 	
 	last_update_xp[id] = player_xp[id]
 	last_update_perc[id] = perc
-	new Racename[18]
+	new Racename[32]
 	copy(Racename, charsmax(Racename), Race[player_class[id]]);
 	if(player_class[id]==Fallen && player_lvl[id]>49)
 	{
-		Racename = "ArrayGetCell"
+		Racename = "Fallen Shaman"
 	}
-	
+	else if(player_class[id]==Zakarum && player_lvl[id]<50)
+	{
+		Racename = "Закарум маньяк"
+	}
+	else if(player_class[id]==Zakarum && player_lvl[id]>49)
+	{
+		Racename = "Закарум жрец"
+	}
 	if(player_class[id]!=Paladin)
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%0.0f%s)^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], perc,"%", player_item_name[id],item_durability[id],mana_gracza[id])
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
 	}
 	else
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%0.0f%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], perc,"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%i%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
 	}
 	
 	message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
@@ -3945,11 +4051,19 @@ public UpdateHUD()
 				
 				new Msg[512]
 				set_hudmessage(255, 255, 255, 0.78, 0.65, 0, 6.0, 3.0)
-				new Racename[18]
+				new Racename[32]
 				copy(Racename, charsmax(Racename), Race[player_class[index]]);
 				if(player_class[index]==Fallen && player_lvl[index]>49)
 				{
 					Racename = "Fallen Shaman"
+				}
+				else if(player_class[index]==Zakarum && player_lvl[index]<50)
+				{
+					Racename = "Закарум маньяк"
+				}
+				else if(player_class[index]==Zakarum && player_lvl[index]>49)
+				{
+					Racename = "Закарум жрец"
 				}
 				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nЗолото: %i",pname,player_lvl[index],Racename,player_item_name[index], mana_gracza[index])		
 				show_hudmessage(id, Msg)
@@ -6070,6 +6184,58 @@ public add_bonus_explode(id)
 	}
 }
 
+public add_bonus_zakarum(id)
+{
+	if (player_class[id] == Zakarum && player_lvl[id] > 49)
+	{
+		
+		emit_sound(id,CHAN_STATIC, "diablo_lp/zakarum_death1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+		set_task(0.35, "add_bonus_zakarum_sprite", id)
+	}
+}
+
+public add_bonus_zakarum_sprite(id)
+{
+	new origin[3] 
+	get_user_origin(id,origin)
+	
+	new parm[5]
+	parm[0] = id;
+	parm[1] = 6;
+	parm[2] = origin[0];
+	parm[3] = origin[1];
+	parm[4] = origin[2];
+	new vPosition[3], vOrigin[3];
+
+	vOrigin[0] = parm[2];
+	vOrigin[1] = parm[3];
+	vOrigin[2] = parm[4] - 16;
+
+	vPosition[0] = vOrigin[0];
+	vPosition[1] = vOrigin[1];
+	vPosition[2] = vOrigin[2] + 80; //radius
+	message_begin( MSG_PAS, SVC_TEMPENTITY, vOrigin )
+	write_byte( TE_BEAMCYLINDER )
+	write_coord( vOrigin[0] )			// center position (X)
+	write_coord( vOrigin[1] )			// center position (Y)
+	write_coord( vOrigin[2] )			// center position (Z)
+	write_coord( vPosition[0] )				// axis and radius (X)
+	write_coord( vPosition[1] )				// axis and radius (Y)
+	write_coord( vPosition[2] )				// axis and radius (Z)
+	write_short( g_shock )				// sprite index
+	write_byte( 0 )			// starting frame
+	write_byte( 0 )				// frame rate in 0.1's
+	write_byte( 6 )					// life in 0.1's
+	write_byte( 16 )					// line width in 0.1's
+	write_byte( 0 )				// noise amplitude in 0.01's
+	write_byte( 0 )					// color (red)
+	write_byte( 0 )					// color (green)
+	write_byte( 255 )					// color (blue)
+	write_byte( 255 )			// brightness
+	write_byte( 0 )					// scroll speed in 0.1's
+	message_end()
+}
+
 public explode(vec1[3],playerid, trigger)
 { 
 	message_begin( MSG_BROADCAST,SVC_TEMPENTITY,vec1) 
@@ -6513,22 +6679,37 @@ public Create_Line(id,origin1[3],origin2[3],bool:draw)
 
 public Prethink_Blink(id)
 {
-	if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
-	{			
-		if (on_knife[id])
-		{
-			if (halflife_time()-player_b_blink[id] <= 3) return PLUGIN_HANDLED		
-			player_b_blink[id] = floatround(halflife_time())	
-			UTIL_Teleport(id,300+15*player_intelligence[id])			
+	if(player_class[id] == Zakarum && player_lvl[id] > 49)
+	{
+		if( get_user_button(id) & IN_RELOAD && !(get_user_oldbutton(id) & IN_RELOAD) && is_user_alive(id)) 
+		{			
+			if (on_knife[id])
+			{
+				if (halflife_time()-c_blink[id] <= 3) return PLUGIN_HANDLED		
+				c_blink[id] = floatround(halflife_time())	
+				UTIL_Teleport(id,300+15*player_intelligence[id])			
+			}
 		}
 	}
-	if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
-	{			
-		if (on_knife[id])
-		{
-			if (halflife_time()-c_blink[id] <= 3) return PLUGIN_HANDLED		
-			c_blink[id] = floatround(halflife_time())	
-			UTIL_Teleport(id,300+15*player_intelligence[id])			
+	else
+	{
+		if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
+		{			
+			if (on_knife[id])
+			{
+				if (halflife_time()-player_b_blink[id] <= 3) return PLUGIN_HANDLED		
+				player_b_blink[id] = floatround(halflife_time())	
+				UTIL_Teleport(id,300+15*player_intelligence[id])			
+			}
+		}
+		if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
+		{			
+			if (on_knife[id])
+			{
+				if (halflife_time()-c_blink[id] <= 3) return PLUGIN_HANDLED		
+				c_blink[id] = floatround(halflife_time())	
+				UTIL_Teleport(id,300+15*player_intelligence[id])			
+			}
 		}
 	}
 	return PLUGIN_CONTINUE
@@ -7312,7 +7493,6 @@ public PressedKlasy(id, key)
 			  {
 				emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 			  }
-			  default: emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 			}
 		}
 		case 7: 
@@ -7350,7 +7530,7 @@ public PokazZwierz(id, key)
 {
 	/* Menu:
 	---.Zwierzeta
-	1.Izual
+	1.Zakarum
 	2.Jumper
 	3.Enslaved
 	4.Kernel
@@ -7373,10 +7553,9 @@ public PokazZwierz(id, key)
 	switch (key) {
 		case 0:
 		{    
-			player_class[id] = Izual
-			c_redirect[id]=4
-			c_antymeek[id]=1
+			player_class[id] = Zakarum
 			MYSQLX_SetDataForRace( id )
+			if(player_lvl[id] > 49) { c_blink[id] = floatround(halflife_time()); }
 		}
 		case 1: 
 		{    
@@ -8187,7 +8366,6 @@ public SelectBotRace(id)
 	if (player_class[id] == 0)
 	{
 		player_class[id] = random_num(1,24)
-		//load_xp(id)
 	}
 	
 	return PLUGIN_CONTINUE
@@ -8219,19 +8397,33 @@ public UTIL_Teleport(id,distance)
 	
 	new origin[3]
 	get_user_origin(id,origin)
+	if(player_class[id] == Zakarum && player_lvl[id] > 49)
+	{
+		emit_sound(id,CHAN_STATIC,"diablo_lp/teleport.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+		message_begin(MSG_BROADCAST ,SVC_TEMPENTITY) //message begin
+		write_byte(TE_PARTICLEBURST )
+		write_coord(origin[0]) // origin
+		write_coord(origin[1]) // origin
+		write_coord(origin[2]) // origin
+		write_short(30) // radius
+		write_byte(208) // particle color
+		write_byte(10) // duration * 10 will be randomized a bit
+		message_end()
+	}
+	else
+	{
+		//Particle burst ie. teleport effect	
+		message_begin(MSG_BROADCAST ,SVC_TEMPENTITY) //message begin
+		write_byte(TE_PARTICLEBURST )
+		write_coord(origin[0]) // origin
+		write_coord(origin[1]) // origin
+		write_coord(origin[2]) // origin
+		write_short(20) // radius
+		write_byte(1) // particle color
+		write_byte(4) // duration * 10 will be randomized a bit
+		message_end()
 	
-	//Particle burst ie. teleport effect	
-	message_begin(MSG_BROADCAST ,SVC_TEMPENTITY) //message begin
-	write_byte(TE_PARTICLEBURST )
-	write_coord(origin[0]) // origin
-	write_coord(origin[1]) // origin
-	write_coord(origin[2]) // origin
-	write_short(20) // radius
-	write_byte(1) // particle color
-	write_byte(4) // duration * 10 will be randomized a bit
-	message_end()
-	
-	
+	}
 }
 
 stock Set_Origin_Forward(id, distance) 
@@ -8599,7 +8791,7 @@ stock hudmsg2(id,Float:display_time,const fmt[], {Float,Sql,Result,_}:...)
 	
 	new buffer[512]
 	vformat(buffer, 511, fmt, 4)
-	set_hudmessage ( 0, 255, 0, 0.03, 0.69, 0, display_time/2, display_time, 0.1, 0.2, -1 ) 	
+	set_hudmessage ( 0, 255, 0, 0.03, 0.69, 0, display_time/2, display_time, 0.1, 0.2, 3 ) 	
 	show_hudmessage(id, buffer)
 	
 	player_huddelay[id]+=0.03
@@ -9808,40 +10000,47 @@ public set_gravitychange(id)
 
 public cmd_who(id)
 {
-        static motd[9000],header[100],name[32],len,i
-        len = 0
-        new team[32]
-        static players[32], numplayers
-        get_players(players, numplayers, "h")
-        new playerid
-        // Table i background
-        len += formatex(motd[len],sizeof motd - 1 - len,"<meta http-equiv='content-type' content='text/html; charset=UTF-8' />")
-        len += formatex(motd[len],sizeof motd - 1 - len,"<body bgcolor=#000000 text=#FFB000>")
-        len += formatex(motd[len],sizeof motd - 1 - len,"<center><table width=700 border=1 cellpadding=4 cellspacing=4>")
-        len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>Ник</td><td>Класс</td><td>Уровень</td><td>Команда</td></tr>")
-        //Title
-        formatex(header,sizeof header - 1,"Diablo Mod Stats")
-        
-        for (i=0; i< numplayers; i++)
-        {
-                playerid = players[i]
-                if ( get_user_team(playerid) == 1 ) team = "Terrorist"
-                else if ( get_user_team(playerid) == 2 ) team = "CT"
-                        else team = "Spectator"
-                get_user_name( playerid, name, 31 )
-                //get_user_name( playerid, name, 31 )
-                new Racename[18]
-                copy(Racename, charsmax(Racename), Race[player_class[playerid]]);
-                if(player_class[playerid]==Fallen && player_lvl[playerid]>49)
-                {
-                 Racename = "Fallen Shaman"
-                }
-                
-                len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>",name,Racename, player_lvl[playerid],team,player_item_name[playerid])
-        }
-        len += formatex(motd[len],sizeof motd - 1 - len,"</table></center>")
-        
-        show_motd(id,motd,header)     
+	static motd[9000],header[100],name[32],len,i
+	len = 0
+	new team[32]
+	static players[32], numplayers
+	get_players(players, numplayers, "h")
+	new playerid
+	// Table i background
+	len += formatex(motd[len],sizeof motd - 1 - len,"<meta http-equiv='content-type' content='text/html; charset=UTF-8' />")
+	len += formatex(motd[len],sizeof motd - 1 - len,"<body bgcolor=#000000 text=#FFB000>")
+	len += formatex(motd[len],sizeof motd - 1 - len,"<center><table width=700 border=1 cellpadding=4 cellspacing=4>")
+	len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>Ник</td><td>Класс</td><td>Уровень</td><td>Команда</td></tr>")
+	//Title
+	formatex(header,sizeof header - 1,"Diablo Mod Stats")
+	
+	for (i=0; i< numplayers; i++)
+	{
+		playerid = players[i]
+		if ( get_user_team(playerid) == 1 ) team = "Terrorist"
+		else if ( get_user_team(playerid) == 2 ) team = "CT"
+				else team = "Spectator"
+		get_user_name( playerid, name, 31 )
+		//get_user_name( playerid, name, 31 )
+		new Racename[32]
+		copy(Racename, charsmax(Racename), Race[player_class[playerid]]);
+		if(player_class[playerid]==Fallen && player_lvl[playerid]>49)
+		{
+			Racename = "Fallen Shaman"
+		}
+		else if(player_class[playerid]==Zakarum && player_lvl[playerid]<50)
+		{
+			Racename = "Закарум маньяк"
+		}
+		else if(player_class[playerid]==Zakarum && player_lvl[playerid]>49)
+		{
+			Racename = "Закарум жрец"
+		}
+		len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>",name,Racename, player_lvl[playerid],team,player_item_name[playerid])
+	}
+	len += formatex(motd[len],sizeof motd - 1 - len,"</table></center>")
+	
+	show_motd(id,motd,header)     
 }
 
 public det_fade(id)
@@ -10711,25 +10910,33 @@ public command_arrow(id)
 
 public command_bow(id) 
 {
-        if(!is_user_alive(id)) return PLUGIN_HANDLED
+	if(!is_user_alive(id)) return PLUGIN_HANDLED
  
-        if(bow[id] == 1){
-                entity_set_string(id,EV_SZ_viewmodel,cbow_VIEW)
-                entity_set_string(id,EV_SZ_weaponmodel,cvow_PLAYER)
+	if(bow[id] == 1)
+	{
+		entity_set_string(id,EV_SZ_viewmodel,cbow_VIEW)
+		entity_set_string(id,EV_SZ_weaponmodel,cvow_PLAYER)
 		bowdelay[id] = get_gametime()
-        }else if(player_sword[id] == 1)
+	}
+	else if(player_sword[id] == 1)
 	{
 		entity_set_string(id, EV_SZ_viewmodel, SWORD_VIEW)  
 		entity_set_string(id, EV_SZ_weaponmodel, SWORD_PLAYER)  
 		bow[id]=0
 	}
+	else if(player_class[id] == Zakarum)
+	{
+		entity_set_string(id, EV_SZ_viewmodel, scythe_view)  
+		entity_set_string(id, EV_SZ_weaponmodel, KNIFE_PLAYER) 
+	}
 	else
 	{
-                entity_set_string(id,EV_SZ_viewmodel,KNIFE_VIEW)
-                entity_set_string(id,EV_SZ_weaponmodel,KNIFE_PLAYER)
+		entity_set_string(id,EV_SZ_viewmodel,KNIFE_VIEW)
+		entity_set_string(id,EV_SZ_weaponmodel,KNIFE_PLAYER)
 		bow[id]=0
-        }
-        return PLUGIN_CONTINUE
+	}
+	
+	return PLUGIN_CONTINUE
 }
 
 public toucharrow(arrow, id)
@@ -11190,7 +11397,7 @@ public make_shild(id,Float:vOrigin[3],Float:vAngles[3],Float:gfBlockSizeMin[3],F
 public call_cast(id)
 {
 	
-	set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 2.0, 0.1, 0.2, 2)
+	set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 3.0, 0.1, 0.4, 2)
 				
 	switch(player_class[id])
 	{
@@ -11264,15 +11471,13 @@ public call_cast(id)
 				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
-		case Izual:
+		case Zakarum:
 		{
-			lustrzany_pocisk[id]++
-			if(lustrzany_pocisk[id]>2)
-			{
-				lustrzany_pocisk[id]=2
-				show_hudmessage(id, "[Izual] У вас максимум зеркал отражения - 2",lustrzany_pocisk[id]) 
-			}
-			else show_hudmessage(id, "[Izual] Кол-во зеркал отражения урона - %i",lustrzany_pocisk[id]) 
+			new Float:zak_maxspeed
+			new speed_points = player_dextery[id] * 2;
+			zak_maxspeed = float(speed_points + 400);
+			show_hudmessage(id, "[Закарум] Макс. скорость %i. ^nСбивается при переключении оружия.", floatround(zak_maxspeed,floatround_round))
+			set_user_maxspeed(id,zak_maxspeed)
 		}
 		case Barbarian:
 		{
@@ -12436,13 +12641,14 @@ public FallenShaman(id)
 			client_print(id, print_center, "Шары можно использовать каждые 5 секунд!");
 			return PLUGIN_CONTINUE;
 		}
+		if(player_intelligence[id] < 1)
+		{
+				client_print(id, print_center, "Чтобы пускать шары необходим Интеллект!");
+				return PLUGIN_CONTINUE;
+		}
 		
 		if (is_user_alive(id))
 		{	
-			if(player_intelligence[id] < 1)
-			{
-				client_print(id, print_center, "Чтобы пускать шары необходим Интеллект!");
-			}
 				
 			falen_fires_time[id] = get_gametime();
 			fallen_fires[id]--;
@@ -12760,11 +12966,14 @@ public StworzRakiete(id)
 		client_print(id, print_center, "Ракеты можно использовать каждые 3 секунды!");
 		return PLUGIN_CONTINUE;
 	}
+	if(player_intelligence[id] < 1)
+	{
+		client_print(id, print_center, "Чтобы пускать ракеты необходим Интеллект!");
+		return PLUGIN_CONTINUE;
+	}
 	
 	if (is_user_alive(id))
 	{	
-		if(player_intelligence[id] < 1)
-			client_print(id, print_center, "Чтобы пускать ракеты необходим Интеллект!");
 			
 		poprzednia_rakieta_gracza[id] = get_gametime();
 		ilosc_rakiet_gracza[id]--;
@@ -14124,9 +14333,40 @@ public fallen_respawn()
 				player_fallen_tr[i]=player_fallen_tr[i]+1;
 			}
 		}
+		if(player_class[i] == Zakarum && player_lvl[i] > 49 && round_status==1 && is_user_alive(i))
+		{
+			new revivername[32]
+			new Float:radius = 800.0 //revive radius
+			
+			for (new a=0; a<32; a++) 
+			{
+				//a = Players[i2] 
+				
+				new Float:aOrigin[3], Float:origin[3]
+				pev(a,pev_origin,aOrigin)
+				pev(i,pev_origin,origin)
+				new Float:distance = get_distance_f(aOrigin,origin)						
+				if (get_user_team(i) == get_user_team(a) && distance < radius && player_class[a] == Zakarum && a != i && is_user_alive(a))
+				{
+					new Float:revivehpfloat = player_intelligence[i]/10.0
+					new revivehp = floatround(revivehpfloat,floatround_round)
+					if(revivehp > 0)
+					{
+						new m_health = race_heal[player_class[a]]+player_strength[a]*2
+						new newhp = get_user_health(a)+revivehp
+						if(newhp < m_health)
+						{
+							set_user_health(a,newhp)
+							get_user_name(i,revivername,31)
+							hudmsg2(a,1.0,"%s исцелил вас на %i HP",revivername, revivehp)
+						}
+					}
+				}
+			}
+		}
     }
 }
-public fallen_play_idle(taskid)
+public play_idle(taskid)
 {
 	new TASK_BLOOD = taskid - 2000;
 	if(round_status==1 && player_class[TASK_BLOOD] == Fallen && is_user_alive(TASK_BLOOD))
@@ -14155,7 +14395,19 @@ public fallen_play_idle(taskid)
 			}
 		} 
 	}
+	else if(round_status==1 && player_class[TASK_BLOOD] == Zakarum && is_user_alive(TASK_BLOOD))
+	{
+			rndfsound = random(3);
+			switch(rndfsound)
+			{
+				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+			} 
+	}
 }
+
 public niesmiertelnoscon(id) 
 {
         if(used_item[id]) 
@@ -16436,6 +16688,24 @@ public hook_team_select(id,key)
 	return PLUGIN_CONTINUE
 }
 
+public glow_player(id, Float:time, red, green, blue)
+{
+	
+	
+	set_user_rendering( id, kRenderFxGlowShell, red, green, blue, kRenderNormal, 16 );
+	remove_task(id+TASKID_GLOW);
+	set_task(time, "unglow_player", id+TASKID_GLOW, "", 0, "a", 1);
+	
+	return;
+}
+
+public unglow_player(id)
+{
+	id-=TASKID_GLOW;
+	set_user_rendering( id );
+	remove_task(id+TASKID_GLOW);	
+}
+
 public cmdUnmakeBoss(id,level,cid){
 	if(cmd_access(id,level,cid,1))set_task(5.0,"UnmakeBoss")
 	return PLUGIN_HANDLED
@@ -16512,21 +16782,25 @@ public MakeBoss2(){
 }
 public cmdBlyskawica(id){
     if(!is_user_alive(id)) return PLUGIN_HANDLED;
-    if(!ilosc_blyskawic[id]) {
-          client_print(id,print_chat,"У вас нет молний");
+    if(!ilosc_blyskawic[id])
+	{
+          client_print(id,print_center,"У вас нет молний");
           return PLUGIN_HANDLED;
     }
     if(poprzednia_blyskawica[id]+2.0>get_gametime()) {
-          client_print(id,print_chat,"Вы можете использовать молнии каждые 5 секунд.");
+          client_print(id,print_center,"Вы можете использовать молнии каждые 5 секунд.");
           return PLUGIN_HANDLED;
     }
-    poprzednia_blyskawica[id]=floatround(get_gametime());
-    ilosc_blyskawic[id]--;
     new ofiara, body;
     get_user_aiming(id, ofiara, body);
     
-    if(is_user_alive(ofiara)){
-        puscBlyskawice(id, ofiara, 50.0, 0.5);
+    if(is_user_alive(ofiara))
+	{
+		new Float:dmg = float((player_intelligence[id] - player_dextery[ofiara])/2);
+		if(dmg < 1.0) { dmg = 1.0; }
+		puscBlyskawice(id, ofiara, dmg);
+		ilosc_blyskawic[id]--;
+		poprzednia_blyskawica[id]=floatround(get_gametime());
     }
     return PLUGIN_HANDLED;
 }
@@ -16550,16 +16824,32 @@ stock Create_TE_BEAMENTS(startEntity, endEntity, iSprite, startFrame, frameRate,
     message_end()
 }
 
-puscBlyskawice(id, ofiara, Float:fObrazenia = 50.0, Float:fCzas = 1.0){
-    //Obrazenia
-    new ent = create_entity("info_target");
-    entity_set_string(ent, EV_SZ_classname, "blyskawica");
-    ExecuteHamB(Ham_TakeDamage, ofiara, ent, id, fObrazenia, DMG_SHOCK);
-    remove_entity(ent);
-    
-    //Piorun
-    Create_TE_BEAMENTS(id, ofiara, sprite, 0, 10, floatround(fCzas*10), 150, 5, 200, 200, 200, 200, 10);
-    
-    //Dzwiek
-    emit_sound(id, CHAN_WEAPON, gszSound, VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+stock Create_ScreenFade(id, duration, holdtime, fadetype, red, green, blue, alpha){
+
+	message_begin( MSG_ONE,gmsgScreenFade,{0,0,0},id )			
+	write_short( duration )			// fade lasts this long duration
+	write_short( holdtime )			// fade lasts this long hold time
+	write_short( fadetype )			// fade type (in / out)
+	write_byte( red )				// fade red
+	write_byte( green )				// fade green
+	write_byte( blue )				// fade blue
+	write_byte( alpha )				// fade alpha
+	message_end()
+}
+
+puscBlyskawice(id, ofiara, Float:fObrazenia)
+{
+	//Obrazenia
+	new ent = create_entity("info_target");
+	new Float:fCzas = 1.0;
+	entity_set_string(ent, EV_SZ_classname, "blyskawica");
+	ExecuteHamB(Ham_TakeDamage, ofiara, ent, id, fObrazenia, DMG_SHOCK);
+	remove_entity(ent);
+		
+	//Piorun
+	Create_TE_BEAMENTS(id, ofiara, sprite, 0, 10, floatround(fCzas*10), 150, 5, 200, 200, 200, 200, 10);
+	glow_player(ofiara, 1.0, 255, 255, 255)
+		
+	//Dzwiek
+	emit_sound(id, CHAN_WEAPON, gszSound, VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
 }
