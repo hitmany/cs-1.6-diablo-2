@@ -47,6 +47,7 @@ new Basepath[128]	//Path from Cstrike base directory
 #include <colorchat>
 #include <xs>
 #include <nvault>
+#include <cs_player_models_api>
 
 
 #define RESTORETIME 30.0	 //How long from server start can players still get their item trasferred (s)
@@ -55,13 +56,9 @@ new Basepath[128]	//Path from Cstrike base directory
 //#define CHEAT 1		 //Cheat for testing purposes
 #define CS_PLAYER_HEIGHT 72.0
 #define GLOBAL_COOLDOWN 0.5
-#define TASK_GREET 240
-#define TASK_HUD 120
-#define TASK_HOOK 360
 #define MAX_PLAYERS 32
 #define BASE_SPEED 	245.0
 #define GLUTON 95841
-#define TASK_GOD 129
 #define VOL_NULL    0.0
 #define VOL_MID    0.5
 #define FLAG_NONE    0
@@ -75,9 +72,13 @@ new DemageTake1[33]
 #define y 1
 #define z 2
 
-#define TASK_CHARGE 100
-#define TASK_NAME 48424
-#define TASK_FLASH_LIGHT 81184
+#define TASK_MODELCHANGE 100
+#define ID_MODELCHANGE (taskid - TASK_MODELCHANGE)
+#define TASK_CHARGE 110
+#define TASK_HUD 120
+#define TASK_GOD 129
+#define TASK_GREET 240
+#define TASK_HOOK 360
 
 #define TASKID_REVIVE 	1337
 #define TASKID_RESPAWN 	1338
@@ -87,6 +88,8 @@ new DemageTake1[33]
 #define TASKID_SETUSER 	13312
 #define TASKID_SQLFETCH 13313
 #define TASKID_GLOW 	13314
+#define TASK_NAME 48424
+#define TASK_FLASH_LIGHT 81184
 #define FL_ONGROUND (1<<9)
 #define message_begin_f(%1,%2,%3,%4) engfunc(EngFunc_MessageBegin, %1, %2, %3, %4)
 #define write_coord_f(%1) engfunc(EngFunc_WriteCoord, %1)
@@ -104,6 +107,38 @@ new DemageTake1[33]
 //Frozen explode
 #define message_begin_fl(%1,%2,%3,%4) engfunc(EngFunc_MessageBegin, %1, %2, %3, %4)
 #define write_coord_fl(%1) engfunc(EngFunc_WriteCoord, %1)
+
+//Set user model
+// Delay between model changes (increase if getting SVC_BAD kicks)
+#define MODELCHANGE_DELAY 0.2
+
+// Delay after roundstart (increase if getting kicks at round start)
+#define ROUNDSTART_DELAY 2.0
+
+#define MAXPLAYERS 32
+#define MODELNAME_MAXLENGTH 32
+
+new amxbasedir[64]
+new configsbasedir[64]
+
+new const DEFAULT_MODELINDEX_T[] = "models/player/terror/terror.mdl"
+new const DEFAULT_MODELINDEX_CT[] = "models/player/urban/urban.mdl"
+
+// CS Player PData Offsets (win32)
+#define PDATA_SAFE 2
+#define OFFSET_CSTEAMS 114
+#define OFFSET_MODELINDEX 491 // Orangutanz
+
+#define flag_get(%1,%2)		(%1 & (1 << (%2 & 31)))
+#define flag_set(%1,%2)		(%1 |= (1 << (%2 & 31)));
+#define flag_unset(%1,%2)	(%1 &= ~(1 << (%2 & 31)));
+
+new g_MaxPlayers
+new g_HasCustomModel
+new Float:g_ModelChangeTargetTime
+new g_CustomPlayerModel[MAXPLAYERS+1][MODELNAME_MAXLENGTH]
+
+//END of set user model block
 
 new SOUND_START[] 	= "items/medshot4.wav"
 new SOUND_FINISHED[] 	= "items/smallmedkit2.wav"
@@ -203,7 +238,7 @@ new player_agility[33]
 new player_agility_best[33]
 new player_dextery[33]
 new player_stamina[33]
-new player_durabilty[33]
+new player_vitality[33]
 new mana_gracza[33]
 new player_TotalLVL[33]
 new Float:player_damreduction[33]
@@ -297,7 +332,6 @@ new player_b_kasatotem[33] = 1
 new player_b_kasaqtotem[33] = 1
 new player_b_wywaltotem[33] = 1
 new uzyl_przedmiot[33];
-new c_piorun[33]
 new skinchanged[33]
 new player_dc_name[33][99]	//Information about last disconnected players name
 new player_dc_item[33]		//Information about last disconnected players item
@@ -386,6 +420,8 @@ new cvow_PLAYER[]= "models/diablomod/p_crossbow.mdl"
 new cbow_bolt[]  = "models/diablomod/Crossbow_bolt.mdl"
 new scythe_view[]  = "models/diablomod/v_scythe.mdl"
 new infidel_view[]  = "models/diablomod/v_infidel2.mdl"
+new infidel_model[]  = "models/player/d2_infidel/d2_infidel.mdl"
+new infidel_model_short[]  = "d2_infidel"
 
 new LeaderCT = -1
 new LeaderT = -1
@@ -404,6 +440,7 @@ new g_iDBPlayerSavedBy[33];
 // SQLX
 new Handle:g_DBTuple;
 new Handle:g_DBConn;
+new gcvar_host, gcvar_user, gcvar_pass, gcvar_database;
 //new bool:bDBXPRetrieved[33];
 
 #define TOTAL_TABLES		5
@@ -418,8 +455,8 @@ new const szTables[TOTAL_TABLES][] =
 };
 
 
-enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, Andariel, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Jumper, Enslaved, Frozen, Infidel, GiantSpider, SnowWanderer, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Andariel", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Jumper", "Enslaved", "Ледянной ужас", "Инфидель", "Giant Spider", "Snow Wanderer","Griswold","The Smith","Demonolog","VipCztery" }
+enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, Andariel, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Leaper, Enslaved, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Andariel", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Прыгун", "Enslaved", "Ледяной ужас", "Инфидель", "Giant Spider", "Sabre Cat","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,127,100,140,115,135,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -546,7 +583,7 @@ new questy[][]={
 	{1,3,Imp,1200,1},
 	{1,6,Fallen,2000,0},
 	{2,6,Diablo,5000,0},
-	{2,15,Jumper,15000,1},
+	{2,15,Leaper,15000,1},
 	{2,20,Andariel,20000,1},
 	{3,65,Imp,150000,1},
 	{3,120,Baal,200000,1}
@@ -569,7 +606,7 @@ new questy_info[][]={
 	"Убей 3 Imp (Получи 1200 опыта)",
 	"Убей 6 Fallen (Получи 2000 опыта)",
 	"Убей 6 Diablo (Получи 5000 опыта)",
-	"Убей 15 Jumper (Получи 15000 опыта)",
+	"Убей 15 Leaper (Получи 15000 опыта)",
 	"Убей 20 Andariel (Получи 20000 опыта)",
 	"Убей 65 Imp (Получи 150000 опыта)",
 	"Убей 120 Baal (Получи 200000 опыта)"
@@ -591,6 +628,9 @@ new mod_version[16] = "LP 2.0 beta"
 
 public plugin_init()
 {
+	get_basedir(amxbasedir,63)
+	get_configsdir(configsbasedir,63)
+	
 	new map[32]
 	get_mapname(map,31)
 	new times[64]
@@ -598,10 +638,10 @@ public plugin_init()
 	//D2_Log( true, "%s ### MAP: %s ### ",times,map)
 	WC3_MapDisableCheck("weapons.cfg")
 	
-	register_cvar("diablo_sql_host","localhost",FCVAR_PROTECTED)
-	register_cvar("diablo_sql_user","root",FCVAR_PROTECTED)
-	register_cvar("diablo_sql_pass","",FCVAR_PROTECTED)
-	register_cvar("diablo_sql_database","dbmod2",FCVAR_PROTECTED)
+	gcvar_host = register_cvar("diablo_sql_host","localhost",FCVAR_PROTECTED)
+	gcvar_user = register_cvar("diablo_sql_user","root",FCVAR_PROTECTED)
+	gcvar_pass = register_cvar("diablo_sql_pass","",FCVAR_PROTECTED)
+	gcvar_database = register_cvar("diablo_sql_database","dbmod",FCVAR_PROTECTED)
 	
 	//register_cvar("diablo_sql_table","dbmod_table222",FCVAR_PROTECTED)
 	register_cvar("diablo_sql_save","0",FCVAR_PROTECTED)	// 0 - nick
@@ -636,6 +676,8 @@ public plugin_init()
 	register_forward(FM_Touch, "fwTouch")
 	register_forward(FM_EmitSound, 		"fwd_emitsound")
 	register_forward(FM_PlayerPostThink, 	"fwd_playerpostthink")
+	register_forward(FM_SetClientKeyValue, "fw_SetClientKeyValue")
+	g_MaxPlayers = get_maxplayers()
 	//register_forward(FM_CmdStart, "Fwd_CmdStart");
 	RegisterHam(Ham_TakeDamage, "player", "lustrzanypocisk")
 
@@ -867,6 +909,7 @@ public plugin_init()
 	
 	register_clcmd("quest","menu_questow")
 	register_clcmd("say /quest","menu_questow")
+	server_cmd("exec %s/diablo/main.cfg", configsbasedir) 
 	sql_start()
 	//set_task(1.0, "AutoCheck_Afk", 0, "", 0, "b")
 	
@@ -877,8 +920,7 @@ bool:WC3_MapDisableCheck( szFileName[] )
 {
 	// Format the Orc Nade Disable File
 	new szFile[128];
-	new amxbasedir[64]
-	get_basedir(amxbasedir,63)
+	
 	formatex( szFile, 127, "%s/diablo/disable/%s", amxbasedir, szFileName );
 
 	if ( !file_exists( szFile ) )
@@ -1191,12 +1233,15 @@ public MYSQLX_CreateTables()
 public sql_start()
 {
 	
-	new host[128], user[64], pass[64], database[64], szError[256], iErrNum;
+	new host[128], database[64], user[64], pass[64], szError[256], iErrNum;
 	
-	get_cvar_string("diablo_sql_database",database,63)
-	get_cvar_string("diablo_sql_host",host,127)
-	get_cvar_string("diablo_sql_user",user,63)
-	get_cvar_string("diablo_sql_pass",pass,63)
+	server_cmd("exec %s/diablo/main.cfg", configsbasedir)
+	server_exec()
+	
+	get_pcvar_string(gcvar_database,database,63)
+	get_pcvar_string(gcvar_host,host,127)
+	get_pcvar_string(gcvar_user,user,63)
+	get_pcvar_string(gcvar_pass,pass,63)
 	
 	g_SqlTuple = SQL_MakeDbTuple(host,user,pass,database)
 	
@@ -1371,10 +1416,10 @@ public MYSQLX_GetAllXP( id )
 	{
 		iRace	= SQL_ReadResult( query, 0 );
 		iXP		= SQL_ReadResult( query, 1 );
-		for (new i = 1; i <= sizeof(LevelXP); i++ )
+		for (new i = 1; i <= sizeof(LevelXP)-1; i++ )
 		{
 			// User has enough XP to advance to the next level
-			if ( iXP >= LevelXP[i] )
+			if ( iXP >= LevelXP[i])
 			{
 				player_class_lvl[id][iRace] = i+1;
 			}
@@ -1512,7 +1557,7 @@ public MYSQLX_Save( id )
 	// Then we need to save this!
 	if ( player_xp[id] >= 0 )
 	{
-		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_durabilty[id], player_intelligence[id], player_dextery[id] );
+		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_vitality[id], player_intelligence[id], player_dextery[id] );
 		query = SQL_PrepareQuery( g_DBConn, szQuery );
 	
 		if ( !SQL_Execute( query ) )
@@ -1607,7 +1652,7 @@ public MYSQLX_Save_T( id )
 	// Then we need to save this!
 	if ( player_xp[id] >= 0 )
 	{
-		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_durabilty[id], player_intelligence[id], player_dextery[id] );
+		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_vitality[id], player_intelligence[id], player_dextery[id] );
 		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
 	}
 	
@@ -1664,7 +1709,7 @@ public MYSQLX_SetDataForRace( id )
 		player_agility_best[id] = SQL_ReadResult( query, 1 );
 		player_agility[id] = SQL_ReadResult( query, 2 );
 		player_stamina[id] = SQL_ReadResult( query, 3 );
-		player_durabilty[id] = SQL_ReadResult( query, 4 );
+		player_vitality[id] = SQL_ReadResult( query, 4 );
 		player_intelligence[id] = SQL_ReadResult( query, 5 );
 		player_dextery[id] = SQL_ReadResult( query, 6 );
 		
@@ -1683,7 +1728,7 @@ public MYSQLX_SetDataForRace( id )
 		player_agility_best[id] = SQL_ReadResult( query, 1 );
 		player_agility[id] = SQL_ReadResult( query, 2 );
 		player_stamina[id] = SQL_ReadResult( query, 3 );
-		player_durabilty[id] = SQL_ReadResult( query, 4 );
+		player_vitality[id] = SQL_ReadResult( query, 4 );
 		player_intelligence[id] = SQL_ReadResult( query, 5 );
 		player_dextery[id] = SQL_ReadResult( query, 6 );
 		D2_Log( true, "Set data for race", szName, iUniqueID );
@@ -1713,21 +1758,24 @@ public DB_SaveAll(thread)
 
 	new players[32], numofplayers, i;
 	get_players( players, numofplayers );
-
-	for ( i = 0; i < numofplayers; i++ )
+	
+	if(numofplayers != 0)
 	{
-		if(thread == 1)
+		for ( i = 0; i < numofplayers; i++ )
 		{
-			if (player_class[players[i]] != 0)
+			if(thread == 1)
 			{
-				MYSQLX_Save_T( players[i] );
+				if (player_class[players[i]] != 0)
+				{
+					MYSQLX_Save_T( players[i] );
+				}
 			}
-		}
-		else if(thread == 2)
-		{
-			if (player_class[players[i]] != 0)
+			else if(thread == 2)
 			{
-				MYSQLX_Save( players[i] );
+				if (player_class[players[i]] != 0)
+				{
+					MYSQLX_Save( players[i] );
+				}
 			}
 		}
 	}
@@ -2020,6 +2068,7 @@ public plugin_precache()
 	precache_model(SE_PLAYER)
 	precache_model(scythe_view)
 	precache_model(infidel_view)
+	precache_model(infidel_model)
 	precache_sound("weapons/xbow_hit2.wav")
 	precache_sound("weapons/xbow_fire1.wav")
 	sprite_blood_drop = precache_model("sprites/blood.spr")
@@ -2043,16 +2092,6 @@ public plugin_precache()
 	precache_model("sprites/diablo_lp/portal_tt.spr")
 	precache_model("sprites/diablo_lp/portal_ct.spr")
 	precache_model("sprites/diablo_lp/cold_expo.spr")
-	
-	precache_model("models/player/arctic/arctic.mdl")
-	precache_model("models/player/terror/terror.mdl")
-	precache_model("models/player/leet/leet.mdl")
-	precache_model("models/player/guerilla/guerilla.mdl")
-	precache_model("models/player/gign/gign.mdl")
-	precache_model("models/player/sas/sas.mdl")
-	precache_model("models/player/gsg9/gsg9.mdl")
-	precache_model("models/player/urban/urban.mdl")
-	precache_model("models/player/vip/vip.mdl")
 		
 	precache_sound(SOUND_START)
 	precache_sound(SOUND_FINISHED)
@@ -2146,6 +2185,9 @@ public plugin_natives()
 	register_native("db_set_user_class", "native_set_user_class", 1)
 	register_native("db_get_user_item", "native_get_user_item", 1)
 	register_native("db_set_user_item", "native_set_user_item", 1)
+	register_library("cs_player_models_api")
+	register_native("cs2_set_player_model", "native_set_player_model")
+	register_native("cs2_reset_player_model", "native_reset_player_model")
 }
 
 /*public savexpcom(id)
@@ -2564,7 +2606,7 @@ public RoundStart(){
 				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
-		if(player_class[i] == Jumper)
+		if(player_class[i] == Leaper)
 		{
 			if(!g_bWeaponsDisabled)
 			{
@@ -2601,20 +2643,9 @@ public RoundStart(){
 				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
-		if(player_class[i] == SnowWanderer)
+		if(player_class[i] == SabreCat)
 		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(i,"weapon_famas")
-				fm_give_item(i,"ammo_556nato")
-				fm_give_item(i,"ammo_556nato")
-				fm_give_item(i,"ammo_556nato")
-				fm_give_item(i,"ammo_556nato")
-			}
-			else
-			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-			}
+
 		}
 		if(player_class[i] == Zakarum && player_lvl[i] > 49)
 		{
@@ -2714,6 +2745,14 @@ public RoundStart(){
 				frozen_colds[i] = floatround(player_lvl[i]/2.0);
 			}
 		}
+		if(player_class[i] == Infidel)
+		{
+			cs2_set_player_model(i, infidel_model_short);
+		}
+		else
+		{
+			cs2_reset_player_model(i);
+		}
 		
 		golden_bulet[i]=0
 		c_ulecz[i] = false
@@ -2725,10 +2764,9 @@ public RoundStart(){
 			ilosc_blyskawic[i]=3;
 			poprzednia_blyskawica[i]=0
 		}	
-		else if(player_class[i] == SnowWanderer)
+		else if(player_class[i] == SabreCat)
 		{
-			ilosc_blyskawic[i]=3;
-			poprzednia_blyskawica[i]=0
+
 		}
 		else if(player_class[i] == TheSmith)
 		{
@@ -2737,7 +2775,7 @@ public RoundStart(){
 		}
 		//else ilosc_rakiet_gracza[i]=0
 		/*if(player_class[i] == Kernel) ilosc_dynamitow_gracza[i]=1
-		else if(player_class[i] == SnowWanderer) ilosc_dynamitow_gracza[i]=1
+		else if(player_class[i] == SabreCat) ilosc_dynamitow_gracza[i]=1
 		else if(player_class[i] == TheSmith) ilosc_dynamitow_gracza[i]=1*/
 		//else ilosc_rakiet_gracza[i]=0
 		
@@ -3193,6 +3231,24 @@ public Damage(id)
 					}
 					
 				}
+				if(player_class[attacker_id] == Infidel && weapon==CSW_KNIFE )
+				{
+
+					if(is_user_alive(id))
+					{
+						if(player_intelligence[attacker_id] > 5)
+						{
+							new infidel_chance = float(player_intelligence[attacker_id]) * 0.01
+							if( random_float(0.0, 1.0 ) <= infidel_chance )
+							{
+								new Float:addin_damage = float(damage)/2.0
+								new new_damage = floatround(addin_damage,floatround_round)
+								change_health(id,-new_damage,attacker_id,"world")
+							}
+						}
+					}
+					
+				}
 				if (HasFlag(attacker_id,Flag_Ignite))
 					RemoveFlag(attacker_id,Flag_Ignite)
 				
@@ -3303,7 +3359,7 @@ public un_rander(id) {
 
 public client_PreThink ( id ) 
 {	
-	if(!is_user_alive(id)||is_user_bot(id)) return PLUGIN_CONTINUE
+	if(!is_user_alive(id)) return PLUGIN_CONTINUE
 	new clip,ammo
         new weapon = get_user_weapon(id,clip,ammo)
         new button2 = get_user_button(id);
@@ -3387,7 +3443,7 @@ public client_PreThink ( id )
                         else cs_set_user_zoom(id,CS_SET_NO_ZOOM,1)
                 }
         }
-	if (entity_get_int(id, EV_INT_button) & 2 && (player_class[id]== Jumper))
+	if (entity_get_int(id, EV_INT_button) & 2 && (player_class[id]== Leaper))
         {
                 new flags = entity_get_int(id, EV_INT_flags)
                 
@@ -3532,13 +3588,13 @@ public client_PreThink ( id )
 		if ((Velocity[0] > 0.0 || Velocity[1] > 0.0 || Velocity[2] > 0.0))  
 		{
 			player_infidel[id] = 1
-			client_print(id, print_center, "Invis")
+			client_print(id, print_center, "НЕвидим")
 			set_renderchange(id)
 		}
 		else
 		{
 			player_infidel[id] = 0
-			client_print(id, print_center, "No invis")
+			client_print(id, print_center, "Видим")
 			set_renderchange(id)
 		}
 	}	
@@ -4007,6 +4063,10 @@ public client_disconnect(id)
 		player_class_lvl[id][race]=1
 		player_class_xp[id][race]=0
 	}
+	//set user model block
+	remove_task(id+TASK_MODELCHANGE)
+	flag_unset(g_HasCustomModel, id)
+	//end of set user model
 }
 
 /* ==================================================================================================== */
@@ -4036,6 +4096,10 @@ public write_hud(id)
 			xp_need = float(LevelXP[player_lvl[id]])
 			perc = xp_now*100.0/xp_need
 		}
+		else if(player_lvl[id] == sizeof(LevelXP))
+		{
+			perc = 0
+		}
 		else
 		{
 			xp_now = float(player_xp[id])-float( LevelXP[player_lvl[id]-1])
@@ -4063,12 +4127,12 @@ public write_hud(id)
 	if(player_class[id]!=Paladin)
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПредмет: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
 	}
 	else
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%i%s)^nПрыжки: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%i%s)^nПредмет: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
 	}
 	
 	message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
@@ -4630,8 +4694,6 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 {
 	new diabloDir[64]	
 	new g_ItemFile[64]
-	new amxbasedir[64]
-	get_basedir(amxbasedir,63)
 	
 	format(diabloDir,63,"%s/diablo",amxbasedir)
 	
@@ -5587,7 +5649,7 @@ public award_item(id, itemnum)
 		}
 		case 70:
 		{
-			player_item_name[id] = "Jumper Ring"
+			player_item_name[id] = "Leaper Ring"
 			player_item_id[id] = rannum
 			player_b_autobh[id] = 1
 			show_hudmessage(id, "Вы нашли item : %s :: Даёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
@@ -7452,7 +7514,7 @@ public select_class_menu(id, key)
 	c_awp[id]=0
 	niewidka[id]=0
 	zmiana_skinu[id]=0
-	c_piorun[id]=0
+	cs2_reset_player_model(id);
 	switch(key) 
 	{ 
 		case 0: 
@@ -7719,10 +7781,10 @@ public PressedKlasy(id, key)
 public PokazZwierze(id) 
 {	
 	new iLen,text5[512]
-	iLen += format(text5, 511, "\yЗвери/Животные: ^n\w1. \yЗакарум^t\wУровень: \r%i^n\w2. \yJumper^t\wУровень: \r%i^n",player_class_lvl[id][17],player_class_lvl[id][18]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yЛедянной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
+	iLen += format(text5, 511, "\yЗвери/Животные: ^n\w1. \yЗакарум^t\wУровень: \r%i^n\w2. \yПрыгун^t\wУровень: \r%i^n",player_class_lvl[id][17],player_class_lvl[id][18]);
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \ySnow Wanderer^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \ySabre Cat^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера");
 	
 	static key
@@ -7735,7 +7797,7 @@ public PokazZwierz( id, item )
 	/* Menu:
 	---.Zwierzeta
 	1.Zakarum
-	2.Jumper
+	2.Leaper
 	3.Enslaved
 	4.Frozen
 	5.Infidel
@@ -7752,7 +7814,6 @@ public PokazZwierz( id, item )
 	c_silent[id]=0
 	c_awp[id]=0
 	c_jump[id]=0
-	c_piorun[id]=0
 	c_vampire[id]=0
 
 	switch (item) {
@@ -7764,7 +7825,7 @@ public PokazZwierz( id, item )
 		}
 		case 1: 
 		{    
-			player_class[id] = Jumper
+			player_class[id] = Leaper
 			MYSQLX_SetDataForRace( id )
 		}
 		case 2: 
@@ -7776,7 +7837,6 @@ public PokazZwierz( id, item )
 		{    
 			player_class[id] = Frozen
 			c_silent[id]=1
-			c_piorun[id]=1
 			MYSQLX_SetDataForRace( id )
 			if(floatround(player_lvl[id]/2.0) < 10)
 			{
@@ -7790,6 +7850,7 @@ public PokazZwierz( id, item )
 		case 4: 
 		{    
 			player_class[id] = Infidel
+			cs2_set_player_model(id, infidel_model_short);
 			MYSQLX_SetDataForRace( id )
 		}
 		case 5: 
@@ -7799,8 +7860,7 @@ public PokazZwierz( id, item )
 		}
 		case 6: 
 		{    
-			player_class[id] = SnowWanderer
-			c_piorun[id]=1
+			player_class[id] = SabreCat
 			MYSQLX_SetDataForRace( id )
 		}
 		case 9: 
@@ -7871,7 +7931,6 @@ public PokazPremium(id, key)
 				c_antyarchy[id]=1
 				c_jump[id]=2
 				niewidka[id]=1
-				c_piorun[id]=1
 				c_vampire[id]=random_num(1,2)
 				MYSQLX_SetDataForRace( id )
 			}
@@ -7951,10 +8010,6 @@ public add_barbarian_bonus(id)
 	if (player_class[id] == Demonolog)
 	{	
 		change_health(id,40,0,"")
-	}
-	if (player_class[headshot] == SnowWanderer)
-	{	
-		change_health(id,30,0,"")
 	}
 }
 
@@ -8572,7 +8627,7 @@ public SelectBotRace(id)
 	if (player_class[id] == 0)
 	{
 		//player_class[id] = random_num(1,24)
-		player_class[id] = Ninja
+		player_class[id] = Infidel
 	}
 	
 	return PLUGIN_CONTINUE
@@ -10077,7 +10132,7 @@ public set_renderchange(id)
 	{	
 		if(!naswietlony[id])
 		{
-		new render = 255
+			new render = 255
 
 			if (player_class[id] == Ninja)
 			{
@@ -10109,7 +10164,16 @@ public set_renderchange(id)
 				if(player_infidel[id] == 1)
 				{
 					new inv_bonus = 255 - player_b_inv[id]
-					render = 13
+					if(player_intelligence[id] < 50)
+					{
+						new level_num = 50 - player_intelligence[id];
+						new Float:add_invis = float(level_num)*0.4;
+						render = floatround(add_invis,floatround_ceil)+10;
+					}
+					else
+					{
+						render = 10
+					}
 					
 					if(player_b_inv[id]>0)
 					{
@@ -10127,9 +10191,9 @@ public set_renderchange(id)
 					
 					if(render<0) render=0
 					
-					if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target)) render*=2	
-					
-					set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, render)
+					if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target)) render*=2
+				
+					set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, 15)
 				}
 				else
 				{
@@ -10524,6 +10588,115 @@ public event_hltv()
 			trace_bool[players[i]] = 0
 		}
 	}
+	//set user model block
+	// An additional delay is offset at round start
+	// since SVC_BAD is more likely to be triggered there
+	g_ModelChangeTargetTime = get_gametime() + ROUNDSTART_DELAY
+	
+	// If a player has a model change task in progress,
+	// reschedule the task, since it could potentially
+	// be executed during roundstart
+	new player
+	for (player = 1; player <= g_MaxPlayers; player++)
+	{
+		if (task_exists(player+TASK_MODELCHANGE))
+		{
+			remove_task(player+TASK_MODELCHANGE)
+			fm_cs_user_model_update(player+TASK_MODELCHANGE)
+		}
+	}
+	//end
+}
+
+public fw_SetClientKeyValue(id, const infobuffer[], const key[], const value[])
+{
+	if (flag_get(g_HasCustomModel, id) && equal(key, "model"))
+	{
+		static currentmodel[MODELNAME_MAXLENGTH]
+		fm_cs_get_user_model(id, currentmodel, charsmax(currentmodel))
+		
+		if (!equal(currentmodel, g_CustomPlayerModel[id]) && !task_exists(id+TASK_MODELCHANGE))
+			fm_cs_set_user_model(id+TASK_MODELCHANGE)
+		
+#if defined SET_MODELINDEX_OFFSET
+		fm_cs_set_user_model_index(id)
+#endif
+		
+		return FMRES_SUPERCEDE;
+	}
+	
+	return FMRES_IGNORED;
+}
+
+public fm_cs_set_user_model(taskid)
+{
+	set_user_info(ID_MODELCHANGE, "model", g_CustomPlayerModel[ID_MODELCHANGE])
+}
+
+stock fm_cs_set_user_model_index(id)
+{
+	if (pev_valid(id) != PDATA_SAFE)
+		return;
+	
+	set_pdata_int(id, OFFSET_MODELINDEX, g_CustomModelIndex[id])
+}
+
+stock fm_cs_reset_user_model_index(id)
+{
+	if (pev_valid(id) != PDATA_SAFE)
+		return;
+	
+	switch (fm_cs_get_user_team(id))
+	{
+		case CS_TEAM_T:
+		{
+			set_pdata_int(id, OFFSET_MODELINDEX, engfunc(EngFunc_ModelIndex, DEFAULT_MODELINDEX_T))
+		}
+		case CS_TEAM_CT:
+		{
+			set_pdata_int(id, OFFSET_MODELINDEX, engfunc(EngFunc_ModelIndex, DEFAULT_MODELINDEX_CT))
+		}
+	}
+}
+
+stock fm_cs_get_user_model(id, model[], len)
+{
+	get_user_info(id, "model", model, len)
+}
+
+stock fm_cs_reset_user_model(id)
+{
+	// Set some generic model and let CS automatically reset player model to default
+	copy(g_CustomPlayerModel[id], charsmax(g_CustomPlayerModel[]), "gordon")
+	fm_cs_user_model_update(id+TASK_MODELCHANGE)
+#if defined SET_MODELINDEX_OFFSET
+	fm_cs_reset_user_model_index(id)
+#endif
+}
+
+stock fm_cs_user_model_update(taskid)
+{
+	new Float:current_time
+	current_time = get_gametime()
+	
+	if (current_time - g_ModelChangeTargetTime >= MODELCHANGE_DELAY)
+	{
+		fm_cs_set_user_model(taskid)
+		g_ModelChangeTargetTime = current_time
+	}
+	else
+	{
+		set_task((g_ModelChangeTargetTime + MODELCHANGE_DELAY) - current_time, "fm_cs_set_user_model", taskid)
+		g_ModelChangeTargetTime = g_ModelChangeTargetTime + MODELCHANGE_DELAY
+	}
+}
+
+stock CsTeams:fm_cs_get_user_team(id)
+{
+	if (pev_valid(id) != PDATA_SAFE)
+		return CS_TEAM_UNASSIGNED;
+	
+	return CsTeams:get_pdata_int(id, OFFSET_CSTEAMS);
 }
 
 public reset_player(id)
@@ -11862,18 +12035,9 @@ public call_cast(id)
 				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
-		case SnowWanderer: 
+		case SabreCat: 
 		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(id, "weapon_flashbang")
-				fm_give_item(id, "weapon_flashbang")
-				show_hudmessage(id, "[Snow Wanderer] Вы получили 2 Flash гранаты")
-			}
-			else
-			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-			}
+
 		}
 		case GiantSpider: 
 		{
@@ -12529,7 +12693,7 @@ public native_set_user_item(id, item)
 		}
 		case 70:
 		{
-			player_item_name[id] = "Jumper Ring"
+			player_item_name[id] = "Leaper Ring"
 			player_b_autobh[id] = 1
 			show_hudmessage(id, "Вы нашли item : %s :: Даёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
 		}
@@ -12899,6 +13063,61 @@ public native_set_user_item(id, item)
 	player_item_id[id] = item
 	BoostRing(id)
 }
+
+public native_set_player_model(plugin_id, num_params)
+{
+	new id = get_param(1)
+	
+	if (!is_user_connected(id))
+	{
+		//log_error(AMX_ERR_NATIVE, "[CS] Player is not in game (%d)", id)
+		return false;
+	}
+	
+	new newmodel[MODELNAME_MAXLENGTH]
+	get_string(2, newmodel, charsmax(newmodel))
+	
+	remove_task(id+TASK_MODELCHANGE)
+	flag_set(g_HasCustomModel, id)
+	
+	copy(g_CustomPlayerModel[id], charsmax(g_CustomPlayerModel[]), newmodel)
+	
+#if defined SET_MODELINDEX_OFFSET	
+	new modelpath[32+(2*MODELNAME_MAXLENGTH)]
+	formatex(modelpath, charsmax(modelpath), "models/player/%s/%s.mdl", newmodel, newmodel)
+	g_CustomModelIndex[id] = engfunc(EngFunc_ModelIndex, modelpath)
+#endif
+	
+	new currentmodel[MODELNAME_MAXLENGTH]
+	fm_cs_get_user_model(id, currentmodel, charsmax(currentmodel))
+	
+	if (!equal(currentmodel, newmodel))
+		fm_cs_user_model_update(id+TASK_MODELCHANGE)
+	
+	return true;
+}
+
+public native_reset_player_model(plugin_id, num_params)
+{
+	new id = get_param(1)
+	
+	if (!is_user_connected(id))
+	{
+		//log_error(AMX_ERR_NATIVE, "[CS] Player is not in game (%d)", id)
+		return false;
+	}
+	
+	// Player doesn't have a custom model, no need to reset
+	if (!flag_get(g_HasCustomModel, id))
+		return true;
+	
+	remove_task(id+TASK_MODELCHANGE)
+	flag_unset(g_HasCustomModel, id)
+	fm_cs_reset_user_model(id)
+	
+	return true;
+}
+
 public FallenShaman(id)
 {
 	if(player_class[id] == Fallen && player_lvl[id] > 49)
@@ -17164,18 +17383,21 @@ public MakeBoss2(){
 	}else
 		UnmakeBoss()
 	set_hudmessage(255,0,0)
-	show_hudmessage(0,"The enemy is strong!")
+	show_hudmessage(0,"Противник опасен!")
 }
-public cmdBlyskawica(id){
+public cmdBlyskawica(id)
+{
     if(!is_user_alive(id)) return PLUGIN_HANDLED;
+	
     if(!ilosc_blyskawic[id])
 	{
-          client_print(id,print_center,"У вас нет молний");
-          return PLUGIN_HANDLED;
+		client_print(id,print_center,"У вас нет молний");
+		return PLUGIN_HANDLED;
     }
-    if(poprzednia_blyskawica[id]+2.0>get_gametime()) {
-          client_print(id,print_center,"Вы можете использовать молнии каждые 5 секунд.");
-          return PLUGIN_HANDLED;
+    if(poprzednia_blyskawica[id]+2.0>get_gametime()) 
+	{
+		client_print(id,print_center,"Вы можете использовать молнии каждые 5 секунд.");
+		return PLUGIN_HANDLED;
     }
     new ofiara, body;
     get_user_aiming(id, ofiara, body);
@@ -17190,7 +17412,8 @@ public cmdBlyskawica(id){
     }
     return PLUGIN_HANDLED;
 }
-stock Create_TE_BEAMENTS(startEntity, endEntity, iSprite, startFrame, frameRate, life, width, noise, red, green, blue, alpha, speed){
+stock Create_TE_BEAMENTS(startEntity, endEntity, iSprite, startFrame, frameRate, life, width, noise, red, green, blue, alpha, speed)
+{
 
     message_begin( MSG_BROADCAST, SVC_TEMPENTITY )
     write_byte( TE_BEAMENTS )
@@ -17210,7 +17433,8 @@ stock Create_TE_BEAMENTS(startEntity, endEntity, iSprite, startFrame, frameRate,
     message_end()
 }
 
-stock Create_ScreenFade(id, duration, holdtime, fadetype, red, green, blue, alpha){
+stock Create_ScreenFade(id, duration, holdtime, fadetype, red, green, blue, alpha)
+{
 
 	message_begin( MSG_ONE,gmsgScreenFade,{0,0,0},id )			
 	write_short( duration )			// fade lasts this long duration
