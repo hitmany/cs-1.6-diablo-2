@@ -4,7 +4,7 @@
 *	------------------
 *
 *	Need:		This compiled and items files
-*	Works with:	AMXX § Cs 1.6
+*	Works with:	AMXX В§ Cs 1.6
 *
 *	Installation:
 *	-------------------
@@ -429,8 +429,8 @@ new scythe_view[]  = "models/diablomod/v_scythe.mdl"
 new infidel_view[]  = "models/diablomod/v_infidel2.mdl"
 new infidel_model[]  = "models/player/d2_infidel/d2_infidel.mdl"
 new infidel_model_short[]  = "d2_infidel"
-new bloodbow_VIEW[]  = "models/diablomod/v_bow.mdl" 
-new bloodbow_PLAYER[]= "models/diablomod/p_bow.mdl" 
+new bloodbow_VIEW[]  = "models/diablomod/v_bow3.mdl" 
+new bloodbow_PLAYER[]= "models/diablomod/p_bow3.mdl" 
 //new bloodbow_MODEL[]  = "models/diablomod/Crossbow_bolt.mdl"
 
 new LeaderCT = -1
@@ -466,7 +466,7 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Leaper, Enslaved, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","BloodRaven", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Прыгун", "Enslaved", "Ледяной ужас", "Инфидель", "Giant Spider", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new Race[28][] = { "РќРµС‚","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","BloodRaven", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Р—Р°РєР°СЂСѓРј", "РџСЂС‹РіСѓРЅ", "Enslaved", "Р›РµРґСЏРЅРѕР№ СѓР¶Р°СЃ", "РРЅС„РёРґРµР»СЊ", "Giant Spider", "РђРґСЃРєРёР№ РєРѕС‚","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,127,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -615,14 +615,14 @@ new prze[][]={
 new prze_wybrany[33]
 
 new questy_info[][]={
-	"Убей 2 Zakarum (Получи 500 опыта)",
-	"Убей 3 Imp (Получи 1200 опыта)",
-	"Убей 6 Fallen (Получи 2000 опыта)",
-	"Убей 6 Diablo (Получи 5000 опыта)",
-	"Убей 15 Leaper (Получи 15000 опыта)",
-	"Убей 20 BloodRaven (Получи 20000 опыта)",
-	"Убей 65 Imp (Получи 150000 опыта)",
-	"Убей 120 Baal (Получи 200000 опыта)"
+	"РЈР±РµР№ 2 Zakarum (РџРѕР»СѓС‡Рё 500 РѕРїС‹С‚Р°)",
+	"РЈР±РµР№ 3 Imp (РџРѕР»СѓС‡Рё 1200 РѕРїС‹С‚Р°)",
+	"РЈР±РµР№ 6 Fallen (РџРѕР»СѓС‡Рё 2000 РѕРїС‹С‚Р°)",
+	"РЈР±РµР№ 6 Diablo (РџРѕР»СѓС‡Рё 5000 РѕРїС‹С‚Р°)",
+	"РЈР±РµР№ 15 Leaper (РџРѕР»СѓС‡Рё 15000 РѕРїС‹С‚Р°)",
+	"РЈР±РµР№ 20 BloodRaven (РџРѕР»СѓС‡Рё 20000 РѕРїС‹С‚Р°)",
+	"РЈР±РµР№ 65 Imp (РџРѕР»СѓС‡Рё 150000 РѕРїС‹С‚Р°)",
+	"РЈР±РµР№ 120 Baal (РџРѕР»СѓС‡Рё 200000 РѕРїС‹С‚Р°)"
 }
 
 new questy_zabil[][]={
@@ -781,15 +781,15 @@ public plugin_init()
 	register_clcmd("say /g","mana1")		
 	register_clcmd("mod","mod_info")
 	
-	register_menucmd(register_menuid("Выбери Скилл"), 1023, "skill_menu")
-	register_menucmd(register_menuid("Опции"), 1023, "option_menu")
+	register_menucmd(register_menuid("Р’С‹Р±РµСЂРё РЎРєРёР»Р»"), 1023, "skill_menu")
+	register_menucmd(register_menuid("РћРїС†РёРё"), 1023, "option_menu")
 	register_menucmd(register_menuid("ChooseClass"), 1023, "select_class_menu")
 	register_menucmd(register_menuid("ChooseRune"), 1023, "select_rune_menu")
-	register_menucmd(register_menuid("Новые Предметы"), 1023, "nowe_itemy")
-	register_menucmd(register_menuid("Демоны"), 1023, "PressedKlasy")
+	register_menucmd(register_menuid("РќРѕРІС‹Рµ РџСЂРµРґРјРµС‚С‹"), 1023, "nowe_itemy")
+	register_menucmd(register_menuid("Р”РµРјРѕРЅС‹"), 1023, "PressedKlasy")
 	register_menucmd(register_menuid("Heroes"), 1023, "PokazMeni")
-	register_menucmd(register_menuid("Животные"), 1023, "PokazZwierz")
-	register_menucmd(register_menuid("Премиум"), 1023, "PokazPremium")
+	register_menucmd(register_menuid("Р–РёРІРѕС‚РЅС‹Рµ"), 1023, "PokazZwierz")
+	register_menucmd(register_menuid("РџСЂРµРјРёСѓРј"), 1023, "PokazPremium")
 	gmsgDeathMsg = get_user_msgid("DeathMsg")
 	gmsgStatusText = get_user_msgid("StatusText")
 	gmsgBartimer = get_user_msgid("BarTime") 
@@ -968,17 +968,17 @@ bool:WC3_MapDisableCheck( szFileName[] )
 public menu_questow(id){
 	if(quest_gracza[id] == -1 || quest_gracza[id] == -2){
 		
-		new menu = menu_create("Меню Квестов","menu_questow_handle")
+		new menu = menu_create("РњРµРЅСЋ РљРІРµСЃС‚РѕРІ","menu_questow_handle")
 		new formats[128]
 		for(new i = 0;i<sizeof prze;i++){
-			formatex(formats,127,"Квесты от %d до %d уровня",prze[i][0],prze[i][1]);
+			formatex(formats,127,"РљРІРµСЃС‚С‹ РѕС‚ %d РґРѕ %d СѓСЂРѕРІРЅСЏ",prze[i][0],prze[i][1]);
 			menu_additem(menu,formats)
 		}
 		menu_display(id,menu,0)
 	}
 	else
 	{
-		client_print(id,print_chat,"Вы не выполнили предыдущее задание")
+		client_print(id,print_chat,"Р’С‹ РЅРµ РІС‹РїРѕР»РЅРёР»Рё РїСЂРµРґС‹РґСѓС‰РµРµ Р·Р°РґР°РЅРёРµ")
 	}
 }
 
@@ -989,13 +989,13 @@ public menu_questow_handle(id,menu,item){
 	}
 	if(player_lvl[id] < prze[item][0])
 	{
-		client_print(id,print_chat,"Ваш уровень меньше требуемого!");
+		client_print(id,print_chat,"Р’Р°С€ СѓСЂРѕРІРµРЅСЊ РјРµРЅСЊС€Рµ С‚СЂРµР±СѓРµРјРѕРіРѕ!");
 		menu_questow(id)
 		menu_destroy(menu);
 		return PLUGIN_CONTINUE;
 	}
 	new formats[128]
-	formatex(formats,127,"Квесты от %d до %d уровня",prze[item][0],prze[item][1]);
+	formatex(formats,127,"РљРІРµСЃС‚С‹ РѕС‚ %d РґРѕ %d СѓСЂРѕРІРЅСЏ",prze[item][0],prze[item][1]);
 	new menu2 = menu_create(formats,"menu_questow_handle2")
 	for(new i = 0;i<sizeof(questy);i++)
 	{
@@ -1003,9 +1003,9 @@ public menu_questow_handle(id,menu,item){
 			menu_additem(menu2,questy_info[i]);
 		}
 	}
-	menu_setprop(menu2, MPROP_EXITNAME, "Выход");
-	menu_setprop(menu2, MPROP_BACKNAME, "Назад");
-	menu_setprop(menu2, MPROP_NEXTNAME, "Вперед");
+	menu_setprop(menu2, MPROP_EXITNAME, "Р’С‹С…РѕРґ");
+	menu_setprop(menu2, MPROP_BACKNAME, "РќР°Р·Р°Рґ");
+	menu_setprop(menu2, MPROP_NEXTNAME, "Р’РїРµСЂРµРґ");
 	prze_wybrany[id] = item+1;
 	menu_display(id,menu2)
 	return PLUGIN_CONTINUE;
@@ -1079,13 +1079,13 @@ public menu_questow_handle2(id,menu,item)
 		ile2++;
 	}
 	if(questy[item][4] && (!player_premium[id])){
-		client_print(id,print_chat,"Этот квест только для Премиум! Покупка премиум на lp.hitmany.net");
+		client_print(id,print_chat,"Р­С‚РѕС‚ РєРІРµСЃС‚ С‚РѕР»СЊРєРѕ РґР»СЏ РџСЂРµРјРёСѓРј! РџРѕРєСѓРїРєР° РїСЂРµРјРёСѓРј РЅР° lp.hitmany.net");
 		menu_questow(id)
 		menu_destroy(menu);
 		return PLUGIN_CONTINUE;
 	}
 	if(wczytaj_questa(id,item)){
-		client_print(id,print_chat,"Ты уже выполнил эту задачу!");
+		client_print(id,print_chat,"РўС‹ СѓР¶Рµ РІС‹РїРѕР»РЅРёР» СЌС‚Сѓ Р·Р°РґР°С‡Сѓ!");
 		menu_questow(id)
 		menu_destroy(menu);
 		return PLUGIN_CONTINUE;
@@ -1093,7 +1093,7 @@ public menu_questow_handle2(id,menu,item)
 	quest_gracza[id] = item;
 	ile_juz[id] = 0
 	zapisz_aktualny_quest(id)
-	client_print(id,print_chat,"Вы выбрали задания: %s Удачи !",questy_info[item]);
+	client_print(id,print_chat,"Р’С‹ РІС‹Р±СЂР°Р»Рё Р·Р°РґР°РЅРёСЏ: %s РЈРґР°С‡Рё !",questy_info[item]);
 	quest_gracza[id] = wczytaj_aktualny_quest(id);
 	menu_destroy(menu);
 	return PLUGIN_CONTINUE;
@@ -1613,7 +1613,7 @@ public MYSQLX_Save( id )
 
 		return;
 	}
-	format( szQuery, 511, "REPLACE INTO `extra` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '2', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][2]);
+	format( szQuery, 511, "REPLACE INTO `item` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '2', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][2]);
 	query = SQL_PrepareQuery( g_DBConn, szQuery );
 
 	if ( !SQL_Execute( query ) )
@@ -1825,7 +1825,7 @@ public D2_ChangeRaceStart( id )
 	}
 	else
 	{
-		client_print( id, print_center, "Пожалуйста выйдите из спектатора!" );
+		client_print( id, print_center, "РџРѕР¶Р°Р»СѓР№СЃС‚Р° РІС‹Р№РґРёС‚Рµ РёР· СЃРїРµРєС‚Р°С‚РѕСЂР°!" );
 	}
 }
 
@@ -2046,13 +2046,13 @@ public Health(id)
 public speed(id)
 {
 	new Float:spd = get_user_maxspeed(id)
-	client_print(id,print_chat,"Макс: %f",spd)
+	client_print(id,print_chat,"РњР°РєСЃ: %f",spd)
 	
 	new Float:vect[3]
 	entity_get_vector(id,EV_VEC_velocity,vect)
 	new Float: sped= floatsqroot(vect[0]*vect[0]+vect[1]*vect[1]+vect[2]*vect[2])
 	
-	client_print(id,print_chat,"Сейчас: %f",sped)
+	client_print(id,print_chat,"РЎРµР№С‡Р°СЃ: %f",sped)
 }
 
 public plugin_precache()
@@ -2516,7 +2516,7 @@ public look_for_none()
 
 public reset_skill(id)
 {	
-	client_print(id,print_chat,"Сброс навыков")
+	client_print(id,print_chat,"РЎР±СЂРѕСЃ РЅР°РІС‹РєРѕРІ")
 	player_point[id] = player_lvl[id]*2-2
 	player_intelligence[id] = 0
 	player_strength[id] = 0 
@@ -2581,7 +2581,7 @@ public RoundStart(){
 			if(zmiana_skinu[i] == 1) 
 			{
 				changeskin(i,0)
-				ColorChat(i, TEAM_COLOR, "[Хамелеон] Вы выглядите как враг!")
+				ColorChat(i, TEAM_COLOR, "[РҐР°РјРµР»РµРѕРЅ] Р’С‹ РІС‹РіР»СЏРґРёС‚Рµ РєР°Рє РІСЂР°Рі!")
 			}
 			else
 			{
@@ -2640,7 +2640,7 @@ public RoundStart(){
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(i,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		if(player_class[i] == Leaper)
@@ -2662,7 +2662,7 @@ public RoundStart(){
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(i,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		if(player_class[i] == Enslaved)
@@ -2677,7 +2677,7 @@ public RoundStart(){
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(i,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		if(player_class[i] == SabreCat)
@@ -2705,7 +2705,7 @@ public RoundStart(){
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(i,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		if(player_class[i] == Baal)
@@ -2721,7 +2721,7 @@ public RoundStart(){
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(i,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		if(player_class[i] == Diablo)
@@ -2738,7 +2738,7 @@ public RoundStart(){
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(i,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		if(player_class[i] == Hephasto)
@@ -2756,7 +2756,7 @@ public RoundStart(){
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(i,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		//Fallen Code
@@ -3093,7 +3093,7 @@ public ResetHUD(id)
 		if (get_pcvar_num(pMaxHooks) > 0)
 		{
 			gHooksUsed[id] = 0
-			statusMsg(0, "[Паутина] 0 из %d паутин использованно.", get_pcvar_num(pMaxHooks))
+			statusMsg(0, "[РџР°СѓС‚РёРЅР°] 0 РёР· %d РїР°СѓС‚РёРЅ РёСЃРїРѕР»СЊР·РѕРІР°РЅРЅРѕ.", get_pcvar_num(pMaxHooks))
 		}
 	}
 }
@@ -3157,7 +3157,7 @@ public DeathMsg(id)
 	if (is_user_connected(kid) && is_user_connected(vid) && get_user_team(kid) != get_user_team(vid))
 	{
 		show_deadmessage(kid,vid,headshot,weaponname)
-		create_itm(vid,0,"Случайный Item")
+		create_itm(vid,0,"РЎР»СѓС‡Р°Р№РЅС‹Р№ Item")
 		award_kill(kid,vid)
 		if(headshot)
 		{
@@ -3189,7 +3189,7 @@ public DeathMsg(id)
 			}
 			if(ile_juz[kid] == questy[quest_gracza[kid]][1])
 			{
-				client_print(kid,print_chat,"Выполнил задание %s полученно %i exp!",questy_info[quest_gracza[kid]],questy[quest_gracza[kid]][3])
+				client_print(kid,print_chat,"Р’С‹РїРѕР»РЅРёР» Р·Р°РґР°РЅРёРµ %s РїРѕР»СѓС‡РµРЅРЅРѕ %i exp!",questy_info[quest_gracza[kid]],questy[quest_gracza[kid]][3])
 				emit_sound(kid,CHAN_STATIC,"diablo_lp/questdone.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 				zapisz_questa(kid,quest_gracza[kid])
 				Give_Xp(kid,questy[quest_gracza[kid]][3]);
@@ -3198,7 +3198,7 @@ public DeathMsg(id)
 			}
 			else
 			{
-				client_print(kid,print_chat,"Убито %i/%i %s",ile_juz[kid],questy[quest_gracza[kid]][1],questy_zabil[quest_gracza[kid]])
+				client_print(kid,print_chat,"РЈР±РёС‚Рѕ %i/%i %s",ile_juz[kid],questy[quest_gracza[kid]][1],questy_zabil[quest_gracza[kid]])
 			}
 		}
 	}
@@ -3557,7 +3557,7 @@ public client_PreThink ( id )
 		entity_set_int(id, EV_INT_flTimeStepSound, 300)
 	
 	//bow model
-	if (button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==Amazon || button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==Demonolog && player_class[id]==BloodRaven){
+	if (button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==Amazon || button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==Demonolog || button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==BloodRaven){
 		bow[id]++
 		button[id] = 1;
 		command_bow(id)
@@ -3655,13 +3655,13 @@ public client_PreThink ( id )
 		if ((Velocity[0] > 0.0 || Velocity[1] > 0.0 || Velocity[2] > 0.0))  
 		{
 			player_infidel[id] = 1
-			client_print(id, print_center, "НЕвидим")
+			client_print(id, print_center, "РќР•РІРёРґРёРј")
 			set_renderchange(id)
 		}
 		else
 		{
 			player_infidel[id] = 0
-			client_print(id, print_center, "Видим")
+			client_print(id, print_center, "Р’РёРґРёРј")
 			set_renderchange(id)
 		}
 	}	
@@ -3673,7 +3673,7 @@ public client_PreThink ( id )
 	else if (pev(id,pev_button) & IN_RELOAD && on_knife[id] && max_knife[id]>0) command_knife(id) 
 		
 	///////////////////// BOW /////////////////////////
-	if(player_class[id]==Amazon || player_class[id]==Demonolog)
+	if(player_class[id]==Amazon || player_class[id]==Demonolog || player_class[id]==BloodRaven)
 	{
 		new clip,ammo
 		new weapon = get_user_weapon(id,clip,ammo)	
@@ -3684,7 +3684,9 @@ public client_PreThink ( id )
 			{
 				bowdelay[id] = get_gametime()
 				command_arrow(id) 
+				client_print(id,print_console, "command_arrow")
 			}
+			//client_print(id,print_console, "inattack")
 			entity_set_int(id, EV_INT_button, (button2 & ~IN_ATTACK) & ~IN_ATTACK2)
 		}
 	
@@ -3775,7 +3777,7 @@ public skilltree(id)
 	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)
 	
 	
-	format(text, 512, "\yВыбери Скилл- \rОчков: %i^n^n\w1. Intelligence [%i] [Больше и дольше сила Item]^n\w2. Strength [%i] [Больше ХП \r%i\w]^n\w3. Agility [%i] [Улучшенный поиск item и урона]^n\w4. Dextery [%i] [Увел. скорость и снижает ущерб от магии]",player_point[id],player_intelligence[id],player_strength[id],player_strength[id]*2,player_agility[id],player_dextery[id]) 
+	format(text, 512, "\yР’С‹Р±РµСЂРё РЎРєРёР»Р»- \rРћС‡РєРѕРІ: %i^n^n\w1. Intelligence [%i] [Р‘РѕР»СЊС€Рµ Рё РґРѕР»СЊС€Рµ СЃРёР»Р° Item]^n\w2. Strength [%i] [Р‘РѕР»СЊС€Рµ РҐРџ \r%i\w]^n\w3. Agility [%i] [РЈР»СѓС‡С€РµРЅРЅС‹Р№ РїРѕРёСЃРє item Рё СѓСЂРѕРЅР°]^n\w4. Dextery [%i] [РЈРІРµР». СЃРєРѕСЂРѕСЃС‚СЊ Рё СЃРЅРёР¶Р°РµС‚ СѓС‰РµСЂР± РѕС‚ РјР°РіРёРё]",player_point[id],player_intelligence[id],player_strength[id],player_strength[id]*2,player_agility[id],player_dextery[id]) 
 	
 	keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)
 	show_menu(id, keys, text) 
@@ -3793,7 +3795,7 @@ public skill_menu(id, key)
 				player_point[id]-=1
 				player_intelligence[id]+=1
 			}
-			else client_print(id,print_center,"Маскисмально Intelligence достигнуто")
+			else client_print(id,print_center,"РњР°СЃРєРёСЃРјР°Р»СЊРЅРѕ Intelligence РґРѕСЃС‚РёРіРЅСѓС‚Рѕ")
 			
 		}
 		case 1: 
@@ -3802,7 +3804,7 @@ public skill_menu(id, key)
 				player_point[id]-=1	
 				player_strength[id]+=1
 			}
-			else client_print(id,print_center,"Маскисмально Strength достигнуто")
+			else client_print(id,print_center,"РњР°СЃРєРёСЃРјР°Р»СЊРЅРѕ Strength РґРѕСЃС‚РёРіРЅСѓС‚Рѕ")
 		}
 		case 2: 
 		{	
@@ -3811,7 +3813,7 @@ public skill_menu(id, key)
 				player_agility[id]+=1
 				player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
 			}
-			else client_print(id,print_center,"Маскисмально Agility достигнуто")
+			else client_print(id,print_center,"РњР°СЃРєРёСЃРјР°Р»СЊРЅРѕ Agility РґРѕСЃС‚РёРіРЅСѓС‚Рѕ")
 			
 		}
 		case 3: 
@@ -3821,7 +3823,7 @@ public skill_menu(id, key)
 				player_dextery[id]+=1
 				set_speedchange(id)
 			}
-			else client_print(id,print_center,"Маскисмально Dextery достигнуто")
+			else client_print(id,print_center,"РњР°СЃРєРёСЃРјР°Р»СЊРЅРѕ Dextery РґРѕСЃС‚РёРіРЅСѓС‚Рѕ")
 		}
 	}
 	
@@ -3863,7 +3865,7 @@ public award_plant()
 	{
 		id = Players[i]
 		Give_Xp(id,get_cvar_num("diablo_xpbonus"))	
-		ColorChat(id, GREEN, "Выданно^x03 *%i*^x01 exp за установку бомбы твоей командой",get_cvar_num("diablo_xpbonus2"))
+		ColorChat(id, GREEN, "Р’С‹РґР°РЅРЅРѕ^x03 *%i*^x01 exp Р·Р° СѓСЃС‚Р°РЅРѕРІРєСѓ Р±РѕРјР±С‹ С‚РІРѕРµР№ РєРѕРјР°РЅРґРѕР№",get_cvar_num("diablo_xpbonus2"))
 	}	
 	Give_Xp(planter,get_cvar_num("diablo_xpbonus2"))
 }
@@ -3882,7 +3884,7 @@ public award_defuse()
 	{
 		id = Players[i] 
 		Give_Xp(id,get_cvar_num("diablo_xpbonus"))	
-		ColorChat(id, GREEN, "Выданно^x03 *%i*^x01 exp за разминирование бомбы твоей командой",get_cvar_num("diablo_xpbonus2"))
+		ColorChat(id, GREEN, "Р’С‹РґР°РЅРЅРѕ^x03 *%i*^x01 exp Р·Р° СЂР°Р·РјРёРЅРёСЂРѕРІР°РЅРёРµ Р±РѕРјР±С‹ С‚РІРѕРµР№ РєРѕРјР°РЅРґРѕР№",get_cvar_num("diablo_xpbonus2"))
 	}
 	Give_Xp(defuser,get_cvar_num("diablo_xpbonus2"))
 }
@@ -3949,12 +3951,12 @@ public Give_Xp(id,amount)
 					player_lvl[id]+=1
 					player_point[id]+=2
 					set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 4.0, 0.1, 0.2, 2)
-					show_hudmessage(id, "Повышен до %i уровня", player_lvl[id])
+					show_hudmessage(id, "РџРѕРІС‹С€РµРЅ РґРѕ %i СѓСЂРѕРІРЅСЏ", player_lvl[id])
 					player_TotalLVL[id]++
 					emit_sound(id,CHAN_STATIC,"diablo_lp/levelup.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 					new name[32]
 					get_user_name(id, name, 31)
-					ColorChat(0, TEAM_COLOR, "%s^x01 повышен до^x03 %i^x01 уровня (^x04%s^x01)", name, player_lvl[id], Race[player_class[id]])
+					ColorChat(0, TEAM_COLOR, "%s^x01 РїРѕРІС‹С€РµРЅ РґРѕ^x03 %i^x01 СѓСЂРѕРІРЅСЏ (^x04%s^x01)", name, player_lvl[id], Race[player_class[id]])
 					MYSQLX_Save(id)
 					player_class_lvl[id][player_class[id]]=player_lvl[id]
 				}
@@ -3965,7 +3967,7 @@ public Give_Xp(id,amount)
 				player_lvl[id]-=1
 				player_point[id]-=2
 				set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 4.0, 0.1, 0.2, 2)
-				show_hudmessage(id, "Понижен до %i уровня", player_lvl[id]) 
+				show_hudmessage(id, "РџРѕРЅРёР¶РµРЅ РґРѕ %i СѓСЂРѕРІРЅСЏ", player_lvl[id]) 
 				player_TotalLVL[id]--
 				MYSQLX_Save(id)
 				player_class_lvl[id][player_class[id]]=player_lvl[id]
@@ -4029,7 +4031,7 @@ public client_connect(id)
 	player_class[id] = 0
 	player_damreduction[id] = 0.0
 	last_update_xp[id] = -1
-	player_item_name[id] = "Нет"
+	player_item_name[id] = "РќРµС‚"
 	DemageTake[id]=0
 	player_b_gamble[id]=0
 	lustrzany_pocisk[id] = 0
@@ -4092,7 +4094,7 @@ public client_putinserver(id)
 	player_class[id] = 0
 	player_damreduction[id] = 0.0
 	last_update_xp[id] = -1
-	player_item_name[id] = "Нет"
+	player_item_name[id] = "РќРµС‚"
 	DemageTake[id]=0
 	player_b_gamble[id]=0
 	lustrzany_pocisk[id] = 0
@@ -4188,21 +4190,21 @@ public write_hud(id)
 	}
 	else if(player_class[id]==Zakarum && player_lvl[id]<50)
 	{
-		Racename = "Закарум маньяк"
+		Racename = "Р—Р°РєР°СЂСѓРј РјР°РЅСЊСЏРє"
 	}
 	else if(player_class[id]==Zakarum && player_lvl[id]>49)
 	{
-		Racename = "Закарум жрец"
+		Racename = "Р—Р°РєР°СЂСѓРј Р¶СЂРµС†"
 	}
 	if(player_class[id]!=Paladin)
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПредмет: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
+		show_hudmessage(id, "Р–РёР·РЅРё: %i^nРљР»Р°СЃСЃ: %s^nРЈСЂРѕРІРµРЅСЊ: %i (%i%s)^nРџСЂРµРґРјРµС‚: %s^nРџСЂРѕС‡РЅРѕСЃС‚СЊ: %i^nР—РѕР»РѕС‚Рѕ: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
 	}
 	else
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%i%s)^nПредмет: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
+		show_hudmessage(id, "Р–РёР·РЅРё: %i^nРљР»Р°СЃСЃ: %s^nРЈСЂРѕРІРµРЅСЊ: %i^n(%i%s)^nРџСЂРµРґРјРµС‚: %i/%i^nItem: %s^nРџСЂРѕС‡РЅРѕСЃС‚СЊ: %i^nР—РѕР»РѕС‚Рѕ: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
 	}
 	
 	message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
@@ -4249,13 +4251,13 @@ public UpdateHUD()
 				}
 				else if(player_class[index]==Zakarum && player_lvl[index]<50)
 				{
-					Racename = "Закарум маньяк"
+					Racename = "Р—Р°РєР°СЂСѓРј РјР°РЅСЊСЏРє"
 				}
 				else if(player_class[index]==Zakarum && player_lvl[index]>49)
 				{
-					Racename = "Закарум жрец"
+					Racename = "Р—Р°РєР°СЂСѓРј Р¶СЂРµС†"
 				}
-				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nЗолото: %i",pname,player_lvl[index],Racename,player_item_name[index], mana_gracza[index])		
+				format(Msg,511,"РќРёРє: %s^nРЈСЂРѕРІРµРЅСЊ: %i^nРљР»Р°СЃСЃ: %s^nItem: %s^nР—РѕР»РѕС‚Рѕ: %i",pname,player_lvl[index],Racename,player_item_name[index], mana_gracza[index])		
 				show_hudmessage(id, Msg)
 				
 			}
@@ -4299,23 +4301,23 @@ public dropitem(id)
 {
 	if (player_item_id[id] == 0)
 	{
-		hudmsg(id,2.0,"У вас нет предмета который можно выкинуть!")
+		hudmsg(id,2.0,"РЈ РІР°СЃ РЅРµС‚ РїСЂРµРґРјРµС‚Р° РєРѕС‚РѕСЂС‹Р№ РјРѕР¶РЅРѕ РІС‹РєРёРЅСѓС‚СЊ!")
 		return PLUGIN_HANDLED
 	} 
 		
 	if (item_durability[id] <= 0) 
 	{
-		hudmsg(id,3.0,"Item потерял свою силу!")
+		hudmsg(id,3.0,"Item РїРѕС‚РµСЂСЏР» СЃРІРѕСЋ СЃРёР»Сѓ!")
 		emit_sound(id,CHAN_STATIC,"diablo_lp/itembroken.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	}
 	else 
 	{
 		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
-		show_hudmessage(id, "Item выброшенн")
+		show_hudmessage(id, "Item РІС‹Р±СЂРѕС€РµРЅРЅ")
 		emit_sound(id,CHAN_STATIC,"diablo_lp/flippy.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	}
 	player_item_id[id] = 0
-	player_item_name[id] = "Нет"
+	player_item_name[id] = "РќРµС‚"
 	player_b_gamble[id] = 0	//Because gamble uses reset skills
 		
 	if (player_b_extrastats[id] > 0)
@@ -4720,27 +4722,27 @@ public auto_help(id)
 		set_hudmessage(0, 180, 0, -1.0, 0.70, 0, 10.0, 10.0, 0.1, 0.5, 11) 	
 		if (rnd == 1)
 		{
-			show_hudmessage(id, "Зеленные бутылочки,рядом с трупами - это предметы,их можно подобрать нажав кнопку присесть")
+			show_hudmessage(id, "Р—РµР»РµРЅРЅС‹Рµ Р±СѓС‚С‹Р»РѕС‡РєРё,СЂСЏРґРѕРј СЃ С‚СЂСѓРїР°РјРё - СЌС‚Рѕ РїСЂРµРґРјРµС‚С‹,РёС… РјРѕР¶РЅРѕ РїРѕРґРѕР±СЂР°С‚СЊ РЅР°Р¶Р°РІ РєРЅРѕРїРєСѓ РїСЂРёСЃРµСЃС‚СЊ")
 		}
 		if (rnd == 2)
 		{
-			show_hudmessage(id, "Чтобы сменить класс/герой набери в чате class,или say class в консоли")
+			show_hudmessage(id, "Р§С‚РѕР±С‹ СЃРјРµРЅРёС‚СЊ РєР»Р°СЃСЃ/РіРµСЂРѕР№ РЅР°Р±РµСЂРё РІ С‡Р°С‚Рµ class,РёР»Рё say class РІ РєРѕРЅСЃРѕР»Рё")
 		}
 		if (rnd == 3)
 		{
-			show_hudmessage(id, "Вы можете получить более подоробную информацию набери в консоли say /help")
+			show_hudmessage(id, "Р’С‹ РјРѕР¶РµС‚Рµ РїРѕР»СѓС‡РёС‚СЊ Р±РѕР»РµРµ РїРѕРґРѕСЂРѕР±РЅСѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ РЅР°Р±РµСЂРё РІ РєРѕРЅСЃРѕР»Рё say /help")
 		}
 		if (rnd == 4)
 		{
-			show_hudmessage(id, "Главное меню мода say /menu")
+			show_hudmessage(id, "Р“Р»Р°РІРЅРѕРµ РјРµРЅСЋ РјРѕРґР° say /menu")
 		}
 		if (rnd == 5)
 		{
-			show_hudmessage(id, "За золото можно купить предметы,телепорты,улучшить/починить предметы,оружие")
+			show_hudmessage(id, "Р—Р° Р·РѕР»РѕС‚Рѕ РјРѕР¶РЅРѕ РєСѓРїРёС‚СЊ РїСЂРµРґРјРµС‚С‹,С‚РµР»РµРїРѕСЂС‚С‹,СѓР»СѓС‡С€РёС‚СЊ/РїРѕС‡РёРЅРёС‚СЊ РїСЂРµРґРјРµС‚С‹,РѕСЂСѓР¶РёРµ")
 		}
 		if (rnd == 6)
 		{
-			show_hudmessage(id, "Золото вы получаете за хедшоты,её можно собрать на ежедневных ивентах")
+			show_hudmessage(id, "Р—РѕР»РѕС‚Рѕ РІС‹ РїРѕР»СѓС‡Р°РµС‚Рµ Р·Р° С…РµРґС€РѕС‚С‹,РµС‘ РјРѕР¶РЅРѕ СЃРѕР±СЂР°С‚СЊ РЅР° РµР¶РµРґРЅРµРІРЅС‹С… РёРІРµРЅС‚Р°С…")
 		}
 	}
 }
@@ -4750,7 +4752,7 @@ public auto_help(id)
 public helpme(id)
 {	 
 	//showitem(id,"Helpmenu","Common","None","Dostajesz przedmioty i doswiadczenie za zabijanie innych. Mozesz dostac go tylko wtedy, gdy nie masz na sobie innego<br><br>Aby dowiedziec sie wiecej o swoim przedmiocie napisz /przedmiot lub /item, a jak chcesz wyrzucic napisz /drop<br><br>Niektore przedmoty da sie uzyc za pomoca klawisza E<br><br>Napisz /czary zeby zobaczyc jakie masz staty<br><br>")
-	show_motd(id, "http://lp.hitmany.net/diablo_help.html", "Помощь Diablo Mod")
+	show_motd(id, "http://lp.hitmany.net/diablo_help.html", "РџРѕРјРѕС‰СЊ Diablo Mod")
 }
 
 
@@ -4762,7 +4764,7 @@ public helpme(id)
 
 public komendy(id)
 {
-showitem(id,"Команды","Общий","Нет","<br>")
+showitem(id,"РљРѕРјР°РЅРґС‹","РћР±С‰РёР№","РќРµС‚","<br>")
 }
 
 /* ==================================================================================================== */
@@ -4777,7 +4779,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	if (!dir_exists(diabloDir))
 	{
 		new errormsg[512]
-		format(errormsg,511,"Blad: Folder %s/diablo nie mogі byж znaleziony. Prosze skopiowac ten folder z archiwum do folderu amxmodx",amxbasedir)
+		format(errormsg,511,"Blad: Folder %s/diablo nie mogС– byР¶ znaleziony. Prosze skopiowac ten folder z archiwum do folderu amxmodx",amxbasedir)
 		show_motd(id, errormsg, "An error has occured")	
 		return PLUGIN_HANDLED
 	}
@@ -4790,7 +4792,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	new Data[768]
 	
   //Header
-	format(Data,767,"<html><head><title>Информация</title></head>")
+	format(Data,767,"<html><head><title>РРЅС„РѕСЂРјР°С†РёСЏ</title></head>")
 	write_file(g_ItemFile,Data,-1)
 	
 	//Format
@@ -4811,19 +4813,19 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	
 
 	//item name
-	format(Data,767,"<td width='0'><p align='center'><font face='Arial'><font color='#FFCC00'><b>Предмет: </b>%s</font><br>",itemname)
+	format(Data,767,"<td width='0'><p align='center'><font face='Arial'><font color='#FFCC00'><b>РџСЂРµРґРјРµС‚: </b>%s</font><br>",itemname)
 	write_file(g_ItemFile,Data,-1)
 	
 	//item value
-	format(Data,767,"<font color='#FFCC00'><b><br>Значение: </b>%s</font><br>",itemvalue)
+	format(Data,767,"<font color='#FFCC00'><b><br>Р—РЅР°С‡РµРЅРёРµ: </b>%s</font><br>",itemvalue)
 	write_file(g_ItemFile,Data,-1)
 	
 	//Durability
-	format(Data,767,"<font color='#FFCC00'><b><br>Прочность: </b>%s</font><br><br>",Durability)
+	format(Data,767,"<font color='#FFCC00'><b><br>РџСЂРѕС‡РЅРѕСЃС‚СЊ: </b>%s</font><br><br>",Durability)
 	write_file(g_ItemFile,Data,-1)
 	
 	//Effects
-	format(Data,767,"<font color='#FFCC00'><b>Эффект:</b> %s</font></font></td>",itemeffect)
+	format(Data,767,"<font color='#FFCC00'><b>Р­С„С„РµРєС‚:</b> %s</font></font></td>",itemeffect)
 	write_file(g_ItemFile,Data,-1)
 	
 	//image ss
@@ -4835,7 +4837,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	write_file(g_ItemFile,Data,-1)
 	
 	//show window with message
-	show_motd(id, g_ItemFile, "Item инфо")
+	show_motd(id, g_ItemFile, "Item РёРЅС„Рѕ")
 	
 	return PLUGIN_HANDLED
 	
@@ -4848,13 +4850,13 @@ public iteminfo(id)
 {
 	new itemvalue[100]
 	
-	if (player_item_id[id] <= 10) itemvalue = "Обычный"
+	if (player_item_id[id] <= 10) itemvalue = "РћР±С‹С‡РЅС‹Р№"
 	if (player_item_id[id] <= 30) 
-		itemvalue = "Редкий"
+		itemvalue = "Р РµРґРєРёР№"
 	else 
-		itemvalue = "Необычный"
+		itemvalue = "РќРµРѕР±С‹С‡РЅС‹Р№"
 	
-	if (player_item_id[id] > 42) itemvalue = "Уникальный"
+	if (player_item_id[id] > 42) itemvalue = "РЈРЅРёРєР°Р»СЊРЅС‹Р№"
 	
 	new itemEffect[200]
 	
@@ -4863,326 +4865,326 @@ public iteminfo(id)
 	if (player_b_vampire[id] > 0) 
 	{
 		num_to_str(player_b_vampire[id],TempSkill,10)
-		add(itemEffect,199,"Высасывает ")
+		add(itemEffect,199,"Р’С‹СЃР°СЃС‹РІР°РµС‚ ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," хп когда вы стреляете в противника<br>")
+		add(itemEffect,199," С…Рї РєРѕРіРґР° РІС‹ СЃС‚СЂРµР»СЏРµС‚Рµ РІ РїСЂРѕС‚РёРІРЅРёРєР°<br>")
 	}
 	if (player_b_damage[id] > 0) 
 	{
 		num_to_str(player_b_damage[id],TempSkill,10)
-		add(itemEffect,199,"Даёт ")
+		add(itemEffect,199,"Р”Р°С‘С‚ ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," дополнительного урона с каждого выстрела<br>")
+		add(itemEffect,199," РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°<br>")
 	}
 	if (player_b_money[id] > 0) 
 	{
 		num_to_str(player_b_money[id],TempSkill,10)
-		add(itemEffect,199,"Даёт $")
+		add(itemEffect,199,"Р”Р°С‘С‚ $")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," + intelligene*50 денежный бонус каждый раунд. При нажатии Е активируется щит котрый снижает урон на 50%<br>")
+		add(itemEffect,199," + intelligene*50 РґРµРЅРµР¶РЅС‹Р№ Р±РѕРЅСѓСЃ РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ. РџСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚СЂС‹Р№ СЃРЅРёР¶Р°РµС‚ СѓСЂРѕРЅ РЅР° 50%<br>")
 	}
 	if (player_b_gravity[id] > 0) 
 	{
 		num_to_str(player_b_gravity[id],TempSkill,10)
-		add(itemEffect,199,"Гравитация увеличивается на ")
+		add(itemEffect,199,"Р“СЂР°РІРёС‚Р°С†РёСЏ СѓРІРµР»РёС‡РёРІР°РµС‚СЃСЏ РЅР° ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199,". Жми Е вы резко упадаете на землю и мгновенно убьёте врага на небольшом радиусе.<br>")
+		add(itemEffect,199,". Р–РјРё Р• РІС‹ СЂРµР·РєРѕ СѓРїР°РґР°РµС‚Рµ РЅР° Р·РµРјР»СЋ Рё РјРіРЅРѕРІРµРЅРЅРѕ СѓР±СЊС‘С‚Рµ РІСЂР°РіР° РЅР° РЅРµР±РѕР»СЊС€РѕРј СЂР°РґРёСѓСЃРµ.<br>")
 	}
 	if(player_b_godmode[id] > 0)
 	{
 		num_to_str(player_b_godmode[id],TempSkill,10)
-		add(itemEffect,199,"Используйте этот предмет чтобы стать бесмертным на ")
+		add(itemEffect,199,"РСЃРїРѕР»СЊР·СѓР№С‚Рµ СЌС‚РѕС‚ РїСЂРµРґРјРµС‚ С‡С‚РѕР±С‹ СЃС‚Р°С‚СЊ Р±РµСЃРјРµСЂС‚РЅС‹Рј РЅР° ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," секунд.<br>")
+		add(itemEffect,199," СЃРµРєСѓРЅРґ.<br>")
 	}
 	if (player_b_inv[id] > 0) 
 	{
 		num_to_str(player_b_inv[id],TempSkill,10)
-		add(itemEffect,199,"Твоя видимость снизится от 255 до ")
+		add(itemEffect,199,"РўРІРѕСЏ РІРёРґРёРјРѕСЃС‚СЊ СЃРЅРёР·РёС‚СЃСЏ РѕС‚ 255 РґРѕ ")
 		add(itemEffect,199,TempSkill)
 		add(itemEffect,199,"<br>")
 	}
 	if (player_b_grenade[id] > 0) 
 	{
 		num_to_str(player_b_grenade[id],TempSkill,10)
-		add(itemEffect,199,"У тебя есть 1/")
+		add(itemEffect,199,"РЈ С‚РµР±СЏ РµСЃС‚СЊ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," шанс мгновенно убить врага с гранаты<br>")
+		add(itemEffect,199," С€Р°РЅСЃ РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РІСЂР°РіР° СЃ РіСЂР°РЅР°С‚С‹<br>")
 	}
 	if (player_b_reduceH[id] > 0) 
 	{
 		num_to_str(player_b_reduceH[id],TempSkill,10)
-		add(itemEffect,199,"Твои жизни уменьшаются на ")
+		add(itemEffect,199,"РўРІРѕРё Р¶РёР·РЅРё СѓРјРµРЅСЊС€Р°СЋС‚СЃСЏ РЅР° ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," в начале каждого раунда, прочность не имеет значения<br>")
+		add(itemEffect,199," РІ РЅР°С‡Р°Р»Рµ РєР°Р¶РґРѕРіРѕ СЂР°СѓРЅРґР°, РїСЂРѕС‡РЅРѕСЃС‚СЊ РЅРµ РёРјРµРµС‚ Р·РЅР°С‡РµРЅРёСЏ<br>")
 	}
 	if (player_b_theif[id] > 0) 
 	{
 		num_to_str(player_b_theif[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/7 украсть $")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/7 СѓРєСЂР°СЃС‚СЊ $")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," каждый раз когда вы атакуете противника. Вы также можете нажать E чтобы конвертировать 1000$ в 15 хп<br>")
+		add(itemEffect,199," РєР°Р¶РґС‹Р№ СЂР°Р· РєРѕРіРґР° РІС‹ Р°С‚Р°РєСѓРµС‚Рµ РїСЂРѕС‚РёРІРЅРёРєР°. Р’С‹ С‚Р°РєР¶Рµ РјРѕР¶РµС‚Рµ РЅР°Р¶Р°С‚СЊ E С‡С‚РѕР±С‹ РєРѕРЅРІРµСЂС‚РёСЂРѕРІР°С‚СЊ 1000$ РІ 15 С…Рї<br>")
 	}
 	if (player_b_respawn[id] > 0) 
 	{
 		num_to_str(player_b_respawn[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," воскреснуть после смерти<br>")
+		add(itemEffect,199," РІРѕСЃРєСЂРµСЃРЅСѓС‚СЊ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё<br>")
 	}
 	if (player_b_explode[id] > 0) 
 	{
 		num_to_str(player_b_explode[id],TempSkill,10)
-		add(itemEffect,199,"Когда вы умираете вы взрываетесь в радиусе ")
+		add(itemEffect,199,"РљРѕРіРґР° РІС‹ СѓРјРёСЂР°РµС‚Рµ РІС‹ РІР·СЂС‹РІР°РµС‚РµСЃСЊ РІ СЂР°РґРёСѓСЃРµ ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," нанося 75 урона всем вокруг вас - intelligence увеличивает радиус item<br>")
+		add(itemEffect,199," РЅР°РЅРѕСЃСЏ 75 СѓСЂРѕРЅР° РІСЃРµРј РІРѕРєСЂСѓРі РІР°СЃ - intelligence СѓРІРµР»РёС‡РёРІР°РµС‚ СЂР°РґРёСѓСЃ item<br>")
 	}
 	if (player_b_heal[id] > 0) 
 	{
 		num_to_str(player_b_heal[id],TempSkill,10)
-		add(itemEffect,199,"Вы получаете +")
+		add(itemEffect,199,"Р’С‹ РїРѕР»СѓС‡Р°РµС‚Рµ +")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," хп каждые 5 секунд. Жми E чтобы установить лечящий тотем на 7 секунд<br>")
+		add(itemEffect,199," С…Рї РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ. Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ Р»РµС‡СЏС‰РёР№ С‚РѕС‚РµРј РЅР° 7 СЃРµРєСѓРЅРґ<br>")
 	}
 	if (player_b_gamble[id] > 0) 
 	{
 		num_to_str(player_b_gamble[id],TempSkill,10)
-		add(itemEffect,199,"Вы получете случайный навык в начале каждого раунда разнообразие 1/")
+		add(itemEffect,199,"Р’С‹ РїРѕР»СѓС‡РµС‚Рµ СЃР»СѓС‡Р°Р№РЅС‹Р№ РЅР°РІС‹Рє РІ РЅР°С‡Р°Р»Рµ РєР°Р¶РґРѕРіРѕ СЂР°СѓРЅРґР° СЂР°Р·РЅРѕРѕР±СЂР°Р·РёРµ 1/")
 		add(itemEffect,199,TempSkill)
 		add(itemEffect,199,"<br>")
 	}
 	if (player_b_blind[id] > 0) 
 	{
 		num_to_str(player_b_blind[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," ослепить проивника когда вы стреляете в него<br>")
+		add(itemEffect,199," РѕСЃР»РµРїРёС‚СЊ РїСЂРѕРёРІРЅРёРєР° РєРѕРіРґР° РІС‹ СЃС‚СЂРµР»СЏРµС‚Рµ РІ РЅРµРіРѕ<br>")
 	}
 	if (player_b_fireshield[id] > 0) 
 	{
 		num_to_str(player_b_fireshield[id],TempSkill,10)
-		add(itemEffect,199,"Уменьшает ваше здоровье, 20 хп каждые 2 секунды.<br>")
-		add(itemEffect,199,"Вы не можете быть убиты chaos orb, hell orb или firerope.<br>")
-		add(itemEffect,199,"При нажатии Е активируется щит котрый наносит урон противнику.<br>")
+		add(itemEffect,199,"РЈРјРµРЅСЊС€Р°РµС‚ РІР°С€Рµ Р·РґРѕСЂРѕРІСЊРµ, 20 С…Рї РєР°Р¶РґС‹Рµ 2 СЃРµРєСѓРЅРґС‹.<br>")
+		add(itemEffect,199,"Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ Р±С‹С‚СЊ СѓР±РёС‚С‹ chaos orb, hell orb РёР»Рё firerope.<br>")
+		add(itemEffect,199,"РџСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚СЂС‹Р№ РЅР°РЅРѕСЃРёС‚ СѓСЂРѕРЅ РїСЂРѕС‚РёРІРЅРёРєСѓ.<br>")
 	}
 	if (player_b_meekstone[id] > 0) 
 	{
 		num_to_str(player_b_meekstone[id],TempSkill,10)
-		add(itemEffect,199,"Вы можете ставить фальшивую бомбу c4 нажатием клавишы E и взорвать ее снова нажав E<br>")
+		add(itemEffect,199,"Р’С‹ РјРѕР¶РµС‚Рµ СЃС‚Р°РІРёС‚СЊ С„Р°Р»СЊС€РёРІСѓСЋ Р±РѕРјР±Сѓ c4 РЅР°Р¶Р°С‚РёРµРј РєР»Р°РІРёС€С‹ E Рё РІР·РѕСЂРІР°С‚СЊ РµРµ СЃРЅРѕРІР° РЅР°Р¶Р°РІ E<br>")
 	}
 	if(player_b_radar[id] > 0)
   {
-        add(itemEffect, 199, "Вы видите противников на радаре.<br>");
+        add(itemEffect, 199, "Р’С‹ РІРёРґРёС‚Рµ РїСЂРѕС‚РёРІРЅРёРєРѕРІ РЅР° СЂР°РґР°СЂРµ.<br>");
   }
 	if (player_b_teamheal[id] > 0) 
 	{
 		num_to_str(player_b_teamheal[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы активировать защиту игрока.<br>")
-		add(itemEffect,199," Все повреждения отражаются. Вы умрёте если получите урон.")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ Р°РєС‚РёРІРёСЂРѕРІР°С‚СЊ Р·Р°С‰РёС‚Сѓ РёРіСЂРѕРєР°.<br>")
+		add(itemEffect,199," Р’СЃРµ РїРѕРІСЂРµР¶РґРµРЅРёСЏ РѕС‚СЂР°Р¶Р°СЋС‚СЃСЏ. Р’С‹ СѓРјСЂС‘С‚Рµ РµСЃР»Рё РїРѕР»СѓС‡РёС‚Рµ СѓСЂРѕРЅ.")
 	}
 	if (player_b_redirect[id] > 0) 
 	{
 		num_to_str(player_b_redirect[id],TempSkill,10)
-		add(itemEffect,199,"Вы получаете уменьшение урона на ")
+		add(itemEffect,199,"Р’С‹ РїРѕР»СѓС‡Р°РµС‚Рµ СѓРјРµРЅСЊС€РµРЅРёРµ СѓСЂРѕРЅР° РЅР° ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," хп<br>")
+		add(itemEffect,199," С…Рї<br>")
 	}
 	if (player_b_fireball[id] > 0) 
 	{
 		num_to_str(player_b_fireball[id],TempSkill,10)
-		add(itemEffect,199,"Метание огненного шара нажатием клавишы E - Intelligence ускоряет item. Он убьет всех в радиусе ")
+		add(itemEffect,199,"РњРµС‚Р°РЅРёРµ РѕРіРЅРµРЅРЅРѕРіРѕ С€Р°СЂР° РЅР°Р¶Р°С‚РёРµРј РєР»Р°РІРёС€С‹ E - Intelligence СѓСЃРєРѕСЂСЏРµС‚ item. РћРЅ СѓР±СЊРµС‚ РІСЃРµС… РІ СЂР°РґРёСѓСЃРµ ")
 		add(itemEffect,199,TempSkill)
 		add(itemEffect,199,"<br>")
 	}
 	if (player_b_ghost[id] > 0) 
 	{
 		num_to_str(player_b_ghost[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы ходить сквозь стены в течении ")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ С…РѕРґРёС‚СЊ СЃРєРІРѕР·СЊ СЃС‚РµРЅС‹ РІ С‚РµС‡РµРЅРёРё ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," секунд<br>")
+		add(itemEffect,199," СЃРµРєСѓРЅРґ<br>")
 	}
 	if(player_b_autobh[id] > 0)
   {
-        add(itemEffect,199,"Даёт вам авто распрыжку. Удерживает в пространстве.")
+        add(itemEffect,199,"Р”Р°С‘С‚ РІР°Рј Р°РІС‚Рѕ СЂР°СЃРїСЂС‹Р¶РєСѓ. РЈРґРµСЂР¶РёРІР°РµС‚ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ.")
   }
 	if (player_b_eye[id] > 0) 
 	{
-		add(itemEffect,199,"Жми E чтобы установить волшебный глаз (только одно место доступно) и жми E снова чтобы использовать или остановить")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РІРѕР»С€РµР±РЅС‹Р№ РіР»Р°Р· (С‚РѕР»СЊРєРѕ РѕРґРЅРѕ РјРµСЃС‚Рѕ РґРѕСЃС‚СѓРїРЅРѕ) Рё Р¶РјРё E СЃРЅРѕРІР° С‡С‚РѕР±С‹ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РёР»Рё РѕСЃС‚Р°РЅРѕРІРёС‚СЊ")
 		
 	}
 	if (player_b_blink[id] > 0) 
 	{
-		add(itemEffect,199,"Вы можете телепортироваться альтернативной атаков если у вас в руках нож. Intelligence увеличивает дистанцию")
+		add(itemEffect,199,"Р’С‹ РјРѕР¶РµС‚Рµ С‚РµР»РµРїРѕСЂС‚РёСЂРѕРІР°С‚СЊСЃСЏ Р°Р»СЊС‚РµСЂРЅР°С‚РёРІРЅРѕР№ Р°С‚Р°РєРѕРІ РµСЃР»Рё Сѓ РІР°СЃ РІ СЂСѓРєР°С… РЅРѕР¶. Intelligence СѓРІРµР»РёС‡РёРІР°РµС‚ РґРёСЃС‚Р°РЅС†РёСЋ")
 	}
 	
 	if (player_b_windwalk[id] > 0) 
 	{
 		num_to_str(player_b_windwalk[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы стать невидимым,вы не можете атаковать и скорость увеличиться на ")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СЃС‚Р°С‚СЊ РЅРµРІРёРґРёРјС‹Рј,РІС‹ РЅРµ РјРѕР¶РµС‚Рµ Р°С‚Р°РєРѕРІР°С‚СЊ Рё СЃРєРѕСЂРѕСЃС‚СЊ СѓРІРµР»РёС‡РёС‚СЊСЃСЏ РЅР° ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," секунд.<br>")
+		add(itemEffect,199," СЃРµРєСѓРЅРґ.<br>")
 	}
 	
 	if (player_b_froglegs[id] > 0)
 	{
-		add(itemEffect,199,"Удерживайте назад +ПРИСЕСТЬ 3 секунды для длинного прыжка")
+		add(itemEffect,199,"РЈРґРµСЂР¶РёРІР°Р№С‚Рµ РЅР°Р·Р°Рґ +РџР РРЎР•РЎРўР¬ 3 СЃРµРєСѓРЅРґС‹ РґР»СЏ РґР»РёРЅРЅРѕРіРѕ РїСЂС‹Р¶РєР°")
 	}
 	if (player_b_dagon[id] == 1)
 	{
-		add(itemEffect,199,"Жми E чтобы выстрелить молнией в ближайшего врага - ты можешь улучших этот item руной")
-		add(itemEffect,199,"Intelligence увеличивает диапазон itema")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ РІС‹СЃС‚СЂРµР»РёС‚СЊ РјРѕР»РЅРёРµР№ РІ Р±Р»РёР¶Р°Р№С€РµРіРѕ РІСЂР°РіР° - С‚С‹ РјРѕР¶РµС€СЊ СѓР»СѓС‡С€РёС… СЌС‚РѕС‚ item СЂСѓРЅРѕР№")
+		add(itemEffect,199,"Intelligence СѓРІРµР»РёС‡РёРІР°РµС‚ РґРёР°РїР°Р·РѕРЅ itema")
 	}
 	if (player_b_sniper[id] > 0) 
 	{
 		num_to_str(player_b_sniper[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," мгновенно убить со скаута<br>")
+		add(itemEffect,199," РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃРѕ СЃРєР°СѓС‚Р°<br>")
 	}
 	if (player_b_awpmaster[id] > 0) 
 	{
 		num_to_str(player_b_awpmaster[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199,"мгновенно убить противника с AWP<br>")
+		add(itemEffect,199,"РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° СЃ AWP<br>")
 	}
 	if (player_b_dglmaster[id] > 0) 
 	{
 		num_to_str(player_b_dglmaster[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199,"мгновенно убить противника с Deagle<br>")
+		add(itemEffect,199,"РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° СЃ Deagle<br>")
 	}
 	if (player_b_m4master[id] > 0) 
 	{
 		num_to_str(player_b_m4master[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199,"мгновенно убить противника с M4A1<br>")
+		add(itemEffect,199,"РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° СЃ M4A1<br>")
 	}
 	if (player_b_m3master[id] > 0) 
 	{
 		num_to_str(player_b_m3master[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199,"мгновенно убить противника с M3<br>")
+		add(itemEffect,199,"РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° СЃ M3<br>")
 	}
 	if (player_b_akmaster[id] > 0) 
 	{
 		num_to_str(player_b_akmaster[id],TempSkill,10)
-		add(itemEffect,199,"Шанс 1/")
+		add(itemEffect,199,"РЁР°РЅСЃ 1/")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199,"мгновенно убить противника с AK47<br>")
+		add(itemEffect,199,"РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° СЃ AK47<br>")
 	}
 	if (player_b_jumpx[id] > 0)
 	{
 		num_to_str(player_b_jumpx[id],TempSkill,10)
-		add(itemEffect,199,"Вы можете прыгать ")
+		add(itemEffect,199,"Р’С‹ РјРѕР¶РµС‚Рµ РїСЂС‹РіР°С‚СЊ ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," раз  в воздух при нажатии кнопки прыжка<br>")	
+		add(itemEffect,199," СЂР°Р·  РІ РІРѕР·РґСѓС… РїСЂРё РЅР°Р¶Р°С‚РёРё РєРЅРѕРїРєРё РїСЂС‹Р¶РєР°<br>")	
 	}
 	if (player_b_smokehit[id] > 0)
 	{
-		add(itemEffect,199,"Ваши дымовые гранаты мгновенно убивают если они попали во врага")
+		add(itemEffect,199,"Р’Р°С€Рё РґС‹РјРѕРІС‹Рµ РіСЂР°РЅР°С‚С‹ РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёРІР°СЋС‚ РµСЃР»Рё РѕРЅРё РїРѕРїР°Р»Рё РІРѕ РІСЂР°РіР°")
 	}
 	if (player_b_extrastats[id] > 0)
 	{
 		num_to_str(player_b_extrastats[id],TempSkill,10)
-		add(itemEffect,199,"Вы получите +")
+		add(itemEffect,199,"Р’С‹ РїРѕР»СѓС‡РёС‚Рµ +")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," к статистике если у вас есть этот item")
+		add(itemEffect,199," Рє СЃС‚Р°С‚РёСЃС‚РёРєРµ РµСЃР»Рё Сѓ РІР°СЃ РµСЃС‚СЊ СЌС‚РѕС‚ item")
 	}
 	if (player_b_firetotem[id] > 0)
 	{
 		num_to_str(player_b_firetotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить огненный тотем который взрывается после 7с. Он сожжёт всех в радиусе ")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РѕРіРЅРµРЅРЅС‹Р№ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РІР·СЂС‹РІР°РµС‚СЃСЏ РїРѕСЃР»Рµ 7СЃ. РћРЅ СЃРѕР¶Р¶С‘С‚ РІСЃРµС… РІ СЂР°РґРёСѓСЃРµ ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," тотема")
+		add(itemEffect,199," С‚РѕС‚РµРјР°")
 	}
 	if (player_b_zamroztotem[id] > 0)
 	{
 		num_to_str(player_b_zamroztotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который замораживает противника.")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ Р·Р°РјРѕСЂР°Р¶РёРІР°РµС‚ РїСЂРѕС‚РёРІРЅРёРєР°.")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_fleshujtotem[id] > 0)
 	{
 		num_to_str(player_b_fleshujtotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который ослепляет противника.")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РѕСЃР»РµРїР»СЏРµС‚ РїСЂРѕС‚РёРІРЅРёРєР°.")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_wywaltotem[id] > 0)
 	{
 		num_to_str(player_b_wywaltotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который притягивает оружие противника.")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РїСЂРёС‚СЏРіРёРІР°РµС‚ РѕСЂСѓР¶РёРµ РїСЂРѕС‚РёРІРЅРёРєР°.")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_kasatotem[id] > 0)
 	{
 		num_to_str(player_b_kasatotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который даёт вам и вашей команде деньги.")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РґР°С‘С‚ РІР°Рј Рё РІР°С€РµР№ РєРѕРјР°РЅРґРµ РґРµРЅСЊРіРё.")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_kasaqtotem[id] > 0)
 	{
 		num_to_str(player_b_kasaqtotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РѕС‚РЅРёРјР°РµС‚ РґРµРЅСЊРіРё РІСЂР°РіР°(500$ РІ СЃРµРє)")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_hook[id] > 0)
 	{
 		num_to_str(player_b_hook[id],TempSkill,10)
-		add(itemEffect,199,"при нажатии E притягивает к себе врагав радиусе 600. Intelligence ускоряет hook")
+		add(itemEffect,199,"РїСЂРё РЅР°Р¶Р°С‚РёРё E РїСЂРёС‚СЏРіРёРІР°РµС‚ Рє СЃРµР±Рµ РІСЂР°РіР°РІ СЂР°РґРёСѓСЃРµ 600. Intelligence СѓСЃРєРѕСЂСЏРµС‚ hook")
 	}
 	if (player_b_darksteel[id] > 0)
 	{		
 		new ddam = floatround(player_strength[id]*2*player_b_darksteel[id]/10.0)*3
 
 		num_to_str(player_b_darksteel[id],TempSkill,10)
-		add(itemEffect,199,"Вы получите 15 + 0.")
+		add(itemEffect,199,"Р’С‹ РїРѕР»СѓС‡РёС‚Рµ 15 + 0.")
 		add(itemEffect,199,TempSkill)
 		add(itemEffect,199,"*strength: ")
 		num_to_str(ddam,TempSkill,10)
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," бонуса урона когда вы атакуете врага сзади ")
+		add(itemEffect,199," Р±РѕРЅСѓСЃР° СѓСЂРѕРЅР° РєРѕРіРґР° РІС‹ Р°С‚Р°РєСѓРµС‚Рµ РІСЂР°РіР° СЃР·Р°РґРё ")
 	}
 	if (player_b_antyarchy[id] > 0)
 	{	
-		add(itemEffect,199,"Защита от всех видов arch angel")
+		add(itemEffect,199,"Р—Р°С‰РёС‚Р° РѕС‚ РІСЃРµС… РІРёРґРѕРІ arch angel")
 	}
 	if (player_b_antyarchy[id] > 0)
 	{	
-		add(itemEffect,199,"Защита от всех видов Meekstone")
+		add(itemEffect,199,"Р—Р°С‰РёС‚Р° РѕС‚ РІСЃРµС… РІРёРґРѕРІ Meekstone")
 	}
 	if (player_b_antyorb[id] > 0)
 	{	
-		add(itemEffect,199,"Вы устойчивы к взрывам")
+		add(itemEffect,199,"Р’С‹ СѓСЃС‚РѕР№С‡РёРІС‹ Рє РІР·СЂС‹РІР°Рј")
 	}
 	if (player_b_antyfs[id] > 0)
 	{	
-		add(itemEffect,199,"У вас есть огнестойкий щит")
+		add(itemEffect,199,"РЈ РІР°СЃ РµСЃС‚СЊ РѕРіРЅРµСЃС‚РѕР№РєРёР№ С‰РёС‚")
 	}
 	if (player_b_illusionist[id] > 0)
 	{
-		add(itemEffect,199,"при нажатии на Е вы становитесь полностью (100%)невидимым.Но и вы никого не видите и умираете от 1 выстрела. Эффект длится 5-7 секунд.")
+		add(itemEffect,199,"РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РІС‹ СЃС‚Р°РЅРѕРІРёС‚РµСЃСЊ РїРѕР»РЅРѕСЃС‚СЊСЋ (100%)РЅРµРІРёРґРёРјС‹Рј.РќРѕ Рё РІС‹ РЅРёРєРѕРіРѕ РЅРµ РІРёРґРёС‚Рµ Рё СѓРјРёСЂР°РµС‚Рµ РѕС‚ 1 РІС‹СЃС‚СЂРµР»Р°. Р­С„С„РµРєС‚ РґР»РёС‚СЃСЏ 5-7 СЃРµРєСѓРЅРґ.")
 	}
 	if (player_b_mine[id] > 0)
 	{
-		add(itemEffect,199,"Жми E чтобы устанвоить почти невидимую мину. Каждая мина взрывается нанося 50hp+intelligece урона. 3 Мины каждый раунд доступны.")
+		add(itemEffect,199,"Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРІРѕРёС‚СЊ РїРѕС‡С‚Рё РЅРµРІРёРґРёРјСѓСЋ РјРёРЅСѓ. РљР°Р¶РґР°СЏ РјРёРЅР° РІР·СЂС‹РІР°РµС‚СЃСЏ РЅР°РЅРѕСЃСЏ 50hp+intelligece СѓСЂРѕРЅР°. 3 РњРёРЅС‹ РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ РґРѕСЃС‚СѓРїРЅС‹.")
 	}
 	if (player_item_id[id]==66)
 	{
-		add(itemEffect,199,"Вы похожи на врага!")
+		add(itemEffect,199,"Р’С‹ РїРѕС…РѕР¶Рё РЅР° РІСЂР°РіР°!")
 	}
 	if (player_ultra_armor[id]>0)
 	{
-		add(itemEffect,199,"У вас есть шанс отбрасывать пули от бронежелета")
+		add(itemEffect,199,"РЈ РІР°СЃ РµСЃС‚СЊ С€Р°РЅСЃ РѕС‚Р±СЂР°СЃС‹РІР°С‚СЊ РїСѓР»Рё РѕС‚ Р±СЂРѕРЅРµР¶РµР»РµС‚Р°")
 	}
 	
 	
 	new Durability[10]
 	num_to_str(item_durability[id],Durability,9)
-	if (equal(itemEffect,"")) showitem(id,"Нет","Нет","Нужно кого-нибудь убить,чтобы получить предмет или купить (/rune)","Нет")
+	if (equal(itemEffect,"")) showitem(id,"РќРµС‚","РќРµС‚","РќСѓР¶РЅРѕ РєРѕРіРѕ-РЅРёР±СѓРґСЊ СѓР±РёС‚СЊ,С‡С‚РѕР±С‹ РїРѕР»СѓС‡РёС‚СЊ РїСЂРµРґРјРµС‚ РёР»Рё РєСѓРїРёС‚СЊ (/rune)","РќРµС‚")
 	if (!equal(itemEffect,"")) showitem(id,player_item_name[id],itemvalue,itemEffect,Durability)
 	
 }
@@ -5221,7 +5223,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Bronze Amplifier"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(1,3)
-			show_hudmessage(id, "Вы нашли item: %s ::  +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s ::  +%i РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_damage[id])
 		}
 		
 		case 2:
@@ -5229,7 +5231,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Silver Amplifier"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_damage[id])
 		}
 		
 		case 3:
@@ -5237,49 +5239,49 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Gold Amplifier"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(6,10)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_damage[id])	
 		}
 		case 4:
 		{
 			player_item_name[id] = "Vampyric Staff"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(1,4)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: %i hp РІС‹СЃР°СЃС‹РІР°РµС‚ СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 5:
 		{
 			player_item_name[id] = "Vampyric Amulet"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(4,6)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: %i hp РІС‹СЃР°СЃС‹РІР°РµС‚ СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 6:
 		{
 			player_item_name[id] = "Vampyric Scepter"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: %i hp РІС‹СЃР°СЃС‹РІР°РµС‚ СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 7:
 		{
 			player_item_name[id] = "Small bronze bag"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(150,500)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ + РџСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚СЂС‹Р№ СЃРЅРёР¶Р°РµС‚ СѓСЂРѕРЅ РїРѕ РІР°Рј РЅР° 50% Р¶СЂСѓС‰РёР№ РїРѕ 200$ РєР°Р¶РґС‹Рµ 2-3 СЃРµРєСѓРЅРґС‹.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 8:
 		{
 			player_item_name[id] = "Medium silver bag"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(500,1200)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ + РџСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚СЂС‹Р№ СЃРЅРёР¶Р°РµС‚ СѓСЂРѕРЅ РїРѕ РІР°Рј РЅР° 50% Р¶СЂСѓС‰РёР№ РїРѕ 200$ РєР°Р¶РґС‹Рµ 2-3 СЃРµРєСѓРЅРґС‹.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 9:
 		{
 			player_item_name[id] = "Large gold bag"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(1200,3000)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ + РџСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚СЂС‹Р№ СЃРЅРёР¶Р°РµС‚ СѓСЂРѕРЅ РїРѕ РІР°Рј РЅР° 50% Р¶СЂСѓС‰РёР№ РїРѕ 200$ РєР°Р¶РґС‹Рµ 2-3 СЃРµРєСѓРЅРґС‹.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 10:
 		{
@@ -5289,7 +5291,7 @@ public award_item(id, itemnum)
 			
 			if (is_user_alive(id))
 				set_gravitychange(id)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i Р±РѕРЅСѓСЃ Рє РіСЂР°РІРёС‚Р°С†РёРё РїСЂРё РїСЂС‹Р¶РєРµ Рё РЅР°Р¶Р°С‚РёРё Р• СЂРµР·РєРѕ РїР°РґР°РµС‚ РЅР° Р·РµРјР»СЋ Рё РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёРІР°РµС‚ РІСЂР°РіР° РЅР° РЅРµР±РѕР»СЊС€РѕРј СЂР°РґРёСѓСЃРµ.",player_item_name[id],player_b_gravity[id])	
 		}
 		case 11:
 		{
@@ -5300,7 +5302,7 @@ public award_item(id, itemnum)
 			if (is_user_alive(id))
 				set_gravitychange(id)
 				
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i Р±РѕРЅСѓСЃ Рє РіСЂР°РІРёС‚Р°С†РёРё РїСЂРё РїСЂС‹Р¶РєРµ Рё РЅР°Р¶Р°С‚РёРё Р• СЂРµР·РєРѕ РїР°РґР°РµС‚ РЅР° Р·РµРјР»СЋ Рё РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёРІР°РµС‚ РІСЂР°РіР° РЅР° СЃСЂРµРґРЅРµРј СЂР°РґРёСѓСЃРµ.",player_item_name[id],player_b_gravity[id])	
 			
 		}
 		case 12:
@@ -5308,35 +5310,35 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Invisibility Rope"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(150,200)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i РЅРµР·РЅР°С‡РёС‚РµР»СЊРЅСѓСЋ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ С‡Р°СЂР°.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 13:
 		{
 			player_item_name[id] = "Invisibility Coat"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(110,150)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i РЅРµР·РЅР°С‡РёС‚РµР»СЊРЅСѓСЋ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ С‡Р°СЂР°.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 14:
 		{
 			player_item_name[id] = "Invisibility Armor"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i РЅРµР·РЅР°С‡РёС‚РµР»СЊРЅСѓСЋ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ С‡Р°СЂР°.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 15:
 		{
 			player_item_name[id] = "Firerope"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: +1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +1/%i  С€Р°РЅСЃ РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РІСЂР°РіР° СЃ РіСЂР°РЅР°С‚С‹",player_item_name[id],player_b_grenade[id])	
 		}
 		case 16:
 		{
 			player_item_name[id] = "Fire Amulet"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(2,4)
-			show_hudmessage(id, "Вы нашли item: %s :: +1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +1/%i  С€Р°РЅСЃ РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РІСЂР°РіР° СЃ РіСЂР°РЅР°С‚С‹",player_item_name[id],player_b_grenade[id])	
 		}
 		case 17:
 		{
@@ -5347,238 +5349,238 @@ public award_item(id, itemnum)
 			item_durability[id] = 100
 			
 			if (is_user_alive(id)) set_user_health(id,5)		
-			show_hudmessage(id, "Вы нашли item: %s :: практически полная невидимость, но у вас 5 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂР°РєС‚РёС‡РµСЃРєРё РїРѕР»РЅР°СЏ РЅРµРІРёРґРёРјРѕСЃС‚СЊ, РЅРѕ Сѓ РІР°СЃ 5 С…Рї Рё РёР· РѕСЂСѓР¶РёСЏ С‚РѕР»СЊРєРѕ РЅРѕР¶, РјРѕР¶РЅРѕ СЃС‚Р°РІРёС‚СЊ Р±РѕРјР±Сѓ.",player_item_name[id])	
 		}
 		case 18:
 		{
 			player_item_name[id] = "Arabian Boots"
 			player_item_id[id] = rannum
 			player_b_theif[id] = random_num(500,1000)
-			show_hudmessage(id, "Вы нашли item: %s :: с каждым выстрелом высасывает с противника деньги, в зависимости от дамага",player_item_name[id],player_b_theif[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃ РєР°Р¶РґС‹Рј РІС‹СЃС‚СЂРµР»РѕРј РІС‹СЃР°СЃС‹РІР°РµС‚ СЃ РїСЂРѕС‚РёРІРЅРёРєР° РґРµРЅСЊРіРё, РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РґР°РјР°РіР°",player_item_name[id],player_b_theif[id])	
 		}
 		case 19:
 		{
 			player_item_name[id] = "Phoenix Ring"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РІРѕСЃРєСЂРµСЃРёС‚СЊСЃСЏ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 20:
 		{
 			player_item_name[id] = "Sorcerers ring"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РІРѕСЃРєСЂРµСЃРёС‚СЊСЃСЏ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 21:
 		{
 			player_item_name[id] = "Chaos Orb"
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(150,275)
-			show_hudmessage(id, "Вы нашли item: %s :: после смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё РІР·СЂС‹РІР°РµС‚РµСЃСЊ РІ СЂР°РґРёСѓСЃРµ %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 22:
 		{
 			player_item_name[id] = "Hell Orb"
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(200,400)
-			show_hudmessage(id, "Вы нашли item: %s :: после смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё РІР·СЂС‹РІР°РµС‚РµСЃСЊ РІ СЂР°РґРёСѓСЃРµ %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 23:
 		{
 			player_item_name[id] = "Gold statue"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(5,10)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РїРѕСЏРІР»СЏРµС‚СЃСЏ С‚РѕС‚РµРј, РєРѕС‚СЂС‹Р№ Р»РµС‡РёС‚ РІР°СЃ Рё РІР°С€Сѓ РєРѕРјР°РЅРґСѓ. %i С…Рї Р·Р° 5 СЃРµРєСѓРЅРґ, С‚РѕС‚РµРј Р°РєС‚РёРІРµРЅ РІ С‚РµС‡РµРЅРёРё 7 СЃРµРєСѓРЅРґ РІ РїСЂРµРґРµР»Р°С… %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 24:
 		{
 			player_item_name[id] = "Daylight Diamond"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РїРѕСЏРІР»СЏРµС‚СЃСЏ С‚РѕС‚РµРј, РєРѕС‚СЂС‹Р№ Р»РµС‡РёС‚ РІР°СЃ Рё РІР°С€Сѓ РєРѕРјР°РЅРґСѓ. %i С…Рї Р·Р° 5 СЃРµРєСѓРЅРґ, С‚РѕС‚РµРј Р°РєС‚РёРІРµРЅ РІ С‚РµС‡РµРЅРёРё 7 СЃРµРєСѓРЅРґ РІ РїСЂРµРґРµР»Р°С… %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 25:
 		{
 			player_item_name[id] = "Blood Diamond"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РїРѕСЏРІР»СЏРµС‚СЃСЏ С‚РѕС‚РµРј, РєРѕС‚СЂС‹Р№ Р»РµС‡РёС‚ РІР°СЃ Рё РІР°С€Сѓ РєРѕРјР°РЅРґСѓ. %i С…Рї Р·Р° 5 СЃРµРєСѓРЅРґ, С‚РѕС‚РµРј Р°РєС‚РёРІРµРЅ РІ С‚РµС‡РµРЅРёРё 7 СЃРµРєСѓРЅРґ РІ РїСЂРµРґРµР»Р°С… %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 26:
 		{
 			player_item_name[id] = "Wheel of Fortune"
 			player_item_id[id] = rannum
 			player_b_gamble[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ СЂР°РЅРґРѕРјРЅРѕ +%i Р±РѕРЅСѓСЃРѕРІ РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 27:
 		{
 			player_item_name[id] = "Four leaf Clover"
 			player_item_id[id] = rannum
 			player_b_gamble[id] = random_num(4,5)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ СЂР°РЅРґРѕРјРЅРѕ +%i Р±РѕРЅСѓСЃРѕРІ РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 28:
 		{
 			player_item_name[id] = "Amulet of the sun"
 			player_item_id[id] = rannum
 			player_b_blind[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РѕСЃР»РµРїРёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° РїСЂРё Р°С‚Р°РєРµ. Р­РєСЂР°РЅ СЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ РїРѕС‡С‚Рё РїРѕР»СЊРЅРѕСЃС‚СЊСЋ РѕСЂР°РЅР¶РµРІС‹Рј РІ С‚РµС‡РµРЅРёРё 7-10 СЃРµРєСѓРЅРґ",player_item_name[id],player_b_blind[id])	
 		}
 		case 29:
 		{
 			player_item_name[id] = "Sword of the sun"
 			player_item_id[id] = rannum
 			player_b_blind[id] = random_num(2,5)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РѕСЃР»РµРїРёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° РїСЂРё Р°С‚Р°РєРµ. Р­РєСЂР°РЅ СЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ РїРѕС‡С‚Рё РїРѕР»СЊРЅРѕСЃС‚СЊСЋ РѕСЂР°РЅР¶РµРІС‹Рј РІ С‚РµС‡РµРЅРёРё 7-10 СЃРµРєСѓРЅРґ",player_item_name[id],player_b_blind[id])	
 		}
 		case 30:
 		{
 			player_item_name[id] = "Fireshield"
 			player_item_id[id] = rannum
 			player_b_fireshield[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии Е активируется щит который наносит дамаг противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚РѕСЂС‹Р№ РЅР°РЅРѕСЃРёС‚ РґР°РјР°Рі РїСЂРѕС‚РёРІРЅРёРєСѓ. РЈРјРµРЅСЊС€Р°РµС‚ РІР°С€Рµ Р·РґРѕСЂРѕРІСЊРµ, 20 С…Рї РєР°Р¶РґС‹Рµ 2 СЃРµРєСѓРЅРґС‹.",player_item_name[id],player_b_fireshield[id])	
 		}
 		case 31:
 		{
 			player_item_name[id] = "Stealth Shoes"
 			player_item_id[id] = rannum
 			player_b_silent[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бесшумный шаг (эфект рассы assassin).",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р±РµСЃС€СѓРјРЅС‹Р№ С€Р°Рі (СЌС„РµРєС‚ СЂР°СЃСЃС‹ assassin).",player_item_name[id])	
 		}
 		case 32:
 		{
 			player_item_name[id] = "Meekstone"
 			player_item_id[id] = rannum
 			player_b_meekstone[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бомба на дистанционом управлении. Е положить бомбу, второе нажатие Е взорвать.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р±РѕРјР±Р° РЅР° РґРёСЃС‚Р°РЅС†РёРѕРЅРѕРј СѓРїСЂР°РІР»РµРЅРёРё. Р• РїРѕР»РѕР¶РёС‚СЊ Р±РѕРјР±Сѓ, РІС‚РѕСЂРѕРµ РЅР°Р¶Р°С‚РёРµ Р• РІР·РѕСЂРІР°С‚СЊ.",player_item_name[id])	
 		}
 		case 33:
 		{
 			player_item_name[id] = "Medicine Glar"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли item: %s :: При атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё Р°С‚Р°РєРµ РІ СЃРѕРєРѕРјР°РЅРґРЅРёРєР° РІРѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ %i С…Рї. РїСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚ РЅР° С‡Р»РµРЅРµ РєРѕРјР°РЅРґС‹ С‰РёС‚ РєРѕС‚СЂС‹Р№ РІРѕР·РІСЂР°С‰Р°РµС‚ РґР°РјР°Рі.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 34:
 		{
 			player_item_name[id] = "Medicine Totem"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(20,30)
-			show_hudmessage(id, "Вы нашли item: %s :: При атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё Р°С‚Р°РєРµ РІ СЃРѕРєРѕРјР°РЅРґРЅРёРєР° РІРѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ %i С…Рї. РїСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚ РЅР° С‡Р»РµРЅРµ РєРѕРјР°РЅРґС‹ С‰РёС‚ РєРѕС‚СЂС‹Р№ РІРѕР·РІСЂР°С‰Р°РµС‚ РґР°РјР°Рі.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 35:
 		{
 			player_item_name[id] = "Iron Armor"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃРЅРёР¶Р°РµС‚ +%i РґР°РјР°РіР° РїРѕ РІР°Рј СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 36:
 		{
 			player_item_name[id] = "Mitril Armor"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(6,11)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃРЅРёР¶Р°РµС‚ +%i РґР°РјР°РіР° РїРѕ РІР°Рј СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 37:
 		{
 			player_item_name[id] = "Godly Armor"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(10,15)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃРЅРёР¶Р°РµС‚ +%i РґР°РјР°РіР° РїРѕ РІР°Рј СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 38:
 		{
 			player_item_name[id] = "Fireball staff"
 			player_item_id[id] = rannum
 			player_b_fireball[id] = random_num(50,100)
-			show_hudmessage(id, "Вы нашли item: %s :: Запускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р—Р°РїСѓСЃРєР°РµС‚ РѕРіРЅРµРЅРЅС‹Р№ С€Р°СЂ, РІР·СЂС‹РІР°СЋС‰РёР№СЃСЏ РІ СЂР°РґРёСѓСЃРµ %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 39:
 		{
 			player_item_name[id] = "Fireball scepter"
 			player_item_id[id] = rannum
 			player_b_fireball[id] = random_num(100,200)
-			show_hudmessage(id, "Вы нашли item: %s :: Запускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р—Р°РїСѓСЃРєР°РµС‚ РѕРіРЅРµРЅРЅС‹Р№ С€Р°СЂ, РІР·СЂС‹РІР°СЋС‰РёР№СЃСЏ РІ СЂР°РґРёСѓСЃРµ %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 40:
 		{
 			player_item_name[id] = "Ghost Rope"
 			player_item_id[id] = rannum
 			player_b_ghost[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: Возможность ходить сквозь стены, эфект длиться %i секунд",player_item_name[id],player_b_ghost[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ С…РѕРґРёС‚СЊ СЃРєРІРѕР·СЊ СЃС‚РµРЅС‹, СЌС„РµРєС‚ РґР»РёС‚СЊСЃСЏ %i СЃРµРєСѓРЅРґ",player_item_name[id],player_b_ghost[id])	
 		}
 		case 41:
 		{
 			player_item_name[id] = "Nicolas Eye"
 			player_item_id[id] = rannum
 			player_b_eye[id] = -1
-			show_hudmessage(id, "Вы нашли item: %s :: Устанавливает камеру на стене.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РєР°РјРµСЂСѓ РЅР° СЃС‚РµРЅРµ.",player_item_name[id])	
 		}
 		case 42:
 		{
 			player_item_name[id] = "Knife Ruby"
 			player_item_id[id] = rannum
 			player_b_blink[id] = floatround(halflife_time())
-			show_hudmessage(id, "Вы нашли item: %s :: при использовании ножа второй конопкой телепортирует вас на небольшое растояние",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРё РЅРѕР¶Р° РІС‚РѕСЂРѕР№ РєРѕРЅРѕРїРєРѕР№ С‚РµР»РµРїРѕСЂС‚РёСЂСѓРµС‚ РІР°СЃ РЅР° РЅРµР±РѕР»СЊС€РѕРµ СЂР°СЃС‚РѕСЏРЅРёРµ",player_item_name[id])	
 		}
 		case 43:
 		{
 			player_item_name[id] = "Lothars Edge"
 			player_item_id[id] = rannum
 			player_b_windwalk[id] = random_num(4,7)
-			show_hudmessage(id, "Вы нашли item: %s :: на %i секунд даёт среднюю прозрачность + сильно увеличивает ваш бег.",player_item_name[id],player_b_windwalk[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РЅР° %i СЃРµРєСѓРЅРґ РґР°С‘С‚ СЃСЂРµРґРЅСЋСЋ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ + СЃРёР»СЊРЅРѕ СѓРІРµР»РёС‡РёРІР°РµС‚ РІР°С€ Р±РµРі.",player_item_name[id],player_b_windwalk[id])	
 		}
 		case 44:
 		{
 			player_item_name[id] = "Sword"
 			player_item_id[id] = rannum
 			player_sword[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: увеличивает урон ножу",player_item_name[id])		
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СѓРІРµР»РёС‡РёРІР°РµС‚ СѓСЂРѕРЅ РЅРѕР¶Сѓ",player_item_name[id])		
 		}
 		case 45:
 		{
 			player_item_name[id] = "Mageic Booster"
 			player_item_id[id] = rannum
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: каждые 3 секунды сидя вы очень длинно прыгаете.(item не всегда работает)",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РєР°Р¶РґС‹Рµ 3 СЃРµРєСѓРЅРґС‹ СЃРёРґСЏ РІС‹ РѕС‡РµРЅСЊ РґР»РёРЅРЅРѕ РїСЂС‹РіР°РµС‚Рµ.(item РЅРµ РІСЃРµРіРґР° СЂР°Р±РѕС‚Р°РµС‚)",player_item_name[id])	
 		}
 		case 46:
 		{
 			player_item_name[id] = "Dagon I"
 			player_item_id[id] = rannum
 			player_b_dagon[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии USE наносит дамаг противнику на близком растоянии раз в 20 секунд",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё USE РЅР°РЅРѕСЃРёС‚ РґР°РјР°Рі РїСЂРѕС‚РёРІРЅРёРєСѓ РЅР° Р±Р»РёР·РєРѕРј СЂР°СЃС‚РѕСЏРЅРёРё СЂР°Р· РІ 20 СЃРµРєСѓРЅРґ",player_item_name[id])	
 		}
 		case 47:
 		{
 			player_item_name[id] = "Scout Extender"
 			player_item_id[id] = rannum
 			player_b_sniper[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃРѕ СЃРєР°СѓС‚Р°.",player_item_name[id],player_b_sniper[id])	
 		}
 		case 48:
 		{
 			player_item_name[id] = "Scout Amplifier"
 			player_item_id[id] = rannum
 			player_b_sniper[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃРѕ СЃРєР°СѓС‚Р°.",player_item_name[id],player_b_sniper[id])	
 		}
 		case 49:
 		{
 			player_item_name[id] = "Air booster"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: Вы можете сделать двойной прыжок в воздухе",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ РґРІРѕР№РЅРѕР№ РїСЂС‹Р¶РѕРє РІ РІРѕР·РґСѓС…Рµ",player_item_name[id],player_b_sniper[id])	
 		}
 		case 50:
 		{
 			player_item_name[id] = "Iron Spikes"
 			player_item_id[id] = rannum
 			player_b_smokehit[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: убивает дымовой гранатой, если попасть ей в противника",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СѓР±РёРІР°РµС‚ РґС‹РјРѕРІРѕР№ РіСЂР°РЅР°С‚РѕР№, РµСЃР»Рё РїРѕРїР°СЃС‚СЊ РµР№ РІ РїСЂРѕС‚РёРІРЅРёРєР°",player_item_name[id])	
 		}
 		case 51:
 		{
@@ -5586,49 +5588,49 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_extrastats[id] = random_num(1,3)
 			BoostStats(id,player_b_extrastats[id])
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i очков к каждому умнению",player_item_name[id],player_b_extrastats[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i РѕС‡РєРѕРІ Рє РєР°Р¶РґРѕРјСѓ СѓРјРЅРµРЅРёСЋ",player_item_name[id],player_b_extrastats[id])	
 		}
 		case 52:
 		{
 			player_item_name[id] = "Totem amulet"
 			player_item_id[id] = rannum
 			player_b_firetotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• СЃС‚Р°РІРёС‚ Р¶С‘Р»С‚С‹Р№ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ С‡РµСЂРµР· РЅРµСЃРєРѕР»СЊРєРѕ СЃРµРєСѓРЅРґ РІР·СЂС‹РІР°РµС‚СЃСЏ Рё РїРѕРґР¶РёРіР°РµС‚ РІСЃРµС… РІ Р±РѕР»СЊС€РѕРј СЂР°РґРёСѓСЃРµ.",player_item_name[id])	
 		}
 		case 53:
 		{
 			player_item_name[id] = "Mageic Hook"
 			player_item_id[id] = rannum
 			player_b_hook[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии USE притягивает к себе врага",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё USE РїСЂРёС‚СЏРіРёРІР°РµС‚ Рє СЃРµР±Рµ РІСЂР°РіР°",player_item_name[id])	
 		}
 		case 54:
 		{
 			player_item_name[id] = "Darksteel Glove"
 			player_item_id[id] = rannum
 			player_b_darksteel[id] = random_num(1,5)
-			show_hudmessage(id, "Вы нашли item: %s :: усиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СѓСЃРёР»РµРЅРЅС‹Р№ РґР°РјР°Рі РїСЂРё Р°С‚Р°РєРµ РїСЂРѕС‚РёРІРЅРёРєР° СЃРѕ СЃРїРёРЅС‹.",player_item_name[id])	
 		}
 		case 55:
 		{
 			player_item_name[id] = "Darksteel Gaunlet"
 			player_item_id[id] = rannum
 			player_b_darksteel[id] = random_num(7,9)
-			show_hudmessage(id, "Вы нашли item: %s :: усиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СѓСЃРёР»РµРЅРЅС‹Р№ РґР°РјР°Рі РїСЂРё Р°С‚Р°РєРµ РїСЂРѕС‚РёРІРЅРёРєР° СЃРѕ СЃРїРёРЅС‹.",player_item_name[id])	
 		}
 		case 56:
 		{
 			player_item_name[id] = "Illusionists Cape"
 			player_item_id[id] = rannum
 			player_b_illusionist[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии на Е вы становитесь полностью (100%)невидимым. однако и вы никого не видите и умираете от 1 выстрела.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РІС‹ СЃС‚Р°РЅРѕРІРёС‚РµСЃСЊ РїРѕР»РЅРѕСЃС‚СЊСЋ (100%)РЅРµРІРёРґРёРјС‹Рј. РѕРґРЅР°РєРѕ Рё РІС‹ РЅРёРєРѕРіРѕ РЅРµ РІРёРґРёС‚Рµ Рё СѓРјРёСЂР°РµС‚Рµ РѕС‚ 1 РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id])	
 		}
 		case 57:
 		{
 			player_item_name[id] = "Techies scepter"
 			player_item_id[id] = rannum
 			player_b_mine[id] = 3
-			show_hudmessage(id, "Вы нашли item: %s :: ставит 3 полуневидимые мины.",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃС‚Р°РІРёС‚ 3 РїРѕР»СѓРЅРµРІРёРґРёРјС‹Рµ РјРёРЅС‹.",player_item_name[id])
 		}
 		
 		case 58:
@@ -5637,7 +5639,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_blink[id] = floatround(halflife_time())
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: Нож позволяет вам телепортироваться каждые 3 секунды. Зажмите DUCK чтобы прыгнуть далеко.",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РќРѕР¶ РїРѕР·РІРѕР»СЏРµС‚ РІР°Рј С‚РµР»РµРїРѕСЂС‚РёСЂРѕРІР°С‚СЊСЃСЏ РєР°Р¶РґС‹Рµ 3 СЃРµРєСѓРЅРґС‹. Р—Р°Р¶РјРёС‚Рµ DUCK С‡С‚РѕР±С‹ РїСЂС‹РіРЅСѓС‚СЊ РґР°Р»РµРєРѕ.",player_item_name[id])
 		}
 		case 59:	
 		{
@@ -5645,7 +5647,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_ring[id]=1
 			player_b_fireball[id] = random_num(50,80)
-			show_hudmessage(id, "Вы нашли item : %s :: Возможность стрелять огненными шарами +5 интеллект",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ СЃС‚СЂРµР»СЏС‚СЊ РѕРіРЅРµРЅРЅС‹РјРё С€Р°СЂР°РјРё +5 РёРЅС‚РµР»Р»РµРєС‚",player_item_name[id])
 		}	
 		case 60:	
 		{
@@ -5653,7 +5655,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(2,4)
 			player_b_vampire[id] = random_num(3,5)	
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс возродиться после смерти. При попадании во врага, частично восполняет ваше НР",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ РІРѕР·СЂРѕРґРёС‚СЊСЃСЏ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё. РџСЂРё РїРѕРїР°РґР°РЅРёРё РІРѕ РІСЂР°РіР°, С‡Р°СЃС‚РёС‡РЅРѕ РІРѕСЃРїРѕР»РЅСЏРµС‚ РІР°С€Рµ РќР ",player_item_name[id])
 		}
 		case 61:
 		{
@@ -5661,7 +5663,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(120,330)
 			player_ring[id]=2
-			show_hudmessage(id, "Вы нашли item : %s :: Когда вас убивают вы взрываетесь, нанося урон стоящим в близи врагам. +5 сила",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РљРѕРіРґР° РІР°СЃ СѓР±РёРІР°СЋС‚ РІС‹ РІР·СЂС‹РІР°РµС‚РµСЃСЊ, РЅР°РЅРѕСЃСЏ СѓСЂРѕРЅ СЃС‚РѕСЏС‰РёРј РІ Р±Р»РёР·Рё РІСЂР°РіР°Рј. +5 СЃРёР»Р°",player_item_name[id])
 		}
 		case 62:
 		{
@@ -5669,7 +5671,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum	
 			player_b_redirect[id] = random_num(7,17)
 			player_b_blind[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли item : %s :: Снижение дамага по вам. Шанс ослепить противника",player_item_name[id])		
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЎРЅРёР¶РµРЅРёРµ РґР°РјР°РіР° РїРѕ РІР°Рј. РЁР°РЅСЃ РѕСЃР»РµРїРёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР°",player_item_name[id])		
 		}
 		case 63:
 		{
@@ -5677,7 +5679,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum	
 			player_b_grenade[id] = random_num(1,4)
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли item : %s :: Увиличивает урон наносимый гранатой. Восстанавливает здоровье",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЈРІРёР»РёС‡РёРІР°РµС‚ СѓСЂРѕРЅ РЅР°РЅРѕСЃРёРјС‹Р№ РіСЂР°РЅР°С‚РѕР№. Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ Р·РґРѕСЂРѕРІСЊРµ",player_item_name[id])
 		}	
 		case 64:
 		{
@@ -5685,21 +5687,21 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 1
 			player_ring[id]=3
-			show_hudmessage(id, "Вы нашли item : %s :: Двойной прыжок. +5 ловкость",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р”РІРѕР№РЅРѕР№ РїСЂС‹Р¶РѕРє. +5 Р»РѕРІРєРѕСЃС‚СЊ",player_item_name[id])	
 		}	
 		case 65:
 		{
 			player_item_name[id] = "Flashbang necklace"	
 			player_item_id[id] = rannum	
 			wear_sun[id] = 1
-			show_hudmessage (id, "Вы нашли item : %s :: Иммунитет к ослепляющим гранатам",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РРјРјСѓРЅРёС‚РµС‚ Рє РѕСЃР»РµРїР»СЏСЋС‰РёРј РіСЂР°РЅР°С‚Р°Рј",player_item_name[id])
 		}
 		case 66:
 		{
 			player_item_name[id] = "Chameleon"	
 			player_item_id[id] = 66	
 			changeskin(id,0)  
-			show_hudmessage (id, "Вы нашли item : %s :: Превращение во врага (внешний вид)",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РџСЂРµРІСЂР°С‰РµРЅРёРµ РІРѕ РІСЂР°РіР° (РІРЅРµС€РЅРёР№ РІРёРґ)",player_item_name[id])
 		}
 		case 67:
 		{
@@ -5707,7 +5709,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = 67	
 			player_ultra_armor[id]=random_num(3,6)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли item : %s :: Каждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РљР°Р¶РґС‹Р№ СЂР°СѓРЅРґ Р±СЂРѕРЅСЏ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ СЂР°РІРЅРѕР№ %i",player_item_name[id],player_ultra_armor[id])
 		}
 		case 68:
 		{
@@ -5715,21 +5717,21 @@ public award_item(id, itemnum)
 			player_item_id[id] = 68	
 			player_ultra_armor[id]=random_num(7,11)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли item : %s :: Каждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РљР°Р¶РґС‹Р№ СЂР°СѓРЅРґ Р±СЂРѕРЅСЏ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ СЂР°РІРЅРѕР№ %i",player_item_name[id],player_ultra_armor[id])
 		}
 		case 69:
 		{
 			player_item_name[id] = "Khalim Eye"
 			player_item_id[id] = rannum
 			player_b_radar[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Вы видите противников на радаре", player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РІРёРґРёС‚Рµ РїСЂРѕС‚РёРІРЅРёРєРѕРІ РЅР° СЂР°РґР°СЂРµ", player_item_name[id])
 		}
 		case 70:
 		{
 			player_item_name[id] = "Leaper Ring"
 			player_item_id[id] = rannum
 			player_b_autobh[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Даёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р”Р°С‘С‚ РІР°Рј Р°РІС‚Рѕ СЂР°СЃРїСЂС‹Р¶РєСѓ. РЈРґРµСЂР¶РёРІР°РµС‚ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ.", player_item_name[id])
 		}
 		case 71:
 		{
@@ -5737,7 +5739,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_silent[id] = 1
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/2)
-			show_hudmessage (id, "Вы нашли item : %s :: Бесшумный и быстрый бег",player_item_name[id],player_b_silent[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р‘РµСЃС€СѓРјРЅС‹Р№ Рё Р±С‹СЃС‚СЂС‹Р№ Р±РµРі",player_item_name[id],player_b_silent[id])
 		}
 		case 72:
 		{
@@ -5745,7 +5747,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 4
 			set_user_gravity(id, 600.0)
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 4 прыжка в воздухе. Уменьшенна гравитация",player_item_name[id],player_b_jumpx[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ 4 РїСЂС‹Р¶РєР° РІ РІРѕР·РґСѓС…Рµ. РЈРјРµРЅСЊС€РµРЅРЅР° РіСЂР°РІРёС‚Р°С†РёСЏ",player_item_name[id],player_b_jumpx[id])
 		}
 		case 73:
 		{
@@ -5753,7 +5755,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_inv[id] = 95
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли item : %s :: Ваш видимость снижается до 95. Быстрый бег.",player_item_name[id],player_b_inv[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’Р°С€ РІРёРґРёРјРѕСЃС‚СЊ СЃРЅРёР¶Р°РµС‚СЃСЏ РґРѕ 95. Р‘С‹СЃС‚СЂС‹Р№ Р±РµРі.",player_item_name[id],player_b_inv[id])
 		}
 		case 74:
 		{
@@ -5761,14 +5763,14 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_inv[id] = 155
 			player_b_damage[id] = 20
-			show_hudmessage (id, "Вы нашли item : %s :: Ваш видимость снижается до 155 +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’Р°С€ РІРёРґРёРјРѕСЃС‚СЊ СЃРЅРёР¶Р°РµС‚СЃСЏ РґРѕ 155 +20 Рє СѓСЂРѕРЅСѓ",player_item_name[id],player_b_inv[id],player_b_damage[id])
 		}
 		case 75:
 		{
 			player_item_name[id] = "Exp Ring"
 			player_item_id[id] = rannum
 			new xp_award = get_cvar_num("diablo_xpbonus")*2
-			show_hudmessage (id, "Вы нашли item : %s :: Удваивание опыта на %i",player_item_name[id],xp_award)
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЈРґРІР°РёРІР°РЅРёРµ РѕРїС‹С‚Р° РЅР° %i",player_item_name[id],xp_award)
 		}
 		case 76:
 		{
@@ -5777,7 +5779,7 @@ public award_item(id, itemnum)
 			player_ring[id]=2
 			player_b_explode[id] = random_num(120,330)
 			player_b_redirect[id] = random_num(10, 100)
-			show_hudmessage (id, "Вы нашли item : %s :: Вы получаете +5 к силе и взрываетесь когда умираете(урон %i) -%i урона по вам",player_item_name[id],player_b_explode[id],player_b_redirect[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РїРѕР»СѓС‡Р°РµС‚Рµ +5 Рє СЃРёР»Рµ Рё РІР·СЂС‹РІР°РµС‚РµСЃСЊ РєРѕРіРґР° СѓРјРёСЂР°РµС‚Рµ(СѓСЂРѕРЅ %i) -%i СѓСЂРѕРЅР° РїРѕ РІР°Рј",player_item_name[id],player_b_explode[id],player_b_redirect[id])
 		}
 		case 77:
 		{
@@ -5785,7 +5787,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_blind[id] = random_num(1,5)
 			player_b_heal[id] =  random_num(1,15)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/%i ослепить врага, жми E чтобы установить исцеляющий тотем",player_item_name[id],player_b_blind[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РѕСЃР»РµРїРёС‚СЊ РІСЂР°РіР°, Р¶РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РёСЃС†РµР»СЏСЋС‰РёР№ С‚РѕС‚РµРј",player_item_name[id],player_b_blind[id])
 		}
 		case 78:
 		{
@@ -5793,7 +5795,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(1,3)
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить HE гранаты и быстрый бег",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ HE РіСЂР°РЅР°С‚С‹ Рё Р±С‹СЃС‚СЂС‹Р№ Р±РµРі",player_item_name[id],player_b_grenade[id])
 		}
 		case 79:
 		{
@@ -5802,14 +5804,14 @@ public award_item(id, itemnum)
 			player_b_respawn[id] = 2
 			player_b_sniper[id] = 1
 			player_b_grenade[id] = 3
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/2 возродится, шанс 1/1 мгновенно убить со скаута,шанс 1/3 убить с HE",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/2 РІРѕР·СЂРѕРґРёС‚СЃСЏ, С€Р°РЅСЃ 1/1 РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃРѕ СЃРєР°СѓС‚Р°,С€Р°РЅСЃ 1/3 СѓР±РёС‚СЊ СЃ HE",player_item_name[id])
 		}
 		case 80:
 		{
 			player_item_name[id] = "Vampire Gloves"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(5,15)
-			show_hudmessage(id, "Вы нашли item : %s :: Высасывает %i за каждое попадание во врага,за убийство +30hp",player_item_name[id],player_b_vampire[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹СЃР°СЃС‹РІР°РµС‚ %i Р·Р° РєР°Р¶РґРѕРµ РїРѕРїР°РґР°РЅРёРµ РІРѕ РІСЂР°РіР°,Р·Р° СѓР±РёР№СЃС‚РІРѕ +30hp",player_item_name[id],player_b_vampire[id])
 		}
 		case 81:
 		{
@@ -5817,7 +5819,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 10
 			player_b_fireball[id] = 5
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 10 прыжков в воздух и пускать до 5 огненных шаров",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ 10 РїСЂС‹Р¶РєРѕРІ РІ РІРѕР·РґСѓС… Рё РїСѓСЃРєР°С‚СЊ РґРѕ 5 РѕРіРЅРµРЅРЅС‹С… С€Р°СЂРѕРІ",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
 		}
 		case 85:
 		{
@@ -5826,21 +5828,21 @@ public award_item(id, itemnum)
 			player_b_damage[id] = 20
 			player_b_redirect[id] = 40
 			set_user_gravity(id,3.0)
-			show_hudmessage (id, "Вы нашли item : %s :: +20 к урону и уменьшение урона на 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +20 Рє СѓСЂРѕРЅСѓ Рё СѓРјРµРЅСЊС€РµРЅРёРµ СѓСЂРѕРЅР° РЅР° 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
 		}
 		case 86:
 		{
 			player_item_name[id] = "RedBull"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 8
-			show_hudmessage(id, "Вы нашли item : %s :: Вы можете сделать 8 прыжков в воздухе",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ 8 РїСЂС‹Р¶РєРѕРІ РІ РІРѕР·РґСѓС…Рµ",player_item_name[id],player_b_sniper[id])	
 		}
 		case 87:
 		{
 			player_item_name[id] = "Dr House"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(45,65)
-			show_hudmessage(id, "Вы нашли item : %s :: Восстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечящий тотем %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ %i hp РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ. Р–РјРёС‚Рµ Р• С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ Р»РµС‡СЏС‰РёР№ С‚РѕС‚РµРј %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 88:
 		{
@@ -5849,7 +5851,7 @@ public award_item(id, itemnum)
 			player_b_inv[id] = 8
 			player_b_reduceH[id] = 55
 			if (is_user_alive(id)) set_user_health(id,45)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы почти невидимы,но у вас 45 HP.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РїРѕС‡С‚Рё РЅРµРІРёРґРёРјС‹,РЅРѕ Сѓ РІР°СЃ 45 HP.",player_item_name[id])	
 		}
 		case 89:
 		{
@@ -5860,7 +5862,7 @@ public award_item(id, itemnum)
 			item_durability[id] = 50
 			
 			if (is_user_alive(id)) set_user_health(id,10)		
-			show_hudmessage(id, "Вы нашли item : %s :: У вас 10 жизней,невидимость 1/255",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЈ РІР°СЃ 10 Р¶РёР·РЅРµР№,РЅРµРІРёРґРёРјРѕСЃС‚СЊ 1/255",player_item_name[id])	
 		}
 		case 90:
 		{
@@ -5868,7 +5870,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 8
 			set_user_gravity(id, 400.0)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы можете сделать 8 прыжков в воздухе и у вас высокая гравитация",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ 8 РїСЂС‹Р¶РєРѕРІ РІ РІРѕР·РґСѓС…Рµ Рё Сѓ РІР°СЃ РІС‹СЃРѕРєР°СЏ РіСЂР°РІРёС‚Р°С†РёСЏ",player_item_name[id],player_b_sniper[id])	
 		}
 		case 91:
 		{
@@ -5879,28 +5881,28 @@ public award_item(id, itemnum)
 			player_b_blind[id] = random_num(3,4)
 			player_ultra_armor[id]=random_num(15,50)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage(id, "Вы нашли item : %s :: Item настолько мощный,что никто ещё не познал его волшебное действия",player_item_name[id])		
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Item РЅР°СЃС‚РѕР»СЊРєРѕ РјРѕС‰РЅС‹Р№,С‡С‚Рѕ РЅРёРєС‚Рѕ РµС‰С‘ РЅРµ РїРѕР·РЅР°Р» РµРіРѕ РІРѕР»С€РµР±РЅРѕРµ РґРµР№СЃС‚РІРёСЏ",player_item_name[id])		
 		}
 		case 92:
 		{
 			player_item_name[id] = "Purse Thief"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(1,16000)
-			show_hudmessage(id, "Вы нашли item : %s :: получаете %i денег в каждом раунде. Используйте чтобы защищаться.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РїРѕР»СѓС‡Р°РµС‚Рµ %i РґРµРЅРµРі РІ РєР°Р¶РґРѕРј СЂР°СѓРЅРґРµ. РСЃРїРѕР»СЊР·СѓР№С‚Рµ С‡С‚РѕР±С‹ Р·Р°С‰РёС‰Р°С‚СЊСЃСЏ.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
 		}
 		case 93:
 		{
 			player_item_name[id] = "Vampiric Blood"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(15,20)
-			show_hudmessage(id, "Вы нашли item : %s :: высасываете %i hp у противника",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РІС‹СЃР°СЃС‹РІР°РµС‚Рµ %i hp Сѓ РїСЂРѕС‚РёРІРЅРёРєР°",player_item_name[id],player_b_vampire[id])	
 		}
 		case 94:
 		{
 			player_item_name[id] = "Revival Ring"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: 1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: 1/%i С€Р°РЅСЃ РЅР° РІРѕР·СЂР°Р¶РґРµРЅРёРµ",player_item_name[id],player_b_respawn[id])	
 		}
 		case 95:
 		{
@@ -5908,7 +5910,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(30,55)
 			player_b_damage[id] = 50
-			show_hudmessage(id, "Вы нашли item : %s :: Восстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечащий тотем %i. +50 к урону",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ %i hp РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ. Р–РјРёС‚Рµ Р• С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ Р»РµС‡Р°С‰РёР№ С‚РѕС‚РµРј %i. +50 Рє СѓСЂРѕРЅСѓ",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 96:
 		{
@@ -5916,7 +5918,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			changeskin(id,0)
 			player_b_grenade[id] = random_num(1,2)
-			show_hudmessage (id, "Вы нашли item : %s :: Ты выглядишь как противник.Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РўС‹ РІС‹РіР»СЏРґРёС€СЊ РєР°Рє РїСЂРѕС‚РёРІРЅРёРє.РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ РіСЂР°РЅР°С‚С‹ HE",player_item_name[id],player_b_grenade[id])
 		}
 		case 97:
 		{
@@ -5925,7 +5927,7 @@ public award_item(id, itemnum)
 			player_b_damage[id] = 100
 			player_b_silent[id] = 1
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли item : %s :: Вы на носите %i урона с каждого выстрела.Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РЅР° РЅРѕСЃРёС‚Рµ %i СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.Р‘РµСЃС€СѓРјРЅС‹Р№ Р±РµРі.",player_item_name[id],player_b_damage[id],player_b_silent[id])
 		}
 		case 98:
 		{
@@ -5934,7 +5936,7 @@ public award_item(id, itemnum)
 			player_b_redirect[id] = 10
 			player_b_damage[id] = 10
 			player_b_respawn[id] = 2
-			show_hudmessage (id, "Вы нашли item : %s :: +10 к урону. -10 урона по вам. Шанс 1/2 возродится.",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +10 Рє СѓСЂРѕРЅСѓ. -10 СѓСЂРѕРЅР° РїРѕ РІР°Рј. РЁР°РЅСЃ 1/2 РІРѕР·СЂРѕРґРёС‚СЃСЏ.",player_item_name[id])
 		}
 		case 99:
 		{
@@ -5942,7 +5944,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_grenade[id] = 5
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/5 убить с НЕ гранаты.+%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/5 СѓР±РёС‚СЊ СЃ РќР• РіСЂР°РЅР°С‚С‹.+%i Рє РЅРµРІРёРґРёРјРѕСЃС‚Рё",player_item_name[id],255-player_b_inv[id])
 		}
 		case 100:
 		{
@@ -5950,7 +5952,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли item : %s :: +25урона || +%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +25СѓСЂРѕРЅР° || +%i Рє РЅРµРІРёРґРёРјРѕСЃС‚Рё",player_item_name[id],255-player_b_inv[id])
 		}
 		case 101:
 		{
@@ -5958,7 +5960,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_damage[id] = 15
 			player_b_vampire[id] = 50
-			show_hudmessage (id, "Вы нашли item : %s :: +15 к урону. Высасывает 50hp с каждого выстрела",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +15 Рє СѓСЂРѕРЅСѓ. Р’С‹СЃР°СЃС‹РІР°РµС‚ 50hp СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°",player_item_name[id])
 		}
 		case 102:
 		{
@@ -5967,7 +5969,7 @@ public award_item(id, itemnum)
 			player_b_damage[id] = 25
 			player_b_vampire[id] = 25
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли item : %s :: +25 к урону. Высасывает 25 HP с каждого выстрела",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +25 Рє СѓСЂРѕРЅСѓ. Р’С‹СЃР°СЃС‹РІР°РµС‚ 25 HP СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°",player_item_name[id])
 		}
 		case 103:
 		{
@@ -5975,7 +5977,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(190,200)
-			show_hudmessage (id, "Вы нашли item : %s :: +25 к урону. +%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +25 Рє СѓСЂРѕРЅСѓ. +%i Рє РЅРµРІРёРґРёРјРѕСЃС‚Рё",player_item_name[id],255-player_b_inv[id])
 		}
 		case 104:
 		{
@@ -5983,7 +5985,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_m4master[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ M4A1",player_item_name[id],player_b_m4master[id])
 		}
 		case 105:
 		{
@@ -5991,7 +5993,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_akmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ AK47",player_item_name[id],player_b_akmaster[id])
 		}
 		case 106:
 		{
@@ -5999,7 +6001,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_awpmaster[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ AWP",player_item_name[id],player_b_awpmaster[id])
 		}
 		case 107:
 		{
@@ -6007,7 +6009,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_dglmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ Deagle",player_item_name[id],player_b_dglmaster[id])
 		}
 		case 108:
 		{
@@ -6015,7 +6017,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_m3master[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ M3",player_item_name[id],player_b_m3master[id])
 		}
 		case 109:
 		{
@@ -6029,42 +6031,42 @@ public award_item(id, itemnum)
 			player_b_m4master[id] = random_num(5,8)
 			player_b_grenade[id] = random_num(3,8)
 			player_b_sniper[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ M3,1/%i СЃ Deagle,1/%i СЃ AWP,1/%i СЃ AK47,1/%i СЃ M4A1,1/%i СЃ HE,1/%i СЃ СЃРєР°СѓС‚Р°",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
 		}
 		case 110:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 111:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 112:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 113:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 114:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		
 		case 115:
@@ -6072,77 +6074,77 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 116:
 		{
 			player_item_name[id] = "Diablo Shoes"
 			player_item_id[id] = rannum
 			player_b_antyarchy[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защитится от Arch angel", player_item_name[id], player_b_antyarchy[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚РёС‚СЃСЏ РѕС‚ Arch angel", player_item_name[id], player_b_antyarchy[id])
 		}
 		case 117:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 118:
 		{
 			player_item_name[id] = "Anti Explosion"
 			player_item_id[id] = rannum
 			player_b_antyorb[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защитится от взрыва после убийства", player_item_name[id], player_b_antyorb[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚РёС‚СЃСЏ РѕС‚ РІР·СЂС‹РІР° РїРѕСЃР»Рµ СѓР±РёР№СЃС‚РІР°", player_item_name[id], player_b_antyorb[id])
 		}
 		case 119:
 		{
 			player_item_name[id] = "Anti HellFlare"
 			player_item_id[id] = rannum
 			player_b_antyfs[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от огня", player_item_name[id], player_b_antyfs[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ РѕРіРЅСЏ", player_item_name[id], player_b_antyfs[id])
 		}
 		case 120:
 		{
 			player_item_name[id] = "Gheed's Fortune"
 			player_item_id[id] = rannum
 			player_b_godmode[id] = random_num(4,10)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы становитесь бесмертным на %i секунд.", player_item_name[id], player_b_godmode[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ СЃС‚Р°РЅРѕРІРёС‚РµСЃСЊ Р±РµСЃРјРµСЂС‚РЅС‹Рј РЅР° %i СЃРµРєСѓРЅРґ.", player_item_name[id], player_b_godmode[id])
 		}
 		case 121:
 		{
 			player_item_name[id] = "Winter Totem"
 			player_item_id[id] = rannum
 			player_b_zamroztotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жмите Е чтобы установить замораживайщий тотем",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р–РјРёС‚Рµ Р• С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ Р·Р°РјРѕСЂР°Р¶РёРІР°Р№С‰РёР№ С‚РѕС‚РµРј",player_item_name[id])	
 		}
 		case 122:
 		{
 			player_item_name[id] = "Cash Totem"
 			player_item_id[id] = rannum
 			player_b_kasatotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который даёт вам и вашей команде деньги.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РґР°С‘С‚ РІР°Рј Рё РІР°С€РµР№ РєРѕРјР°РЅРґРµ РґРµРЅСЊРіРё.",player_item_name[id])	
 		}
 		case 123:
 		{
 			player_item_name[id] = "Thief Totem"
 			player_item_id[id] = rannum
 			player_b_kasaqtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РѕС‚РЅРёРјР°РµС‚ РґРµРЅСЊРіРё РІСЂР°РіР°(500$ РІ СЃРµРє)",player_item_name[id])	
 		}
 		case 124:
 		{
 			player_item_name[id] = "Weapon Totem"
 			player_item_id[id] = rannum
 			player_b_wywaltotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который притягивает оружие противника.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РїСЂРёС‚СЏРіРёРІР°РµС‚ РѕСЂСѓР¶РёРµ РїСЂРѕС‚РёРІРЅРёРєР°.",player_item_name[id])	
 		}
 		case 125:
 		{
 			player_item_name[id] = "Flash Totem"
 			player_item_id[id] = rannum
 			player_b_fleshujtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Жми E чтобы установить тотем который ослепляет противника.",player_item_name[id])	
+			show_hudmessage(id, "Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РѕСЃР»РµРїР»СЏРµС‚ РїСЂРѕС‚РёРІРЅРёРєР°.",player_item_name[id])	
 		}
 		
 	}
@@ -6203,7 +6205,7 @@ public award_unique_item(id)
 	item_durability[id] = 350
 	
 	set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 4.0, 0.2, 0.3, 5)
-	show_hudmessage(id, "Вы нашли Уникальный Item: %s", Unique_name)
+	show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё РЈРЅРёРєР°Р»СЊРЅС‹Р№ Item: %s", Unique_name)
 	
 }
 /* EFFECTS ================================================================================================= */
@@ -6362,7 +6364,7 @@ public add_respawn_bonus(id)
 			else
 			{
 				set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 2.0, 0.2, 0.3, 5)
-				show_hudmessage(id, "Более 2 игроков, необходимо для возрождения")	
+				show_hudmessage(id, "Р‘РѕР»РµРµ 2 РёРіСЂРѕРєРѕРІ, РЅРµРѕР±С…РѕРґРёРјРѕ РґР»СЏ РІРѕР·СЂРѕР¶РґРµРЅРёСЏ")	
 			}
 			
 		}
@@ -6384,7 +6386,7 @@ public add_respawn_bonus(id)
 			else
 			{
 				set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 2.0, 0.2, 0.3, 5)
-				show_hudmessage(id, "Более 2 игроков, необходимо для возрождения")	
+				show_hudmessage(id, "Р‘РѕР»РµРµ 2 РёРіСЂРѕРєРѕРІ, РЅРµРѕР±С…РѕРґРёРјРѕ РґР»СЏ РІРѕР·СЂРѕР¶РґРµРЅРёСЏ")	
 			}
 			
 		}
@@ -6653,27 +6655,27 @@ public add_bonus_gamble(id)
 		new roll = random_num(1,player_b_gamble[id])
 		if (roll == 1)
 		{
-			show_hudmessage(id, "Бонус раунда: +5 урона")
+			show_hudmessage(id, "Р‘РѕРЅСѓСЃ СЂР°СѓРЅРґР°: +5 СѓСЂРѕРЅР°")
 			player_b_damage[id] = 5
 		}
 		if (roll == 2)
 		{
-			show_hudmessage(id, "Бонус раунда: +5 к гравитации")
+			show_hudmessage(id, "Р‘РѕРЅСѓСЃ СЂР°СѓРЅРґР°: +5 Рє РіСЂР°РІРёС‚Р°С†РёРё")
 			player_b_gravity[id] = 5
 		}
 		if (roll == 3)
 		{
-			show_hudmessage(id, "Бонус раунда: +5 vampyric урон")
+			show_hudmessage(id, "Р‘РѕРЅСѓСЃ СЂР°СѓРЅРґР°: +5 vampyric СѓСЂРѕРЅ")
 			player_b_vampire[id] = 5
 		}
 		if (roll == 4)
 		{
-			show_hudmessage(id, "Бонус раунда: +10 hp каждые 5 секунд")
+			show_hudmessage(id, "Р‘РѕРЅСѓСЃ СЂР°СѓРЅРґР°: +10 hp РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ")
 			player_b_heal[id] = 10
 		}
 		if (roll == 5)
 		{
-			show_hudmessage(id, "Бонус раунда: шанс 1/3 сразу убить с гранаты HE")
+			show_hudmessage(id, "Р‘РѕРЅСѓСЃ СЂР°СѓРЅРґР°: С€Р°РЅСЃ 1/3 СЃСЂР°Р·Сѓ СѓР±РёС‚СЊ СЃ РіСЂР°РЅР°С‚С‹ HE")
 			player_b_grenade[id] = 3
 		}
 	}
@@ -6699,7 +6701,7 @@ public item_c4fake(id)
 { 
 	if (c4state[id] > 1)
 	{
-		hudmsg(id,2.0,"Meekstone можно использовать один раз за раунд!")
+		hudmsg(id,2.0,"Meekstone РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РѕРґРёРЅ СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_CONTINUE 
 	}
 	
@@ -6758,7 +6760,7 @@ public item_fireball(id)
 {
 	if (fired[id] > 0)
 	{
-		hudmsg(id,2.0,"Шар можно использовать один раз за раунд!")
+		hudmsg(id,2.0,"РЁР°СЂ РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РѕРґРёРЅ СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_HANDLED
 	}
 	
@@ -6839,7 +6841,7 @@ public item_ghost(id)
 	}
 	else
 	{
-		hudmsg(id,3.0,"Только один игрок может использовать Призрак в то же время! Предмет был использован!")
+		hudmsg(id,3.0,"РўРѕР»СЊРєРѕ РѕРґРёРЅ РёРіСЂРѕРє РјРѕР¶РµС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РџСЂРёР·СЂР°Рє РІ С‚Рѕ Р¶Рµ РІСЂРµРјСЏ! РџСЂРµРґРјРµС‚ Р±С‹Р» РёСЃРїРѕР»СЊР·РѕРІР°РЅ!")
 	}
 }
 
@@ -7088,9 +7090,9 @@ public item_convertmoney(id)
 	new maxhealth = race_heal[player_class[id]]+player_strength[id]*2
 	
 	if (cs_get_user_money(id) < 1000)
-		hudmsg(id,2.0,"У вас недостаточно денег")
+		hudmsg(id,2.0,"РЈ РІР°СЃ РЅРµРґРѕСЃС‚Р°С‚РѕС‡РЅРѕ РґРµРЅРµРі")
 	else if (get_user_health(id) == maxhealth)
-		hudmsg(id,2.0,"У вас есть максимальное количество жизней")
+		hudmsg(id,2.0,"РЈ РІР°СЃ РµСЃС‚СЊ РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»РёС‡РµСЃС‚РІРѕ Р¶РёР·РЅРµР№")
 	else
 	{
 		cs_set_user_money(id,cs_get_user_money(id)-1000)
@@ -7141,7 +7143,7 @@ public item_windwalk(id)
 	else if (player_b_usingwind[id] == 2)
 	{
 		set_hudmessage(220, 30, 30, -1.0, 0.40, 0, 3.0, 2.0, 0.2, 0.3, 5)
-		show_hudmessage(id, "Этот item можно использовать один раз за раунд!") 
+		show_hudmessage(id, "Р­С‚РѕС‚ item РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РѕРґРёРЅ СЂР°Р· Р·Р° СЂР°СѓРЅРґ!") 
 	}
 	
 }
@@ -7151,7 +7153,7 @@ public resetwindwalk(szId[])
 	new id = str_to_num(szId)
 	if (id < 0 || id > MAX)
 	{
-		log_amx("Ошибка в resetwindwalk, id: %i за пределами поля", id)
+		log_amx("РћС€РёР±РєР° РІ resetwindwalk, id: %i Р·Р° РїСЂРµРґРµР»Р°РјРё РїРѕР»СЏ", id)
 	}
 	
 	if (player_b_usingwind[id] == 1)
@@ -7272,7 +7274,7 @@ public host_killed(id)
 {
 	if (player_lvl[id] > 1)
 	{
-		hudmsg(id,2.0,"Вы потеряли опыт за убийство заложников")
+		hudmsg(id,2.0,"Р’С‹ РїРѕС‚РµСЂСЏР»Рё РѕРїС‹С‚ Р·Р° СѓР±РёР№СЃС‚РІРѕ Р·Р°Р»РѕР¶РЅРёРєРѕРІ")
 		Give_Xp(id,-floatround(3*player_lvl[id]/(1.65-player_lvl[id]/50)))
 	}
 	
@@ -7284,7 +7286,7 @@ public show_menu_item(id)
 {
 	new text[513]
 
-	format(text, 512, "\yНовые item - ^n\w1. Mag ring^n\w2. Paladin ring^n\w3. Monk ring^n\w4. Barbarian ring^n\w5. Assassin ring^n\w6. Necromancer ring^n\w7. Ninja ring^n\w8. Flashbang necklace^n\w9. Больше") 
+	format(text, 512, "\yРќРѕРІС‹Рµ item - ^n\w1. Mag ring^n\w2. Paladin ring^n\w3. Monk ring^n\w4. Barbarian ring^n\w5. Assassin ring^n\w6. Necromancer ring^n\w7. Ninja ring^n\w8. Flashbang necklace^n\w9. Р‘РѕР»СЊС€Рµ") 
 
 	new keys 
 	keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<8)
@@ -7339,35 +7341,35 @@ public nowe_itemy(id, key)
 }
 public magring(id)
 {
-showitem(id,"Mag ring","общий","нет","<br>")
+showitem(id,"Mag ring","РѕР±С‰РёР№","РЅРµС‚","<br>")
 }
 public paladinring(id)
 {
-showitem(id,"Paladin ring","общий","нет","<br>")
+showitem(id,"Paladin ring","РѕР±С‰РёР№","РЅРµС‚","<br>")
 }
 public monkring(id)
 {
-showitem(id,"Monk ring","общий","нет","<br>")
+showitem(id,"Monk ring","РѕР±С‰РёР№","РЅРµС‚","<br>")
 }
 public barbarianring(id)
 {
-showitem(id,"Barbarian ring","общий","нет","<br>")
+showitem(id,"Barbarian ring","РѕР±С‰РёР№","РЅРµС‚","<br>")
 }
 public assassinring(id)
 {
-showitem(id,"Assassin ring","общий","нет","<br>")
+showitem(id,"Assassin ring","РѕР±С‰РёР№","РЅРµС‚","<br>")
 }
 public nekromantring(id)
 {
-showitem(id,"Necromancer ring","общий","нет","<br>")
+showitem(id,"Necromancer ring","РѕР±С‰РёР№","РЅРµС‚","<br>")
 }
 public ninjaring(id)
 {
-showitem(id,"Ninja ring","общий","нет","<br>")
+showitem(id,"Ninja ring","РѕР±С‰РёР№","РЅРµС‚","<br>")
 }
 public flashbangnecklace(id)
 {
-showitem(id,"Flashbang necklece","общий","нет","<br>")
+showitem(id,"Flashbang necklece","РѕР±С‰РёР№","РЅРµС‚","<br>")
 }
 
 /* ==================================================================================================== */
@@ -7379,7 +7381,7 @@ public showmenu(id)
 	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<9)
 	
 	
-	format(text, 512, "\rОпции\R^n^n\y1.\w Инфо о предмете^n\y2.\w Выкинуть текущий item^n\y3.\w Помощь^n\y4.\w Использовать силу item^n\y5.\w Магазин Рун^n\y6.\w Инфо о скиллах^n\y7.\w Выбор/Смена Класса^n\y0.\w Закрыть") 
+	format(text, 512, "\rРћРїС†РёРё\R^n^n\y1.\w РРЅС„Рѕ Рѕ РїСЂРµРґРјРµС‚Рµ^n\y2.\w Р’С‹РєРёРЅСѓС‚СЊ С‚РµРєСѓС‰РёР№ item^n\y3.\w РџРѕРјРѕС‰СЊ^n\y4.\w РСЃРїРѕР»СЊР·РѕРІР°С‚СЊ СЃРёР»Сѓ item^n\y5.\w РњР°РіР°Р·РёРЅ Р СѓРЅ^n\y6.\w РРЅС„Рѕ Рѕ СЃРєРёР»Р»Р°С…^n\y7.\w Р’С‹Р±РѕСЂ/РЎРјРµРЅР° РљР»Р°СЃСЃР°^n\y0.\w Р—Р°РєСЂС‹С‚СЊ") 
 	
 	show_menu(id, keys, text) 
 	return PLUGIN_HANDLED  
@@ -7558,7 +7560,7 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 public select_class(id)
 {
 new text4[512]  
-format(text4, 511,"^n\wВаш общий уровень: %d^nУ вас %d золота.^n^n\yВыбери Класс: ^n^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n^n^n\r4. \wСоветы: Что выбрать?^n^n^n\dРазработал: HiTmanY^nСайт сервера:^nlp.hitmany.net", player_TotalLVL[id], mana_gracza[id]) 
+format(text4, 511,"^n\wР’Р°С€ РѕР±С‰РёР№ СѓСЂРѕРІРµРЅСЊ: %d^nРЈ РІР°СЃ %d Р·РѕР»РѕС‚Р°.^n^n\yР’С‹Р±РµСЂРё РљР»Р°СЃСЃ: ^n^n\r1. \wР“РµСЂРѕРё^n\r2. \wР”РµРјРѕРЅС‹^n\r3. \wР–РёРІРѕС‚РЅС‹Рµ^n^n^n\r4. \wРЎРѕРІРµС‚С‹: Р§С‚Рѕ РІС‹Р±СЂР°С‚СЊ?^n^n^n\dР Р°Р·СЂР°Р±РѕС‚Р°Р»: HiTmanY^nРЎР°Р№С‚ СЃРµСЂРІРµСЂР°:^nlp.hitmany.net", player_TotalLVL[id], mana_gracza[id]) 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -7567,7 +7569,7 @@ show_menu(id, keys,text4, -1, "ChooseClass")
 
 public select_class_menu(id, key) 
 { 
-	//new lx[28] // <-- w nawiasie wpisz liczbк swoich klas + 1(none)
+	//new lx[28] // <-- w nawiasie wpisz liczbРє swoich klas + 1(none)
 	g_haskit[id] = 0
 	c_shake[id]=0
 	c_shaked[id]=0
@@ -7622,9 +7624,9 @@ public select_class_menu(id, key)
 public PokazKlasy(id)
 {
 	new flags[28]
-	get_cvar_string("diablo_classes",flags,27) //<--- tu, gdzie jest 16 wpisz liczbк swoich klas
+	get_cvar_string("diablo_classes",flags,27) //<--- tu, gdzie jest 16 wpisz liczbРє swoich klas
 	new text3[512]
-	format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите5 сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+	format(text3, 512,"\yР“РµСЂРѕРё: ^n\w1. \yMag^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w2. \yMonk^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w3. \yPaladin^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w4. \yAssassin^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w5. \yNecromancer^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w6. \yBarbarian^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w7. \yNinja^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w8. \yAmazon^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n^n\w0. \yР’С‹С…РѕРґ^n^n\yР–РґРёС‚Рµ5 СЃРµРє РїСЂРµР¶РґРµ С‡РµРј РІС‹Р±СЂР°С‚СЊ РєР»Р°СЃСЃ^n\dlp.hitmany.net^n\dРЎР°Р№С‚ СЃРµСЂРІРµСЂР°",
 	player_class_lvl[id][1],player_class_lvl[id][2],player_class_lvl[id][3],player_class_lvl[id][4],player_class_lvl[id][5],player_class_lvl[id][6],player_class_lvl[id][7],player_class_lvl[id][8])
 
 	new keyspiata
@@ -7646,7 +7648,7 @@ public PokazMeni(id, key)
 * 8:Amazon
 * 0:Wstecz
 */
-//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+//new lx[28] // <-- tutaj wpisz liczbРє swoich klas + 1(none)
 g_haskit[id] = 0
 c_shake[id]=0
 c_damage[id]=0
@@ -7722,7 +7724,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yMephisto^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yBaal^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+	format(text2, 511,"\yР”РµРјРѕРЅС‹: ^n\w1. \yРљСЂРѕРІР°РІС‹Р№ РІРѕСЂРѕРЅ^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w2. \yDuriel^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w3. \yMephisto^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w4. \yHephasto^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w5. \yDiablo^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w6. \yBaal^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w7. \yFallen^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w8. \yImp^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n^n\w0. \yР’С‹С…РѕРґ^n^n\yР–РґРёС‚Рµ 5СЃРµРє РїСЂРµР¶РґРµ С‡РµРј РІС‹Р±СЂР°С‚СЊ РєР»Р°СЃСЃ^n\dlp.hitmany.net^n\dРЎР°Р№С‚ СЃРµСЂРІРµСЂР°",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -7744,7 +7746,7 @@ public PressedKlasy(id, key)
 	* 8:Imp
 	* 0:Wstecz
 	*/
-	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+	//new lx[28] // <-- tutaj wpisz liczbРє swoich klas + 1(none)
 	g_haskit[id] = 0
 	c_vampire[id]=0
 	c_silent[id]=0
@@ -7851,11 +7853,11 @@ public PressedKlasy(id, key)
 public PokazZwierze(id) 
 {	
 	new iLen,text5[512]
-	iLen += format(text5, 511, "\yЗвери/Животные: ^n\w1. \yЗакарум^t\wУровень: \r%i^n\w2. \yПрыгун^t\wУровень: \r%i^n",player_class_lvl[id][17],player_class_lvl[id][18]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \yАдский кот^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера");
+	iLen += format(text5, 511, "\yР—РІРµСЂРё/Р–РёРІРѕС‚РЅС‹Рµ: ^n\w1. \yР—Р°РєР°СЂСѓРј^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w2. \yРџСЂС‹РіСѓРЅ^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n",player_class_lvl[id][17],player_class_lvl[id][18]);
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yEnslaved^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w4. \yР›РµРґСЏРЅРѕР№ СѓР¶Р°СЃ^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yРРЅС„РёРґРµР»СЊ^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w6. \yGiant Spider^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \yРђРґСЃРєРёР№ РєРѕС‚^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n^n",player_class_lvl[id][23]);
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yР’С‹С…РѕРґ^n^n\yР–РґРёС‚Рµ 5СЃРµРє РїСЂРµР¶РґРµ С‡РµРј РІС‹Р±СЂР°С‚СЊ РєР»Р°СЃСЃ^n\dlp.hitmany.net^n\dРЎР°Р№С‚ СЃРµСЂРІРµСЂР°");
 	
 	static key
 	key = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
@@ -7876,7 +7878,7 @@ public PokazZwierz( id, item )
 	8.Piekielna Krowa
 	* 0:Wstecz
 	*/
-	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none) 
+	//new lx[28] // <-- tutaj wpisz liczbРє swoich klas + 1(none) 
 	
 	g_haskit[id] = 0
 	c_redirect[id]=0
@@ -7952,7 +7954,7 @@ public PokazZwierz( id, item )
 public PokazPremiumy(id)
 {
 	new text6[512]
-	format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\rДоступ к премиум классам.^n\rкупить на lp.hitmany.net",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
+	format(text6, 511,"\yРџСЂРµРјРёСѓРј: ^n\w1. \yGriswold^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w2. \yTheSmith^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n\w3. \yDemonolog^t\wРЈСЂРѕРІРµРЅСЊ: \r%i^n^n\w0. \yР’С‹С…РѕРґ^n^n\rР”РѕСЃС‚СѓРї Рє РїСЂРµРјРёСѓРј РєР»Р°СЃСЃР°Рј.^n\rРєСѓРїРёС‚СЊ РЅР° lp.hitmany.net",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
 
 	new usma
 	usma = (1<<0)|(1<<1)|(1<<2)|(1<<9)
@@ -7969,7 +7971,7 @@ public PokazPremium(id, key)
 	* 4:VipCztery
 	* 0:Wstecz
 	*/
-	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
+	//new lx[28] // <-- tutaj wpisz liczbРє swoich klas + 1(none)
 	g_haskit[id] = 0
 	c_antymeek[id]=0
 	c_silent[id]=0
@@ -7993,7 +7995,7 @@ public PokazPremium(id, key)
 		}
 		else
 		{
-			hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
+			hudmsg(id,6.0,"РЈ РІР°СЃ РЅРµС‚ РґРѕСЃС‚СѓРїР° Рє РїСЂРµРјРёСѓРј РєР»Р°СЃСЃР°Рј^n РљСѓРїРёС‚Рµ РґРѕСЃС‚СѓРї Р·Р° 200 СЂСѓР±Р»РµР№ РЅР° СЃР°Р№С‚Рµ СЃРµСЂРІРµСЂР°")
 		}
 		case 1:
 		{
@@ -8010,7 +8012,7 @@ public PokazPremium(id, key)
 			}
 			else
 			{
-				hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
+				hudmsg(id,6.0,"РЈ РІР°СЃ РЅРµС‚ РґРѕСЃС‚СѓРїР° Рє РїСЂРµРјРёСѓРј РєР»Р°СЃСЃР°Рј^n РљСѓРїРёС‚Рµ РґРѕСЃС‚СѓРї Р·Р° 200 СЂСѓР±Р»РµР№ РЅР° СЃР°Р№С‚Рµ СЃРµСЂРІРµСЂР°")
 			}
 		}
 		case 2:
@@ -8028,7 +8030,7 @@ public PokazPremium(id, key)
 			}
 			else
 			{
-				hudmsg(id,6.0,"У вас нет доступа к премиум классам^n Купите доступ за 200 рублей на сайте сервера")
+				hudmsg(id,6.0,"РЈ РІР°СЃ РЅРµС‚ РґРѕСЃС‚СѓРїР° Рє РїСЂРµРјРёСѓРј РєР»Р°СЃСЃР°Рј^n РљСѓРїРёС‚Рµ РґРѕСЃС‚СѓРї Р·Р° 200 СЂСѓР±Р»РµР№ РЅР° СЃР°Р№С‚Рµ СЃРµСЂРІРµСЂР°")
 			}
 		}
 		case 9: 
@@ -8182,7 +8184,7 @@ public item_dagon(id)
 	if (player_b_dagfired[id])
 	{
 		set_hudmessage(220, 30, 30, -1.0, 0.40, 0, 3.0, 2.0, 0.2, 0.3, 5)
-		show_hudmessage(id, "Этот item можно использовать только 1 раз за раунд") 
+		show_hudmessage(id, "Р­С‚РѕС‚ item РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С‚РѕР»СЊРєРѕ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ") 
 		return PLUGIN_HANDLED
 	}
 	//Target nearest non-friendly player
@@ -8234,7 +8236,7 @@ public item_dagon(id)
 
 	change_health(target,-DagonDamage,id,"world")
 	Display_Fade(target,2600,2600,0,255,0,0,15)
-	hudmsg(id,2.0,"Ваши удары dagon %i, %i", DagonDamage, player_dextery[target]*2)
+	hudmsg(id,2.0,"Р’Р°С€Рё СѓРґР°СЂС‹ dagon %i, %i", DagonDamage, player_dextery[target]*2)
 
 	return PLUGIN_HANDLED
 	
@@ -8255,7 +8257,7 @@ public bool:UTIL_Buyformoney(id,amount)
 	}
 	else
 	{
-		hudmsg(id,2.0,"Не хватает денег")
+		hudmsg(id,2.0,"РќРµ С…РІР°С‚Р°РµС‚ РґРµРЅРµРі")
 		return false
 	}
 	
@@ -8265,7 +8267,7 @@ public buyrune(id)
 {
 	//new text[513] 
 	
-	//format(text, 512, "\yМагазин item - ^n\w1. \yКупить случайный Item! \r$5000^n^n\w0. \yВыход^n\y/gold,/g - магазин золота") 
+	//format(text, 512, "\yРњР°РіР°Р·РёРЅ item - ^n\w1. \yРљСѓРїРёС‚СЊ СЃР»СѓС‡Р°Р№РЅС‹Р№ Item! \r$5000^n^n\w0. \yР’С‹С…РѕРґ^n\y/gold,/g - РјР°РіР°Р·РёРЅ Р·РѕР»РѕС‚Р°") 
 	
 	//new keys = (1<<0)|(1<<9)
 	//show_menu(id, keys, text, -1, "ChooseRune") 
@@ -8712,7 +8714,7 @@ public SelectBotRace(id)
 public showskills(id)
 {
 	new Skillsinfo[768]
-	format(Skillsinfo,767,"У вас %i Strength - это даёт тебе %i HP<br><br>У вас %i Dextery - увел. скорость на %i% и умен. урон от магии на %i%<br>У вас %i Agility - Повышает щанс найти улучш. item и умен. урон на %0.0f%%<br><br>У вас %i Intelligence - увел. прочность и силу действия item<br>",
+	format(Skillsinfo,767,"РЈ РІР°СЃ %i Strength - СЌС‚Рѕ РґР°С‘С‚ С‚РµР±Рµ %i HP<br><br>РЈ РІР°СЃ %i Dextery - СѓРІРµР». СЃРєРѕСЂРѕСЃС‚СЊ РЅР° %i% Рё СѓРјРµРЅ. СѓСЂРѕРЅ РѕС‚ РјР°РіРёРё РЅР° %i%<br>РЈ РІР°СЃ %i Agility - РџРѕРІС‹С€Р°РµС‚ С‰Р°РЅСЃ РЅР°Р№С‚Рё СѓР»СѓС‡С€. item Рё СѓРјРµРЅ. СѓСЂРѕРЅ РЅР° %0.0f%%<br><br>РЈ РІР°СЃ %i Intelligence - СѓРІРµР». РїСЂРѕС‡РЅРѕСЃС‚СЊ Рё СЃРёР»Сѓ РґРµР№СЃС‚РІРёСЏ item<br>",
 	player_strength[id],
 	player_strength[id]*2,
 	player_dextery[id],
@@ -8722,7 +8724,7 @@ public showskills(id)
 	player_damreduction[id]*100,
 	player_intelligence[id])
 	
-	showitem(id,"Способности","Нет","Нет", Skillsinfo)
+	showitem(id,"РЎРїРѕСЃРѕР±РЅРѕСЃС‚Рё","РќРµС‚","РќРµС‚", Skillsinfo)
 }
 
 /* ==================================================================================================== */
@@ -9050,7 +9052,7 @@ public Greet_Player(id)
 	id-=TASK_GREET
 	new name[32]
 	get_user_name(id,name,31)
-	client_print(id,print_chat, "Привет %s,ты новичёк? Помощь в say /help", name)
+	client_print(id,print_chat, "РџСЂРёРІРµС‚ %s,С‚С‹ РЅРѕРІРёС‡С‘Рє? РџРѕРјРѕС‰СЊ РІ say /help", name)
 }
 
 /* ==================================================================================================== */
@@ -9155,7 +9157,7 @@ public item_firetotem(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Вы можете использовать тотем только 1 раз за раунд")
+		hudmsg(id,2.0,"Р’С‹ РјРѕР¶РµС‚Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ С‚РѕС‚РµРј С‚РѕР»СЊРєРѕ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ")
 	}
 	else
 	{
@@ -9209,7 +9211,7 @@ public Effect_Ignite_Totem_Think(ent)
 			if (pid == id && is_user_alive(id))
 			{
 				Effect_Ignite(pid,id,4)
-				hudmsg(pid,3.0,"Дымовая завеса. Стреляй в кого-нибудь чтобы остановить!")
+				hudmsg(pid,3.0,"Р”С‹РјРѕРІР°СЏ Р·Р°РІРµСЃР°. РЎС‚СЂРµР»СЏР№ РІ РєРѕРіРѕ-РЅРёР±СѓРґСЊ С‡С‚РѕР±С‹ РѕСЃС‚Р°РЅРѕРІРёС‚СЊ!")
 				continue
 			}
 			
@@ -9226,7 +9228,7 @@ public Effect_Ignite_Totem_Think(ent)
 			else
 				Effect_Ignite(pid,id,4)
 			
-			hudmsg(pid,3.0,"Дымовая завеса. Стреляй в кого-нибудь чтобы остановить!")
+			hudmsg(pid,3.0,"Р”С‹РјРѕРІР°СЏ Р·Р°РІРµСЃР°. РЎС‚СЂРµР»СЏР№ РІ РєРѕРіРѕ-РЅРёР±СѓРґСЊ С‡С‚РѕР±С‹ РѕСЃС‚Р°РЅРѕРІРёС‚СЊ!")
 		}
 		
 		remove_entity(ent)
@@ -9453,7 +9455,7 @@ public item_hook(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Hook можно использовать ввсего 1 раз за раунд")
+		hudmsg(id,2.0,"Hook РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РІРІСЃРµРіРѕ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ")
 		return PLUGIN_CONTINUE	
 	}
 	
@@ -9461,7 +9463,7 @@ public item_hook(id)
 	
 	if (!is_valid_ent(target))
 	{
-		hudmsg(id,2.0,"Объект находится вне досягаемости.")
+		hudmsg(id,2.0,"РћР±СЉРµРєС‚ РЅР°С…РѕРґРёС‚СЃСЏ РІРЅРµ РґРѕСЃСЏРіР°РµРјРѕСЃС‚Рё.")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -9553,13 +9555,13 @@ public item_gravitybomb(id)
 {	
 	if (pev(id,pev_flags) & FL_ONGROUND) 
 	{
-		hudmsg(id,2.0,"Вы должны быть в воздухе!")
+		hudmsg(id,2.0,"Р’С‹ РґРѕР»Р¶РЅС‹ Р±С‹С‚СЊ РІ РІРѕР·РґСѓС…Рµ!")
 		return PLUGIN_CONTINUE
 	}
 	
 	if (halflife_time()-gravitytimer[id] <= 5)
 	{
-		hudmsg(id,2.0,"Этот item, могет быть использован каждые 5 секунд")
+		hudmsg(id,2.0,"Р­С‚РѕС‚ item, РјРѕРіРµС‚ Р±С‹С‚СЊ РёСЃРїРѕР»СЊР·РѕРІР°РЅ РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -9795,7 +9797,7 @@ public item_illusion(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Этот item можно использовать один раз за раунд!")
+		hudmsg(id,2.0,"Р­С‚РѕС‚ item РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РѕРґРёРЅ СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_CONTINUE
 	}
 
@@ -9880,7 +9882,7 @@ public item_mine(id)
 	
 	if (count > 2)
 	{
-		hudmsg(id,2.0,"Вы можете поставить до 3ёх мин за раунд")
+		hudmsg(id,2.0,"Р’С‹ РјРѕР¶РµС‚Рµ РїРѕСЃС‚Р°РІРёС‚СЊ РґРѕ 3С‘С… РјРёРЅ Р·Р° СЂР°СѓРЅРґ")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -9925,13 +9927,13 @@ public item_teamshield(id)
 		
 		if (!is_valid_ent(target))
 		{
-			hudmsg(id,2.0,"Нет цели в пространстве")
+			hudmsg(id,2.0,"РќРµС‚ С†РµР»Рё РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ")
 			return PLUGIN_CONTINUE
 		}
 		
 		if (pev(target,pev_rendermode) == kRenderTransTexture || player_item_id[target] == 17 || player_class[target] == Ninja)
 		{
-			hudmsg(id,2.0,"Не возможно использовать невидимый щит от игрока.")
+			hudmsg(id,2.0,"РќРµ РІРѕР·РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РЅРµРІРёРґРёРјС‹Р№ С‰РёС‚ РѕС‚ РёРіСЂРѕРєР°.")
 			return PLUGIN_CONTINUE
 		}
 		
@@ -10060,7 +10062,7 @@ public item_totemheal(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Тотем лечения можно использовать один раз за раунд!")
+		hudmsg(id,2.0,"РўРѕС‚РµРј Р»РµС‡РµРЅРёСЏ РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РѕРґРёРЅ СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -10418,7 +10420,7 @@ public cmd_who(id)
 	len += formatex(motd[len],sizeof motd - 1 - len,"<meta http-equiv='content-type' content='text/html; charset=UTF-8' />")
 	len += formatex(motd[len],sizeof motd - 1 - len,"<body bgcolor=#000000 text=#FFB000>")
 	len += formatex(motd[len],sizeof motd - 1 - len,"<center><table width=700 border=1 cellpadding=4 cellspacing=4>")
-	len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>Ник</td><td>Класс</td><td>Уровень</td><td>Команда</td></tr>")
+	len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>РќРёРє</td><td>РљР»Р°СЃСЃ</td><td>РЈСЂРѕРІРµРЅСЊ</td><td>РљРѕРјР°РЅРґР°</td></tr>")
 	//Title
 	formatex(header,sizeof header - 1,"Diablo Mod Stats")
 	
@@ -10438,11 +10440,11 @@ public cmd_who(id)
 		}
 		else if(player_class[playerid]==Zakarum && player_lvl[playerid]<50)
 		{
-			Racename = "Закарум маньяк"
+			Racename = "Р—Р°РєР°СЂСѓРј РјР°РЅСЊСЏРє"
 		}
 		else if(player_class[playerid]==Zakarum && player_lvl[playerid]>49)
 		{
-			Racename = "Закарум жрец"
+			Racename = "Р—Р°РєР°СЂСѓРј Р¶СЂРµС†"
 		}
 		len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>",name,Racename, player_lvl[playerid],team,player_item_name[playerid])
 	}
@@ -11056,7 +11058,7 @@ public fwd_emitsound(id, channel, const sound[], Float:fVol, Float:fAttn, iFlags
 
 	static name[32]
 	get_user_name(lucky_bastard, name, 31)
-	client_print(id, print_chat, "Возраждение %s", name)
+	client_print(id, print_chat, "Р’РѕР·СЂР°Р¶РґРµРЅРёРµ %s", name)
 		
 	new revivaltime = get_pcvar_num(cvar_revival_time)
 	msg_bartime(id, revivaltime)
@@ -11372,7 +11374,7 @@ public task_setplayer(args[])
     }
 		else
 		{
-    hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+    hudmsg(id,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
     }
 		change_health(id,9999,0,"")		
 		set_user_godmode(id, 1)
@@ -11475,7 +11477,7 @@ public command_knife(id)
 
 	if(!player_knife[id])
 	{
-		client_print(id,print_center,"У вас уже есть метательные ножи")
+		client_print(id,print_center,"РЈ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ РјРµС‚Р°С‚РµР»СЊРЅС‹Рµ РЅРѕР¶Рё")
 		return PLUGIN_HANDLED
 	}
 
@@ -11485,7 +11487,7 @@ public command_knife(id)
 	player_knife[id]--
 
 	if (player_knife[id] == 1) {
-		client_print(id,print_center,"Остался только 1 нож!")
+		client_print(id,print_center,"РћСЃС‚Р°Р»СЃСЏ С‚РѕР»СЊРєРѕ 1 РЅРѕР¶!")
 	}
 
 	new Float: Origin[3], Float: Velocity[3], Float: vAngle[3], Ent
@@ -11534,7 +11536,7 @@ public touchKnife(knife, id)
 			if( player_knife[id] < max_knife[id] )
 			{
 				player_knife[id] += 1
-				client_print(id,print_center,"Текущее количество ножей: %i",player_knife[id])
+				client_print(id,print_center,"РўРµРєСѓС‰РµРµ РєРѕР»РёС‡РµСЃС‚РІРѕ РЅРѕР¶РµР№: %i",player_knife[id])
 			}
 			emit_sound(knife, CHAN_ITEM, "weapons/knife_deploy1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 			remove_entity(knife)
@@ -11619,10 +11621,10 @@ public kill_all_entity(classname[]) {
 ////////////////////////////////////////////////////////////////////////////////
 public mod_info(id)
 {
-	client_print(id,print_console,"Добро пожаловать в Diablo Mod от HiTmAnY")
-	client_print(id,print_console,"     Читай инфо о моде на сайте")
+	client_print(id,print_console,"Р”РѕР±СЂРѕ РїРѕР¶Р°Р»РѕРІР°С‚СЊ РІ Diablo Mod РѕС‚ HiTmAnY")
+	client_print(id,print_console,"     Р§РёС‚Р°Р№ РёРЅС„Рѕ Рѕ РјРѕРґРµ РЅР° СЃР°Р№С‚Рµ")
 	client_print(id,print_console,"        http://lp.hitmany.net")
-	client_print(id,print_console,"        Текущая версия %s",mod_version)
+	client_print(id,print_console,"        РўРµРєСѓС‰Р°СЏ РІРµСЂСЃРёСЏ %s",mod_version)
 	return PLUGIN_HANDLED
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -11679,8 +11681,8 @@ public command_bow(id)
 	{
 		if(player_class[id]==BloodRaven)
 		{
-			entity_set_string(id,EV_SZ_viewmodel,bloodbow_VIEW)
-			entity_set_string(id,EV_SZ_weaponmodel,bloodbow_PLAYER)
+			set_pev(id, pev_viewmodel2, bloodbow_VIEW)
+			set_pev(id, pev_weaponmodel2, bloodbow_PLAYER)
 		}
 		else
 		{
@@ -12194,7 +12196,7 @@ public call_cast(id)
 	{
 		case Mag:
 		{
-			show_hudmessage(id, "[Mag] Выстрел огненным шаром") 
+			show_hudmessage(id, "[Mag] Р’С‹СЃС‚СЂРµР» РѕРіРЅРµРЅРЅС‹Рј С€Р°СЂРѕРј") 
 			fired[id]=0
 			item_fireball(id)
 		}
@@ -12202,10 +12204,10 @@ public call_cast(id)
 		{
 			if(num_shild[id])
 			{
-				show_hudmessage(id, "[Monk] Стенка установленна") 
+				show_hudmessage(id, "[Monk] РЎС‚РµРЅРєР° СѓСЃС‚Р°РЅРѕРІР»РµРЅРЅР°") 
 				createBlockAiming(id)
 			}
-			else show_hudmessage(id, "[Monk] Вы не можете строить") 
+			else show_hudmessage(id, "[Monk] Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ СЃС‚СЂРѕРёС‚СЊ") 
 		}
 		case Paladin:
 		{
@@ -12214,20 +12216,20 @@ public call_cast(id)
 			if(golden_bulet[id]>3)
 			{
 				golden_bulet[id]=3
-				show_hudmessage(id, "[Paladin] У вас максимальное кол-во магических пулей - 3",golden_bulet[id]) 
+				show_hudmessage(id, "[Paladin] РЈ РІР°СЃ РјР°РєСЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»-РІРѕ РјР°РіРёС‡РµСЃРєРёС… РїСѓР»РµР№ - 3",golden_bulet[id]) 
 			}
-			else if(golden_bulet[id]==1)show_hudmessage(id, "[Paladin] У вас одна магическая пуля") 
-			else if(golden_bulet[id]>1)show_hudmessage(id, "[Paladin] У вас %i магических пулей",golden_bulet[id]) 
+			else if(golden_bulet[id]==1)show_hudmessage(id, "[Paladin] РЈ РІР°СЃ РѕРґРЅР° РјР°РіРёС‡РµСЃРєР°СЏ РїСѓР»СЏ") 
+			else if(golden_bulet[id]>1)show_hudmessage(id, "[Paladin] РЈ РІР°СЃ %i РјР°РіРёС‡РµСЃРєРёС… РїСѓР»РµР№",golden_bulet[id]) 
 		}
 		case Assassin:
 		{
-			show_hudmessage(id, "[Assassin] Вы временно невидимыми (только нож)") 
+			show_hudmessage(id, "[Assassin] Р’С‹ РІСЂРµРјРµРЅРЅРѕ РЅРµРІРёРґРёРјС‹РјРё (С‚РѕР»СЊРєРѕ РЅРѕР¶)") 
 			invisible_cast[id]=1
 			set_renderchange(id)
 		}
 		case Ninja:
 		{
-			show_hudmessage(id, "[Нинзя] Временное увеличение скорости") 
+			show_hudmessage(id, "[РќРёРЅР·СЏ] Р’СЂРµРјРµРЅРЅРѕРµ СѓРІРµР»РёС‡РµРЅРёРµ СЃРєРѕСЂРѕСЃС‚Рё") 
 			set_user_maxspeed(id,get_user_maxspeed(id)+25.0)
 		}
 		case Necromancer:
@@ -12239,11 +12241,11 @@ public call_cast(id)
 				fm_give_item(id, "ammo_9mm")
 				fm_give_item(id, "ammo_9mm")
 				fm_give_item(id, "ammo_9mm")
-				show_hudmessage(id, "[Necromancer] Вы получили MP5")
+				show_hudmessage(id, "[Necromancer] Р’С‹ РїРѕР»СѓС‡РёР»Рё MP5")
 			}
 			else
 			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(id,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		case Zakarum:
@@ -12251,17 +12253,17 @@ public call_cast(id)
 			new Float:zak_maxspeed
 			new speed_points = player_dextery[id] * 2;
 			zak_maxspeed = float(speed_points + 400);
-			show_hudmessage(id, "[Закарум] Макс. скорость %i. ^nСбивается при переключении оружия.", floatround(zak_maxspeed,floatround_round))
+			show_hudmessage(id, "[Р—Р°РєР°СЂСѓРј] РњР°РєСЃ. СЃРєРѕСЂРѕСЃС‚СЊ %i. ^nРЎР±РёРІР°РµС‚СЃСЏ РїСЂРё РїРµСЂРµРєР»СЋС‡РµРЅРёРё РѕСЂСѓР¶РёСЏ.", floatround(zak_maxspeed,floatround_round))
 			set_user_maxspeed(id,zak_maxspeed)
 		}
 		case Frozen:
 		{
-			show_hudmessage(id, "[Ледяной ужас] Бесшумный шаг до конца раунда")
+			show_hudmessage(id, "[Р›РµРґСЏРЅРѕР№ СѓР¶Р°СЃ] Р‘РµСЃС€СѓРјРЅС‹Р№ С€Р°Рі РґРѕ РєРѕРЅС†Р° СЂР°СѓРЅРґР°")
 			c_silent[id] = 1
 		}
 		case Infidel:
 		{
-			show_hudmessage(id, "[Инфидель] Временное увеличение скорости") 
+			show_hudmessage(id, "[РРЅС„РёРґРµР»СЊ] Р’СЂРµРјРµРЅРЅРѕРµ СѓРІРµР»РёС‡РµРЅРёРµ СЃРєРѕСЂРѕСЃС‚Рё") 
 			set_user_maxspeed(id,get_user_maxspeed(id)+50.0)
 		}
 		case Barbarian:
@@ -12270,9 +12272,9 @@ public call_cast(id)
 			if(ultra_armor[id]>7)
 			{
 				ultra_armor[id]=7
-				show_hudmessage(id, "[Barbarian] Достигнуто масимальное кол-во Ultra Armor - 7",ultra_armor[id]) 
+				show_hudmessage(id, "[Barbarian] Р”РѕСЃС‚РёРіРЅСѓС‚Рѕ РјР°СЃРёРјР°Р»СЊРЅРѕРµ РєРѕР»-РІРѕ Ultra Armor - 7",ultra_armor[id]) 
 			}
-			else show_hudmessage(id, "[Barbarian] У вас %i Ultra Armor",ultra_armor[id]) 
+			else show_hudmessage(id, "[Barbarian] РЈ РІР°СЃ %i Ultra Armor",ultra_armor[id]) 
 		}
 		case Hephasto:
 		{
@@ -12280,15 +12282,15 @@ public call_cast(id)
 			if(ultra_armor[id]>2)
 			{
 				ultra_armor[id]=2
-				show_hudmessage(id, "[Hephasto] Максимальное значение магич. доспехов - 2",ultra_armor[id]) 
+				show_hudmessage(id, "[Hephasto] РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ РјР°РіРёС‡. РґРѕСЃРїРµС…РѕРІ - 2",ultra_armor[id]) 
 			}
-			else show_hudmessage(id, "[Hephasto] У вас %i магических доспехов",ultra_armor[id]) 
+			else show_hudmessage(id, "[Hephasto] РЈ РІР°СЃ %i РјР°РіРёС‡РµСЃРєРёС… РґРѕСЃРїРµС…РѕРІ",ultra_armor[id]) 
 		}
 		case Griswold:
 		{
 			if(player_item_id[id] != 0)
 			{
-			show_hudmessage(id, "[Griswold] У вас уже есть Item")
+			show_hudmessage(id, "[Griswold] РЈ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ Item")
 			}
 			else 
 			{
@@ -12296,7 +12298,7 @@ public call_cast(id)
 				if(losowe_itemy[id] > 3) 
 				{
 					losowe_itemy[id] = 3
-					show_hudmessage(id, "[Griswold] Полученно предметов - %i", losowe_itemy[id])
+					show_hudmessage(id, "[Griswold] РџРѕР»СѓС‡РµРЅРЅРѕ РїСЂРµРґРјРµС‚РѕРІ - %i", losowe_itemy[id])
 				}
 				else
 				{
@@ -12308,7 +12310,7 @@ public call_cast(id)
 		{
 			if(player_item_id[id] != 0)
 			{
-			show_hudmessage(id, "[The Smith] У вас уже есть Item")
+			show_hudmessage(id, "[The Smith] РЈ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ Item")
 			}
 			else 
 			{
@@ -12316,7 +12318,7 @@ public call_cast(id)
 				if(losowe_itemy[id] > 3) 
 				{
 					losowe_itemy[id] = 3
-					show_hudmessage(id, "[The Smith] Полученно предметов - %i", losowe_itemy[id])
+					show_hudmessage(id, "[The Smith] РџРѕР»СѓС‡РµРЅРЅРѕ РїСЂРµРґРјРµС‚РѕРІ - %i", losowe_itemy[id])
 				}
 				else
 				{
@@ -12328,7 +12330,7 @@ public call_cast(id)
 		{
 			if(player_item_id[id] != 0)
 			{
-			show_hudmessage(id, "[Demonolog] У вас уже есть Item")
+			show_hudmessage(id, "[Demonolog] РЈ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ Item")
 			}
 			else 
 			{
@@ -12336,7 +12338,7 @@ public call_cast(id)
 				if(losowe_itemy[id] > 3) 
 				{
 					losowe_itemy[id] = 3
-					show_hudmessage(id, "[Demonolog] Полученно предметов - %i", losowe_itemy[id])
+					show_hudmessage(id, "[Demonolog] РџРѕР»СѓС‡РµРЅРЅРѕ РїСЂРµРґРјРµС‚РѕРІ - %i", losowe_itemy[id])
 				}
 				else
 				{
@@ -12347,18 +12349,18 @@ public call_cast(id)
 		case Enslaved: 
 		{
 			change_health(id, 40, id, "")
-			show_hudmessage(id, "[Enslaved] Вы получили 40hp")
+			show_hudmessage(id, "[Enslaved] Р’С‹ РїРѕР»СѓС‡РёР»Рё 40hp")
 		}
 		case Amazon: 
 		{
 			if(!g_bWeaponsDisabled)
 			{
 				fm_give_item(id, "weapon_hegrenade")
-				show_hudmessage(id, "[Amazon] Вы получили HE гранату")
+				show_hudmessage(id, "[Amazon] Р’С‹ РїРѕР»СѓС‡РёР»Рё HE РіСЂР°РЅР°С‚Сѓ")
 			}
 			else
 			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(id,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		case Fallen: 
@@ -12367,17 +12369,17 @@ public call_cast(id)
 			{
 				fm_give_item(id, "weapon_flashbang")
 				fm_give_item(id, "weapon_flashbang")
-				show_hudmessage(id, "[Fallen] Вы получили 2 Flash гранаты")
+				show_hudmessage(id, "[Fallen] Р’С‹ РїРѕР»СѓС‡РёР»Рё 2 Flash РіСЂР°РЅР°С‚С‹")
 			}
 			else
 			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(id,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		case SabreCat: 
 		{
 			fm_give_item(id, "weapon_smokegrenade")
-			show_hudmessage(id, "[Адский кот] Вы получили яд")
+			show_hudmessage(id, "[РђРґСЃРєРёР№ РєРѕС‚] Р’С‹ РїРѕР»СѓС‡РёР»Рё СЏРґ")
 		}
 		case GiantSpider: 
 		{
@@ -12394,11 +12396,11 @@ public call_cast(id)
 				fm_give_item(id,"ammo_50ae")
 				fm_give_item(id,"ammo_50ae")
 				fm_give_item(id,"ammo_50ae")
-				show_hudmessage(id, "[Giant Spider] Вы получили полный набор гранат и Deagle")
+				show_hudmessage(id, "[Giant Spider] Р’С‹ РїРѕР»СѓС‡РёР»Рё РїРѕР»РЅС‹Р№ РЅР°Р±РѕСЂ РіСЂР°РЅР°С‚ Рё Deagle")
 			}
 			else
 			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(id,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 	}	
@@ -12537,7 +12539,7 @@ public native_set_user_xp(id, amount)
 		player_lvl[id]+=1
 		player_point[id]+=2
 		set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 2.0, 0.1, 0.2, 2)
-		show_hudmessage(id, "Уровень повышен до %i", player_lvl[id]) 
+		show_hudmessage(id, "РЈСЂРѕРІРµРЅСЊ РїРѕРІС‹С€РµРЅ РґРѕ %i", player_lvl[id]) 
 		MYSQLX_Save(id)
 		player_class_lvl[id][player_class[id]]=player_lvl[id]
 	}
@@ -12547,7 +12549,7 @@ public native_set_user_xp(id, amount)
 		player_lvl[id]-=1
 		player_point[id]-=2
 		set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 2.0, 0.1, 0.2, 2)
-		show_hudmessage(id, "Уровень понижен до %i", player_lvl[id]) 
+		show_hudmessage(id, "РЈСЂРѕРІРµРЅСЊ РїРѕРЅРёР¶РµРЅ РґРѕ %i", player_lvl[id]) 
 		MYSQLX_Save(id)
 		player_class_lvl[id][player_class[id]]=player_lvl[id]
 	}
@@ -12596,57 +12598,57 @@ public native_set_user_item(id, item)
 		{
 			player_item_name[id] = "Bronze Amplifier"
 			player_b_damage[id] = random_num(1,3)
-			show_hudmessage(id, "Вы нашли item: %s ::  +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s ::  +%i РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_damage[id])
 		}
 		
 		case 2:
 		{
 			player_item_name[id] = "Silver Amplifier"
 			player_b_damage[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_damage[id])
 		}
 		
 		case 3:
 		{
 			player_item_name[id] = "Gold Amplifier"
 			player_b_damage[id] = random_num(6,10)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕРіРѕ СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_damage[id])	
 		}
 		case 4:
 		{
 			player_item_name[id] = "Vampyric Staff"
 			player_b_vampire[id] = random_num(1,4)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: %i hp РІС‹СЃР°СЃС‹РІР°РµС‚ СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 5:
 		{
 			player_item_name[id] = "Vampyric Amulet"
 			player_b_vampire[id] = random_num(4,6)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: %i hp РІС‹СЃР°СЃС‹РІР°РµС‚ СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 6:
 		{
 			player_item_name[id] = "Vampyric Scepter"
 			player_b_vampire[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: %i hp РІС‹СЃР°СЃС‹РІР°РµС‚ СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 7:
 		{
 			player_item_name[id] = "Small bronze bag"
 			player_b_money[id] = random_num(150,500)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ + РџСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚СЂС‹Р№ СЃРЅРёР¶Р°РµС‚ СѓСЂРѕРЅ РїРѕ РІР°Рј РЅР° 50% Р¶СЂСѓС‰РёР№ РїРѕ 200$ РєР°Р¶РґС‹Рµ 2-3 СЃРµРєСѓРЅРґС‹.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 8:
 		{
 			player_item_name[id] = "Medium silver bag"
 			player_b_money[id] = random_num(500,1200)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ + РџСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚СЂС‹Р№ СЃРЅРёР¶Р°РµС‚ СѓСЂРѕРЅ РїРѕ РІР°Рј РЅР° 50% Р¶СЂСѓС‰РёР№ РїРѕ 200$ РєР°Р¶РґС‹Рµ 2-3 СЃРµРєСѓРЅРґС‹.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 9:
 		{
 			player_item_name[id] = "Large gold bag"
 			player_b_money[id] = random_num(1200,3000)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +%i РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ + РџСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚СЂС‹Р№ СЃРЅРёР¶Р°РµС‚ СѓСЂРѕРЅ РїРѕ РІР°Рј РЅР° 50% Р¶СЂСѓС‰РёР№ РїРѕ 200$ РєР°Р¶РґС‹Рµ 2-3 СЃРµРєСѓРЅРґС‹.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 10:
 		{
@@ -12655,7 +12657,7 @@ public native_set_user_item(id, item)
 			
 			if (is_user_alive(id))
 				set_gravitychange(id)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i Р±РѕРЅСѓСЃ Рє РіСЂР°РІРёС‚Р°С†РёРё РїСЂРё РїСЂС‹Р¶РєРµ Рё РЅР°Р¶Р°С‚РёРё Р• СЂРµР·РєРѕ РїР°РґР°РµС‚ РЅР° Р·РµРјР»СЋ Рё РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёРІР°РµС‚ РІСЂР°РіР° РЅР° РЅРµР±РѕР»СЊС€РѕРј СЂР°РґРёСѓСЃРµ.",player_item_name[id],player_b_gravity[id])	
 		}
 		case 11:
 		{
@@ -12665,38 +12667,38 @@ public native_set_user_item(id, item)
 			if (is_user_alive(id))
 				set_gravitychange(id)
 				
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i Р±РѕРЅСѓСЃ Рє РіСЂР°РІРёС‚Р°С†РёРё РїСЂРё РїСЂС‹Р¶РєРµ Рё РЅР°Р¶Р°С‚РёРё Р• СЂРµР·РєРѕ РїР°РґР°РµС‚ РЅР° Р·РµРјР»СЋ Рё РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёРІР°РµС‚ РІСЂР°РіР° РЅР° СЃСЂРµРґРЅРµРј СЂР°РґРёСѓСЃРµ.",player_item_name[id],player_b_gravity[id])	
 			
 		}
 		case 12:
 		{
 			player_item_name[id] = "Invisibility Rope"
 			player_b_inv[id] = random_num(150,200)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i РЅРµР·РЅР°С‡РёС‚РµР»СЊРЅСѓСЋ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ С‡Р°СЂР°.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 13:
 		{
 			player_item_name[id] = "Invisibility Coat"
 			player_b_inv[id] = random_num(110,150)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i РЅРµР·РЅР°С‡РёС‚РµР»СЊРЅСѓСЋ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ С‡Р°СЂР°.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 14:
 		{
 			player_item_name[id] = "Invisibility Armor"
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i РЅРµР·РЅР°С‡РёС‚РµР»СЊРЅСѓСЋ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ С‡Р°СЂР°.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 15:
 		{
 			player_item_name[id] = "Firerope"
 			player_b_grenade[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: +1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +1/%i  С€Р°РЅСЃ РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РІСЂР°РіР° СЃ РіСЂР°РЅР°С‚С‹",player_item_name[id],player_b_grenade[id])	
 		}
 		case 16:
 		{
 			player_item_name[id] = "Fire Amulet"
 			player_b_grenade[id] = random_num(2,4)
-			show_hudmessage(id, "Вы нашли item: %s :: +1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: +1/%i  С€Р°РЅСЃ РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ РІСЂР°РіР° СЃ РіСЂР°РЅР°С‚С‹",player_item_name[id],player_b_grenade[id])	
 		}
 		case 17:
 		{
@@ -12706,248 +12708,248 @@ public native_set_user_item(id, item)
 			item_durability[id] = 100
 			
 			if (is_user_alive(id)) set_user_health(id,5)		
-			show_hudmessage(id, "Вы нашли item: %s :: практически полная невидимость, но у вас 5 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂР°РєС‚РёС‡РµСЃРєРё РїРѕР»РЅР°СЏ РЅРµРІРёРґРёРјРѕСЃС‚СЊ, РЅРѕ Сѓ РІР°СЃ 5 С…Рї Рё РёР· РѕСЂСѓР¶РёСЏ С‚РѕР»СЊРєРѕ РЅРѕР¶, РјРѕР¶РЅРѕ СЃС‚Р°РІРёС‚СЊ Р±РѕРјР±Сѓ.",player_item_name[id])	
 		}
 		case 18:
 		{
 			player_item_name[id] = "Arabian Boots"
 			player_b_theif[id] = random_num(500,1000)
-			show_hudmessage(id, "Вы нашли item: %s :: с каждым выстрелом высасывает с противника деньги, в зависимости от дамага",player_item_name[id],player_b_theif[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃ РєР°Р¶РґС‹Рј РІС‹СЃС‚СЂРµР»РѕРј РІС‹СЃР°СЃС‹РІР°РµС‚ СЃ РїСЂРѕС‚РёРІРЅРёРєР° РґРµРЅСЊРіРё, РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ РґР°РјР°РіР°",player_item_name[id],player_b_theif[id])	
 		}
 		case 19:
 		{
 			player_item_name[id] = "Phoenix Ring"
 			player_b_respawn[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РІРѕСЃРєСЂРµСЃРёС‚СЊСЃСЏ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 20:
 		{
 			player_item_name[id] = "Sorcerers ring"
 			player_b_respawn[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РІРѕСЃРєСЂРµСЃРёС‚СЊСЃСЏ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 21:
 		{
 			player_item_name[id] = "Chaos Orb"
 			player_b_explode[id] = random_num(150,275)
-			show_hudmessage(id, "Вы нашли item: %s :: после смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё РІР·СЂС‹РІР°РµС‚РµСЃСЊ РІ СЂР°РґРёСѓСЃРµ %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 22:
 		{
 			player_item_name[id] = "Hell Orb"
 			player_b_explode[id] = random_num(200,400)
-			show_hudmessage(id, "Вы нашли item: %s :: после смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё РІР·СЂС‹РІР°РµС‚РµСЃСЊ РІ СЂР°РґРёСѓСЃРµ %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 23:
 		{
 			player_item_name[id] = "Gold statue"
 			player_b_heal[id] = random_num(5,10)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РїРѕСЏРІР»СЏРµС‚СЃСЏ С‚РѕС‚РµРј, РєРѕС‚СЂС‹Р№ Р»РµС‡РёС‚ РІР°СЃ Рё РІР°С€Сѓ РєРѕРјР°РЅРґСѓ. %i С…Рї Р·Р° 5 СЃРµРєСѓРЅРґ, С‚РѕС‚РµРј Р°РєС‚РёРІРµРЅ РІ С‚РµС‡РµРЅРёРё 7 СЃРµРєСѓРЅРґ РІ РїСЂРµРґРµР»Р°С… %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 24:
 		{
 			player_item_name[id] = "Daylight Diamond"
 			player_b_heal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РїРѕСЏРІР»СЏРµС‚СЃСЏ С‚РѕС‚РµРј, РєРѕС‚СЂС‹Р№ Р»РµС‡РёС‚ РІР°СЃ Рё РІР°С€Сѓ РєРѕРјР°РЅРґСѓ. %i С…Рї Р·Р° 5 СЃРµРєСѓРЅРґ, С‚РѕС‚РµРј Р°РєС‚РёРІРµРЅ РІ С‚РµС‡РµРЅРёРё 7 СЃРµРєСѓРЅРґ РІ РїСЂРµРґРµР»Р°С… %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 25:
 		{
 			player_item_name[id] = "Blood Diamond"
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РїРѕСЏРІР»СЏРµС‚СЃСЏ С‚РѕС‚РµРј, РєРѕС‚СЂС‹Р№ Р»РµС‡РёС‚ РІР°СЃ Рё РІР°С€Сѓ РєРѕРјР°РЅРґСѓ. %i С…Рї Р·Р° 5 СЃРµРєСѓРЅРґ, С‚РѕС‚РµРј Р°РєС‚РёРІРµРЅ РІ С‚РµС‡РµРЅРёРё 7 СЃРµРєСѓРЅРґ РІ РїСЂРµРґРµР»Р°С… %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 26:
 		{
 			player_item_name[id] = "Wheel of Fortune"
 			player_b_gamble[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ СЂР°РЅРґРѕРјРЅРѕ +%i Р±РѕРЅСѓСЃРѕРІ РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 27:
 		{
 			player_item_name[id] = "Four leaf Clover"
 			player_b_gamble[id] = random_num(4,5)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ СЂР°РЅРґРѕРјРЅРѕ +%i Р±РѕРЅСѓСЃРѕРІ РєР°Р¶РґС‹Р№ СЂР°СѓРЅРґ.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 28:
 		{
 			player_item_name[id] = "Amulet of the sun"
 			player_b_blind[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РѕСЃР»РµРїРёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° РїСЂРё Р°С‚Р°РєРµ. Р­РєСЂР°РЅ СЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ РїРѕС‡С‚Рё РїРѕР»СЊРЅРѕСЃС‚СЊСЋ РѕСЂР°РЅР¶РµРІС‹Рј РІ С‚РµС‡РµРЅРёРё 7-10 СЃРµРєСѓРЅРґ",player_item_name[id],player_b_blind[id])	
 		}
 		case 29:
 		{
 			player_item_name[id] = "Sword of the sun"
 			player_b_blind[id] = random_num(2,5)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РѕСЃР»РµРїРёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР° РїСЂРё Р°С‚Р°РєРµ. Р­РєСЂР°РЅ СЃС‚Р°РЅРѕРІРёС‚СЊСЃСЏ РїРѕС‡С‚Рё РїРѕР»СЊРЅРѕСЃС‚СЊСЋ РѕСЂР°РЅР¶РµРІС‹Рј РІ С‚РµС‡РµРЅРёРё 7-10 СЃРµРєСѓРЅРґ",player_item_name[id],player_b_blind[id])	
 		}
 		case 30:
 		{
 			player_item_name[id] = "Fireshield"
 			player_b_fireshield[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии Е активируется щит который наносит дамаг противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚СЃСЏ С‰РёС‚ РєРѕС‚РѕСЂС‹Р№ РЅР°РЅРѕСЃРёС‚ РґР°РјР°Рі РїСЂРѕС‚РёРІРЅРёРєСѓ. РЈРјРµРЅСЊС€Р°РµС‚ РІР°С€Рµ Р·РґРѕСЂРѕРІСЊРµ, 20 С…Рї РєР°Р¶РґС‹Рµ 2 СЃРµРєСѓРЅРґС‹.",player_item_name[id],player_b_fireshield[id])	
 		}
 		case 31:
 		{
 			player_item_name[id] = "Stealth Shoes"
 			player_b_silent[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бесшумный шаг (эфект рассы assassin).",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р±РµСЃС€СѓРјРЅС‹Р№ С€Р°Рі (СЌС„РµРєС‚ СЂР°СЃСЃС‹ assassin).",player_item_name[id])	
 		}
 		case 32:
 		{
 			player_item_name[id] = "Meekstone"
 			player_b_meekstone[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бомба на дистанционом управлении. Е положить бомбу, второе нажатие Е взорвать.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р±РѕРјР±Р° РЅР° РґРёСЃС‚Р°РЅС†РёРѕРЅРѕРј СѓРїСЂР°РІР»РµРЅРёРё. Р• РїРѕР»РѕР¶РёС‚СЊ Р±РѕРјР±Сѓ, РІС‚РѕСЂРѕРµ РЅР°Р¶Р°С‚РёРµ Р• РІР·РѕСЂРІР°С‚СЊ.",player_item_name[id])	
 		}
 		case 33:
 		{
 			player_item_name[id] = "Medicine Glar"
 			player_b_teamheal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли item: %s :: При атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё Р°С‚Р°РєРµ РІ СЃРѕРєРѕРјР°РЅРґРЅРёРєР° РІРѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ %i С…Рї. РїСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚ РЅР° С‡Р»РµРЅРµ РєРѕРјР°РЅРґС‹ С‰РёС‚ РєРѕС‚СЂС‹Р№ РІРѕР·РІСЂР°С‰Р°РµС‚ РґР°РјР°Рі.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 34:
 		{
 			player_item_name[id] = "Medicine Totem"
 			player_b_teamheal[id] = random_num(20,30)
-			show_hudmessage(id, "Вы нашли item: %s :: При атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РџСЂРё Р°С‚Р°РєРµ РІ СЃРѕРєРѕРјР°РЅРґРЅРёРєР° РІРѕСЃС‚Р°РЅР°РІР»РёРІР°РµС‚СЃСЏ %i С…Рї. РїСЂРё РЅР°Р¶Р°С‚РёРё Р• Р°РєС‚РёРІРёСЂСѓРµС‚ РЅР° С‡Р»РµРЅРµ РєРѕРјР°РЅРґС‹ С‰РёС‚ РєРѕС‚СЂС‹Р№ РІРѕР·РІСЂР°С‰Р°РµС‚ РґР°РјР°Рі.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 35:
 		{
 			player_item_name[id] = "Iron Armor"
 			player_b_redirect[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃРЅРёР¶Р°РµС‚ +%i РґР°РјР°РіР° РїРѕ РІР°Рј СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 36:
 		{
 			player_item_name[id] = "Mitril Armor"
 			player_b_redirect[id] = random_num(6,11)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃРЅРёР¶Р°РµС‚ +%i РґР°РјР°РіР° РїРѕ РІР°Рј СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 37:
 		{
 			player_item_name[id] = "Godly Armor"
 			player_b_redirect[id] = random_num(10,15)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃРЅРёР¶Р°РµС‚ +%i РґР°РјР°РіР° РїРѕ РІР°Рј СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 38:
 		{
 			player_item_name[id] = "Fireball staff"
 			player_b_fireball[id] = random_num(50,100)
-			show_hudmessage(id, "Вы нашли item: %s :: Запускает ракету, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р—Р°РїСѓСЃРєР°РµС‚ СЂР°РєРµС‚Сѓ, РІР·СЂС‹РІР°СЋС‰СѓСЋСЃСЏ РІ СЂР°РґРёСѓСЃРµ %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 39:
 		{
 			player_item_name[id] = "Fireball scepter"
 			player_b_fireball[id] = random_num(100,200)
-			show_hudmessage(id, "Вы нашли item: %s :: Запускает ракету, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р—Р°РїСѓСЃРєР°РµС‚ СЂР°РєРµС‚Сѓ, РІР·СЂС‹РІР°СЋС‰СѓСЋСЃСЏ РІ СЂР°РґРёСѓСЃРµ %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 40:
 		{
 			player_item_name[id] = "Ghost Rope"
 			player_b_ghost[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: Возможность ходить сквозь стены, эфект длиться %i секунд",player_item_name[id],player_b_ghost[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ С…РѕРґРёС‚СЊ СЃРєРІРѕР·СЊ СЃС‚РµРЅС‹, СЌС„РµРєС‚ РґР»РёС‚СЊСЃСЏ %i СЃРµРєСѓРЅРґ",player_item_name[id],player_b_ghost[id])	
 		}
 		case 41:
 		{
 			player_item_name[id] = "Nicolas Eye"
 			player_b_eye[id] = -1
-			show_hudmessage(id, "Вы нашли item: %s :: Устанавливает камеру на стене.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РЈСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ РєР°РјРµСЂСѓ РЅР° СЃС‚РµРЅРµ.",player_item_name[id])	
 		}
 		case 42:
 		{
 			player_item_name[id] = "Knife Ruby"
 			player_b_blink[id] = floatround(halflife_time())
-			show_hudmessage(id, "Вы нашли item: %s :: при использовании ножа второй конопкой телепортирует вас на небольшое растояние",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРё РЅРѕР¶Р° РІС‚РѕСЂРѕР№ РєРѕРЅРѕРїРєРѕР№ С‚РµР»РµРїРѕСЂС‚РёСЂСѓРµС‚ РІР°СЃ РЅР° РЅРµР±РѕР»СЊС€РѕРµ СЂР°СЃС‚РѕСЏРЅРёРµ",player_item_name[id])	
 		}
 		case 43:
 		{
 			player_item_name[id] = "Lothars Edge"
 			player_b_windwalk[id] = random_num(4,7)
-			show_hudmessage(id, "Вы нашли item: %s :: на %i секунд даёт среднюю прозрачность + сильно увеличивает ваш бег.",player_item_name[id],player_b_windwalk[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РЅР° %i СЃРµРєСѓРЅРґ РґР°С‘С‚ СЃСЂРµРґРЅСЋСЋ РїСЂРѕР·СЂР°С‡РЅРѕСЃС‚СЊ + СЃРёР»СЊРЅРѕ СѓРІРµР»РёС‡РёРІР°РµС‚ РІР°С€ Р±РµРі.",player_item_name[id],player_b_windwalk[id])	
 		}
 		case 44:
 		{
 			player_item_name[id] = "Sword"
 			player_sword[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: увеличивает урон ножу",player_item_name[id])		
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СѓРІРµР»РёС‡РёРІР°РµС‚ СѓСЂРѕРЅ РЅРѕР¶Сѓ",player_item_name[id])		
 		}
 		case 45:
 		{
 			player_item_name[id] = "Mageic Booster"
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: каждые 3 секунды сидя вы очень длинно прыгаете.(item не всегда работает)",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РєР°Р¶РґС‹Рµ 3 СЃРµРєСѓРЅРґС‹ СЃРёРґСЏ РІС‹ РѕС‡РµРЅСЊ РґР»РёРЅРЅРѕ РїСЂС‹РіР°РµС‚Рµ.(item РЅРµ РІСЃРµРіРґР° СЂР°Р±РѕС‚Р°РµС‚)",player_item_name[id])	
 		}
 		case 46:
 		{
 			player_item_name[id] = "Dagon I"
 			player_b_dagon[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии USE наносит дамаг противнику на близком растоянии раз в 20 секунд",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё USE РЅР°РЅРѕСЃРёС‚ РґР°РјР°Рі РїСЂРѕС‚РёРІРЅРёРєСѓ РЅР° Р±Р»РёР·РєРѕРј СЂР°СЃС‚РѕСЏРЅРёРё СЂР°Р· РІ 20 СЃРµРєСѓРЅРґ",player_item_name[id])	
 		}
 		case 47:
 		{
 			player_item_name[id] = "Scout Extender"
 			player_b_sniper[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃРѕ СЃРєР°СѓС‚Р°.",player_item_name[id],player_b_sniper[id])	
 		}
 		case 48:
 		{
 			player_item_name[id] = "Scout Amplifier"
 			player_b_sniper[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: С€Р°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃРѕ СЃРєР°СѓС‚Р°.",player_item_name[id],player_b_sniper[id])	
 		}
 		case 49:
 		{
 			player_item_name[id] = "Air booster"
 			player_b_jumpx[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: Вы можете сделать двойной прыжок в воздухе",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ РґРІРѕР№РЅРѕР№ РїСЂС‹Р¶РѕРє РІ РІРѕР·РґСѓС…Рµ",player_item_name[id],player_b_sniper[id])	
 		}
 		case 50:
 		{
 			player_item_name[id] = "Iron Spikes"
 			player_b_smokehit[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: убивает дымовой гранатой, если попасть ей в противника",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СѓР±РёРІР°РµС‚ РґС‹РјРѕРІРѕР№ РіСЂР°РЅР°С‚РѕР№, РµСЃР»Рё РїРѕРїР°СЃС‚СЊ РµР№ РІ РїСЂРѕС‚РёРІРЅРёРєР°",player_item_name[id])	
 		}
 		case 51:
 		{
 			player_item_name[id] = "Point Booster"
 			player_b_extrastats[id] = random_num(1,3)
 			BoostStats(id,player_b_extrastats[id])
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i очков к каждому умнению",player_item_name[id],player_b_extrastats[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РґР°С‘С‚ +%i РѕС‡РєРѕРІ Рє РєР°Р¶РґРѕРјСѓ СѓРјРЅРµРЅРёСЋ",player_item_name[id],player_b_extrastats[id])	
 		}
 		case 52:
 		{
 			player_item_name[id] = "Totem amulet"
 			player_b_firetotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• СЃС‚Р°РІРёС‚ Р¶С‘Р»С‚С‹Р№ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ С‡РµСЂРµР· РЅРµСЃРєРѕР»СЊРєРѕ СЃРµРєСѓРЅРґ РІР·СЂС‹РІР°РµС‚СЃСЏ Рё РїРѕРґР¶РёРіР°РµС‚ РІСЃРµС… РІ Р±РѕР»СЊС€РѕРј СЂР°РґРёСѓСЃРµ.",player_item_name[id])	
 		}
 		case 53:
 		{
 			player_item_name[id] = "Mageic Hook"
 			player_b_hook[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии USE притягивает к себе врага",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё USE РїСЂРёС‚СЏРіРёРІР°РµС‚ Рє СЃРµР±Рµ РІСЂР°РіР°",player_item_name[id])	
 		}
 		case 54:
 		{
 			player_item_name[id] = "Darksteel Glove"
 			player_b_darksteel[id] = random_num(1,5)
-			show_hudmessage(id, "Вы нашли item: %s :: усиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СѓСЃРёР»РµРЅРЅС‹Р№ РґР°РјР°Рі РїСЂРё Р°С‚Р°РєРµ РїСЂРѕС‚РёРІРЅРёРєР° СЃРѕ СЃРїРёРЅС‹.",player_item_name[id])	
 		}
 		case 55:
 		{
 			player_item_name[id] = "Darksteel Gaunlet"
 			player_b_darksteel[id] = random_num(7,9)
-			show_hudmessage(id, "Вы нашли item: %s :: усиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СѓСЃРёР»РµРЅРЅС‹Р№ РґР°РјР°Рі РїСЂРё Р°С‚Р°РєРµ РїСЂРѕС‚РёРІРЅРёРєР° СЃРѕ СЃРїРёРЅС‹.",player_item_name[id])	
 		}
 		case 56:
 		{
 			player_item_name[id] = "Illusionists Cape"
 			player_b_illusionist[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии на Е вы становитесь полностью (100%)невидимым. однако и вы никого не видите и умираете от 1 выстрела.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РїСЂРё РЅР°Р¶Р°С‚РёРё РЅР° Р• РІС‹ СЃС‚Р°РЅРѕРІРёС‚РµСЃСЊ РїРѕР»РЅРѕСЃС‚СЊСЋ (100%)РЅРµРІРёРґРёРјС‹Рј. РѕРґРЅР°РєРѕ Рё РІС‹ РЅРёРєРѕРіРѕ РЅРµ РІРёРґРёС‚Рµ Рё СѓРјРёСЂР°РµС‚Рµ РѕС‚ 1 РІС‹СЃС‚СЂРµР»Р°.",player_item_name[id])	
 		}
 		case 57:
 		{
 			player_item_name[id] = "Techies scepter"
 			player_b_mine[id] = 3
-			show_hudmessage(id, "Вы нашли item: %s :: ставит 3 полуневидимые мины.",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: СЃС‚Р°РІРёС‚ 3 РїРѕР»СѓРЅРµРІРёРґРёРјС‹Рµ РјРёРЅС‹.",player_item_name[id])
 		}
 		
 		case 58:
@@ -12955,121 +12957,121 @@ public native_set_user_item(id, item)
 			player_item_name[id] = "Ninja ring"
 			player_b_blink[id] = floatround(halflife_time())
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: Нож позволяет вам телепортироваться каждые 3 секунды. Зажмите DUCK чтобы прыгнуть далеко.",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item: %s :: РќРѕР¶ РїРѕР·РІРѕР»СЏРµС‚ РІР°Рј С‚РµР»РµРїРѕСЂС‚РёСЂРѕРІР°С‚СЊСЃСЏ РєР°Р¶РґС‹Рµ 3 СЃРµРєСѓРЅРґС‹. Р—Р°Р¶РјРёС‚Рµ DUCK С‡С‚РѕР±С‹ РїСЂС‹РіРЅСѓС‚СЊ РґР°Р»РµРєРѕ.",player_item_name[id])
 		}
 		case 59:	
 		{
 			player_item_name[id] = "Mage ring"
 			player_ring[id]=1
 			player_b_fireball[id] = random_num(50,80)
-			show_hudmessage(id, "Вы нашли item : %s :: Возможность стрелять огненными шарами +5 интеллект",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’РѕР·РјРѕР¶РЅРѕСЃС‚СЊ СЃС‚СЂРµР»СЏС‚СЊ РѕРіРЅРµРЅРЅС‹РјРё С€Р°СЂР°РјРё +5 РёРЅС‚РµР»Р»РµРєС‚",player_item_name[id])
 		}	
 		case 60:	
 		{
 			player_item_name[id] = "Necromant ring"
 			player_b_respawn[id] = random_num(2,4)
 			player_b_vampire[id] = random_num(3,5)	
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс возродиться после смерти. При попадании во врага, частично восполняет ваше НР",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ РІРѕР·СЂРѕРґРёС‚СЊСЃСЏ РїРѕСЃР»Рµ СЃРјРµСЂС‚Рё. РџСЂРё РїРѕРїР°РґР°РЅРёРё РІРѕ РІСЂР°РіР°, С‡Р°СЃС‚РёС‡РЅРѕ РІРѕСЃРїРѕР»РЅСЏРµС‚ РІР°С€Рµ РќР ",player_item_name[id])
 		}
 		case 61:
 		{
 			player_item_name[id] = "Barbarian ring"
 			player_b_explode[id] = random_num(120,330)
 			player_ring[id]=2
-			show_hudmessage(id, "Вы нашли item : %s :: Когда вас убивают вы взрываетесь, нанося урон стоящим в близи врагам. +5 сила",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РљРѕРіРґР° РІР°СЃ СѓР±РёРІР°СЋС‚ РІС‹ РІР·СЂС‹РІР°РµС‚РµСЃСЊ, РЅР°РЅРѕСЃСЏ СѓСЂРѕРЅ СЃС‚РѕСЏС‰РёРј РІ Р±Р»РёР·Рё РІСЂР°РіР°Рј. +5 СЃРёР»Р°",player_item_name[id])
 		}
 		case 62:
 		{
 			player_item_name[id] = "Paladin ring"	
 			player_b_redirect[id] = random_num(7,17)
 			player_b_blind[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли item : %s :: Снижение дамага по вам. Шанс ослепить противника",player_item_name[id])		
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЎРЅРёР¶РµРЅРёРµ РґР°РјР°РіР° РїРѕ РІР°Рј. РЁР°РЅСЃ РѕСЃР»РµРїРёС‚СЊ РїСЂРѕС‚РёРІРЅРёРєР°",player_item_name[id])		
 		}
 		case 63:
 		{
 			player_item_name[id] = "Monk ring"
 			player_b_grenade[id] = random_num(1,4)
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли item : %s :: Увиличивает урон наносимый гранатой. Восстанавливает здоровье",player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЈРІРёР»РёС‡РёРІР°РµС‚ СѓСЂРѕРЅ РЅР°РЅРѕСЃРёРјС‹Р№ РіСЂР°РЅР°С‚РѕР№. Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ Р·РґРѕСЂРѕРІСЊРµ",player_item_name[id])
 		}	
 		case 64:
 		{
 			player_item_name[id] = "Assassin ring"
 			player_b_jumpx[id] = 1
 			player_ring[id]=3
-			show_hudmessage(id, "Вы нашли item : %s :: Двойной прыжок. +5 ловкость",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р”РІРѕР№РЅРѕР№ РїСЂС‹Р¶РѕРє. +5 Р»РѕРІРєРѕСЃС‚СЊ",player_item_name[id])	
 		}	
 		case 65:
 		{
 			player_item_name[id] = "Flashbang necklace"	
 			wear_sun[id] = 1
-			show_hudmessage (id, "Вы нашли item : %s :: Иммунитет к ослепляющим гранатам",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РРјРјСѓРЅРёС‚РµС‚ Рє РѕСЃР»РµРїР»СЏСЋС‰РёРј РіСЂР°РЅР°С‚Р°Рј",player_item_name[id])
 		}
 		case 66:
 		{
 			player_item_name[id] = "Chameleon"	
 			changeskin(id,0)  
-			show_hudmessage (id, "Вы нашли item : %s :: Превращение во врага (внешний вид)",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РџСЂРµРІСЂР°С‰РµРЅРёРµ РІРѕ РІСЂР°РіР° (РІРЅРµС€РЅРёР№ РІРёРґ)",player_item_name[id])
 		}
 		case 67:
 		{
 			player_item_name[id] = "Stong Armor"	
 			player_ultra_armor[id]=random_num(3,6)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли item : %s :: Каждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РљР°Р¶РґС‹Р№ СЂР°СѓРЅРґ Р±СЂРѕРЅСЏ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ СЂР°РІРЅРѕР№ %i",player_item_name[id],player_ultra_armor[id])
 		}
 		case 68:
 		{
 			player_item_name[id] = "Ultra Armor"	
 			player_ultra_armor[id]=random_num(7,11)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли item : %s :: Каждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РљР°Р¶РґС‹Р№ СЂР°СѓРЅРґ Р±СЂРѕРЅСЏ СЃС‚Р°РЅРѕРІРёС‚СЃСЏ СЂР°РІРЅРѕР№ %i",player_item_name[id],player_ultra_armor[id])
 		}
 		case 69:
 		{
 			player_item_name[id] = "Khalim Eye"
 			player_b_radar[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Вы видите противников на радаре", player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РІРёРґРёС‚Рµ РїСЂРѕС‚РёРІРЅРёРєРѕРІ РЅР° СЂР°РґР°СЂРµ", player_item_name[id])
 		}
 		case 70:
 		{
 			player_item_name[id] = "Leaper Ring"
 			player_b_autobh[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Даёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р”Р°С‘С‚ РІР°Рј Р°РІС‚Рѕ СЂР°СЃРїСЂС‹Р¶РєСѓ. РЈРґРµСЂР¶РёРІР°РµС‚ РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРµ.", player_item_name[id])
 		}
 		case 71:
 		{
 			player_item_name[id] = "Myrmidon Greaves"
 			player_b_silent[id] = 1
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/2)
-			show_hudmessage (id, "Вы нашли item : %s :: Бесшумный и быстрый бег",player_item_name[id],player_b_silent[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р‘РµСЃС€СѓРјРЅС‹Р№ Рё Р±С‹СЃС‚СЂС‹Р№ Р±РµРі",player_item_name[id],player_b_silent[id])
 		}
 		case 72:
 		{
 			player_item_name[id] = "Shoes of the Bone"
 			player_b_jumpx[id] = 4
 			set_user_gravity(id, 600.0)
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 4 прыжка в воздухе. Уменьшенна гравитация",player_item_name[id],player_b_jumpx[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ 4 РїСЂС‹Р¶РєР° РІ РІРѕР·РґСѓС…Рµ. РЈРјРµРЅСЊС€РµРЅРЅР° РіСЂР°РІРёС‚Р°С†РёСЏ",player_item_name[id],player_b_jumpx[id])
 		}
 		case 73:
 		{
 			player_item_name[id] = "Scarab Shoes"
 			player_b_inv[id] = 95
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли item : %s :: Ваш видимость снижается до 95. Быстрый бег.",player_item_name[id],player_b_inv[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’Р°С€ РІРёРґРёРјРѕСЃС‚СЊ СЃРЅРёР¶Р°РµС‚СЃСЏ РґРѕ 95. Р‘С‹СЃС‚СЂС‹Р№ Р±РµРі.",player_item_name[id],player_b_inv[id])
 		}
 		case 74:
 		{
 			player_item_name[id] = "Hydra Blade"
 			player_b_inv[id] = 155
 			player_b_damage[id] = 20
-			show_hudmessage (id, "Вы нашли item : %s :: Ваш видимость снижается до 155 +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’Р°С€ РІРёРґРёРјРѕСЃС‚СЊ СЃРЅРёР¶Р°РµС‚СЃСЏ РґРѕ 155 +20 Рє СѓСЂРѕРЅСѓ",player_item_name[id],player_b_inv[id],player_b_damage[id])
 		}
 		case 75:
 		{
 			player_item_name[id] = "Exp Ring"
 			new xp_award = get_cvar_num("diablo_xpbonus")*2
-			show_hudmessage (id, "Вы нашли item : %s :: Удваивание опыта на %i",player_item_name[id],xp_award)
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЈРґРІР°РёРІР°РЅРёРµ РѕРїС‹С‚Р° РЅР° %i",player_item_name[id],xp_award)
 		}
 		case 76:
 		{
@@ -13077,21 +13079,21 @@ public native_set_user_item(id, item)
 			player_ring[id]=2
 			player_b_explode[id] = random_num(120,330)
 			player_b_redirect[id] = random_num(10, 100)
-			show_hudmessage (id, "Вы нашли item : %s :: Вы получаете +5 к силе и взрываетесь когда умираете(урон %i) -%i урона по вам",player_item_name[id],player_b_explode[id],player_b_redirect[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РїРѕР»СѓС‡Р°РµС‚Рµ +5 Рє СЃРёР»Рµ Рё РІР·СЂС‹РІР°РµС‚РµСЃСЊ РєРѕРіРґР° СѓРјРёСЂР°РµС‚Рµ(СѓСЂРѕРЅ %i) -%i СѓСЂРѕРЅР° РїРѕ РІР°Рј",player_item_name[id],player_b_explode[id],player_b_redirect[id])
 		}
 		case 77:
 		{
 			player_item_name[id] = "Polished Wand"
 			player_b_blind[id] = random_num(1,5)
 			player_b_heal[id] =  random_num(1,15)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/%i ослепить врага, жми E чтобы установить исцеляющий тотем",player_item_name[id],player_b_blind[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РѕСЃР»РµРїРёС‚СЊ РІСЂР°РіР°, Р¶РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ РёСЃС†РµР»СЏСЋС‰РёР№ С‚РѕС‚РµРј",player_item_name[id],player_b_blind[id])
 		}
 		case 78:
 		{
 			player_item_name[id] = "Heavenly Stone"
 			player_b_grenade[id] = random_num(1,3)
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить HE гранаты и быстрый бег",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ HE РіСЂР°РЅР°С‚С‹ Рё Р±С‹СЃС‚СЂС‹Р№ Р±РµРі",player_item_name[id],player_b_grenade[id])
 		}
 		case 79:
 		{
@@ -13099,20 +13101,20 @@ public native_set_user_item(id, item)
 			player_b_respawn[id] = 2
 			player_b_sniper[id] = 1
 			player_b_grenade[id] = 3
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/2 возродится, шанс 1/1 мгновенно убить со скаута,шанс 1/3 убить с HE",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/2 РІРѕР·СЂРѕРґРёС‚СЃСЏ, С€Р°РЅСЃ 1/1 РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃРѕ СЃРєР°СѓС‚Р°,С€Р°РЅСЃ 1/3 СѓР±РёС‚СЊ СЃ HE",player_item_name[id])
 		}
 		case 80:
 		{
 			player_item_name[id] = "Vampire Gloves"
 			player_b_vampire[id] = random_num(5,15)
-			show_hudmessage(id, "Вы нашли item : %s :: Высасывает %i за каждое попадание во врага,за убийство +30hp",player_item_name[id],player_b_vampire[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹СЃР°СЃС‹РІР°РµС‚ %i Р·Р° РєР°Р¶РґРѕРµ РїРѕРїР°РґР°РЅРёРµ РІРѕ РІСЂР°РіР°,Р·Р° СѓР±РёР№СЃС‚РІРѕ +30hp",player_item_name[id],player_b_vampire[id])
 		}
 		case 81:
 		{
 			player_item_name[id] = "Super Mario"
 			player_b_jumpx[id] = 10
 			player_b_fireball[id] = 5
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 10 прыжков в воздух и пускать до 5 ракет",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ 10 РїСЂС‹Р¶РєРѕРІ РІ РІРѕР·РґСѓС… Рё РїСѓСЃРєР°С‚СЊ РґРѕ 5 СЂР°РєРµС‚",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
 		}
 		case 85:
 		{
@@ -13120,19 +13122,19 @@ public native_set_user_item(id, item)
 			player_b_damage[id] = 20
 			player_b_redirect[id] = 40
 			set_user_gravity(id,3.0)
-			show_hudmessage (id, "Вы нашли item : %s :: +20 к урону и уменьшение урона на 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +20 Рє СѓСЂРѕРЅСѓ Рё СѓРјРµРЅСЊС€РµРЅРёРµ СѓСЂРѕРЅР° РЅР° 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
 		}
 		case 86:
 		{
 			player_item_name[id] = "RedBull"
 			player_b_jumpx[id] = 8
-			show_hudmessage(id, "Вы нашли item : %s :: Вы можете сделать 8 прыжков в воздухе",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ 8 РїСЂС‹Р¶РєРѕРІ РІ РІРѕР·РґСѓС…Рµ",player_item_name[id],player_b_sniper[id])	
 		}
 		case 87:
 		{
 			player_item_name[id] = "Dr House"
 			player_b_heal[id] = random_num(45,65)
-			show_hudmessage(id, "Вы нашли item : %s :: Восстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечящий тотем %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ %i hp РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ. Р–РјРёС‚Рµ Р• С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ Р»РµС‡СЏС‰РёР№ С‚РѕС‚РµРј %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 88:
 		{
@@ -13140,7 +13142,7 @@ public native_set_user_item(id, item)
 			player_b_inv[id] = 8
 			player_b_reduceH[id] = 55
 			if (is_user_alive(id)) set_user_health(id,45)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы почти невидимы,но у вас 45 HP.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РїРѕС‡С‚Рё РЅРµРІРёРґРёРјС‹,РЅРѕ Сѓ РІР°СЃ 45 HP.",player_item_name[id])	
 		}
 		case 89:
 		{
@@ -13150,14 +13152,14 @@ public native_set_user_item(id, item)
 			item_durability[id] = 50
 			
 			if (is_user_alive(id)) set_user_health(id,10)		
-			show_hudmessage(id, "Вы нашли item : %s :: У вас 10 жизней,невидимость 1/255",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЈ РІР°СЃ 10 Р¶РёР·РЅРµР№,РЅРµРІРёРґРёРјРѕСЃС‚СЊ 1/255",player_item_name[id])	
 		}
 		case 90:
 		{
 			player_item_name[id] = "Bul'Kathos Shoes"
 			player_b_jumpx[id] = 8
 			set_user_gravity(id, 400.0)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы можете сделать 8 прыжков в воздухе и у вас высокая гравитация",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РјРѕР¶РµС‚Рµ СЃРґРµР»Р°С‚СЊ 8 РїСЂС‹Р¶РєРѕРІ РІ РІРѕР·РґСѓС…Рµ Рё Сѓ РІР°СЃ РІС‹СЃРѕРєР°СЏ РіСЂР°РІРёС‚Р°С†РёСЏ",player_item_name[id],player_b_sniper[id])	
 		}
 		case 91:
 		{
@@ -13167,39 +13169,39 @@ public native_set_user_item(id, item)
 			player_b_blind[id] = random_num(3,4)
 			player_ultra_armor[id]=random_num(15,50)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage(id, "Вы нашли item : %s :: Item настолько мощный,что никто ещё не познал его волшебное действия",player_item_name[id])		
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Item РЅР°СЃС‚РѕР»СЊРєРѕ РјРѕС‰РЅС‹Р№,С‡С‚Рѕ РЅРёРєС‚Рѕ РµС‰С‘ РЅРµ РїРѕР·РЅР°Р» РµРіРѕ РІРѕР»С€РµР±РЅРѕРµ РґРµР№СЃС‚РІРёСЏ",player_item_name[id])		
 		}
 		case 92:
 		{
 			player_item_name[id] = "Purse Thief"
 			player_b_money[id] = random_num(1,16000)
-			show_hudmessage(id, "Вы нашли item : %s :: получаете %i денег в каждом раунде. Используйте чтобы защищаться.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РїРѕР»СѓС‡Р°РµС‚Рµ %i РґРµРЅРµРі РІ РєР°Р¶РґРѕРј СЂР°СѓРЅРґРµ. РСЃРїРѕР»СЊР·СѓР№С‚Рµ С‡С‚РѕР±С‹ Р·Р°С‰РёС‰Р°С‚СЊСЃСЏ.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
 		}
 		case 93:
 		{
 			player_item_name[id] = "Vampiric Blood"
 			player_b_vampire[id] = random_num(15,20)
-			show_hudmessage(id, "Вы нашли item : %s :: высасываете %i hp у противника",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РІС‹СЃР°СЃС‹РІР°РµС‚Рµ %i hp Сѓ РїСЂРѕС‚РёРІРЅРёРєР°",player_item_name[id],player_b_vampire[id])	
 		}
 		case 94:
 		{
 			player_item_name[id] = "Revival Ring"
 			player_b_respawn[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: 1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: 1/%i С€Р°РЅСЃ РЅР° РІРѕР·СЂР°Р¶РґРµРЅРёРµ",player_item_name[id],player_b_respawn[id])	
 		}
 		case 95:
 		{
 			player_item_name[id] = "Demon Assassin"
 			player_b_heal[id] = random_num(30,55)
 			player_b_damage[id] = 50
-			show_hudmessage(id, "Вы нашли item : %s :: Восстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечащий тотем %i. +50 к урону",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµС‚ %i hp РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ. Р–РјРёС‚Рµ Р• С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ Р»РµС‡Р°С‰РёР№ С‚РѕС‚РµРј %i. +50 Рє СѓСЂРѕРЅСѓ",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 96:
 		{
 			player_item_name[id] = "Mystiqe"
 			changeskin(id,0)
 			player_b_grenade[id] = random_num(1,2)
-			show_hudmessage (id, "Вы нашли item : %s :: Ты выглядишь как противник.Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РўС‹ РІС‹РіР»СЏРґРёС€СЊ РєР°Рє РїСЂРѕС‚РёРІРЅРёРє.РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ РіСЂР°РЅР°С‚С‹ HE",player_item_name[id],player_b_grenade[id])
 		}
 		case 97:
 		{
@@ -13207,7 +13209,7 @@ public native_set_user_item(id, item)
 			player_b_damage[id] = 100
 			player_b_silent[id] = 1
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли item : %s :: Вы на носите %i урона с каждого выстрела.Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ РЅР° РЅРѕСЃРёС‚Рµ %i СѓСЂРѕРЅР° СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°.Р‘РµСЃС€СѓРјРЅС‹Р№ Р±РµРі.",player_item_name[id],player_b_damage[id],player_b_silent[id])
 		}
 		case 98:
 		{
@@ -13215,28 +13217,28 @@ public native_set_user_item(id, item)
 			player_b_redirect[id] = 10
 			player_b_damage[id] = 10
 			player_b_respawn[id] = 2
-			show_hudmessage (id, "Вы нашли item : %s :: +10 к урону. -10 урона по вам. Шанс 1/2 возродится.",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +10 Рє СѓСЂРѕРЅСѓ. -10 СѓСЂРѕРЅР° РїРѕ РІР°Рј. РЁР°РЅСЃ 1/2 РІРѕР·СЂРѕРґРёС‚СЃСЏ.",player_item_name[id])
 		}
 		case 99:
 		{
 			player_item_name[id] = "Hellspawn"
 			player_b_grenade[id] = 5
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/5 убить с НЕ гранаты.+%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/5 СѓР±РёС‚СЊ СЃ РќР• РіСЂР°РЅР°С‚С‹.+%i Рє РЅРµРІРёРґРёРјРѕСЃС‚Рё",player_item_name[id],255-player_b_inv[id])
 		}
 		case 100:
 		{
 			player_item_name[id] = "Shako"
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли item : %s :: +25урона || +%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +25СѓСЂРѕРЅР° || +%i Рє РЅРµРІРёРґРёРјРѕСЃС‚Рё",player_item_name[id],255-player_b_inv[id])
 		}
 		case 101:
 		{
 			player_item_name[id] = "Annihilus"
 			player_b_damage[id] = 15
 			player_b_vampire[id] = 50
-			show_hudmessage (id, "Вы нашли item : %s :: +15 к урону. Высасывает 50hp с каждого выстрела",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +15 Рє СѓСЂРѕРЅСѓ. Р’С‹СЃР°СЃС‹РІР°РµС‚ 50hp СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°",player_item_name[id])
 		}
 		case 102:
 		{
@@ -13244,49 +13246,49 @@ public native_set_user_item(id, item)
 			player_b_damage[id] = 25
 			player_b_vampire[id] = 25
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли item : %s :: +25 к урону. Высасывает 25 HP с каждого выстрела",player_item_name[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +25 Рє СѓСЂРѕРЅСѓ. Р’С‹СЃР°СЃС‹РІР°РµС‚ 25 HP СЃ РєР°Р¶РґРѕРіРѕ РІС‹СЃС‚СЂРµР»Р°",player_item_name[id])
 		}
 		case 103:
 		{
 			player_item_name[id] = "Mara's Kaleidoscope"
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(190,200)
-			show_hudmessage (id, "Вы нашли item : %s :: +25 к урону. +%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Р’С‹ РЅР°С€Р»Рё item : %s :: +25 Рє СѓСЂРѕРЅСѓ. +%i Рє РЅРµРІРёРґРёРјРѕСЃС‚Рё",player_item_name[id],255-player_b_inv[id])
 		}
 		case 104:
 		{
 			player_item_name[id] = "M4A1 Special"
 			item_durability[id] = 100
 			player_b_m4master[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ M4A1",player_item_name[id],player_b_m4master[id])
 		}
 		case 105:
 		{
 			player_item_name[id] = "AK47 Special"
 			item_durability[id] = 100
 			player_b_akmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ AK47",player_item_name[id],player_b_akmaster[id])
 		}
 		case 106:
 		{
 			player_item_name[id] = "AWP Special"
 			item_durability[id] = 100
 			player_b_awpmaster[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ AWP",player_item_name[id],player_b_awpmaster[id])
 		}
 		case 107:
 		{
 			player_item_name[id] = "Deagle Special"
 			item_durability[id] = 100
 			player_b_dglmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ Deagle",player_item_name[id],player_b_dglmaster[id])
 		}
 		case 108:
 		{
 			player_item_name[id] = "M3 Special"
 			item_durability[id] = 100
 			player_b_m3master[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ M3",player_item_name[id],player_b_m3master[id])
 		}
 		case 109:
 		{
@@ -13299,104 +13301,104 @@ public native_set_user_item(id, item)
 			player_b_m4master[id] = random_num(5,8)
 			player_b_grenade[id] = random_num(3,8)
 			player_b_sniper[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i РјРіРЅРѕРІРµРЅРЅРѕ СѓР±РёС‚СЊ СЃ M3,1/%i СЃ Deagle,1/%i СЃ AWP,1/%i СЃ AK47,1/%i СЃ M4A1,1/%i СЃ HE,1/%i СЃ СЃРєР°СѓС‚Р°",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
 		}
 		case 110:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 111:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 112:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 113:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 114:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		
 		case 115:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 116:
 		{
 			player_item_name[id] = "Diablo Shoes"
 			player_b_antyarchy[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защитится от Arch angel", player_item_name[id], player_b_antyarchy[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚РёС‚СЃСЏ РѕС‚ Arch angel", player_item_name[id], player_b_antyarchy[id])
 		}
 		case 117:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 118:
 		{
 			player_item_name[id] = "Anti Explosion"
 			player_b_antyorb[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защитится от взрыва после убийства", player_item_name[id], player_b_antyorb[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚РёС‚СЃСЏ РѕС‚ РІР·СЂС‹РІР° РїРѕСЃР»Рµ СѓР±РёР№СЃС‚РІР°", player_item_name[id], player_b_antyorb[id])
 		}
 		case 119:
 		{
 			player_item_name[id] = "Anti HellFlare"
 			player_b_antyfs[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от огня", player_item_name[id], player_b_antyfs[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: РЁР°РЅСЃ 1/%i Р·Р°С‰РёС‚С‹ РѕС‚ РѕРіРЅСЏ", player_item_name[id], player_b_antyfs[id])
 		}
 		case 120:
 		{
 			player_item_name[id] = "Gheed's Fortune"
 			player_b_godmode[id] = random_num(4,10)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы становитесь бесмертным на %i секунд.", player_item_name[id], player_b_godmode[id])
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р’С‹ СЃС‚Р°РЅРѕРІРёС‚РµСЃСЊ Р±РµСЃРјРµСЂС‚РЅС‹Рј РЅР° %i СЃРµРєСѓРЅРґ.", player_item_name[id], player_b_godmode[id])
 		}
 		case 121:
 		{
 			player_item_name[id] = "Winter Totem"
 			player_b_zamroztotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жмите Е чтобы установить замораживайщий тотем",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р–РјРёС‚Рµ Р• С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ Р·Р°РјРѕСЂР°Р¶РёРІР°Р№С‰РёР№ С‚РѕС‚РµРј",player_item_name[id])	
 		}
 		case 122:
 		{
 			player_item_name[id] = "Cash Totem"
 			player_b_kasatotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который даёт вам и вашей команде деньги.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РґР°С‘С‚ РІР°Рј Рё РІР°С€РµР№ РєРѕРјР°РЅРґРµ РґРµРЅСЊРіРё.",player_item_name[id])	
 		}
 		case 123:
 		{
 			player_item_name[id] = "Thief Totem"
 			player_b_kasaqtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РѕС‚РЅРёРјР°РµС‚ РґРµРЅСЊРіРё РІСЂР°РіР°(500$ РІ СЃРµРє)",player_item_name[id])	
 		}
 		case 124:
 		{
 			player_item_name[id] = "Weapon Totem"
 			player_b_wywaltotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который притягивает оружие противника.",player_item_name[id])	
+			show_hudmessage(id, "Р’С‹ РЅР°С€Р»Рё item : %s :: Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РїСЂРёС‚СЏРіРёРІР°РµС‚ РѕСЂСѓР¶РёРµ РїСЂРѕС‚РёРІРЅРёРєР°.",player_item_name[id])	
 		}
 		case 125:
 		{
 			player_item_name[id] = "Flash Totem"
 			player_b_fleshujtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Жми E чтобы установить тотем который ослепляет противника.",player_item_name[id])	
+			show_hudmessage(id, "Р–РјРё E С‡С‚РѕР±С‹ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ С‚РѕС‚РµРј РєРѕС‚РѕСЂС‹Р№ РѕСЃР»РµРїР»СЏРµС‚ РїСЂРѕС‚РёРІРЅРёРєР°.",player_item_name[id])	
 		}
 
 	}
@@ -13465,17 +13467,17 @@ public FallenShaman(id)
   
 		if(fallen_fires[id] == 0)
 		{
-			client_print(id, print_center, "У вас закончились шары!");
+			client_print(id, print_center, "РЈ РІР°СЃ Р·Р°РєРѕРЅС‡РёР»РёСЃСЊ С€Р°СЂС‹!");
 			return PLUGIN_CONTINUE;
 		}	
 		if(falen_fires_time[id] + 5.0 > get_gametime())
 		{
-			client_print(id, print_center, "Шары можно использовать каждые 5 секунд!");
+			client_print(id, print_center, "РЁР°СЂС‹ РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ!");
 			return PLUGIN_CONTINUE;
 		}
 		if(player_intelligence[id] < 1)
 		{
-				client_print(id, print_center, "Чтобы пускать шары необходим Интеллект!");
+				client_print(id, print_center, "Р§С‚РѕР±С‹ РїСѓСЃРєР°С‚СЊ С€Р°СЂС‹ РЅРµРѕР±С…РѕРґРёРј РРЅС‚РµР»Р»РµРєС‚!");
 				return PLUGIN_CONTINUE;
 		}
 		
@@ -13524,7 +13526,7 @@ public FallenShaman(id)
 	}
 	else
 	{
-		client_print(id, print_center, "Вы не Fallen Shaman!");
+		client_print(id, print_center, "Р’С‹ РЅРµ Fallen Shaman!");
 		return PLUGIN_CONTINUE;
 	}	
 	return PLUGIN_CONTINUE;
@@ -13580,12 +13582,12 @@ public frozen_key(id)
   
 	if(frozen_colds[id] == 0)
 	{
-		client_print(id, print_center, "У вас закончился холод!");
+		client_print(id, print_center, "РЈ РІР°СЃ Р·Р°РєРѕРЅС‡РёР»СЃСЏ С…РѕР»РѕРґ!");
 		return PLUGIN_CONTINUE;
 	}	
 	if(player_intelligence[id] < 4)
 	{
-			client_print(id, print_center, "Необходимо 4 интеллекта!");
+			client_print(id, print_center, "РќРµРѕР±С…РѕРґРёРјРѕ 4 РёРЅС‚РµР»Р»РµРєС‚Р°!");
 			return PLUGIN_CONTINUE;
 	}
 	
@@ -13643,14 +13645,14 @@ public cancast(id)
 public cmd_place_portal(id){
 	if (player_portal[id] == 0)
 	{
-		client_print(id, print_center, "У вас нет Портала!");
+		client_print(id, print_center, "РЈ РІР°СЃ РЅРµС‚ РџРѕСЂС‚Р°Р»Р°!");
 		return PLUGIN_CONTINUE;
 	}
-	new cmd_place_portal=menu_create("Меню Портала","cmd_place_portal2");
+	new cmd_place_portal=menu_create("РњРµРЅСЋ РџРѕСЂС‚Р°Р»Р°","cmd_place_portal2");
 	
-	menu_additem(cmd_place_portal,"\yУстановить портал");
-	menu_additem(cmd_place_portal,"\wУдалить все порталы");
-	menu_setprop(cmd_place_portal,MPROP_EXITNAME,"Выход")
+	menu_additem(cmd_place_portal,"\yРЈСЃС‚Р°РЅРѕРІРёС‚СЊ РїРѕСЂС‚Р°Р»");
+	menu_additem(cmd_place_portal,"\wРЈРґР°Р»РёС‚СЊ РІСЃРµ РїРѕСЂС‚Р°Р»С‹");
+	menu_setprop(cmd_place_portal,MPROP_EXITNAME,"Р’С‹С…РѕРґ")
 	
 	menu_display(id, cmd_place_portal,0);
 	return PLUGIN_HANDLED;
@@ -13661,7 +13663,7 @@ public cmd_place_portal2(id, menu, item){
 		{
 			if (player_portals[id] == 2)
 			{
-				client_print(id, print_center, "Вы уже установили все порталы!");
+				client_print(id, print_center, "Р’С‹ СѓР¶Рµ СѓСЃС‚Р°РЅРѕРІРёР»Рё РІСЃРµ РїРѕСЂС‚Р°Р»С‹!");
 				return PLUGIN_CONTINUE;
 			}
 			set_portal(id)
@@ -13740,7 +13742,7 @@ public set_portal(id)
 	{
 		remove_entity(g_ent);
 		remove_entity(g_ent2);
-		client_print(id, print_center, "ОШИБКА: Поставьте портал на ровной стене!^n Или порталу не хватает свободного места");
+		client_print(id, print_center, "РћРЁРР‘РљРђ: РџРѕСЃС‚Р°РІСЊС‚Рµ РїРѕСЂС‚Р°Р» РЅР° СЂРѕРІРЅРѕР№ СЃС‚РµРЅРµ!^n РР»Рё РїРѕСЂС‚Р°Р»Сѓ РЅРµ С…РІР°С‚Р°РµС‚ СЃРІРѕР±РѕРґРЅРѕРіРѕ РјРµСЃС‚Р°");
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
 	}
@@ -13759,7 +13761,7 @@ public set_portal(id)
 	{	
 		remove_entity(g_ent);
 		remove_entity(g_ent2);
-		client_print(id, print_center, "ОШИБКА: Поставьте портал на ровной стене!^n Или порталу не хватает свободного места");
+		client_print(id, print_center, "РћРЁРР‘РљРђ: РџРѕСЃС‚Р°РІСЊС‚Рµ РїРѕСЂС‚Р°Р» РЅР° СЂРѕРІРЅРѕР№ СЃС‚РµРЅРµ!^n РР»Рё РїРѕСЂС‚Р°Р»Сѓ РЅРµ С…РІР°С‚Р°РµС‚ СЃРІРѕР±РѕРґРЅРѕРіРѕ РјРµСЃС‚Р°");
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
 	}
@@ -13854,18 +13856,18 @@ public StworzRakiete(id)
 {
 	if (!ilosc_rakiet_gracza[id] && is_user_alive(id))
 	{
-		client_print(id, print_center, "У вас закончились ракеты!");
+		client_print(id, print_center, "РЈ РІР°СЃ Р·Р°РєРѕРЅС‡РёР»РёСЃСЊ СЂР°РєРµС‚С‹!");
 		return PLUGIN_CONTINUE;
 	}
 	
 	if(poprzednia_rakieta_gracza[id] + 3.0 > get_gametime())
 	{
-		client_print(id, print_center, "Ракеты можно использовать каждые 3 секунды!");
+		client_print(id, print_center, "Р Р°РєРµС‚С‹ РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РєР°Р¶РґС‹Рµ 3 СЃРµРєСѓРЅРґС‹!");
 		return PLUGIN_CONTINUE;
 	}
 	if(player_intelligence[id] < 1)
 	{
-		client_print(id, print_center, "Чтобы пускать ракеты необходим Интеллект!");
+		client_print(id, print_center, "Р§С‚РѕР±С‹ РїСѓСЃРєР°С‚СЊ СЂР°РєРµС‚С‹ РЅРµРѕР±С…РѕРґРёРј РРЅС‚РµР»Р»РµРєС‚!");
 		return PLUGIN_CONTINUE;
 	}
 	
@@ -14055,20 +14057,20 @@ public make_hook(id)
 		{
 			if (gHooksUsed[id] >= iMaxHooks)
 			{
-				client_print(id, print_chat, "[Паутина] У вас закончилась паутина.")
-				statusMsg(id, "[Паутина] %d из %d паутин.", gHooksUsed[id], get_pcvar_num(pMaxHooks))
+				client_print(id, print_chat, "[РџР°СѓС‚РёРЅР°] РЈ РІР°СЃ Р·Р°РєРѕРЅС‡РёР»Р°СЃСЊ РїР°СѓС‚РёРЅР°.")
+				statusMsg(id, "[РџР°СѓС‚РёРЅР°] %d РёР· %d РїР°СѓС‚РёРЅ.", gHooksUsed[id], get_pcvar_num(pMaxHooks))
 				
 				return PLUGIN_HANDLED
 			}
 			else 
 			{
 				gHooksUsed[id]++
-				statusMsg(id, "[Паутина] %d из %d паутин", gHooksUsed[id], get_pcvar_num(pMaxHooks))
+				statusMsg(id, "[РџР°СѓС‚РёРЅР°] %d РёР· %d РїР°СѓС‚РёРЅ", gHooksUsed[id], get_pcvar_num(pMaxHooks))
 			}
 		}
 		new Float:fDelay = get_pcvar_float(pRndStartDelay)
 		if (fDelay > 0 && !rndStarted)
-			client_print(id, print_chat, "[Паутина] Вы не можете использовать паутину подождите %0.0f секунд или раунд закончился", fDelay)
+			client_print(id, print_chat, "[РџР°СѓС‚РёРЅР°] Р’С‹ РЅРµ РјРѕР¶РµС‚Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РїР°СѓС‚РёРЅСѓ РїРѕРґРѕР¶РґРёС‚Рµ %0.0f СЃРµРєСѓРЅРґ РёР»Рё СЂР°СѓРЅРґ Р·Р°РєРѕРЅС‡РёР»СЃСЏ", fDelay)
 			
 		throw_hook(id)
 		}
@@ -14746,7 +14748,7 @@ public throw_hook(id)
 		set_task(0.1, "hookthink", id + 890, TaskData, 2, "b")
 	}
 	else
-		client_print(id, print_chat, "Не могу создать паутину")
+		client_print(id, print_chat, "РќРµ РјРѕРіСѓ СЃРѕР·РґР°С‚СЊ РїР°СѓС‚РёРЅСѓ")
 }
 
 public remove_hook(id)
@@ -14780,7 +14782,7 @@ public give_hook(id, level, cid)
 		
 	if (!get_pcvar_num(pAdmin))
 	{
-		console_print(id, "[Паутина] Админ мод выключен")
+		console_print(id, "[РџР°СѓС‚РёРЅР°] РђРґРјРёРЅ РјРѕРґ РІС‹РєР»СЋС‡РµРЅ")
 		return PLUGIN_HANDLED
 	}
 	
@@ -14799,11 +14801,11 @@ public give_hook(id, level, cid)
 	{
 		g_bHookAllowed[iUsrId] = true
 		
-		console_print(id, "[Паутина] %s Получил доступ к паутине", szName)
+		console_print(id, "[РџР°СѓС‚РёРЅР°] %s РџРѕР»СѓС‡РёР» РґРѕСЃС‚СѓРї Рє РїР°СѓС‚РёРЅРµ", szName)
 	}
 	else
 	{
-		console_print(id, "[Паутина] У %s уже есть паутина", szName)
+		console_print(id, "[РџР°СѓС‚РёРЅР°] РЈ %s СѓР¶Рµ РµСЃС‚СЊ РїР°СѓС‚РёРЅР°", szName)
 	}
 	
 	return PLUGIN_HANDLED
@@ -14816,7 +14818,7 @@ public take_hook(id, level, cid)
 	
 	if (!get_pcvar_num(pAdmin))
 	{
-		console_print(id, "[Паутина] Режим админа выключен")
+		console_print(id, "[РџР°СѓС‚РёРЅР°] Р РµР¶РёРј Р°РґРјРёРЅР° РІС‹РєР»СЋС‡РµРЅ")
 		return PLUGIN_HANDLED
 	}
 		
@@ -14835,10 +14837,10 @@ public take_hook(id, level, cid)
 	{
 		g_bHookAllowed[iUsrId] = false
 		
-		console_print(id, "[Паутина] Ты отобрал у %s доступ к паутине", szName)
+		console_print(id, "[РџР°СѓС‚РёРЅР°] РўС‹ РѕС‚РѕР±СЂР°Р» Сѓ %s РґРѕСЃС‚СѓРї Рє РїР°СѓС‚РёРЅРµ", szName)
 	}
 	else
-		console_print(id, "[Паутина] У %s нет доступа к паутине", szName)
+		console_print(id, "[РџР°СѓС‚РёРЅР°] РЈ %s РЅРµС‚ РґРѕСЃС‚СѓРїР° Рє РїР°СѓС‚РёРЅРµ", szName)
 	
 	return PLUGIN_HANDLED
 }
@@ -14948,7 +14950,7 @@ public TTWin() {
 				{
                         new dziel = is_user_alive(id) ? 1 : 2;
                         Give_Xp(id, get_cvar_num("diablo_xpbonus3")/dziel);
-                        ColorChat(id, GREEN, "Полученно^x03 *%i*^x01 опыта за победу твоей команды в раунде", get_cvar_num("diablo_xpbonus3")/dziel);
+                        ColorChat(id, GREEN, "РџРѕР»СѓС‡РµРЅРЅРѕ^x03 *%i*^x01 РѕРїС‹С‚Р° Р·Р° РїРѕР±РµРґСѓ С‚РІРѕРµР№ РєРѕРјР°РЅРґС‹ РІ СЂР°СѓРЅРґРµ", get_cvar_num("diablo_xpbonus3")/dziel);
                 }
         }
 }
@@ -14964,7 +14966,7 @@ public CTWin()
 				{
                         new dziel = is_user_alive(id) ? 1 : 2;
                         Give_Xp(id, get_cvar_num("diablo_xpbonus3")/dziel);
-                        ColorChat(id, GREEN, "Полученно^x03 *%i*^x01 опыта за победу твоей команды в раунде", get_cvar_num("diablo_xpbonus3")/dziel);
+                        ColorChat(id, GREEN, "РџРѕР»СѓС‡РµРЅРЅРѕ^x03 *%i*^x01 РѕРїС‹С‚Р° Р·Р° РїРѕР±РµРґСѓ С‚РІРѕРµР№ РєРѕРјР°РЅРґС‹ РІ СЂР°СѓРЅРґРµ", get_cvar_num("diablo_xpbonus3")/dziel);
                 }
         }
 }
@@ -15007,7 +15009,7 @@ public item_ulecz(id)
 {
 		if (used_item[id])
 		{
-			hudmsg(id,2.0,"Лечится можно 1 раз за раунд!")
+			hudmsg(id,2.0,"Р›РµС‡РёС‚СЃСЏ РјРѕР¶РЅРѕ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 			return PLUGIN_CONTINUE
 		}
 		new m_healthf = race_heal[player_class[id]]+player_strength[id]*2
@@ -15201,8 +15203,8 @@ public HealBotThink4(Bot)
 }
 public exp(id)
 {
-	ColorChat(id, GREEN, "Уровень: ^x04%i ^x01- у вас есть ^x03(%d/%d)^x01 опыта", player_lvl[id], player_xp[id], LevelXP[player_lvl[id]])
-	ColorChat(id, GREEN, "До следующего уровня ^x04%d^x01 опыта", LevelXP[player_lvl[id]]-player_xp[id])
+	ColorChat(id, GREEN, "РЈСЂРѕРІРµРЅСЊ: ^x04%i ^x01- Сѓ РІР°СЃ РµСЃС‚СЊ ^x03(%d/%d)^x01 РѕРїС‹С‚Р°", player_lvl[id], player_xp[id], LevelXP[player_lvl[id]])
+	ColorChat(id, GREEN, "Р”Рѕ СЃР»РµРґСѓСЋС‰РµРіРѕ СѓСЂРѕРІРЅСЏ ^x04%d^x01 РѕРїС‹С‚Р°", LevelXP[player_lvl[id]]-player_xp[id])
 }
 public radar_scan() 
 {
@@ -15259,14 +15261,14 @@ public fallen_respawn()
 					player=ArrayGetCell(a_fallens,player) 
 					get_user_name(player,name,31)
 					ExecuteHamB(Ham_CS_RoundRespawn, player)
-					hudmsg2(i,1.0,"Воскрешенн Fallen ^nиз твоей команды:^n %s",name)
+					hudmsg2(i,1.0,"Р’РѕСЃРєСЂРµС€РµРЅРЅ Fallen ^nРёР· С‚РІРѕРµР№ РєРѕРјР°РЅРґС‹:^n %s",name)
 					player_fallen_tr[i]=1;
 					emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 					emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 					get_user_name(i,name2,31)
 					for(new i3=0; i3<33; i3++)
 					{
-						client_print(i3, print_chat, "Fallen Shaman %s воскресил Fallena %s",name2,name)
+						client_print(i3, print_chat, "Fallen Shaman %s РІРѕСЃРєСЂРµСЃРёР» Fallena %s",name2,name)
 					}
 					ArrayDestroy(a_fallens) 
 				}
@@ -15274,7 +15276,7 @@ public fallen_respawn()
 			else
 			{
 				new normaltime = falltime - player_fallen_tr[i];
-				hudmsg2(i,1.0,"Воскрешение Fallena через %i секунд",normaltime)
+				hudmsg2(i,1.0,"Р’РѕСЃРєСЂРµС€РµРЅРёРµ Fallena С‡РµСЂРµР· %i СЃРµРєСѓРЅРґ",normaltime)
 				player_fallen_tr[i]=player_fallen_tr[i]+1;
 			}
 		}
@@ -15303,7 +15305,7 @@ public fallen_respawn()
 						{
 							set_user_health(a,newhp)
 							get_user_name(i,revivername,31)
-							hudmsg2(a,1.0,"%s исцелил вас на %i HP",revivername, revivehp)
+							hudmsg2(a,1.0,"%s РёСЃС†РµР»РёР» РІР°СЃ РЅР° %i HP",revivername, revivehp)
 						}
 					}
 				}
@@ -15357,7 +15359,7 @@ public niesmiertelnoscon(id)
 {
         if(used_item[id]) 
 		{
-            hudmsg(id, 2.0, "Бессмертие можно использовать один раз за раунд!");
+            hudmsg(id, 2.0, "Р‘РµСЃСЃРјРµСЂС‚РёРµ РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РѕРґРёРЅ СЂР°Р· Р·Р° СЂР°СѓРЅРґ!");
             return PLUGIN_CONTINUE;
         }
         set_user_godmode(id, 1);
@@ -15392,7 +15394,7 @@ public item_zamroz(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Тотем можно использовать 1 раз за раунд!")
+		hudmsg(id,2.0,"РўРѕС‚РµРј РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -15516,7 +15518,7 @@ public giveitem(id, level, cid)
                 new szItem[10], iItem; 
                 read_argv(2, szItem, 9); 
                 iItem=str_to_num(szItem); 
-                client_print(id, print_console, "Игроку %s выдан item %d",szName, iItem); 
+                client_print(id, print_console, "РРіСЂРѕРєСѓ %s РІС‹РґР°РЅ item %d",szName, iItem); 
                 award_item(iTarget, iItem); 
                 set_gravitychange(iTarget)
                 set_speedchange(iTarget)
@@ -15528,7 +15530,7 @@ public item_kasa(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Тотем можно использовать 1 раз за раунд!")
+		hudmsg(id,2.0,"РўРѕС‚РµРј РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -15640,7 +15642,7 @@ public item_kasaq(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Тотем можно использовать 1 раз за раунд!")
+		hudmsg(id,2.0,"РўРѕС‚РµРј РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -15752,7 +15754,7 @@ public item_wywal(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Тотем можно использовать 1 раз за раунд!")
+		hudmsg(id,2.0,"РўРѕС‚РµРј РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -15867,7 +15869,7 @@ public item_fleshuj(id)
 {
 	if (used_item[id])
 	{
-		hudmsg(id,2.0,"Тотем можно использовать 1 раз за раунд!")
+		hudmsg(id,2.0,"РўРѕС‚РµРј РјРѕР¶РЅРѕ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ 1 СЂР°Р· Р·Р° СЂР°СѓРЅРґ!")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -16462,10 +16464,10 @@ public cbMyMenu(id, menu, item){
 	return PLUGIN_HANDLED;
 }*/
 public mana1(id){
-	new mana1=menu_create("Магазин золота","mana1a");
+	new mana1=menu_create("РњР°РіР°Р·РёРЅ Р·РѕР»РѕС‚Р°","mana1a");
 	
-	menu_additem(mana1,"\yОружие");//item=0
-	menu_additem(mana1,"\yДругое");//item=2
+	menu_additem(mana1,"\yРћСЂСѓР¶РёРµ");//item=0
+	menu_additem(mana1,"\yР”СЂСѓРіРѕРµ");//item=2
 	
 	menu_display(id, mana1,0);
 	return PLUGIN_HANDLED;
@@ -16482,7 +16484,7 @@ public mana1a(id, menu, item)
 			}
 			else
 			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(id,5.0,"РќР° СЌС‚РѕР№ РєР°СЂС‚Рµ РѕСЂСѓР¶РёРµ РЅРµ РІС‹РґР°С‘С‚СЃСЏ!")
 			}
 		}
 		case 1:
@@ -16494,27 +16496,27 @@ public mana1a(id, menu, item)
 	return PLUGIN_HANDLED;
 }
 public mana2(id){
-	new mana2=menu_create("Магазин оружия","mana2a");
+	new mana2=menu_create("РњР°РіР°Р·РёРЅ РѕСЂСѓР¶РёСЏ","mana2a");
 	
-	menu_additem(mana2,"\y M4A1 + Патроны \d[10 золота]")
-	menu_additem(mana2,"\y AK47 + Патроны \d[7 золота]")
-	menu_additem(mana2,"\y AWP + Патроны \d[10 золота]")
-	menu_additem(mana2,"\y Famas + Патроны \d[5 золота]")
-	menu_additem(mana2,"\y Galil + Патроны \d[5 золота]")
-	menu_additem(mana2,"\y M249 + Патроны \d[13 золота]")
-	menu_additem(mana2,"\y Mp5 + Патроны \d[4 золота]")
-	menu_additem(mana2,"\y Scout + Патроны \d[6 золота]")
-	menu_additem(mana2,"\y M3 Pompa + Патроны \d[7 золота]")
-	menu_additem(mana2,"\y XM1014 Pompa + Патроны \d[7 золота]")
-	menu_additem(mana2,"\y P90 + Патроны \d[4 золота]")
-	menu_additem(mana2,"\y Deagle + Патроны \d[2 золота]")
-	menu_additem(mana2,"\y Aug + Патроны \d[8 золота]")
-	menu_additem(mana2,"\y SG552 + Патроны \d[8 золота]")
-	menu_additem(mana2,"\y Nightvision \d[5 золота]")
+	menu_additem(mana2,"\y M4A1 + РџР°С‚СЂРѕРЅС‹ \d[10 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y AK47 + РџР°С‚СЂРѕРЅС‹ \d[7 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y AWP + РџР°С‚СЂРѕРЅС‹ \d[10 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y Famas + РџР°С‚СЂРѕРЅС‹ \d[5 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y Galil + РџР°С‚СЂРѕРЅС‹ \d[5 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y M249 + РџР°С‚СЂРѕРЅС‹ \d[13 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y Mp5 + РџР°С‚СЂРѕРЅС‹ \d[4 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y Scout + РџР°С‚СЂРѕРЅС‹ \d[6 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y M3 Pompa + РџР°С‚СЂРѕРЅС‹ \d[7 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y XM1014 Pompa + РџР°С‚СЂРѕРЅС‹ \d[7 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y P90 + РџР°С‚СЂРѕРЅС‹ \d[4 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y Deagle + РџР°С‚СЂРѕРЅС‹ \d[2 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y Aug + РџР°С‚СЂРѕРЅС‹ \d[8 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y SG552 + РџР°С‚СЂРѕРЅС‹ \d[8 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana2,"\y Nightvision \d[5 Р·РѕР»РѕС‚Р°]")
 	menu_setprop(mana2,MPROP_EXIT,MEXIT_ALL)
-	menu_setprop(mana2,MPROP_EXITNAME,"Выход")
-	menu_setprop(mana2,MPROP_NEXTNAME,"Далее")
-	menu_setprop(mana2,MPROP_BACKNAME,"Назад")
+	menu_setprop(mana2,MPROP_EXITNAME,"Р’С‹С…РѕРґ")
+	menu_setprop(mana2,MPROP_NEXTNAME,"Р”Р°Р»РµРµ")
+	menu_setprop(mana2,MPROP_BACKNAME,"РќР°Р·Р°Рґ")
 	
 	menu_display(id, mana2,0);
 	return PLUGIN_HANDLED;
@@ -16527,7 +16529,7 @@ public mana2a(id, menu, item){
 			new koszt = 10;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16542,7 +16544,7 @@ public mana2a(id, menu, item){
 			new koszt = 7;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16557,7 +16559,7 @@ public mana2a(id, menu, item){
 			new koszt = 10;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16572,7 +16574,7 @@ public mana2a(id, menu, item){
 			new koszt = 5;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16587,7 +16589,7 @@ public mana2a(id, menu, item){
 			new koszt = 5;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16602,7 +16604,7 @@ public mana2a(id, menu, item){
 			new koszt = 13;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16617,7 +16619,7 @@ public mana2a(id, menu, item){
 			new koszt = 4;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16632,7 +16634,7 @@ public mana2a(id, menu, item){
 			new koszt = 6;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16647,7 +16649,7 @@ public mana2a(id, menu, item){
 			new koszt = 7;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16662,7 +16664,7 @@ public mana2a(id, menu, item){
 			new koszt = 7;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16677,7 +16679,7 @@ public mana2a(id, menu, item){
 			new koszt = 4;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16692,7 +16694,7 @@ public mana2a(id, menu, item){
 			new koszt = 2;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16707,7 +16709,7 @@ public mana2a(id, menu, item){
 			new koszt = 8;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16722,7 +16724,7 @@ public mana2a(id, menu, item){
 			new koszt = 8;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16737,7 +16739,7 @@ public mana2a(id, menu, item){
 			new koszt = 5;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16752,68 +16754,68 @@ public mana2a(id, menu, item){
 }
 /*public mana3(id)
 {
-	new mana3=menu_create("Магазин Item","mana3a");
+	new mana3=menu_create("РњР°РіР°Р·РёРЅ Item","mana3a");
 	
-	menu_additem(mana3,"\y Vampyric Scepter \d[10 золота]")
-	menu_additem(mana3,"\y Small bronze bag \d[40 золота]")
-	menu_additem(mana3,"\y Medium silver bag \d[50 золота]")
-	menu_additem(mana3,"\y Large gold bag \d[60 золота]")
-	menu_additem(mana3,"\y Small angel wings \d[100 золота]")
-	menu_additem(mana3,"\y Arch angel wings \d[130 золота]")
-	menu_additem(mana3,"\y Firerope \d[40 золота]")
-	menu_additem(mana3,"\y Fire Amulet \d[60 золота]")
-	menu_additem(mana3,"\y Stalkers ring \d[140 золота]")
-	menu_additem(mana3,"\y Gold statue \d[25 золота]")
-	menu_additem(mana3,"\y Daylight Diamond \d[40 золота]")
-	menu_additem(mana3,"\y Blood Diamond \d[60 золота]")
-	menu_additem(mana3,"\y Wheel of Fortune \d[30 золота]")
-	menu_additem(mana3,"\y Sword of the sun \d[40 золота]")
-	menu_additem(mana3,"\y Fireshield \d[85 золота]")
-	menu_additem(mana3,"\y Stealth Shoes \d[10 золота]")
-	menu_additem(mana3,"\y Meekstone \d[70 золота]")
-	menu_additem(mana3,"\y Godly Armor \d[50 золота]")
-	menu_additem(mana3,"\y Knife Ruby \d[25 золота]")
-	menu_additem(mana3,"\y Sword \d[45 золота]")
-	menu_additem(mana3,"\y Scout Extender \d[70 золота]")
-	menu_additem(mana3,"\y Scout Amplifier \d[100 золота]")
-	menu_additem(mana3,"\y Iron Spikes \d[50 золота]")
-	menu_additem(mana3,"\y Paladin ring \d[60 золота]")
-	menu_additem(mana3,"\y Monk ring \d[80 золота]")
-	menu_additem(mana3,"\y Flashbang necklace \d[30 золота]")
-	menu_additem(mana3,"\y Khalim Eye \d[100 золота]")
-	menu_additem(mana3,"\y Hydra Blade \d[80 золота]")
-	menu_additem(mana3,"\y Exp Ring \d[70 золота]")
-	menu_additem(mana3,"\y Aegis \d[90 золота]")
-	menu_additem(mana3,"\y Heavenly Stone \d[70 золота]")
-	menu_additem(mana3,"\y Festering Essence of Destruction \d[140 золота]")
+	menu_additem(mana3,"\y Vampyric Scepter \d[10 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Small bronze bag \d[40 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Medium silver bag \d[50 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Large gold bag \d[60 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Small angel wings \d[100 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Arch angel wings \d[130 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Firerope \d[40 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Fire Amulet \d[60 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Stalkers ring \d[140 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Gold statue \d[25 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Daylight Diamond \d[40 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Blood Diamond \d[60 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Wheel of Fortune \d[30 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Sword of the sun \d[40 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Fireshield \d[85 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Stealth Shoes \d[10 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Meekstone \d[70 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Godly Armor \d[50 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Knife Ruby \d[25 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Sword \d[45 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Scout Extender \d[70 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Scout Amplifier \d[100 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Iron Spikes \d[50 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Paladin ring \d[60 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Monk ring \d[80 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Flashbang necklace \d[30 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Khalim Eye \d[100 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Hydra Blade \d[80 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Exp Ring \d[70 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Aegis \d[90 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Heavenly Stone \d[70 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Festering Essence of Destruction \d[140 Р·РѕР»РѕС‚Р°]")
 	menu_additem(mana3,"\y Centurion \d[170 many]","32")
 	menu_additem(mana3,"\y Dr House \d[100 many]","33")
-	menu_additem(mana3,"\y Own Invisible \d[300 золота]")
-	menu_additem(mana3,"\y Mega Invisible \d[300 золота]")
-	menu_additem(mana3,"\y Bul'Kathos Shoes \d[30 золота]")
-	menu_additem(mana3,"\y Karik's Ring \d[220 золота]")
-	menu_additem(mana3,"\y Purse Thief \d[150 золота]")
-	menu_additem(mana3,"\y Revival Ring \d[80 золота]")
+	menu_additem(mana3,"\y Own Invisible \d[300 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Mega Invisible \d[300 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Bul'Kathos Shoes \d[30 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Karik's Ring \d[220 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Purse Thief \d[150 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Revival Ring \d[80 Р·РѕР»РѕС‚Р°]")
 	menu_additem(mana3,"\y Demon Assassin \d[170 many]","41")
 	menu_additem(mana3,"\y Mystiqe \d[100 many]","42")
 	menu_additem(mana3,"\y Apocalypse Anihilation \d[240 many]","43")
-	menu_additem(mana3,"\y M4A1 Special \d[150 золота]")
-	menu_additem(mana3,"\y Ak47 Special \d[150 золота]")
-	menu_additem(mana3,"\y AWP Special \d[130 золота]")
-	menu_additem(mana3,"\y Deagle Special \d[140 золота]")
-	menu_additem(mana3,"\y M3 Special \d[145 золота]")
-	menu_additem(mana3,"\y Full Special \d[210 золота]")
-	menu_additem(mana3,"\y Hellspawn \d[50 золота]")
-	menu_additem(mana3,"\y Gheed's Fortune \d[148 золота]")
-	menu_additem(mana3,"\y Winter Totem \d[30 золота]")
-	menu_additem(mana3,"\y Cash Totem \d[40 золота]")
-	menu_additem(mana3,"\y Thief Totem \d[50 золота]")
-	menu_additem(mana3,"\y Weapon Totem \d[80 золота]")
-	menu_additem(mana3,"\y Flash Totem \d[80 золота]")
+	menu_additem(mana3,"\y M4A1 Special \d[150 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Ak47 Special \d[150 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y AWP Special \d[130 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Deagle Special \d[140 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y M3 Special \d[145 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Full Special \d[210 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Hellspawn \d[50 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Gheed's Fortune \d[148 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Winter Totem \d[30 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Cash Totem \d[40 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Thief Totem \d[50 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Weapon Totem \d[80 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana3,"\y Flash Totem \d[80 Р·РѕР»РѕС‚Р°]")
 	menu_setprop(mana3,MPROP_EXIT,MEXIT_ALL)
-	menu_setprop(mana3,MPROP_EXITNAME,"Выход")
-	menu_setprop(mana3,MPROP_NEXTNAME,"Далее")
-	menu_setprop(mana3,MPROP_BACKNAME,"Назад")
+	menu_setprop(mana3,MPROP_EXITNAME,"Р’С‹С…РѕРґ")
+	menu_setprop(mana3,MPROP_NEXTNAME,"Р”Р°Р»РµРµ")
+	menu_setprop(mana3,MPROP_BACKNAME,"РќР°Р·Р°Рґ")
 	
 	menu_display(id, mana3,0);
 	return PLUGIN_HANDLED;
@@ -16825,7 +16827,7 @@ public mana3a(id, menu, item){
 			new koszt = 10;
 			if (mana_gracza[id]<koszt && player_item_id[id] != 0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16838,7 +16840,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16851,7 +16853,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16864,7 +16866,7 @@ public mana3a(id, menu, item){
 			new koszt = 60;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16877,7 +16879,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16890,7 +16892,7 @@ public mana3a(id, menu, item){
 			new koszt = 130;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16903,7 +16905,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16916,7 +16918,7 @@ public mana3a(id, menu, item){
 			new koszt = 60;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16929,7 +16931,7 @@ public mana3a(id, menu, item){
 			new koszt = 140;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16942,7 +16944,7 @@ public mana3a(id, menu, item){
 			new koszt = 25;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16955,7 +16957,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16968,7 +16970,7 @@ public mana3a(id, menu, item){
 			new koszt = 60;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16981,7 +16983,7 @@ public mana3a(id, menu, item){
 			new koszt = 30;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -16994,7 +16996,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17007,7 +17009,7 @@ public mana3a(id, menu, item){
 			new koszt = 85;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17020,7 +17022,7 @@ public mana3a(id, menu, item){
 			new koszt = 10;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17033,7 +17035,7 @@ public mana3a(id, menu, item){
 			new koszt = 70;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17046,7 +17048,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17059,7 +17061,7 @@ public mana3a(id, menu, item){
 			new koszt = 25;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17072,7 +17074,7 @@ public mana3a(id, menu, item){
 			new koszt = 45;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17085,7 +17087,7 @@ public mana3a(id, menu, item){
 			new koszt = 70;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17098,7 +17100,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17111,7 +17113,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17124,7 +17126,7 @@ public mana3a(id, menu, item){
 			new koszt = 60;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17137,7 +17139,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17150,7 +17152,7 @@ public mana3a(id, menu, item){
 			new koszt = 30;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17163,7 +17165,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17176,7 +17178,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17189,7 +17191,7 @@ public mana3a(id, menu, item){
 			new koszt = 70;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17202,7 +17204,7 @@ public mana3a(id, menu, item){
 			new koszt = 90;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17215,7 +17217,7 @@ public mana3a(id, menu, item){
 			new koszt = 70;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17228,7 +17230,7 @@ public mana3a(id, menu, item){
 			new koszt = 140;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17241,7 +17243,7 @@ public mana3a(id, menu, item){
 			new koszt = 170;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17254,7 +17256,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17267,7 +17269,7 @@ public mana3a(id, menu, item){
 			new koszt = 300;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17280,7 +17282,7 @@ public mana3a(id, menu, item){
 			new koszt = 300;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17293,7 +17295,7 @@ public mana3a(id, menu, item){
 			new koszt = 30;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17306,7 +17308,7 @@ public mana3a(id, menu, item){
 			new koszt = 220;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17319,7 +17321,7 @@ public mana3a(id, menu, item){
 			new koszt = 150;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17332,7 +17334,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17345,7 +17347,7 @@ public mana3a(id, menu, item){
 			new koszt = 170;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17358,7 +17360,7 @@ public mana3a(id, menu, item){
 			new koszt = 100;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17371,7 +17373,7 @@ public mana3a(id, menu, item){
 			new koszt = 240;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17384,7 +17386,7 @@ public mana3a(id, menu, item){
 			new koszt = 150;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17397,7 +17399,7 @@ public mana3a(id, menu, item){
 			new koszt = 150;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17410,7 +17412,7 @@ public mana3a(id, menu, item){
 			new koszt = 130;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17423,7 +17425,7 @@ public mana3a(id, menu, item){
 			new koszt = 140;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17436,7 +17438,7 @@ public mana3a(id, menu, item){
 			new koszt = 145;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17449,7 +17451,7 @@ public mana3a(id, menu, item){
 			new koszt = 210;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17462,7 +17464,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17475,7 +17477,7 @@ public mana3a(id, menu, item){
 			new koszt = 148;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17488,7 +17490,7 @@ public mana3a(id, menu, item){
 			new koszt = 30;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17501,7 +17503,7 @@ public mana3a(id, menu, item){
 			new koszt = 40;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17514,7 +17516,7 @@ public mana3a(id, menu, item){
 			new koszt = 50;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17527,7 +17529,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17540,7 +17542,7 @@ public mana3a(id, menu, item){
 			new koszt = 80;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17555,15 +17557,15 @@ public mana3a(id, menu, item){
 }
 */
 public mana4(id){
-	new mana4=menu_create("Предметы - Другое","mana4a");
+	new mana4=menu_create("РџСЂРµРґРјРµС‚С‹ - Р”СЂСѓРіРѕРµ","mana4a");
 	
-	menu_additem(mana4,"\y Случайный item \d[10 золота]")
-	menu_additem(mana4,"\y Улучшить\Починить item \d[2 золота]")
-	menu_additem(mana4,"\y Свиток Портала \d[25 золота]")
+	menu_additem(mana4,"\y РЎР»СѓС‡Р°Р№РЅС‹Р№ item \d[10 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana4,"\y РЈР»СѓС‡С€РёС‚СЊ\РџРѕС‡РёРЅРёС‚СЊ item \d[2 Р·РѕР»РѕС‚Р°]")
+	menu_additem(mana4,"\y РЎРІРёС‚РѕРє РџРѕСЂС‚Р°Р»Р° \d[25 Р·РѕР»РѕС‚Р°]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
-	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
-	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
-	menu_setprop(mana4,MPROP_BACKNAME,"Назад")
+	menu_setprop(mana4,MPROP_EXITNAME,"Р’С‹С…РѕРґ")
+	menu_setprop(mana4,MPROP_NEXTNAME,"Р”Р°Р»РµРµ")
+	menu_setprop(mana4,MPROP_BACKNAME,"РќР°Р·Р°Рґ")
 	
 	menu_display(id, mana4,0);
 	return PLUGIN_HANDLED;
@@ -17577,7 +17579,7 @@ public mana4a(id, menu, item)
 			new koszt = 10;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р° РёР»Рё Сѓ РІР°СЃ СѓР¶Рµ РµСЃС‚СЊ item");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17591,7 +17593,7 @@ public mana4a(id, menu, item)
 			new koszt = 2;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17606,7 +17608,7 @@ public mana4a(id, menu, item)
 			new koszt = 25;
 			if (mana_gracza[id]<koszt)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				ColorChat(id,GREEN,"[РњРђР“РђР—РРќ]^x01 РќРµ С…РІР°С‚Р°РµС‚ Р·РѕР»РѕС‚Р°.");
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -17614,8 +17616,8 @@ public mana4a(id, menu, item)
 				mana_gracza[id] -= koszt;
 				player_portal[id] = 1;
 				player_portals[id] = 0;
-				client_print(id,print_chat,"Наведите прицел на место размещения портала и нажмите установить.");
-				client_print(id,print_chat,"Чтобы снова открыть меню портала наберите say portal");
+				client_print(id,print_chat,"РќР°РІРµРґРёС‚Рµ РїСЂРёС†РµР» РЅР° РјРµСЃС‚Рѕ СЂР°Р·РјРµС‰РµРЅРёСЏ РїРѕСЂС‚Р°Р»Р° Рё РЅР°Р¶РјРёС‚Рµ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ.");
+				client_print(id,print_chat,"Р§С‚РѕР±С‹ СЃРЅРѕРІР° РѕС‚РєСЂС‹С‚СЊ РјРµРЅСЋ РїРѕСЂС‚Р°Р»Р° РЅР°Р±РµСЂРёС‚Рµ say portal");
 				cmd_place_portal(id);
 			}
 		}
@@ -17723,7 +17725,7 @@ public MakeBoss2(){
 	}else
 		UnmakeBoss()
 	set_hudmessage(255,0,0)
-	show_hudmessage(0,"Противник опасен!")
+	show_hudmessage(0,"РџСЂРѕС‚РёРІРЅРёРє РѕРїР°СЃРµРЅ!")
 }
 public cmdBlyskawica(id)
 {
@@ -17731,12 +17733,12 @@ public cmdBlyskawica(id)
 	
     if(!ilosc_blyskawic[id])
 	{
-		client_print(id,print_center,"У вас нет молний");
+		client_print(id,print_center,"РЈ РІР°СЃ РЅРµС‚ РјРѕР»РЅРёР№");
 		return PLUGIN_HANDLED;
     }
     if(poprzednia_blyskawica[id]+2.0>get_gametime()) 
 	{
-		client_print(id,print_center,"Вы можете использовать молнии каждые 5 секунд.");
+		client_print(id,print_center,"Р’С‹ РјРѕР¶РµС‚Рµ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊ РјРѕР»РЅРёРё РєР°Р¶РґС‹Рµ 5 СЃРµРєСѓРЅРґ.");
 		return PLUGIN_HANDLED;
     }
     new ofiara, body;
