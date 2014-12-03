@@ -222,6 +222,7 @@ new sprite_laser = 0
 new sprite_ignite = 0
 new sprite_smoke = 0
 new sprite_sabrecat = 0
+new sprite_bloodraven = 0
 new coldGibs;
 //new sound_fireball = 0
 //new sound_explode = 0
@@ -323,6 +324,7 @@ new c_blink[33]
 new lustrzany_pocisk[33] = 1
 new c_redirect[33]
 new losowe_itemy[33]
+new fire_bows[33]
 new niewidka[33]
 new player_b_radar[33] = 1              // radar
 new player_b_autobh[33] = 1
@@ -466,7 +468,7 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Leaper, Enslaved, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","BloodRaven", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Прыгун", "Enslaved", "Ледяной ужас", "Инфидель", "Giant Spider", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Прыгун", "Enslaved", "Ледяной ужас", "Инфидель", "Giant Spider", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,127,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -529,8 +531,10 @@ new Float:tossdelay[33]
 
 new Float:bowdelay[33]
 new bow[33]
+new bow_zoom[33]
 new button[33]
 new can_cast[33] //frozen horror
+new righthand[33] //frozen horror
 
 // amazon - slad
 
@@ -563,6 +567,7 @@ new Float:gfBlockSizeMax2[3]= { 4.0, 32.0, 32.0}
 new Float:vAngles2[3] = {90.0,0.0,0.0}
 
 new casting[33]
+new casting_bow[33]
 new Float:cast_end[33]
 new on_knife[33]
 new golden_bulet[33]
@@ -835,6 +840,7 @@ public plugin_init()
 	register_think("Effect_Teamshield","Effect_Teamshield_Think")
 	register_think("Effect_Healing_Totem","Effect_Healing_Totem_Think")
 	register_forward(FM_AddToFullPack, "client_AddToFullPack")
+	register_forward(FM_UpdateClientData, "UpdateClientData_Post", 1)
 	register_event("SendAudio","freeze_over1","b","2=%!MRAD_GO","2=%!MRAD_MOVEOUT","2=%!MRAD_LETSGO","2=%!MRAD_LOCKNLOAD")
 	register_event("SendAudio","freeze_begin1","a","2=%!MRAD_terwin","2=%!MRAD_ctwin","2=%!MRAD_rounddraw")
 
@@ -2114,6 +2120,7 @@ public plugin_precache()
 	precache_model("sprites/diablo_lp/portal_tt.spr")
 	precache_model("sprites/diablo_lp/portal_ct.spr")
 	precache_model("sprites/diablo_lp/cold_expo.spr")
+	sprite_bloodraven = precache_model("sprites/diablo_lp/blood_dead2.spr")
 		
 	precache_sound(SOUND_START)
 	precache_sound(SOUND_FINISHED)
@@ -2175,6 +2182,9 @@ public plugin_precache()
 	precache_model("models/diablomod/bm_block_platform.mdl")
 	sprite_sabrecat = precache_model( "sprites/gas_puff_01g.spr" ); // SabreCat
 	precache_sound( "weapons/grenade_hit1.wav" ); // SabreCat
+	precache_sound( "diablo_lp/bow2.wav" ); // Bows
+	precache_sound( "diablo_lp/bloodraventaunt1.wav" );
+	precache_sound( "diablo_lp/brdeath.wav" );
 	
 	precache_model(cbow_VIEW)
     precache_model(cvow_PLAYER)
@@ -2600,6 +2610,7 @@ public RoundStart(){
 		used_item[i] = false
 		naswietlony[i] = 0;
 		losowe_itemy[i] = 0
+		fire_bows[i] = 0
 		uzyl_przedmiot[i] = 0
 		DemageTake1[i]=1
 		count_jumps(i)
@@ -3007,6 +3018,11 @@ public CurWeapon(id)
 		if(bow[id]==1)
 		{
 			bow[id]=0
+			message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
+			write_byte( 0 ) 
+			write_byte( 0 ) 
+			message_end()
+			
 			if(on_knife[id])
 			{
 				entity_set_string(id, EV_SZ_viewmodel, KNIFE_VIEW)  
@@ -3151,6 +3167,53 @@ public DeathMsg(id)
 					mana_gracza[kid]+=1
 				}
 				award_kill(kid,vid)
+			}
+		}
+	}
+	if(player_class[vid] == BloodRaven)
+	{
+		static origin[3], entSound
+		get_user_origin(vid, origin)
+		
+		//entSound = create_entity("info_target")
+		//entity_set_origin(entSound,origin)
+		emit_sound(vid,CHAN_STATIC,"diablo_lp/brdeath.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+		//set_task(3.0, "removeEntity", entSound, "", 0, "a", 1);
+		
+		message_begin(MSG_PVS, SVC_TEMPENTITY, origin)
+		write_byte(TE_SPRITE)
+		write_coord(origin[0])
+		write_coord(origin[1])
+		write_coord(origin[2])
+		write_short(sprite_bloodraven)
+		write_byte(15)
+		write_byte(255) //Brightness
+		message_end()
+		
+		new players[32], numberofplayers;
+		get_players( players, numberofplayers, "a" );
+		
+		new i, iTargetID, vTargetOrigin[3], iDistance, dmg;
+		new iTeam = get_user_team( vid );
+		
+		new br_range = 330
+		
+		for ( i = 0; i < numberofplayers; i++ )
+		{
+		
+			iTargetID = players[i];
+			
+			// Get origin of target
+			get_user_origin( iTargetID, vTargetOrigin );
+
+			// Get distance in b/t target and caster
+			iDistance = get_distance( origin, vTargetOrigin );
+			
+			dmg = float((player_intelligence[vid] - player_dextery[iTargetID])/2);
+			
+			if ( iDistance < br_range && iTeam != get_user_team( iTargetID ) && dmg > 0)
+			{
+				puscBlyskawice(vid, iTargetID, dmg);
 			}
 		}
 	}
@@ -3421,6 +3484,16 @@ public un_rander(id) {
         }
 }
 
+public UpdateClientData_Post( id, sendweapons, cd_handle )
+{
+	if( !is_user_alive(id) || player_class[id] != BloodRaven || !bow[id])
+		return FMRES_IGNORED;
+	
+	set_cd(cd_handle, CD_ID, 0);        
+	
+	return FMRES_HANDLED;
+}
+
 public client_PreThink ( id ) 
 {	
 	if(!is_user_alive(id)) return PLUGIN_CONTINUE
@@ -3501,12 +3574,38 @@ public client_PreThink ( id )
 	new body 
 	get_user_aiming(id, cel, body)
 	if( is_user_alive(id)) itminfo(id,cel)
-	if (button2 & IN_ATTACK2 && player_class[id]==Diablo &&  !(get_user_oldbutton(id) & IN_ATTACK2)){
-        if (weapon !=CSW_KNIFE && weapon != CSW_AWP && weapon != CSW_SCOUT){
-                        if (cs_get_user_zoom(id)==CS_SET_NO_ZOOM) cs_set_user_zoom ( id, CS_SET_AUGSG552_ZOOM, 1 ) 
-                        else cs_set_user_zoom(id,CS_SET_NO_ZOOM,1)
-                }
-        }
+	if((player_class[id] != BloodRaven || !bow[id]) && righthand[id] == 0)
+	{
+		client_cmd(id, "cl_righthand 1")
+		righthand[id] = 1
+	}
+	if(bow_zoom[id]==1)
+	{
+		bow[id]++
+		button[id] = 1
+		on_knife[id] = 1
+		command_bow(id)
+		bow_zoom[id]=2
+	}
+	if (button2 & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2))
+	{
+        if((player_class[id]==Diablo && weapon != CSW_KNIFE) || (player_class[id]==BloodRaven && bow[id]))
+		{
+			if (weapon != CSW_AWP && weapon != CSW_SCOUT)
+			{
+				if (cs_get_user_zoom(id)==CS_SET_NO_ZOOM)
+				{
+					bow_zoom[id]=1
+					cs_set_user_zoom ( id, CS_SET_AUGSG552_ZOOM, 1 ) 
+				}
+				else
+				{
+					cs_set_user_zoom(id,CS_SET_NO_ZOOM,1)
+					bow_zoom[id]=1
+				}
+			}
+		}
+    }
 	if (entity_get_int(id, EV_INT_button) & 2 && (player_class[id]== Leaper))
         {
                 new flags = entity_get_int(id, EV_INT_flags)
@@ -3561,6 +3660,11 @@ public client_PreThink ( id )
 		bow[id]++
 		button[id] = 1;
 		command_bow(id)
+		if (cs_get_user_zoom(id)==CS_SET_AUGSG552_ZOOM)
+		{	
+			cs_set_user_zoom(id,CS_SET_NO_ZOOM,1)
+			bow_zoom[id]=0
+		}
 	}
 	
 	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Frozen){
@@ -3620,7 +3724,6 @@ public client_PreThink ( id )
 			else if(player_class[id] == Assassin) time_delay*=2.0
 			else if(player_class[id] == Paladin) time_delay*=1.4
 			else if(player_class[id] == SabreCat) time_delay*=2.0
-			else if(player_class[id] == BloodRaven) time_delay*=2.0
 			else if(player_class[id] == Infidel) time_delay*=2.0
 			
 			cast_end[id]=halflife_time()+time_delay
@@ -3680,14 +3783,33 @@ public client_PreThink ( id )
 		
 		if(bow[id] == 1)
 		{
-			if((bowdelay[id] + 4.25 - float(player_intelligence[id]/25))< get_gametime() && button2 & IN_ATTACK)
+			if((floatround(bowdelay[id] + 4.25 - float(player_intelligence[id]/25),floatround_ceil))< get_gametime() && button2 & IN_ATTACK)
 			{
 				bowdelay[id] = get_gametime()
-				command_arrow(id) 
-				client_print(id,print_console, "command_arrow")
+				
+				message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
+				write_byte( 0 ) 
+				write_byte( 0 ) 
+				message_end()
+				
+				command_arrow(id)
+				if(player_class[id]==BloodRaven)
+				{
+					setWeaponAnim( id , 1 );
+				}
+				else
+				{
+					setWeaponAnim( id , 6 );
+				}
+				casting_bow[id] = 0
+			}
+			else if(!casting_bow[id])
+			{
+				do_casting_bow(id)
 			}
 			//client_print(id,print_console, "inattack")
-			entity_set_int(id, EV_INT_button, (button2 & ~IN_ATTACK) & ~IN_ATTACK2)
+			entity_set_int( id, EV_INT_button, entity_get_int(id,EV_INT_button) & ~IN_ATTACK );
+			entity_set_int( id, EV_INT_button, entity_get_int(id,EV_INT_button) & ~IN_ATTACK2 );
 		}
 	
 		
@@ -3720,6 +3842,28 @@ public client_PreThink ( id )
 	///////////////////////////////////////////////////
 	
 	return PLUGIN_CONTINUE		
+}
+
+public do_casting_bow(id)
+{
+	bowdelay[id] = get_gametime()
+	casting_bow[id] = 1
+	new Float:time_delay = 4.25 - float(player_intelligence[id]/25)
+	new bar_delay = floatround(time_delay,floatround_ceil)
+
+	message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
+	write_byte( bar_delay ) 
+	write_byte( 0 ) 
+	message_end()
+}
+
+stock setWeaponAnim(id, anim) {
+        set_pev(id, pev_weaponanim, anim)
+        
+        message_begin(MSG_ONE, SVC_WEAPONANIM, {0, 0, 0}, id)
+        write_byte(anim)
+        write_byte(pev(id, pev_body))
+        message_end()
 }
 
 public client_PostThink( id )
@@ -4779,7 +4923,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	if (!dir_exists(diabloDir))
 	{
 		new errormsg[512]
-		format(errormsg,511,"Blad: Folder %s/diablo nie mogі byж znaleziony. Prosze skopiowac ten folder z archiwum do folderu amxmodx",amxbasedir)
+		format(errormsg,511,"Error: Folder %s/diablo not exist",amxbasedir)
 		show_motd(id, errormsg, "An error has occured")	
 		return PLUGIN_HANDLED
 	}
@@ -6393,6 +6537,25 @@ public add_respawn_bonus(id)
 	}
 }
 
+public d2_damage( iVictim, iAttacker, iDamage, iWeapon[])
+{
+	new iHealth = get_user_health( iVictim );
+	
+	// User has been killed
+	if ( iHealth - iDamage <= 0 )
+	{
+		UTIL_Kill(iVictim,iAttacker,iWeapon)
+	}
+
+	// Just do the damage
+	else
+	{
+		set_user_health( iVictim, iHealth - iDamage );
+	}
+	
+	return;
+}
+
 public respawn(svIndex[]) 
 { 
 	new vIndex = str_to_num(svIndex) 
@@ -7769,6 +7932,7 @@ public PressedKlasy(id, key)
 		{    
 			player_class[id] = BloodRaven
 			MYSQLX_SetDataForRace( id )
+			emit_sound(id,CHAN_STATIC,"diablo_lp/bloodraventaunt1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 		}
 		case 1: 
 		{    
@@ -8703,7 +8867,7 @@ public SelectBotRace(id)
 	if (player_class[id] == 0)
 	{
 		//player_class[id] = random_num(1,24)
-		player_class[id] = Mag
+		player_class[id] = BloodRaven
 	}
 	
 	return PLUGIN_CONTINUE
@@ -11669,6 +11833,7 @@ public command_arrow(id)
 	VelocityByAim(id, get_cvar_num("diablo_arrow_speed") , Velocity)
 	set_rendering (Ent,kRenderFxGlowShell, 255,0,0, kRenderNormal,56)
 	entity_set_vector(Ent, EV_VEC_velocity ,Velocity)
+	emit_sound(id,CHAN_STATIC,"diablo_lp/bow2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	
 	return PLUGIN_HANDLED
 }
@@ -11683,30 +11848,47 @@ public command_bow(id)
 		{
 			set_pev(id, pev_viewmodel2, bloodbow_VIEW)
 			set_pev(id, pev_weaponmodel2, bloodbow_PLAYER)
+			client_cmd(id, "cl_righthand 0")
+			righthand[id] = 0
 		}
 		else
 		{
 			entity_set_string(id,EV_SZ_viewmodel,cbow_VIEW)
 			entity_set_string(id,EV_SZ_weaponmodel,cvow_PLAYER)
 		}
-		bowdelay[id] = get_gametime()
+		do_casting_bow(id)
 	}
 	else if(player_sword[id] == 1)
 	{
 		entity_set_string(id, EV_SZ_viewmodel, SWORD_VIEW)  
 		entity_set_string(id, EV_SZ_weaponmodel, SWORD_PLAYER)  
 		bow[id]=0
+		
+		message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
+		write_byte( 0 ) 
+		write_byte( 0 ) 
+		message_end()
 	}
 	else if(player_class[id] == Zakarum)
 	{
 		entity_set_string(id, EV_SZ_viewmodel, scythe_view)  
-		entity_set_string(id, EV_SZ_weaponmodel, KNIFE_PLAYER) 
+		entity_set_string(id, EV_SZ_weaponmodel, KNIFE_PLAYER)
+		
+		message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
+		write_byte( 0 ) 
+		write_byte( 0 ) 
+		message_end()
 	}
 	else
 	{
 		entity_set_string(id,EV_SZ_viewmodel,KNIFE_VIEW)
 		entity_set_string(id,EV_SZ_weaponmodel,KNIFE_PLAYER)
 		bow[id]=0
+		
+		message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
+		write_byte( 0 ) 
+		write_byte( 0 ) 
+		message_end()
 	}
 	
 	return PLUGIN_CONTINUE
@@ -11733,6 +11915,14 @@ public toucharrow(arrow, id)
 		bowdelay[kid] -=  0.5 - floatround(player_intelligence[kid]/5.0)
 	
 		change_health(id,floatround(-dmg),kid,"knife")
+		
+		if(fire_bows[kid])
+		{
+			fire_bows[kid]--
+			new Float:origin[3]
+			pev(arrow,pev_origin,origin)
+			Explode_Origin(kid,origin,player_intelligence[kid],125,1)
+		}
 				
 		message_begin(MSG_ONE,get_user_msgid("ScreenShake"),{0,0,0},id); 
 		write_short(7<<14); 
@@ -11761,6 +11951,13 @@ public touchWorld2(arrow, world)
 	{
 		remove_task(arrow)
 		emit_sound(owner, CHAN_STATIC, "diablo_lp/frozne_blast.wav", VOL_NULL, ATTN_NONE, SND_STOP, PITCH_NONE)
+	}
+	else if(equal(szClassName, "xbow_arrow") && fire_bows[owner])
+	{
+		fire_bows[owner]--
+		new Float:origin[3]
+		pev(arrow,pev_origin,origin)
+		Explode_Origin(owner,origin,player_intelligence[owner],125,1)
 	}
 	remove_entity(arrow)
 }
@@ -12255,6 +12452,18 @@ public call_cast(id)
 			zak_maxspeed = float(speed_points + 400);
 			show_hudmessage(id, "[Закарум] Макс. скорость %i. ^nСбивается при переключении оружия.", floatround(zak_maxspeed,floatround_round))
 			set_user_maxspeed(id,zak_maxspeed)
+		}
+		case BloodRaven:
+		{
+			if(fire_bows[id] < 6)
+			{
+				fire_bows[id]++
+				show_hudmessage(id, "[Кровавый ворон] Вы получили огненую стрелу(%d/6)",fire_bows[id])
+			}
+			else
+			{
+				show_hudmessage(id, "Лимит стрел достигнут")
+			}
 		}
 		case Frozen:
 		{
@@ -17791,17 +18000,13 @@ stock Create_ScreenFade(id, duration, holdtime, fadetype, red, green, blue, alph
 
 puscBlyskawice(id, ofiara, Float:fObrazenia)
 {
-	//Obrazenia
-	new ent = create_entity("info_target");
 	new Float:fCzas = 1.0;
-	entity_set_string(ent, EV_SZ_classname, "blyskawica");
-	ExecuteHamB(Ham_TakeDamage, ofiara, ent, id, fObrazenia, DMG_SHOCK);
-	remove_entity(ent);
-		
+	
 	//Piorun
 	Create_TE_BEAMENTS(id, ofiara, sprite, 0, 10, floatround(fCzas*10), 150, 5, 200, 200, 200, 200, 10);
 	glow_player(ofiara, 1.0, 255, 255, 255)
+	d2_damage( ofiara, id, floatround( fObrazenia ), "diablomod Lightning")
 		
 	//Dzwiek
-	emit_sound(id, CHAN_WEAPON, gszSound, VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
+	emit_sound(id,CHAN_STATIC,gszSound, 1.0, ATTN_NORM, 0, PITCH_NORM)
 }
