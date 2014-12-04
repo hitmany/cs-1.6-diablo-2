@@ -467,8 +467,8 @@ new const szTables[TOTAL_TABLES][] =
 };
 
 
-enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Leaper, Enslaved, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Прыгун", "Enslaved", "Ледяной ужас", "Инфидель", "Giant Spider", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Leaper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Прыгун", "Гигантский комар", "Ледяной ужас", "Инфидель", "Giant Spider", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,127,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -532,9 +532,23 @@ new Float:tossdelay[33]
 new Float:bowdelay[33]
 new bow[33]
 new bow_zoom[33]
+
+new Float:player_last_check_time[33]  //Mosquito
+new bool:use_fly[33] //Mosquito
+new bool:hit_key[33] //Mosquito
+new bool:fly_step_shift[33], Float:fly_check_time[33] //Mosquito
+
+const fly_forward_speed = 300					//forward flying speed 
+const fly_left_right_speed = (fly_forward_speed / 3) * 2	//to the left and the speed of flight 
+const fly_up_down_speed = fly_forward_speed / 2			//to the upper and lower flight speed
+const fly_back_speed = fly_forward_speed / 3			//down flight speed
+const fly_step_range = 90	
+
 new button[33]
 new can_cast[33] //frozen horror
 new righthand[33] //frozen horror
+
+new mosquito_sting[33]
 
 // amazon - slad
 
@@ -869,8 +883,21 @@ public plugin_init()
 	register_touch("throwing_knife", "func_breakable",	"touchbreakable")
 	register_touch("func_breakable", "throwing_knife",	"touchbreakable")
 	
+	register_touch("mosquito_sting", "player", "touchmosquito_sting")
+	register_touch("mosquito_sting", "worldspawn",		"removeEntity")
+	register_touch("mosquito_sting", "func_wall",		"removeEntity")
+	register_touch("mosquito_sting", "func_door",		"removeEntity")
+	register_touch("mosquito_sting", "func_door_rotating",	"removeEntity")
+	register_touch("mosquito_sting", "func_wall_toggle",	"removeEntity")
+	register_touch("mosquito_sting", "dbmod_shild",		"removeEntity")
+	
+	register_touch("mosquito_sting", "func_breakable",	"touchbreakable")
+	register_touch("func_breakable", "mosquito_sting",	"touchbreakable")
+	
 	register_cvar("diablo_knife","20")
 	register_cvar("diablo_knife_speed","1000")
+	
+	register_cvar("diablo_mosquito_sting_speed","1000")
 	
 	register_touch("xbow_arrow", "player", 			"toucharrow")
 	register_touch("xbow_arrow", "worldspawn",		"touchWorld2")
@@ -1674,7 +1701,7 @@ public MYSQLX_Save_T( id )
 
 	// Only save skill levels if the user does NOT play chameleon
 	// Then we need to save this!
-	if ( player_xp[id] >= 0 )
+	if ( player_xp[id] > 0 )
 	{
 		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_vitality[id], player_intelligence[id], player_dextery[id] );
 		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
@@ -2623,7 +2650,8 @@ public RoundStart(){
 		is_frozen[i] = 0
 		is_poisoned[i] = 0
 		is_touched[i] = 0
-		
+		hit_key[i] = false
+		use_fly[i] = false
 		
 		player_fallen_tr[i]=1;
 		//play idle
@@ -2676,20 +2704,9 @@ public RoundStart(){
 				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
-		if(player_class[i] == Enslaved)
+		if(player_class[i] == Mosquito)
 		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(i,"weapon_m4a1")
-				fm_give_item(i,"ammo_556nato")
-				fm_give_item(i,"ammo_556nato")
-				fm_give_item(i,"ammo_556nato")
-				fm_give_item(i,"ammo_556nato")
-			}
-			else
-			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-			}
+			mosquito_sting[i] = 0
 		}
 		if(player_class[i] == SabreCat)
 		{
@@ -2895,7 +2912,7 @@ public CurWeapon(id)
 }
 	else on_knife[id]=0
 	
-	if ((weapon != CSW_C4 ) && !on_knife[id] && ((player_class[id] == Ninja) || (player_class[id] == Infidel)))
+	if ((weapon != CSW_C4 ) && !on_knife[id] && ((player_class[id] == Ninja) || (player_class[id] == Infidel) || (player_class[id] == Mosquito)))
 	{
 		client_cmd(id,"weapon_knife")
 		engclient_cmd(id,"weapon_knife")
@@ -3140,6 +3157,14 @@ public DeathMsg(id)
 	flashbattery[vid] = MAX_FLASH;
 	flashlight[vid] = 0;
 	
+	hit_key[vid] = false
+	
+	if (use_fly[player])
+	{
+		use_fly[player] = false
+		fm_set_user_gravity(player, 0.8)
+	}
+	
 	if(player_sword[id] == 1)
 	{
 		if(on_knife[id])
@@ -3175,10 +3200,7 @@ public DeathMsg(id)
 		static origin[3], entSound
 		get_user_origin(vid, origin)
 		
-		//entSound = create_entity("info_target")
-		//entity_set_origin(entSound,origin)
 		emit_sound(vid,CHAN_STATIC,"diablo_lp/brdeath.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-		//set_task(3.0, "removeEntity", entSound, "", 0, "a", 1);
 		
 		message_begin(MSG_PVS, SVC_TEMPENTITY, origin)
 		write_byte(TE_SPRITE)
@@ -3774,6 +3796,8 @@ public client_PreThink ( id )
 	
 	if(player_class[id]==Ninja && (pev(id,pev_button) & IN_RELOAD)) command_knife(id) 
 	else if (pev(id,pev_button) & IN_RELOAD && on_knife[id] && max_knife[id]>0) command_knife(id) 
+	
+	if(player_class[id]==Mosquito && (pev(id,pev_button) & IN_RELOAD)) command_mosquito(id) 
 		
 	///////////////////// BOW /////////////////////////
 	if(player_class[id]==Amazon || player_class[id]==Demonolog || player_class[id]==BloodRaven)
@@ -4251,6 +4275,9 @@ public client_putinserver(id)
 	is_frozen[id] = 0
 	is_poisoned[id] = 0
 	is_touched[id] = 0
+	
+	hit_key[id] = false
+	use_fly[id] = false
 }
 
 public client_disconnect(id)
@@ -4619,7 +4646,7 @@ public frozen_touch(entity, player)
 		if(is_frozen[player] == 0)
 		{
 			new Float:colddelay
-			colddelay = player_intelligence[player] * 0.2
+			colddelay = player_intelligence[owner] * 0.2
 			if(colddelay < 4.0) { colddelay = 4.0; }
 			glow_player(player, colddelay, 0, 0, 255)
 			set_user_maxspeed(player, 100.0)
@@ -6544,7 +6571,7 @@ public d2_damage( iVictim, iAttacker, iDamage, iWeapon[])
 	// User has been killed
 	if ( iHealth - iDamage <= 0 )
 	{
-		UTIL_Kill(iVictim,iAttacker,iWeapon)
+		UTIL_Kill(iAttacker,iVictim,iWeapon)
 	}
 
 	// Just do the damage
@@ -8018,7 +8045,7 @@ public PokazZwierze(id)
 {	
 	new iLen,text5[512]
 	iLen += format(text5, 511, "\yЗвери/Животные: ^n\w1. \yЗакарум^t\wУровень: \r%i^n\w2. \yПрыгун^t\wУровень: \r%i^n",player_class_lvl[id][17],player_class_lvl[id][18]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yEnslaved^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yГигантский комар^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \yАдский кот^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера");
@@ -8034,7 +8061,7 @@ public PokazZwierz( id, item )
 	---.Zwierzeta
 	1.Zakarum
 	2.Leaper
-	3.Enslaved
+	3.Mosquito
 	4.Frozen
 	5.Infidel
 	6.Gigantyczny Pajak
@@ -8066,7 +8093,7 @@ public PokazZwierz( id, item )
 		}
 		case 2: 
 		{    
-			player_class[id] = Enslaved
+			player_class[id] = Mosquito
 			MYSQLX_SetDataForRace( id )
 		}
 		case 3: 
@@ -10095,7 +10122,7 @@ public item_teamshield(id)
 			return PLUGIN_CONTINUE
 		}
 		
-		if (pev(target,pev_rendermode) == kRenderTransTexture || player_item_id[target] == 17 || player_class[target] == Ninja)
+		if (pev(target,pev_rendermode) == kRenderTransTexture || player_item_id[target] == 17 || player_class[target] == Ninja || player_class[target] == Infidel)
 		{
 			hudmsg(id,2.0,"Не возможно использовать невидимый щит от игрока.")
 			return PLUGIN_CONTINUE
@@ -10983,8 +11010,176 @@ public reset_player(id)
 	
 }
 
+/*=============================Mosquito===================================*/
+stock bool:is_user_on_ground(index)
+{
+	if (pev(index, pev_flags) & FL_ONGROUND)
+		return true;
+	
+	return false;
+}
+
+stock velocity_by_force_angle(id, force, height, Float:angle, Float:new_velocity[3])
+{
+	new Float:entity_angles[3]
+	pev(id, pev_angles, entity_angles)
+	
+	entity_angles[1] += angle
+	
+	while (entity_angles[1] < 0.0)
+	 entity_angles[1] += 360.0
+	
+	new Float:v_length
+	v_length  = float(force)
+	new_velocity[0] = v_length * floatcos(entity_angles[1], degrees)
+	new_velocity[1] = v_length * floatsin(entity_angles[1], degrees)
+	new_velocity[2] = float(height)
+}
+/*+++++++++++++++++++++++++++++++++Mosquito End++++++++++++++++++++++++++++++++*/
+
 public fwd_playerpostthink(id)
 {
+	
+	if (is_user_alive(id) && player_class[id] == Mosquito)
+	{
+	
+		static button, oldbutton
+		button = pev(id, pev_button)
+		oldbutton = pev(id, pev_oldbuttons)
+		
+		if ((button & IN_USE) && (oldbutton & IN_USE))
+		{
+			if (!hit_key[id])
+			{
+				hit_key[id] = true
+				
+				if (!use_fly[id])
+				{
+					
+					if (is_user_on_ground(id))
+					{
+						client_print(id, print_center, "Вы должны прыгнуть чтобы взлететь!")
+						return PLUGIN_CONTINUE
+					}
+					
+					client_print(id, print_center, "ПОЛЕТ.")
+					
+					use_fly[id] = true
+					fm_set_user_gravity(id, -0.01)
+				}
+				else
+				{
+					use_fly[id] = false
+					fm_set_user_gravity(id, 0.8)
+					client_print(id, print_center, "СТОП ПОЛЕТ.")
+				}
+			}
+		}
+		else
+		{
+			hit_key[id] = false
+		}
+		
+		if (use_fly[id])
+		{
+			if (is_user_on_ground(id))
+			{
+				use_fly[id] = false
+				fm_set_user_gravity(id, 0.8)
+				client_print(id, print_center, "ПРЕЗЕМЛЕНИЕ.")
+			}
+			
+			if ((get_gametime() - fly_check_time[id]) > 0.5)
+			{
+				new Float:velocity1[3]
+				pev(id, pev_velocity, velocity1)
+				
+				if (fly_step_shift[id])
+				{
+					fly_step_shift[id] = false
+					velocity1[2] += float(fly_step_range)
+					//PlaySound(id, sound_wings_up)
+				}
+				else
+				{
+					fly_step_shift[id] = true
+					velocity1[2] -= float(fly_step_range)
+					//PlaySound(id, sound_wings_down)
+				}
+				
+				set_pev(id, pev_velocity, velocity1)
+				
+				fly_check_time[id] = get_gametime()
+			}
+			
+			if (get_gametime() - player_last_check_time[id] < 0.2)
+				return PLUGIN_CONTINUE
+			player_last_check_time[id] = get_gametime()
+			
+			new Float:velocity[3], bool:have_move
+			have_move = false
+			
+			new velo_multi = player_intelligence[id]*4
+			if (button & IN_FORWARD)
+			{
+				have_move = true
+				velocity_by_aim(id, fly_forward_speed+velo_multi, velocity)
+				set_pev(id, pev_velocity, velocity)
+			}
+			
+			if (button & IN_BACK)
+			{
+				have_move = true
+				velocity_by_aim(id, fly_back_speed+velo_multi, velocity)
+				xs_vec_mul_scalar(velocity, -1.0, velocity)
+				set_pev(id, pev_velocity, velocity)
+			}
+			
+			if (button & IN_MOVELEFT)
+			{
+				have_move = true
+				velocity_by_force_angle(id, fly_left_right_speed+velo_multi, 0, 90.0, velocity)
+				set_pev(id, pev_velocity, velocity)
+			}
+			
+			if (button & IN_MOVERIGHT)
+			{
+				have_move = true
+				velocity_by_force_angle(id, fly_left_right_speed+velo_multi, 0, -90.0, velocity)
+				set_pev(id, pev_velocity, velocity)
+			}
+			
+			if (button & IN_JUMP)
+			{
+				have_move = true
+				velocity[0] = velocity[1] = 0.0
+				velocity[2] = float(fly_up_down_speed+velo_multi)
+				set_pev(id, pev_velocity, velocity)
+			}
+			
+			if (button & IN_DUCK)
+			{
+				have_move = true
+				velocity[0] = velocity[1] = 0.0
+				velocity[2] = float(0 - fly_up_down_speed+velo_multi)
+				set_pev(id, pev_velocity, velocity)
+			}
+			
+			if (!have_move)
+			{
+				new speed
+				pev(id, pev_velocity, velocity)
+				speed = floatround(vector_length(velocity))
+				
+				if (speed > 0)
+				{
+					xs_vec_mul_scalar(velocity, 0.5, velocity)
+					set_pev(id, pev_velocity, velocity)
+				}
+			}
+		}
+	}
+	
 	if(!is_user_connected(id)) return FMRES_IGNORED
 		
 	if(g_haskit[id]==0) return FMRES_IGNORED
@@ -11010,7 +11205,7 @@ public fwd_playerpostthink(id)
 	else
 		Display_Icon(id , ICON_SHOW,"rescue" ,0,160,0)
 	
-	return FMRES_IGNORED
+	return PLUGIN_CONTINUE
 }
 
 public task_check_dead_flag(id)
@@ -11329,7 +11524,7 @@ public FwdPlayerTouch_FakeSmoke( iEntity, iPlayer ) {
 	if(is_poisoned[iPlayer] == 0)
 	{
 		new Float:colddelay
-		colddelay = player_intelligence[iPlayer] * 0.4
+		colddelay = player_intelligence[iOwner] * 0.4
 		if(colddelay < 4.0) { colddelay = 4.0; }
 		glow_player(iPlayer, colddelay, 0, 255, 0)
 		set_user_maxspeed(iPlayer, 100.0)
@@ -11339,7 +11534,7 @@ public FwdPlayerTouch_FakeSmoke( iEntity, iPlayer ) {
 		new dmg, Float:dmgsumm
 		dmgsumm = (player_intelligence[iOwner]+20.0) - (player_dextery[iPlayer]+10.0)
 		dmg = floatround(dmgsumm, floatround_ceil)
-		if(dmg < 2) { dmg = 10; }
+		if(dmg < 10) { dmg = 10; }
 		change_health(iPlayer,-dmg,iOwner,"world")
 	}
 	new dmg, Float:dmgsumm
@@ -11641,7 +11836,7 @@ public command_knife(id)
 
 	if(!player_knife[id])
 	{
-		client_print(id,print_center,"У вас уже есть метательные ножи")
+		client_print(id,print_center,"У вас нет метательных ножей")
 		return PLUGIN_HANDLED
 	}
 
@@ -11687,6 +11882,60 @@ public command_knife(id)
 	return PLUGIN_HANDLED
 }
 
+public command_mosquito(id) 
+{
+
+	if(!is_user_alive(id)) return PLUGIN_HANDLED
+
+
+	if(!mosquito_sting[id])
+	{
+		client_print(id,print_center,"У вас нет ядовитых жал")
+		return PLUGIN_HANDLED
+	}
+
+	if(tossdelay[id] > get_gametime() - 0.9) return PLUGIN_HANDLED
+	else tossdelay[id] = get_gametime()
+
+	mosquito_sting[id]--
+
+	if (mosquito_sting[id] == 1) {
+		client_print(id,print_center,"Осталось 1 жало!")
+	}
+
+	new Float: Origin[3], Float: Velocity[3], Float: vAngle[3], Ent
+
+	entity_get_vector(id, EV_VEC_origin , Origin)
+	entity_get_vector(id, EV_VEC_v_angle, vAngle)
+
+	Ent = create_entity("info_target")
+
+	if (!Ent) return PLUGIN_HANDLED
+
+	entity_set_string(Ent, EV_SZ_classname, "mosquito_sting")
+	entity_set_model(Ent, "models/diablomod/cold.mdl")
+
+	new Float:MinBox[3] = {-1.0, -7.0, -1.0}
+	new Float:MaxBox[3] = {1.0, 7.0, 1.0}
+	entity_set_vector(Ent, EV_VEC_mins, MinBox)
+	entity_set_vector(Ent, EV_VEC_maxs, MaxBox)
+
+	vAngle[1] -= 180
+
+	entity_set_origin(Ent, Origin)
+	entity_set_vector(Ent, EV_VEC_angles, vAngle)
+
+	entity_set_int(Ent, EV_INT_effects, 2)
+	entity_set_int(Ent, EV_INT_solid, 1)
+	entity_set_int(Ent, EV_INT_movetype, 6)
+	entity_set_edict(Ent, EV_ENT_owner, id)
+
+	VelocityByAim(id, get_cvar_num("diablo_mosquito_sting_speed") , Velocity)
+	entity_set_vector(Ent, EV_VEC_velocity ,Velocity)
+	
+	return PLUGIN_HANDLED
+}
+
 public touchKnife(knife, id)
 {	
 	new kid = entity_get_edict(knife, EV_ENT_owner)
@@ -11715,12 +11964,67 @@ public touchKnife(knife, id)
 
 			entity_set_float(id, EV_FL_dmg_take, get_cvar_num("diablo_knife") * 1.0)
 
-			change_health(id,-get_cvar_num("diablo_knife"),kid,"knife")
+			d2_damage( id, kid, get_cvar_num("diablo_knife"), "ninja knife")
 			message_begin(MSG_ONE,get_user_msgid("ScreenShake"),{0,0,0},id)
 			write_short(7<<14)
 			write_short(1<<13)
 			write_short(1<<14)
 			message_end()		
+
+			if(get_user_team(id) == get_user_team(kid)) {
+				new name[33]
+				get_user_name(kid,name,32)
+				client_print(0,print_chat,"%s attacked a teammate",name)
+			}
+
+			emit_sound(id, CHAN_ITEM, "weapons/knife_hit4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+
+		}
+	}
+}
+
+public touchmosquito_sting(knife, id)
+{	
+	new kid = entity_get_edict(knife, EV_ENT_owner)
+	
+	if(is_user_alive(id)) 
+	{
+		new movetype = entity_get_int(knife, EV_INT_movetype)
+		
+		if(movetype == 0) 
+		{
+			if( player_knife[id] < max_knife[id] )
+			{
+				player_knife[id] += 1
+				client_print(id,print_center,"Текущее количество жал: %i",player_knife[id])
+			}
+			remove_entity(knife)
+		}
+		else if (movetype != 0) 
+		{
+			if(kid == id) return
+
+			remove_entity(knife)
+
+			if(get_cvar_num("mp_friendlyfire") == 0 && get_user_team(id) == get_user_team(kid)) return
+			
+			if(is_poisoned[id] == 0)
+			{
+				new Float:colddelay
+				colddelay = player_intelligence[kid] * 0.4
+				if(colddelay < 4.0) { colddelay = 4.0; }
+				glow_player(id, colddelay, 0, 255, 0)
+				set_user_maxspeed(id, 100.0)
+				set_task(colddelay, "unpoison", id, "", 0, "a", 1)
+				is_poisoned[id] = 1
+				Display_Icon(id ,2 ,"dmg_gas" ,0,255,0)
+			}
+			new dmg, Float:dmgsumm
+			dmgsumm = player_intelligence[kid] - player_dextery[id]/2.0
+			dmg = floatround(dmgsumm, floatround_ceil)
+			if(dmg < 10) { dmg = 10; }
+			d2_damage( id, kid, dmg, "mosquito sting")
+			Effect_Bleed(id,248)			
 
 			if(get_user_team(id) == get_user_team(kid)) {
 				new name[33]
@@ -12387,8 +12691,8 @@ public make_shild(id,Float:vOrigin[3],Float:vAngles[3],Float:gfBlockSizeMin[3],F
 public call_cast(id)
 {
 	
-	set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 3.0, 0.1, 0.4, 2)
-				
+	set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 3.0, 0.1, 0.4, 18)
+	
 	switch(player_class[id])
 	{
 		case Mag:
@@ -12462,7 +12766,19 @@ public call_cast(id)
 			}
 			else
 			{
-				show_hudmessage(id, "Лимит стрел достигнут")
+				show_hudmessage(id, "У вас максимум стрел")
+			}
+		}
+		case Mosquito:
+		{
+			if(mosquito_sting[id] < 10)
+			{
+				mosquito_sting[id]++
+				show_hudmessage(id, "[Гигантский комар] Вы получили ядовитое жало(%d/10)",mosquito_sting[id])
+			}
+			else
+			{
+				show_hudmessage(id, "У вас максимум ядовитых жал")
 			}
 		}
 		case Frozen:
@@ -12554,11 +12870,6 @@ public call_cast(id)
 					award_item(id, 0)
 				}
 			}
-		}
-		case Enslaved: 
-		{
-			change_health(id, 40, id, "")
-			show_hudmessage(id, "[Enslaved] Вы получили 40hp")
 		}
 		case Amazon: 
 		{
@@ -14230,15 +14541,15 @@ public wallclimb(id, button)
                 
         if(button & IN_FORWARD)
         {
-                static Float:velocity[3]
-                velocity_by_aim(id, 120, velocity)
-                fm_set_user_velocity(id, velocity)
+			static Float:velocity[3]
+			velocity_by_aim(id, 120, velocity)
+			fm_set_user_velocity(id, velocity)
         }
         else if(button & IN_BACK)
         {
-                static Float:velocity[3]
-                velocity_by_aim(id, -120, velocity)
-                fm_set_user_velocity(id, velocity)
+			static Float:velocity[3]
+			velocity_by_aim(id, -120, velocity)
+			fm_set_user_velocity(id, velocity)
         }
         return FMRES_IGNORED
 }
