@@ -205,6 +205,12 @@ new c4state[33]
 new c4bombc[33][3] 
 new c4fake[33]
 new fired[33]
+new fired_viper[33]
+new Float:viper_cord[33][3]
+new Float:viper_vector[33][3]
+new viper_spear[33]
+new Float:viper_gas_time[33]
+new viper_gases[33]
 new bool:ghost_check
 new ghosttime[33]
 new ghoststate[33]
@@ -350,7 +356,7 @@ new fallen_fires[33]
 new frozen_colds[33]
 new is_frozen[33]
 new is_poisoned[33]
-new is_touched[33]
+new Float:is_touched[33]
 new cel // do pokazywania statusu
 new item_info[513] //id itemu  
 new item_name[513][128] //nazwa itemu
@@ -431,8 +437,8 @@ new scythe_view[]  = "models/diablomod/v_scythe.mdl"
 new infidel_view[]  = "models/diablomod/v_infidel2.mdl"
 new infidel_model[]  = "models/player/d2_infidel/d2_infidel.mdl"
 new infidel_model_short[]  = "d2_infidel"
-new bloodbow_VIEW[]  = "models/diablomod/v_bow3.mdl" 
-new bloodbow_PLAYER[]= "models/diablomod/p_bow3.mdl" 
+new bloodbow_VIEW[]  = "models/diablomod/v_ravenbow.mdl" 
+new bloodbow_PLAYER[]= "models/diablomod/p_ravenbow.mdl" 
 //new bloodbow_MODEL[]  = "models/diablomod/Crossbow_bolt.mdl"
 
 new LeaderCT = -1
@@ -467,9 +473,9 @@ new const szTables[TOTAL_TABLES][] =
 };
 
 
-enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Leaper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Прыгун", "Гигантский комар", "Ледяной ужас", "Инфидель", "Giant Spider", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
-new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,127,100,140,115,120,145,145,145,145 }
+enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Giant Spider", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,100,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
 14300,15730,17300,19030,20900,23000,24000,25200,26400,27700,29000,30500,32000,33600,35300,37000,39000,41000,43000,45100,//41
@@ -546,7 +552,6 @@ const fly_step_range = 90
 
 new button[33]
 new can_cast[33] //frozen horror
-new righthand[33] //frozen horror
 
 new mosquito_sting[33]
 
@@ -592,7 +597,7 @@ new invisible_cast[33]
 new player_dmg[33]
 
 //SabreCat smoke
-new const g_SabreSmokeClassname[] = "colored_smokenade";
+//new const g_SabreSmokeClassname[] = "colored_smokenade";
 
 /* PLUGIN CORE REDIRECTING TO FUNCTIONS ========================================================== */
 
@@ -615,7 +620,7 @@ new questy[][]={
 	{1,3,Imp,1200,1},
 	{1,6,Fallen,2000,0},
 	{2,6,Diablo,5000,0},
-	{2,15,Leaper,15000,1},
+	{2,15,Viper,15000,1},
 	{2,20,BloodRaven,20000,1},
 	{3,65,Imp,150000,1},
 	{3,120,Baal,200000,1}
@@ -638,7 +643,7 @@ new questy_info[][]={
 	"Убей 3 Imp (Получи 1200 опыта)",
 	"Убей 6 Fallen (Получи 2000 опыта)",
 	"Убей 6 Diablo (Получи 5000 опыта)",
-	"Убей 15 Leaper (Получи 15000 опыта)",
+	"Убей 15 Viper (Получи 15000 опыта)",
 	"Убей 20 BloodRaven (Получи 20000 опыта)",
 	"Убей 65 Imp (Получи 150000 опыта)",
 	"Убей 120 Baal (Получи 200000 опыта)"
@@ -728,7 +733,7 @@ public plugin_init()
 	register_event("ResetHUD", "ResetHUD", "abe")
 	register_event("ScreenFade","det_fade","be","1!0","2!0","7!0")
 	register_event("DeathMsg","DeathMsg","ade") 
-	register_event("Damage", "Damage", "b", "2!0")
+	register_event("Damage", "Damage", "ae", "2!0")
 	register_event("SendAudio","freeze_over","b","2=%!MRAD_GO","2=%!MRAD_MOVEOUT","2=%!MRAD_LETSGO","2=%!MRAD_LOCKNLOAD")
 	register_event("SendAudio","freeze_begin","a","2=%!MRAD_terwin","2=%!MRAD_ctwin","2=%!MRAD_rounddraw") 
 	register_event("HLTV", "round_bstart", "a", "1=0", "2=0")
@@ -853,6 +858,7 @@ public plugin_init()
 	register_think("Effect_MShield","Effect_MShield_Think")
 	register_think("Effect_Teamshield","Effect_Teamshield_Think")
 	register_think("Effect_Healing_Totem","Effect_Healing_Totem_Think")
+	register_think("viperball", "viper_think")
 	register_forward(FM_AddToFullPack, "client_AddToFullPack")
 	register_forward(FM_UpdateClientData, "UpdateClientData_Post", 1)
 	register_event("SendAudio","freeze_over1","b","2=%!MRAD_GO","2=%!MRAD_MOVEOUT","2=%!MRAD_LETSGO","2=%!MRAD_LOCKNLOAD")
@@ -919,8 +925,8 @@ public plugin_init()
 	//register_touch("frozencold", "func_door_rotating",	"touchWorld2")
 	//register_touch("frozencold", "func_wall_toggle",	"touchWorld2")
 	register_touch("frozencold", "dbmod_shild",		"touchWorld2")
-	register_touch( g_SabreSmokeClassname, "worldspawn", "FwdTouch_FakeSmoke" );
-	register_think( g_SabreSmokeClassname, "FwdThink_FakeSmoke" );
+	//register_touch( g_SabreSmokeClassname, "worldspawn", "FwdTouch_FakeSmoke" );
+	//register_think( g_SabreSmokeClassname, "FwdThink_FakeSmoke" );
 	register_think( "saber_smoke3", "FwdThink_FakeSmoke2" );
 	register_touch( "saber_smoke3", "player", "FwdPlayerTouch_FakeSmoke" );
 	
@@ -1695,13 +1701,16 @@ public MYSQLX_Save_T( id )
 
 	// Save the user's XP!
 	new szQuery[512];
-	format( szQuery, 511, "REPLACE INTO `class` ( `id` , `class` , `xp` ) VALUES ( '%d', '%d', '%d');", iUniqueID, player_class[id], player_xp[id] );
-	SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
+	if ( player_xp[id] > 0 && player_class[id] != 0)
+	{
+		format( szQuery, 511, "REPLACE INTO `class` ( `id` , `class` , `xp` ) VALUES ( '%d', '%d', '%d');", iUniqueID, player_class[id], player_xp[id] );
+		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
+	}
 
 
 	// Only save skill levels if the user does NOT play chameleon
 	// Then we need to save this!
-	if ( player_xp[id] > 0 )
+	if ( player_xp[id] > 0)
 	{
 		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_vitality[id], player_intelligence[id], player_dextery[id] );
 		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
@@ -2143,6 +2152,7 @@ public plugin_precache()
 	g_shock = precache_model("sprites/shockwave.spr")
 	sprite = precache_model("sprites/lgtning.spr");
 	precache_model("sprites/xfireball3.spr")
+	precache_model("sprites/diablo_lp/bone1.spr")
 	precache_model("models/portal/portal.mdl")
 	precache_model("sprites/diablo_lp/portal_tt.spr")
 	precache_model("sprites/diablo_lp/portal_ct.spr")
@@ -2212,6 +2222,8 @@ public plugin_precache()
 	precache_sound( "diablo_lp/bow2.wav" ); // Bows
 	precache_sound( "diablo_lp/bloodraventaunt1.wav" );
 	precache_sound( "diablo_lp/brdeath.wav" );
+	precache_sound( "diablo_lp/bonecast.wav" );
+	precache_sound( "diablo_lp/bonespear1.wav" );
 	
 	precache_model(cbow_VIEW)
     precache_model(cvow_PLAYER)
@@ -2596,7 +2608,6 @@ public on_EndRound()
 public RoundStart(){
 	kill_all_entity("przedmiot")
 	kill_all_entity("saber_smoke3")
-	kill_all_entity("colored_smokenade")
 	for (new i=0; i < 33; i++){
 		if(player_portals[i] > 0)
 		{
@@ -2682,27 +2693,14 @@ public RoundStart(){
 				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
-		if(player_class[i] == Leaper)
+		if(player_class[i] == Viper)
 		{
-			if(!g_bWeaponsDisabled)
+			new Float:gas = player_intelligence[i]/10.0;
+			if(gas < 1.0)
 			{
-				fm_give_item(i,"weapon_deagle")       
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"weapon_ak47")
-				fm_give_item(i,"ammo_762nato")
-				fm_give_item(i,"ammo_762nato")
-				fm_give_item(i,"ammo_762nato")
-				fm_give_item(i,"ammo_762nato")
+				gas = 1.0
 			}
-			else
-			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-			}
+			viper_gases[i] = floatround(gas,floatround_round);
 		}
 		if(player_class[i] == Mosquito)
 		{
@@ -3082,6 +3080,7 @@ public ResetHUD(id)
 		BoostRing(id)
 		
 		fired[id] = 0
+		fired_viper[id] = 0
 		
 		player_ultra_armor_left[id]=player_ultra_armor[id]
 		
@@ -3358,7 +3357,7 @@ public Damage(id)
 				
 				if(player_sword[attacker_id] == 1 && weapon==CSW_KNIFE )
 				{
-						change_health(id,-35,attacker_id,"world")					
+						change_health(id,-35,attacker_id,"sword")					
 				}
 				if(player_class[attacker_id] == Zakarum && weapon==CSW_KNIFE )
 				{
@@ -3368,7 +3367,7 @@ public Damage(id)
 						new Float:knife_dmg = player_intelligence[attacker_id]/2.0
 						if(knife_dmg < 1.0) { knife_dmg = 1.0; }
 						new knife_dmg2 = floatround(knife_dmg,floatround_round)
-						change_health(id,-knife_dmg2,attacker_id,"world")						
+						change_health(id,-knife_dmg2,attacker_id,"zakarum braid")						
 					}
 					
 				}
@@ -3381,7 +3380,7 @@ public Damage(id)
 					{
 						new Float:addin_damage = float(damage)/2.0
 						new new_damage = floatround(addin_damage,floatround_round)
-						change_health(id,-new_damage,attacker_id,"world")
+						change_health(id,-new_damage,attacker_id,"infidel sword")
 						new origin[3];
 						pev(id,pev_origin,origin)
 						//get_user_origin(id,origin,3);
@@ -3396,6 +3395,29 @@ public Damage(id)
 						write_byte(TE_EXPLFLAG_NOSOUND)
 						message_end()
 						engfunc(EngFunc_EmitAmbientSound, 0, origin, "diablo_lp/fireball3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+					}
+				}
+				if(weapon==CSW_KNIFE && player_class[attacker_id] == Viper)
+				{
+					new Float:viper_chance = player_intelligence[attacker_id]/160
+					new Float:chance = random_float(0.0, 1.0 )
+					
+					if( chance <= viper_chance )
+					{
+						new Float:addin_damage = float(damage)/2.0
+						new new_damage = floatround(addin_damage,floatround_round)
+						if(is_frozen[id] == 0)
+						{
+							new Float:colddelay
+							colddelay = player_intelligence[attacker_id] * 0.2
+							if(colddelay < 4.0) { colddelay = 4.0; }
+							glow_player(id, colddelay, 0, 0, 255)
+							set_user_maxspeed(id, 100.0)
+							set_task(colddelay, "unfreeze", id, "", 0, "a", 1)
+							is_frozen[id] = 1
+							Display_Icon(id ,2 ,"dmg_cold" ,0,206,209)
+						}
+						change_health(id,-new_damage,attacker_id,"cold")				
 					}
 				}
 				if (HasFlag(attacker_id,Flag_Ignite))
@@ -3596,11 +3618,6 @@ public client_PreThink ( id )
 	new body 
 	get_user_aiming(id, cel, body)
 	if( is_user_alive(id)) itminfo(id,cel)
-	if((player_class[id] != BloodRaven || !bow[id]) && righthand[id] == 0)
-	{
-		client_cmd(id, "cl_righthand 1")
-		righthand[id] = 1
-	}
 	if(bow_zoom[id]==1)
 	{
 		bow[id]++
@@ -3628,25 +3645,6 @@ public client_PreThink ( id )
 			}
 		}
     }
-	if (entity_get_int(id, EV_INT_button) & 2 && (player_class[id]== Leaper))
-        {
-                new flags = entity_get_int(id, EV_INT_flags)
-                
-                
-                if (flags & FL_WATERJUMP)
-                        return PLUGIN_CONTINUE
-                if ( entity_get_int(id, EV_INT_waterlevel) >= 2 )
-                        return PLUGIN_CONTINUE
-                if ( !(flags & FL_ONGROUND) )
-                        return PLUGIN_CONTINUE
-                
-                new Float:velocity[3]
-                entity_get_vector(id, EV_VEC_velocity, velocity)
-                velocity[2] += 250.0
-                entity_set_vector(id, EV_VEC_velocity, velocity)
-                
-                entity_set_int(id, EV_INT_gaitsequence, 6)
-        }
 	if (entity_get_int(id, EV_INT_button) & 2 && (player_b_autobh[id] > 0))
         {
                 new flags = entity_get_int(id, EV_INT_flags)
@@ -3697,6 +3695,11 @@ public client_PreThink ( id )
 		}
 	}
 	
+	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Viper)
+	{
+		viper_gas(id)
+	}
+	
 	if ((!(button2 & IN_RELOAD)) && on_knife[id] && button[id]==1) button[id]=0
 	//
 	
@@ -3738,7 +3741,7 @@ public client_PreThink ( id )
 			new Float: time_delay = 8.0-(player_intelligence[id]/8.0)
 
 			if(player_class[id] == Ninja) time_delay*=2.0
-			else if(player_class[id] == Mag)
+			else if(player_class[id] == Mag || player_class[id] == Viper)
 			{
 				time_delay=time_delay = 10.0-(player_intelligence[id]/8.0)
 				if(player_b_fireball[id]>0) time_delay=random_float(3.0,10.0-(player_intelligence[id]/8.0))
@@ -3831,7 +3834,6 @@ public client_PreThink ( id )
 			{
 				do_casting_bow(id)
 			}
-			//client_print(id,print_console, "inattack")
 			entity_set_int( id, EV_INT_button, entity_get_int(id,EV_INT_button) & ~IN_ATTACK );
 			entity_set_int( id, EV_INT_button, entity_get_int(id,EV_INT_button) & ~IN_ATTACK2 );
 		}
@@ -4559,6 +4561,23 @@ public pfn_touch ( ptr, ptd )
 			remove_entity(ptd)
 		}
 	}
+	if(equal(szClassName, "viperball"))
+	{
+		new owner = pev(ptd,pev_owner)
+		entity_get_string(ptr, EV_SZ_classname, szClassNameOther, 31);
+		//Touch
+		if(equal(szClassNameOther, "player"))
+		{
+			if ((get_user_team(owner) != get_user_team(ptr)) && (owner != ptr))
+			{
+				new dmg, Float:dmgsumm
+				dmgsumm = player_intelligence[owner]/5 - player_dextery[ptr]/10
+				dmg = floatround(dmgsumm, floatround_ceil)
+				if(dmg < 10) { dmg = 10; }
+				d2_damage( ptr, owner, dmg, "bone spear")
+			}
+		}
+	}
 	
 	if (ptr != 0 && pev_valid(ptr))
 	{
@@ -4658,7 +4677,7 @@ public frozen_touch(entity, player)
 		dmgsumm = (player_intelligence[owner]/5.0) - (player_dextery[player]/10.0)
 		dmg = floatround(dmgsumm, floatround_ceil)
 		if(dmg < 2) { dmg = 1; }
-		change_health(player,-dmg,owner,"world")
+		change_health(player,-dmg,owner,"cold")
 		remove_entity(entity)
 		emit_sound(owner, CHAN_STATIC, "diablo_lp/frozne_blast.wav", VOL_NULL, ATTN_NONE, SND_STOP, PITCH_NONE)
 	}
@@ -6385,13 +6404,13 @@ public add_damage_bonus(id,damage,attacker_id)
 {
 	if (player_b_damage[attacker_id] > 0 && get_user_health(id)>player_b_damage[attacker_id])
 	{
-		change_health(id,-player_b_damage[attacker_id],attacker_id,"")
+		change_health(id,-player_b_damage[attacker_id],attacker_id,"damage bonus")
 			
 		if (random_num(0,2) == 1) Effect_Bleed(id,248)
 	}
 	if (c_damage[attacker_id] > 0 && get_user_health(id)>player_b_damage[attacker_id])
 	{
-		change_health(id,-c_damage[attacker_id],attacker_id,"")
+		change_health(id,-c_damage[attacker_id],attacker_id,"damage bonus")
 			
 		if (random_num(0,2) == 1) Effect_Bleed(id,248)
 	}
@@ -6475,7 +6494,7 @@ public add_grenade_bonus(id,attacker_id,weapon)
 public add_redhealth_bonus(id)
 {
 	if (player_b_reduceH[id] > 0)
-		change_health(id,-player_b_reduceH[id],0,"")
+		change_health(id,-player_b_reduceH[id],0,"reduce bonus")
 	if(player_item_id[id]==17)	//stalker ring
 		set_user_health(id,5)
 	if(player_item_id[id]==88)	//own invisible
@@ -6645,7 +6664,7 @@ public add_bonus_explode(id)
 			{
 				new dam = 75-(player_dextery[a]*2)
 				if(dam<1) dam=1
-				change_health(a,-dam,id,"grenade")
+				change_health(a,-dam,id,"explode bonus")
 				Display_Fade(id,2600,2600,0,255,0,0,15)				
 			}
 		}
@@ -6708,7 +6727,7 @@ public add_bonus_explode(id)
 				new Float:dam2 = (player_intelligence[id]/2.0)-(player_dextery[a]/2.0)+10.0
 				dam = floatround(dam2,floatround_round);
 				if(dam<1) dam=0
-				change_health(a,-dam,id,"world")
+				change_health(a,-dam,id,"cold")
 				Display_Icon(a ,2 ,"dmg_cold" ,rgb[0],rgb[1],rgb[2])
 				set_task(3.0, "remove_frozencold", a)		
 			}
@@ -6950,7 +6969,6 @@ public item_fireball(id)
 {
 	if (fired[id] > 0)
 	{
-		hudmsg(id,2.0,"Шар можно использовать один раз за раунд!")
 		return PLUGIN_HANDLED
 	}
 	
@@ -6991,6 +7009,189 @@ public item_fireball(id)
 		message_end() 
 	}	
 	return PLUGIN_HANDLED
+}
+
+public item_viper(id)
+{
+	if (fired_viper[id] > 0)
+	{
+		hudmsg(id,2.0,"Копье еще не активировалось")
+		return PLUGIN_HANDLED
+	}
+	if (fired_viper[id] == 0 && is_user_alive(id) == 1)
+	{
+		fired_viper[id] = 1
+		new Float:fOrigin[3],enOrigin[3]
+		get_user_origin(id, enOrigin)
+		new ent = create_entity("env_sprite")
+   
+		IVecFVec(enOrigin, fOrigin)
+		viper_cord[id] = fOrigin;
+
+   
+		entity_set_string(ent, EV_SZ_classname, "viperball")
+		entity_set_model(ent, "sprites/diablo_lp/bone1.spr")
+		entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
+		entity_set_float(ent, EV_FL_framerate, 9.0)
+
+		DispatchSpawn(ent)
+
+		entity_set_origin(ent, fOrigin)
+		entity_set_size(ent, Float:{-5.0, -5.0, -5.0}, Float:{5.0, 5.0, 5.0})
+		entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
+		entity_set_int(ent, EV_INT_movetype, MOVETYPE_NOCLIP)
+		entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
+		entity_set_float(ent, EV_FL_renderamt, 255.0)
+		entity_set_edict(ent,EV_ENT_owner, id)
+		
+		entity_set_float(ent, EV_FL_scale, 0.5)
+		//Send forward
+		new Float:fl_iNewVelocity[3]
+		VelocityByAim(id, 800, fl_iNewVelocity)
+		entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
+		set_pev(ent, pev_nextthink, (get_gametime() + 4.0))
+		viper_vector[id] = fl_iNewVelocity;
+		viper_spear[id] = 1
+		
+		set_task(0.1,"create_bone_spear",id)
+		
+		emit_sound(id, CHAN_VOICE, "diablo_lp/bonecast.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	}	
+	return PLUGIN_HANDLED
+}
+
+public create_bone_spear(id)
+{
+	new ent2 = create_entity("env_sprite")
+
+	viper_spear[id]++
+	entity_set_string(ent2, EV_SZ_classname, "viperball")
+	entity_set_model(ent2, "sprites/diablo_lp/bone1.spr")
+	entity_set_int(ent2, EV_INT_spawnflags, SF_SPRITE_STARTON)
+	entity_set_float(ent2, EV_FL_framerate, 9.0)
+
+	DispatchSpawn(ent2)
+
+	entity_set_origin(ent2, viper_cord[id])
+	entity_set_size(ent2, Float:{-5.0, -5.0, -5.0}, Float:{5.0, 5.0, 5.0})
+	entity_set_int(ent2, EV_INT_solid, SOLID_BBOX)
+	entity_set_int(ent2, EV_INT_movetype, MOVETYPE_NOCLIP)
+	entity_set_int(ent2, EV_INT_rendermode, kRenderTransAdd)
+	entity_set_float(ent2, EV_FL_renderamt, 255.0)
+	if(viper_spear[id] == 2)
+	{
+		entity_set_float(ent2, EV_FL_scale, 0.6)
+	}
+	else if(viper_spear[id] == 3)
+	{
+		entity_set_float(ent2, EV_FL_scale, 0.8)
+		emit_sound(ent2, CHAN_VOICE, "diablo_lp/bonespear1.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	}
+	else if(viper_spear[id] == 4)
+	{
+		entity_set_float(ent2, EV_FL_scale, 1.0)
+	}
+	else if(viper_spear[id] == 5)
+	{
+		entity_set_float(ent2, EV_FL_scale, 1.2)
+	}
+	entity_set_edict(ent2,EV_ENT_owner, id)
+	//Send forward
+	entity_set_vector(ent2, EV_VEC_velocity, viper_vector[id])
+	if(viper_spear[id] < 5)
+	{
+		set_task(0.1,"create_bone_spear",id)
+	}
+	set_pev(ent2, pev_nextthink, (get_gametime() + 4.0))
+}
+
+public viper_think(ent)
+{
+	remove_entity(ent)
+	    
+	return PLUGIN_CONTINUE
+}
+
+public viper_gas(id)
+{
+	if(viper_gas_time[id] + 5.0 > get_gametime())
+	{
+		client_print(id, print_center, "Газ можно использовать каждые 5 секунд!");
+		return PLUGIN_CONTINUE;
+	}
+	if(player_intelligence[id] < 1)
+	{
+		client_print(id, print_center, "Чтобы пускать газ необходим Интеллект!");
+		return PLUGIN_CONTINUE;
+	}
+	if(viper_gases[id] < 1)
+	{
+		client_print(id, print_center, "У вас закончился газ!");
+		return PLUGIN_CONTINUE;
+	}
+	if(is_user_alive(id))
+	{
+		viper_gas_time[id] = get_gametime();
+		viper_gases[id]--
+		new Float:vOrigin[ 3 ]
+		entity_get_vector( id, EV_VEC_origin, vOrigin );
+		
+		// create new entity
+		new iEntity = create_entity( "info_target" );
+		if( iEntity > 0 ) 
+		{
+			
+			message_begin( MSG_BROADCAST, SVC_TEMPENTITY );
+			write_byte( TE_FIREFIELD );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 0 ] );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 1 ] );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 2 ] + 50 );
+			write_short( 100 );
+			write_short( sprite_sabrecat );
+			write_byte( 100 );
+			write_byte( TEFIRE_FLAG_ALPHA );
+			write_byte( 1000 );
+			message_end();
+			
+			message_begin( MSG_BROADCAST, SVC_TEMPENTITY );
+			write_byte( TE_FIREFIELD );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 0 ] );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 1 ] );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 2 ] + 50 );
+			write_short( 150 );
+			write_short( sprite_sabrecat );
+			write_byte( 10 );
+			write_byte( TEFIRE_FLAG_ALPHA | TEFIRE_FLAG_SOMEFLOAT );
+			write_byte( 1000 );
+			message_end( );
+			new iEntity2;
+			iEntity2 = create_entity("info_target")
+			entity_set_string(iEntity2,EV_SZ_classname,"saber_smoke3")
+			engfunc(EngFunc_SetModel, iEntity2, "models/portal/portal.mdl")
+			set_pev(iEntity2,pev_solid,SOLID_TRIGGER)
+			set_pev(iEntity2,pev_movetype,MOVETYPE_FLY)
+			set_pev(iEntity2,pev_skin,1)		
+			engfunc(EngFunc_SetOrigin, iEntity2, vOrigin)
+			set_rendering(iEntity2, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 0 )
+			entity_set_edict(iEntity2,EV_ENT_owner, id)
+			set_pev(iEntity2,pev_owner,id);
+			entity_set_float( iEntity2, EV_FL_nextthink, get_gametime( ) + 21.5 );
+			new Float:fMins[3],Float:fMaxs[3];
+			pev(iEntity2, pev_mins, fMins)
+			pev(iEntity2, pev_maxs, fMaxs)
+			fMins[0] = fMins[0] + 100.5;
+			fMins[1] = fMins[1] + 100.5;
+			fMins[2] = fMins[2] + 100.5;
+
+			fMaxs[0] = fMaxs[0] + 100.5;
+			fMaxs[1] = fMaxs[1] + 100.5;
+			fMaxs[2] = fMaxs[2] + 100.5;
+			entity_set_size(iEntity2,Float:{-100.0,-100.0,-100.0},Float:{100.0,100.0,100.0})
+			emit_sound(iEntity, CHAN_VOICE, "diablo_lp/poison.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+		}
+	}
+	
+	return PLUGIN_CONTINUE
 }
 
 public add_bonus_redirect(id)
@@ -7047,7 +7248,7 @@ public add_bonus_darksteel(attacker,id,damage)
 			new dam = floatround (15+player_strength[id]*2*player_b_darksteel[id]/10.0)
 			
 			Effect_Bleed(id,248)
-			change_health(id,-dam,attacker,"world")
+			change_health(id,-dam,attacker,"darkstell")
 		}
 	}
 	if (c_darksteel[attacker] > 0)
@@ -7056,7 +7257,7 @@ public add_bonus_darksteel(attacker,id,damage)
 	{
 		new dam = (1+player_b_darksteel[id])
 		Effect_Bleed(id,248)
-		change_health(id,-dam,attacker,"world")
+		change_health(id,-dam,attacker,"darksteel")
 	}
 }
 }
@@ -8044,7 +8245,7 @@ public PressedKlasy(id, key)
 public PokazZwierze(id) 
 {	
 	new iLen,text5[512]
-	iLen += format(text5, 511, "\yЗвери/Животные: ^n\w1. \yЗакарум^t\wУровень: \r%i^n\w2. \yПрыгун^t\wУровень: \r%i^n",player_class_lvl[id][17],player_class_lvl[id][18]);
+	iLen += format(text5, 511, "\yЗвери/Животные: ^n\w1. \yЗакарум^t\wУровень: \r%i^n\w2. \yСаламандра^t\wУровень: \r%i^n",player_class_lvl[id][17],player_class_lvl[id][18]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yГигантский комар^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \yАдский кот^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
@@ -8060,7 +8261,7 @@ public PokazZwierz( id, item )
 	/* Menu:
 	---.Zwierzeta
 	1.Zakarum
-	2.Leaper
+	2.Viper
 	3.Mosquito
 	4.Frozen
 	5.Infidel
@@ -8088,7 +8289,7 @@ public PokazZwierz( id, item )
 		}
 		case 1: 
 		{    
-			player_class[id] = Leaper
+			player_class[id] = Viper
 			MYSQLX_SetDataForRace( id )
 		}
 		case 2: 
@@ -8253,7 +8454,6 @@ public check_class()
 
 public add_barbarian_bonus(id)
 {
-	new headshot = read_data(3)
 	if (player_class[id] == Barbarian)
 	{	
 		change_health(id,30,0,"")
@@ -8293,7 +8493,7 @@ public add_bonus_necromancer(attacker_id,id)
 		else
 		{
 			new dmg = random_num(6,12)
-			change_health(id,-dmg,0,"")
+			change_health(id,-dmg,0,"necromancer bonus")
 			change_health(attacker_id,1,0,"")
 		}
 	}
@@ -8425,7 +8625,7 @@ public item_dagon(id)
 	
 	//Apply damage
 
-	change_health(target,-DagonDamage,id,"world")
+	change_health(target,-DagonDamage,id,"dagon")
 	Display_Fade(target,2600,2600,0,255,0,0,15)
 	hudmsg(id,2.0,"Ваши удары dagon %i, %i", DagonDamage, player_dextery[target]*2)
 
@@ -9542,7 +9742,7 @@ public Effect_Ignite_Think(ent)
 	
 	
 	//Do the actual damage
-	change_health(id,-damage,attacker,"world")
+	change_health(id,-damage,attacker,"ignite")
 	
 	set_pev(ent,pev_nextthink, halflife_time() + 1.5)
 	
@@ -9835,7 +10035,7 @@ public add_bonus_stomp(id)
 		write_short( 1<<14 );
 		message_end();
 		
-		change_health(pid,-dam,id,"world")			
+		change_health(pid,-dam,id,"stomp bonus")			
 	}
 		
 	return PLUGIN_CONTINUE
@@ -9909,13 +10109,13 @@ public Effect_Rot_Think(ent)
 		//Rot him!
 		if (random_num(1,2) == 1) Display_Fade(id,1<<14,1<<14,1<<16,255,155,50,230)
 		
-		change_health(pid,-45,id,"world")
+		change_health(pid,-45,id,"rot")
 		Effect_Bleed(pid,100)
 		Create_Slow(pid,3)
 		
 	}
 	
-	change_health(id,-10,id,"world")
+	change_health(id,-10,id,"rot")
 		
 	set_pev(ent,pev_nextthink, halflife_time() + 0.8)
 	return PLUGIN_CONTINUE
@@ -11289,108 +11489,56 @@ public fwd_emitsound(id, channel, const sound[], Float:fVol, Float:fAttn, iFlags
 			entity_set_vector( id, EV_VEC_origin, Float:{ 9999.9, 9999.9, 9999.9 } );
 			entity_set_int( id, EV_INT_flags, FL_KILLME );
 			
-			// create new entity
-			new iEntity = create_entity( "info_target" );
-			if( iEntity > 0 ) {
-				entity_set_string( iEntity, EV_SZ_classname, g_SabreSmokeClassname );
-				
-				entity_set_origin( iEntity, vOrigin );
-				entity_set_vector( iEntity, EV_VEC_angles, vAngles );
-				
-				entity_set_int( iEntity, EV_INT_movetype, MOVETYPE_TOSS );
-				entity_set_int( iEntity, EV_INT_solid, SOLID_BBOX );
-				
-				entity_set_float( iEntity, EV_FL_nextthink, get_gametime( ) + 21.5 );
-				entity_set_float( iEntity, EV_FL_gravity, 0.5 );
-				entity_set_float( iEntity, EV_FL_friction, 0.8 );
-				
-				entity_set_model( iEntity, szModel );
-				
-				new Float:vVelocity[ 3 ];
-				vVelocity[ 0 ] = random_float( -220.0, 220.0 );
-				vVelocity[ 1 ] = random_float( -220.0, 220.0 );
-				vVelocity[ 2 ] = random_float(  200.0, 300.0 );
-				entity_set_vector( iEntity, EV_VEC_velocity, vVelocity );
-				
-				//emit_sound( iEntity, channel, sound, fVol, fAttn, iFlags, iPitch );
-				
-				// Create fake smoke
-				
-				message_begin( MSG_BROADCAST, SVC_TEMPENTITY );
-				write_byte( TE_FIREFIELD );
-				engfunc( EngFunc_WriteCoord, vOrigin[ 0 ] );
-				engfunc( EngFunc_WriteCoord, vOrigin[ 1 ] );
-				engfunc( EngFunc_WriteCoord, vOrigin[ 2 ] + 50 );
-				write_short( 100 );
-				write_short( sprite_sabrecat );
-				write_byte( 100 );
-				write_byte( TEFIRE_FLAG_ALPHA );
-				write_byte( 1000 );
-				message_end();
-				
-				message_begin( MSG_BROADCAST, SVC_TEMPENTITY );
-				write_byte( TE_FIREFIELD );
-				engfunc( EngFunc_WriteCoord, vOrigin[ 0 ] );
-				engfunc( EngFunc_WriteCoord, vOrigin[ 1 ] );
-				engfunc( EngFunc_WriteCoord, vOrigin[ 2 ] + 50 );
-				write_short( 150 );
-				write_short( sprite_sabrecat );
-				write_byte( 10 );
-				write_byte( TEFIRE_FLAG_ALPHA | TEFIRE_FLAG_SOMEFLOAT );
-				write_byte( 1000 );
-				message_end( );
-				new iEntity2;
-				iEntity2 = create_entity("info_target")
-				entity_set_string(iEntity2,EV_SZ_classname,"saber_smoke3")
-				engfunc(EngFunc_SetModel, iEntity2, "models/portal/portal.mdl")
-				set_pev(iEntity2,pev_solid,SOLID_TRIGGER)
-				set_pev(iEntity2,pev_movetype,MOVETYPE_FLY)
-				set_pev(iEntity2,pev_skin,1)		
-				engfunc(EngFunc_SetOrigin, iEntity2, vOrigin)
-				set_rendering(iEntity2, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 0 )
-				entity_set_edict(iEntity2,EV_ENT_owner, iOwner)
-				set_pev(iEntity2,pev_owner,iOwner);
-				entity_set_float( iEntity2, EV_FL_nextthink, get_gametime( ) + 21.5 );
-				new Float:fMins[3],Float:fMaxs[3];
-				pev(iEntity2, pev_mins, fMins)
-				pev(iEntity2, pev_maxs, fMaxs)
-				fMins[0] = fMins[0] + 100.5;
-				fMins[1] = fMins[1] + 100.5;
-				fMins[2] = fMins[2] + 100.5;
+			// Create fake smoke
+			
+			message_begin( MSG_BROADCAST, SVC_TEMPENTITY );
+			write_byte( TE_FIREFIELD );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 0 ] );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 1 ] );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 2 ] + 50 );
+			write_short( 100 );
+			write_short( sprite_sabrecat );
+			write_byte( 100 );
+			write_byte( TEFIRE_FLAG_ALPHA );
+			write_byte( 1000 );
+			message_end();
+			
+			message_begin( MSG_BROADCAST, SVC_TEMPENTITY );
+			write_byte( TE_FIREFIELD );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 0 ] );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 1 ] );
+			engfunc( EngFunc_WriteCoord, vOrigin[ 2 ] + 50 );
+			write_short( 150 );
+			write_short( sprite_sabrecat );
+			write_byte( 10 );
+			write_byte( TEFIRE_FLAG_ALPHA | TEFIRE_FLAG_SOMEFLOAT );
+			write_byte( 1000 );
+			message_end( );
+			new iEntity2;
+			iEntity2 = create_entity("info_target")
+			entity_set_string(iEntity2,EV_SZ_classname,"saber_smoke3")
+			engfunc(EngFunc_SetModel, iEntity2, "models/portal/portal.mdl")
+			set_pev(iEntity2,pev_solid,SOLID_TRIGGER)
+			set_pev(iEntity2,pev_movetype,MOVETYPE_FLY)
+			set_pev(iEntity2,pev_skin,1)		
+			engfunc(EngFunc_SetOrigin, iEntity2, vOrigin)
+			set_rendering(iEntity2, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 0 )
+			entity_set_edict(iEntity2,EV_ENT_owner, iOwner)
+			set_pev(iEntity2,pev_owner,iOwner);
+			entity_set_float( iEntity2, EV_FL_nextthink, get_gametime( ) + 21.5 );
+			new Float:fMins[3],Float:fMaxs[3];
+			pev(iEntity2, pev_mins, fMins)
+			pev(iEntity2, pev_maxs, fMaxs)
+			fMins[0] = fMins[0] + 100.5;
+			fMins[1] = fMins[1] + 100.5;
+			fMins[2] = fMins[2] + 100.5;
 
-				fMaxs[0] = fMaxs[0] + 100.5;
-				fMaxs[1] = fMaxs[1] + 100.5;
-				fMaxs[2] = fMaxs[2] + 100.5;
-				//engfunc(EngFunc_SetSize, iEntity2,fMins, fMaxs)
-				//entity_set_size(iEntity2,fMins, fMaxs)
-				entity_set_size(iEntity2,Float:{-100.0,-100.0,-100.0},Float:{100.0,100.0,100.0})
-				emit_sound(iEntity, CHAN_VOICE, "diablo_lp/poison.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
-				
-				/*new Float:fOrigin[3], Float:fMins2[3], Float:fMaxs2[3];
-				pev(iEntity2, pev_mins, fMins2);
-				pev(iEntity2, pev_maxs, fMaxs2);
-				pev(iEntity2, pev_origin, fOrigin);
-				new g_iColor[3] = { 0, 255, 255 };
-				fMins2[0] += fOrigin[0];
-				fMins2[1] += fOrigin[1];
-				fMins2[2] += fOrigin[2];
-				fMaxs2[0] += fOrigin[0];
-				fMaxs2[1] += fOrigin[1];
-				fMaxs2[2] += fOrigin[2];
-
-				fm_draw_line(iOwner, fMaxs2[0], fMaxs2[1], fMaxs2[2], fMins2[0], fMaxs2[1], fMaxs2[2], g_iColor);
-				fm_draw_line(iOwner, fMaxs2[0], fMaxs2[1], fMaxs2[2], fMaxs2[0], fMins2[1], fMaxs2[2], g_iColor);
-				fm_draw_line(iOwner, fMaxs2[0], fMaxs2[1], fMaxs2[2], fMaxs2[0], fMaxs2[1], fMins2[2], g_iColor);
-				fm_draw_line(iOwner, fMins2[0], fMins2[1], fMins2[2], fMaxs2[0], fMins2[1], fMins2[2], g_iColor);
-				fm_draw_line(iOwner, fMins2[0], fMins2[1], fMins2[2], fMins2[0], fMaxs2[1], fMins2[2], g_iColor);
-				fm_draw_line(iOwner, fMins2[0], fMins2[1], fMins2[2], fMins2[0], fMins2[1], fMaxs2[2], g_iColor);
-				fm_draw_line(iOwner, fMins2[0], fMaxs2[1], fMaxs2[2], fMins2[0], fMaxs2[1], fMins2[2], g_iColor);
-				fm_draw_line(iOwner, fMins2[0], fMaxs2[1], fMins2[2], fMaxs2[0], fMaxs2[1], fMins2[2], g_iColor);
-				fm_draw_line(iOwner, fMaxs2[0], fMaxs2[1], fMins2[2], fMaxs2[0], fMins2[1], fMins2[2], g_iColor);
-				fm_draw_line(iOwner, fMaxs2[0], fMins2[1], fMins2[2], fMaxs2[0], fMins2[1], fMaxs2[2], g_iColor);
-				fm_draw_line(iOwner, fMaxs2[0], fMins2[1], fMaxs2[2], fMins2[0], fMins2[1], fMaxs2[2], g_iColor);
-				fm_draw_line(iOwner, fMins2[0], fMins2[1], fMaxs2[2], fMins2[0], fMaxs2[1], fMaxs2[2], g_iColor);*/		
-			}
+			fMaxs[0] = fMaxs[0] + 100.5;
+			fMaxs[1] = fMaxs[1] + 100.5;
+			fMaxs[2] = fMaxs[2] + 100.5;
+			
+			entity_set_size(iEntity2,Float:{-100.0,-100.0,-100.0},Float:{100.0,100.0,100.0})
+			emit_sound(iEntity2, CHAN_VOICE, "diablo_lp/poison.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM);
 		}
 	}
 		
@@ -11531,25 +11679,22 @@ public FwdPlayerTouch_FakeSmoke( iEntity, iPlayer ) {
 		set_task(colddelay, "unpoison", iPlayer, "", 0, "a", 1)
 		is_poisoned[iPlayer] = 1
 		Display_Icon(iPlayer ,2 ,"dmg_gas" ,0,255,0)
-		new dmg, Float:dmgsumm
-		dmgsumm = (player_intelligence[iOwner]+20.0) - (player_dextery[iPlayer]+10.0)
-		dmg = floatround(dmgsumm, floatround_ceil)
+		new dmg = player_intelligence[iOwner] - player_dextery[iPlayer]
 		if(dmg < 10) { dmg = 10; }
-		change_health(iPlayer,-dmg,iOwner,"world")
+		d2_damage( iPlayer, iOwner, dmg, "poison gas")
+		is_touched[iPlayer]=get_gametime()
 	}
-	new dmg, Float:dmgsumm
-	dmgsumm = (player_intelligence[iOwner]/10.0)+5.0
-	dmg = floatround(dmgsumm, floatround_ceil)
-	if(dmg < 5) { dmg = 5; }
-	if((is_touched[iPlayer] < 20) && (is_touched[iPlayer] > 0))
+	if(is_touched[iPlayer] + 1.0 < get_gametime())
 	{
-		is_touched[iPlayer]++;
-	}
-	else
-	{
-		is_touched[iPlayer] = 1
-		change_health(iPlayer,-dmg,iOwner,"world")	
-		Effect_Bleed(iPlayer,248)			
+		new dmg, Float:dmgsumm
+		dmgsumm = (player_intelligence[iOwner]/4.0)+5.0 - (player_dextery[iPlayer]/10.0)
+		dmg = floatround(dmgsumm, floatround_ceil)
+		
+		if(dmg < 5) { dmg = 5; }
+		
+		d2_damage( iPlayer, iOwner, dmg, "poison gas")
+		Effect_Bleed(iPlayer,248)
+		is_touched[iPlayer]=get_gametime()
 	}
 	
 	return PLUGIN_CONTINUE;
@@ -12152,8 +12297,6 @@ public command_bow(id)
 		{
 			set_pev(id, pev_viewmodel2, bloodbow_VIEW)
 			set_pev(id, pev_weaponmodel2, bloodbow_PLAYER)
-			client_cmd(id, "cl_righthand 0")
-			righthand[id] = 0
 		}
 		else
 		{
@@ -12218,7 +12361,7 @@ public toucharrow(arrow, id)
 
 		bowdelay[kid] -=  0.5 - floatround(player_intelligence[kid]/5.0)
 	
-		change_health(id,floatround(-dmg),kid,"knife")
+		change_health(id,floatround(-dmg),kid,"arrow")
 		
 		if(fire_bows[kid])
 		{
@@ -12756,6 +12899,12 @@ public call_cast(id)
 			zak_maxspeed = float(speed_points + 400);
 			show_hudmessage(id, "[Закарум] Макс. скорость %i. ^nСбивается при переключении оружия.", floatround(zak_maxspeed,floatround_round))
 			set_user_maxspeed(id,zak_maxspeed)
+		}
+		case Viper:
+		{
+			show_hudmessage(id, "[Саламандра] Выстрел костяным копьем") 
+			fired_viper[id]=0
+			item_viper(id)
 		}
 		case BloodRaven:
 		{
