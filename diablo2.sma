@@ -216,6 +216,34 @@ new ghosttime[33]
 new ghoststate[33]
 new naswietlony[33]
 
+new spider_traps[33]
+new is_trap_active[33]
+new owner_radar_trap[33] //Кто владелец ловушки показать ему на радаре
+new spider_hook_disabled[33] //Кто владелец ловушки показать ему на радаре
+new Float:spider_regen_time[33]
+
+new const primaryWeapons[][] = {
+	"weapon_shield",
+	"weapon_scout",
+	"weapon_xm1014",
+	"weapon_mac10",
+	"weapon_aug",
+	"weapon_ump45",
+	"weapon_sg550",
+	"weapon_galil",
+	"weapon_famas",
+	"weapon_awp",
+	"weapon_mp5navy",
+	"weapon_m249",
+	"weapon_m3",
+	"weapon_m4a1",
+	"weapon_tmp",
+	"weapon_g3sg1",
+	"weapon_sg552",
+	"weapon_ak47",
+	"weapon_p90"
+}
+
 new sprite_blood_drop = 0
 new sprite_blood_spray = 0
 new sprite_gibs = 0
@@ -364,9 +392,6 @@ new player_artifact[33][4]
 new player_artifact_time[33][4]
 new const modelitem[]="models/winebottle.mdl" //tutaj zmieniacie model itemu
 new const gszSound[] = "diablo_lp/eleccast.wav";
-//infidel
-new lastactive[33]
-new nextcheck[33]
 //Cvars
 new pHook, pThrowSpeed, pSpeed, pWidth, pSound, pColor
 new pInterrupt, pAdmin, pHookSky, pOpenDoors, pPlayers
@@ -437,6 +462,8 @@ new scythe_view[]  = "models/diablomod/v_scythe.mdl"
 new infidel_view[]  = "models/diablomod/v_infidel2.mdl"
 new infidel_model[]  = "models/player/d2_infidel/d2_infidel.mdl"
 new infidel_model_short[]  = "d2_infidel"
+new mosquito_model_short[]  = "d2_mosquito3"
+new mosquito_model[]  = "models/player/d2_mosquito3/d2_mosquito3.mdl"
 new bloodbow_VIEW[]  = "models/diablomod/v_ravenbow.mdl" 
 new bloodbow_PLAYER[]= "models/diablomod/p_ravenbow.mdl" 
 //new bloodbow_MODEL[]  = "models/diablomod/Crossbow_bolt.mdl"
@@ -474,7 +501,7 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Giant Spider", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,100,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -716,6 +743,7 @@ public plugin_init()
 	register_forward(FM_SetClientKeyValue, "fw_SetClientKeyValue")
 	g_MaxPlayers = get_maxplayers()
 	//register_forward(FM_CmdStart, "Fwd_CmdStart");
+	register_forward(FM_CmdStart, "FwdCmdStart");
 	RegisterHam(Ham_TakeDamage, "player", "lustrzanypocisk")
 
 	
@@ -899,6 +927,8 @@ public plugin_init()
 	
 	register_touch("mosquito_sting", "func_breakable",	"touchbreakable")
 	register_touch("func_breakable", "mosquito_sting",	"touchbreakable")
+	
+	register_touch("spidertrap", "player", "touchSpiderTrap")
 	
 	register_cvar("diablo_knife","20")
 	register_cvar("diablo_knife_speed","1000")
@@ -2130,6 +2160,7 @@ public plugin_precache()
 	precache_model(scythe_view)
 	precache_model(infidel_view)
 	precache_model(infidel_model)
+	precache_model(mosquito_model)
 	precache_model(SABRECAT_VIEW)
 	precache_model(SABRECAT_PLAYER)
 	precache_model(SABRECAT_MODEL)
@@ -2608,6 +2639,7 @@ public on_EndRound()
 public RoundStart(){
 	kill_all_entity("przedmiot")
 	kill_all_entity("saber_smoke3")
+	kill_all_entity("spidertrap")
 	for (new i=0; i < 33; i++){
 		if(player_portals[i] > 0)
 		{
@@ -2621,7 +2653,7 @@ public RoundStart(){
 				engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_ct.spr")
 				engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_ct.spr")
 			}
-		}		
+		}
 		
 		if(player_class[i] == Baal) 
 		{
@@ -2705,6 +2737,7 @@ public RoundStart(){
 		if(player_class[i] == Mosquito)
 		{
 			mosquito_sting[i] = 0
+			entity_set_string(i, EV_SZ_viewmodel, "")
 		}
 		if(player_class[i] == SabreCat)
 		{
@@ -2719,6 +2752,10 @@ public RoundStart(){
 		{
 			new Float:random_time = random_float(15.0, 20.0);
 			set_task(random_time, "play_idle", i+2000, _, _, "b")
+		}
+		if(player_class[i] == GiantSpider)
+		{
+			spider_traps[i] = 0
 		}
 		if(player_class[i] == Imp)
 		{
@@ -2811,6 +2848,10 @@ public RoundStart(){
 		if(player_class[i] == Infidel)
 		{
 			cs2_set_player_model(i, infidel_model_short);
+		}
+		else if(player_class[i] == Mosquito)
+		{
+			cs2_set_player_model(i, mosquito_model_short);
 		}
 		else
 		{
@@ -2958,7 +2999,7 @@ public CurWeapon(id)
 				{
 					entity_set_string(id, EV_SZ_viewmodel, infidel_view)  
 					entity_set_string(id, EV_SZ_weaponmodel, KNIFE_PLAYER)  
-				}
+				} 
 				else
 				{
 					entity_set_string(id, EV_SZ_viewmodel, KNIFE_VIEW)  
@@ -3043,6 +3084,11 @@ public CurWeapon(id)
 				entity_set_string(id, EV_SZ_viewmodel, KNIFE_VIEW)  
 				entity_set_string(id, EV_SZ_weaponmodel, KNIFE_PLAYER)  
 			}
+		}
+		
+		if(player_class[id] == Mosquito)
+		{
+			entity_set_string(id, EV_SZ_viewmodel, "")
 		}
 		
 		set_gravitychange(id)
@@ -3158,6 +3204,8 @@ public DeathMsg(id)
 	
 	hit_key[vid] = false
 	
+	kill_all_traps(vid)
+	
 	if (use_fly[player])
 	{
 		use_fly[player] = false
@@ -3196,7 +3244,7 @@ public DeathMsg(id)
 	}
 	if(player_class[vid] == BloodRaven)
 	{
-		static origin[3], entSound
+		static origin[3]
 		get_user_origin(vid, origin)
 		
 		emit_sound(vid,CHAN_STATIC,"diablo_lp/brdeath.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
@@ -3295,6 +3343,12 @@ public Damage(id)
 		new weapon
 		new bodypart
 		
+		if((player_class[id] == GiantSpider) && (spider_hook_disabled[id] == 0))
+		{
+			spider_hook_disabled[id]=1
+			del_hook(id)
+			set_task(5.0, "enablehook", id)
+		}
 		if(get_user_attacker(id,weapon,bodypart)!=0)
 		{
 			new damage = read_data(2)
@@ -3537,6 +3591,25 @@ public UpdateClientData_Post( id, sendweapons, cd_handle )
 	
 	return FMRES_HANDLED;
 }
+
+public FwdCmdStart(id, uc_handle)
+{
+    static Button, OldButtons;
+    Button = get_uc(uc_handle, UC_Buttons);
+    OldButtons = pev(id, pev_oldbuttons);
+ 
+    if((Button & IN_RELOAD) && !(OldButtons & IN_RELOAD) && on_knife[id] && player_class[id]==GiantSpider)
+    {
+        // Player presses reload
+        make_hook(id)
+    }
+
+    if(!(Button & IN_RELOAD) && (OldButtons & IN_RELOAD) && player_class[id]==GiantSpider)
+    {
+        // Player releases reload
+        del_hook(id)
+    }
+} 
 
 public client_PreThink ( id ) 
 {	
@@ -4695,6 +4768,17 @@ public unpoison(id)
 	is_poisoned[id] = 0
 	Display_Icon(id ,0 ,"dmg_gas" ,0,0,0)
 	set_speedchange(id)
+}
+
+public untrap(id)
+{
+	is_trap_active[id] = 0
+	set_speedchange(id)
+}
+
+public enablehook(id)
+{
+	spider_hook_disabled[id] = 0
 }
 
 
@@ -7194,6 +7278,25 @@ public viper_gas(id)
 	return PLUGIN_CONTINUE
 }
 
+public create_trap(id)
+{	
+	if (is_user_alive(id) == 1 && freeze_ended == true)
+	{
+		new Float:pOrigin[3]
+		entity_get_vector(id,EV_VEC_origin, pOrigin)
+		new ent = create_entity("info_target")
+		
+		entity_set_model(ent,"models/w_backpack.mdl")
+		entity_set_origin(ent,pOrigin)
+		//entity_set_string(c4fake[id],EV_SZ_classname,"fakec4")
+		entity_set_string(ent,EV_SZ_classname,"spidertrap")
+		entity_set_int(ent, EV_INT_solid, 1)
+		entity_set_int(ent,EV_INT_movetype,6)
+		entity_set_edict(ent,EV_ENT_owner,id)
+		spider_traps[id]++
+	}
+}
+
 public add_bonus_redirect(id)
 {
 	if (player_b_redirect[id] > 0)
@@ -8247,7 +8350,7 @@ public PokazZwierze(id)
 	new iLen,text5[512]
 	iLen += format(text5, 511, "\yЗвери/Животные: ^n\w1. \yЗакарум^t\wУровень: \r%i^n\w2. \yСаламандра^t\wУровень: \r%i^n",player_class_lvl[id][17],player_class_lvl[id][18]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yГигантский комар^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yGiant Spider^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yГигантский паук^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \yАдский кот^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера");
 	
@@ -9094,7 +9197,7 @@ public SelectBotRace(id)
 	if (player_class[id] == 0)
 	{
 		//player_class[id] = random_num(1,24)
-		player_class[id] = BloodRaven
+		player_class[id] = Mag
 	}
 	
 	return PLUGIN_CONTINUE
@@ -10604,6 +10707,10 @@ public set_speedchange(id)
 	{
 		set_user_maxspeed(id, 100.0)
 	}
+	else if(is_trap_active[id])
+	{
+		set_user_maxspeed(id, 1.0)
+	}
 	else if(is_user_connected(id) && freeze_ended)
 	{
 		new speeds
@@ -11623,7 +11730,6 @@ public FwdTouch_FakeSmoke( iEntity, iWorld ) {
 	
 	if( vVelocity[ 1 ] <= 0.0 && vVelocity[ 2 ] <= 0.0 ) {
 		new Float:vOrigin[ 3 ];
-		new iSmoke = entity_get_int( iEntity, EV_INT_iuser4 );
 		entity_get_vector( iEntity, EV_VEC_origin, vOrigin );
 		
 		// Make small smoke near grenade on ground
@@ -12183,6 +12289,45 @@ public touchmosquito_sting(knife, id)
 	}
 }
 
+public touchSpiderTrap(trap, id)
+{
+	new owner = entity_get_edict(trap, EV_ENT_owner)
+	
+	if(owner == id)
+	{
+		if(spider_regen_time[id] + 1.0 < get_gametime())
+		{
+			spider_regen_time[id]=get_gametime()
+			new amount_healed = floatround(player_intelligence[id]/2)
+			if(amount_healed < 1) { amount_healed = 1; }
+			change_health(id,amount_healed,0,"")
+		}
+		
+		return
+	}
+		
+	if((get_user_team(id) == get_user_team(owner)) || (player_class[id] == GiantSpider)) return
+	
+	if(is_user_alive(id)) 
+	{
+		if(is_trap_active[id] == 0)
+		{
+			is_trap_active[id] = 1
+			glow_player(id, 3.0, 255, 255, 255)
+			set_user_maxspeed(id, 1.0)
+			set_task(3.0, "untrap", id, "", 0, "a", 1)
+			owner_radar_trap[id] = owner
+			client_print(owner,print_center,"ВРАГ ПОПАЛСЯ В ЛОВУШКУ ^r^nи отмечен на радаре")
+			for(new i = 0; i < sizeof primaryWeapons; i++)
+			{
+				engclient_cmd(id, "drop", primaryWeapons[i])
+			}
+		}
+		remove_entity(trap)
+		spider_traps[owner]--
+	}
+}
+
 public touchWorld(knife, world)
 {
 	entity_set_int(knife, EV_INT_movetype, 0)
@@ -12228,6 +12373,17 @@ public kill_all_entity(classname[]) {
 		remove_entity(iEnt)
 		iEnt = find_ent_by_class(iEnt, classname)		
 	}
+}
+
+public kill_all_traps(id) 
+{
+	new iEnt = find_ent_by_owner(-1,"spidertrap",id,0);
+	
+	while(iEnt > 0) {
+		remove_entity(iEnt)
+		iEnt = find_ent_by_owner(-1,"spidertrap",id,0);		
+	}
+	spider_traps[id]=0
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                             koniec z nozami                                //
@@ -13052,24 +13208,28 @@ public call_cast(id)
 		}
 		case GiantSpider: 
 		{
-			if(!g_bWeaponsDisabled)
+			new max_traps
+			if(player_intelligence[id] > 0 && player_intelligence[id] < 25)
 			{
-				fm_give_item(id, "weapon_flashbang")
-				fm_give_item(id, "weapon_flashbang")
-				fm_give_item(id, "weapon_hegrenade")
-				fm_give_item(id, "weapon_smokegrenade")
-				fm_give_item(id, "weapon_deagle")
-				fm_give_item(id,"ammo_50ae")
-				fm_give_item(id,"ammo_50ae")
-				fm_give_item(id,"ammo_50ae")
-				fm_give_item(id,"ammo_50ae")
-				fm_give_item(id,"ammo_50ae")
-				fm_give_item(id,"ammo_50ae")
-				show_hudmessage(id, "[Giant Spider] Вы получили полный набор гранат и Deagle")
+				max_traps = 1
+			}
+			else if(player_intelligence[id] > 24 && player_intelligence[id] < 51)
+			{
+				max_traps = 2
+			}
+			if(max_traps == 0)
+			{
+				hudmsg(id,5.0,"Прокачайте интеллект, чтобы использовать ловушку!")
+				return;
+			}
+			if(spider_traps[id] < max_traps)
+			{
+				create_trap(id)
+				show_hudmessage(id, "[Гигантский паук] Ловушка установлена")
 			}
 			else
 			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+				hudmsg(id,5.0,"Ловушки закончились!")
 			}
 		}
 	}	
@@ -14704,6 +14864,11 @@ public wallclimb(id, button)
 }
 public make_hook(id)
 {
+	if(spider_hook_disabled[id] == 1)
+	{
+		client_print(id, print_center, "[Паутина] Вы получили урон, паутина отключена на 5 секунд")
+		return PLUGIN_HANDLED
+	}
 	if (player_class[id] == GiantSpider && is_user_alive(id) || (player_class[id] == Griswold && is_user_alive(id)))
 	{
 	if (get_pcvar_num(pHook) && is_user_alive(id) && canThrowHook[id] && !gHooked[id]) {		
@@ -15879,26 +16044,48 @@ public radar_scan()
 {
         for(new id=1; id<=MAX; id++) 
 		{
-                if(!is_user_alive(id) || !player_b_radar[id]) continue;
+				if(!is_user_alive(id)) continue;
+				
+				if(!player_b_radar[id] && player_class[id] != GiantSpider) continue;
 
                 for(new i=1; i<=MAX; i++) 
 				{
                         if(!is_user_alive(i) || id == i || get_user_team(id) == get_user_team(i)) continue;
 
-                        new PlayerCoords[3];
-                        get_user_origin(i, PlayerCoords);
+                        if(player_b_radar[id])
+						{
+							new PlayerCoords[3];
+							get_user_origin(i, PlayerCoords);
 
-                        message_begin(MSG_ONE_UNRELIABLE, g_msgHostageAdd, {0,0,0}, id);
-                        write_byte(id);
-                        write_byte(i);
-                        write_coord(PlayerCoords[0]);
-                        write_coord(PlayerCoords[1]);
-                        write_coord(PlayerCoords[2]);
-                        message_end();
+							message_begin(MSG_ONE_UNRELIABLE, g_msgHostageAdd, {0,0,0}, id);
+							write_byte(id);
+							write_byte(i);
+							write_coord(PlayerCoords[0]);
+							write_coord(PlayerCoords[1]);
+							write_coord(PlayerCoords[2]);
+							message_end();
 
-                        message_begin(MSG_ONE_UNRELIABLE, g_msgHostageDel, {0,0,0}, id);
-                        write_byte(i);
-                        message_end();
+							message_begin(MSG_ONE_UNRELIABLE, g_msgHostageDel, {0,0,0}, id);
+							write_byte(i);
+							message_end();
+						}
+						else if((player_class[id] == GiantSpider) && (is_trap_active[i] == 1) && (owner_radar_trap[i] == id))
+						{
+							new PlayerCoords[3];
+							get_user_origin(i, PlayerCoords);
+
+							message_begin(MSG_ONE_UNRELIABLE, g_msgHostageAdd, {0,0,0}, id);
+							write_byte(id);
+							write_byte(i);
+							write_coord(PlayerCoords[0]);
+							write_coord(PlayerCoords[1]);
+							write_coord(PlayerCoords[2]);
+							message_end();
+
+							message_begin(MSG_ONE_UNRELIABLE, g_msgHostageDel, {0,0,0}, id);
+							write_byte(i);
+							message_end();
+						}						
                 }
         }
 }
