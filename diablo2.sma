@@ -90,6 +90,7 @@ new DemageTake1[33]
 #define TASKID_GLOW 	13314
 #define TASK_NAME 48424
 #define TASK_FLASH_LIGHT 81184
+#define TASK_REMOVE_BAAL 81185
 #define FL_ONGROUND (1<<9)
 #define message_begin_f(%1,%2,%3,%4) engfunc(EngFunc_MessageBegin, %1, %2, %3, %4)
 #define write_coord_f(%1) engfunc(EngFunc_WriteCoord, %1)
@@ -212,6 +213,7 @@ new viper_spear[33]
 new Float:viper_gas_time[33]
 new viper_gases[33]
 new bool:ghost_check
+new baal_copyed[33]
 new ghosttime[33]
 new ghoststate[33]
 new naswietlony[33]
@@ -354,7 +356,7 @@ new c_grenade[33]
 new c_blind[33]
 new zmiana_skinu[33]
 new c_darksteel[33]
-new c_blink[33]
+new c_blink[33] = 0
 new lustrzany_pocisk[33] = 1
 new c_redirect[33]
 new losowe_itemy[33]
@@ -501,7 +503,7 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Baal", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Баал", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,100,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -673,7 +675,7 @@ new questy_info[][]={
 	"Убей 15 Viper (Получи 15000 опыта)",
 	"Убей 20 BloodRaven (Получи 20000 опыта)",
 	"Убей 65 Imp (Получи 150000 опыта)",
-	"Убей 120 Baal (Получи 200000 опыта)"
+	"Убей 120 Баал (Получи 200000 опыта)"
 }
 
 new questy_zabil[][]={
@@ -1148,7 +1150,7 @@ public menu_questow_handle2(id,menu,item)
 		ile2++;
 	}
 	if(questy[item][4] && (!player_premium[id])){
-		client_print(id,print_chat,"Этот квест только для Премиум! Покупка премиум на lp.hitmany.net");
+		client_print(id,print_chat,"Этот квест только для Премиум! Покупка премиум на lpstrike.ru");
 		menu_questow(id)
 		menu_destroy(menu);
 		return PLUGIN_CONTINUE;
@@ -2640,6 +2642,8 @@ public RoundStart(){
 	kill_all_entity("przedmiot")
 	kill_all_entity("saber_smoke3")
 	kill_all_entity("spidertrap")
+	kill_all_entity("baalcopy")
+	kill_all_entity("baalcopyweap")
 	for (new i=0; i < 33; i++){
 		if(player_portals[i] > 0)
 		{
@@ -2655,20 +2659,7 @@ public RoundStart(){
 			}
 		}
 		
-		if(player_class[i] == Baal) 
-		{
-			zmiana_skinu[i] = random(5)
-			if(zmiana_skinu[i] == 1) 
-			{
-				changeskin(i,0)
-				ColorChat(i, TEAM_COLOR, "[Хамелеон] Вы выглядите как враг!")
-			}
-			else
-			{
-				changeskin(i,1)
-			}
-		}
-		else if(player_class[i] == Frozen)
+		if(player_class[i] == Frozen)
 		{
 			c_silent[i] = 0
 		}
@@ -2699,6 +2690,9 @@ public RoundStart(){
 		player_fallen_tr[i]=1;
 		//play idle
 		remove_task(i+2000)
+		//baal
+		remove_task(i+TASK_REMOVE_BAAL)
+		baal_copyed[i] = 0
 		
 		if(player_class[i] == Necromancer)
 		{
@@ -2734,6 +2728,10 @@ public RoundStart(){
 			}
 			viper_gases[i] = floatround(gas,floatround_round);
 		}
+		if(player_class[i] == Baal)
+		{
+			c_blink[i]=floatround(halflife_time())
+		}
 		if(player_class[i] == Mosquito)
 		{
 			mosquito_sting[i] = 0
@@ -2765,22 +2763,6 @@ public RoundStart(){
 				fm_give_item(i,"weapon_flashbang")
 				fm_give_item(i,"weapon_flasgbang")
 				fm_give_item(i,"weapon_smokegrenade")
-			}
-			else
-			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-			}
-		}
-		if(player_class[i] == Baal)
-		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(i,"weapon_m3")
-				fm_give_item(i,"ammo_buckshot")
-				fm_give_item(i,"ammo_buckshot")
-				fm_give_item(i,"ammo_buckshot")
-				fm_give_item(i,"ammo_buckshot")
-				fm_give_item(i,"ammo_buckshot")
 			}
 			else
 			{
@@ -3467,7 +3449,7 @@ public Damage(id)
 							if(colddelay < 4.0) { colddelay = 4.0; }
 							glow_player(id, colddelay, 0, 0, 255)
 							set_user_maxspeed(id, 100.0)
-							set_task(colddelay, "unfreeze", id, "", 0, "a", 1)
+							set_task(colddelay, "unfreeze", id)
 							is_frozen[id] = 1
 							Display_Icon(id ,2 ,"dmg_cold" ,0,206,209)
 						}
@@ -4282,6 +4264,7 @@ public client_connect(id)
 	g_GrenadeTrap[id] = 0
 	g_TrapMode[id] = 0
 	player_infidel[id] = 0
+	baal_copyed[id] = 0
 	
 	player_ring[id]=0
 	
@@ -5026,7 +5009,7 @@ public auto_help(id)
 public helpme(id)
 {	 
 	//showitem(id,"Helpmenu","Common","None","Dostajesz przedmioty i doswiadczenie za zabijanie innych. Mozesz dostac go tylko wtedy, gdy nie masz na sobie innego<br><br>Aby dowiedziec sie wiecej o swoim przedmiocie napisz /przedmiot lub /item, a jak chcesz wyrzucic napisz /drop<br><br>Niektore przedmoty da sie uzyc za pomoca klawisza E<br><br>Napisz /czary zeby zobaczyc jakie masz staty<br><br>")
-	show_motd(id, "http://lp.hitmany.net/diablo_help.html", "Помощь Diablo Mod")
+	show_motd(id, "http://lpstrike.ru/diablo_help.html", "Помощь Diablo Mod")
 }
 
 
@@ -5074,7 +5057,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	write_file(g_ItemFile,Data,-1)
 	
 	//Background
-	format(Data,767,"<body text='#FFFF00' bgcolor='#000000' background='http://dbstats.lp.hitmany.net/server/drkmotr.jpg'>")
+	format(Data,767,"<body text='#FFFF00' bgcolor='#000000' background='http://dbstats.lpstrike.ru/server/drkmotr.jpg'>")
 	write_file(g_ItemFile,Data,-1)
 	
 	//Table stuff
@@ -5082,7 +5065,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	write_file(g_ItemFile,Data,-1)
 	
 	//ss.gif image
-	format(Data,767,"<p align='center'><img border='0' src='http://dbstats.lp.hitmany.net/server/ss.gif'></td>")
+	format(Data,767,"<p align='center'><img border='0' src='http://dbstats.lpstrike.ru/server/ss.gif'></td>")
 	write_file(g_ItemFile,Data,-1)
 	
 
@@ -5103,7 +5086,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	write_file(g_ItemFile,Data,-1)
 	
 	//image ss
-	format(Data,767,"<td width='0'><p align='center'><img border='0' src='http://dbstats.lp.hitmany.net/server/gf.gif'></td>")
+	format(Data,767,"<td width='0'><p align='center'><img border='0' src='http://dbstats.lpstrike.ru/server/gf.gif'></td>")
 	write_file(g_ItemFile,Data,-1)
 	
 	//end
@@ -7297,6 +7280,53 @@ public create_trap(id)
 	}
 }
 
+public create_baal_copy(id)
+{
+	if (is_user_alive(id) == 1 && freeze_ended == true)
+	{
+		new Float:pOrigin[3], Float:flAngle[3], copy_model[50]
+		entity_get_vector(id,EV_VEC_origin, pOrigin)
+		
+		new ent = create_entity("info_target")
+		
+		get_user_info(id,"model",copy_model,31)
+		format(copy_model,50,"models/player/%s/%s.mdl",copy_model,copy_model)
+		entity_set_model(ent,copy_model)
+		
+		entity_set_int(ent, EV_INT_solid, 2);
+		entity_set_int(ent, EV_INT_movetype, 5);
+		
+		entity_set_origin(ent,pOrigin)
+		
+		entity_set_string(ent,EV_SZ_classname,"baalcopy")
+		
+		entity_get_vector(id, EV_VEC_angles, flAngle); 
+        //Make sure the pitch is zeroed out 
+        flAngle[0] = 0.0; 
+        entity_set_vector(ent, EV_VEC_angles, flAngle); 
+		
+		static const Float: mins[ 3 ] = {-16.0, -16.0, -36.0}
+		static const Float: maxs[ 3 ] = {16.0, 16.0, 36.0}
+		entity_set_size(ent, mins, maxs); 
+		
+		entity_set_int(ent, EV_INT_gaitsequence, 1)
+		set_pev(ent,pev_sequence,1)
+		
+		entity_set_edict(ent,EV_ENT_owner,id)
+		
+		new weap = create_entity("info_target")
+		entity_set_string(weap,EV_SZ_classname,"baalcopyweap")
+		entity_set_int(weap, EV_INT_solid, SOLID_NOT)
+		entity_set_edict(weap, EV_ENT_aiment, ent)
+		entity_set_model(weap, "models/p_glock18.mdl")
+		entity_set_edict(weap,EV_ENT_owner,id)
+		baal_copyed[id] = 1
+		set_task(30.0, "removeBaalcopy", TASK_REMOVE_BAAL+id)
+	}
+	
+	return PLUGIN_CONTINUE
+}
+
 public add_bonus_redirect(id)
 {
 	if (player_b_redirect[id] > 0)
@@ -7520,15 +7550,19 @@ public Create_Line(id,origin1[3],origin2[3],bool:draw)
 
 public Prethink_Blink(id)
 {
-	if(player_class[id] == Zakarum && player_lvl[id] > 49)
+	if(player_class[id] == Zakarum && (player_lvl[id] > 49))
 	{
 		if( get_user_button(id) & IN_RELOAD && !(get_user_oldbutton(id) & IN_RELOAD) && is_user_alive(id)) 
 		{			
-			if (on_knife[id])
+			if (on_knife[id] && (player_intelligence[id] > 0))
 			{
-				if (halflife_time()-c_blink[id] <= 3) return PLUGIN_HANDLED		
-				c_blink[id] = floatround(halflife_time())	
-				UTIL_Teleport(id,300+15*player_intelligence[id])			
+				new Float:blink_timer = 160.0/player_intelligence[id] 
+				if(blink_timer > 32.0) { blink_timer = 32.0; }
+				if ((floatround(halflife_time())-c_blink[id]) > floatround(blink_timer))
+				{
+					c_blink[id] = floatround(halflife_time())
+					UTIL_Teleport(id,300+15*player_intelligence[id])
+				}			
 			}
 		}
 	}
@@ -7536,7 +7570,7 @@ public Prethink_Blink(id)
 	{
 		if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
 		{			
-			if (on_knife[id])
+			if (on_knife[id] && (player_b_blink[id] != 0))
 			{
 				if (halflife_time()-player_b_blink[id] <= 3) return PLUGIN_HANDLED		
 				player_b_blink[id] = floatround(halflife_time())	
@@ -7545,11 +7579,15 @@ public Prethink_Blink(id)
 		}
 		if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
 		{			
-			if (on_knife[id])
+			if (on_knife[id] && (player_intelligence[id] > 0))
 			{
-				if (halflife_time()-c_blink[id] <= 3) return PLUGIN_HANDLED		
-				c_blink[id] = floatround(halflife_time())	
-				UTIL_Teleport(id,300+15*player_intelligence[id])			
+				new Float:blink_timer = 160.0/player_intelligence[id] 
+				if(blink_timer > 32.0) { blink_timer = 32.0; }
+				if ((floatround(halflife_time())-c_blink[id]) > floatround(blink_timer))
+				{
+					c_blink[id] = floatround(halflife_time())
+					UTIL_Teleport(id,300+15*player_intelligence[id])
+				}
 			}
 		}
 	}
@@ -8054,7 +8092,7 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 public select_class(id)
 {
 new text4[512]  
-format(text4, 511,"^n\wВаш общий уровень: %d^nУ вас %d золота.^n^n\yВыбери Класс: ^n^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n^n^n\r4. \wСоветы: Что выбрать?^n^n^n\dРазработал: HiTmanY^nСайт сервера:^nlp.hitmany.net", player_TotalLVL[id], mana_gracza[id]) 
+format(text4, 511,"^n\wВаш общий уровень: %d^nУ вас %d золота.^n^n\yВыбери Класс: ^n^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n^n^n\r4. \wСоветы: Что выбрать?^n^n^n\dРазработал: HiTmanY^nСайт сервера:^nlpstrike.ru", player_TotalLVL[id], mana_gracza[id]) 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -8120,7 +8158,7 @@ public PokazKlasy(id)
 	new flags[28]
 	get_cvar_string("diablo_classes",flags,27) //<--- tu, gdzie jest 16 wpisz liczbк swoich klas
 	new text3[512]
-	format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите5 сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+	format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите5 сек прежде чем выбрать класс^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][1],player_class_lvl[id][2],player_class_lvl[id][3],player_class_lvl[id][4],player_class_lvl[id][5],player_class_lvl[id][6],player_class_lvl[id][7],player_class_lvl[id][8])
 
 	new keyspiata
@@ -8218,7 +8256,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yMephisto^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yBaal^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yMephisto^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -8297,6 +8335,7 @@ public PressedKlasy(id, key)
 		{    
 			player_class[id] = Baal
 			c_antyarchy[id]=0
+			c_blink[id] = floatround(halflife_time())
 			MYSQLX_SetDataForRace( id )
 		}
 		case 6: 
@@ -8352,7 +8391,7 @@ public PokazZwierze(id)
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yГигантский комар^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yГигантский паук^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \yАдский кот^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlp.hitmany.net^n\dСайт сервера");
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlpstrike.ru^n\dСайт сервера");
 	
 	static key
 	key = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
@@ -8449,7 +8488,7 @@ public PokazZwierz( id, item )
 public PokazPremiumy(id)
 {
 	new text6[512]
-	format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\rДоступ к премиум классам.^n\rкупить на lp.hitmany.net",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
+	format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\rДоступ к премиум классам.^n\rкупить на lpstrike.ru",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
 
 	new usma
 	usma = (1<<0)|(1<<1)|(1<<2)|(1<<9)
@@ -12385,6 +12424,25 @@ public kill_all_traps(id)
 	}
 	spider_traps[id]=0
 }
+
+public removeBaalcopy(taskid)
+{
+	new id = taskid - TASK_REMOVE_BAAL
+	new iEnt = find_ent_by_owner(-1,"baalcopy",id,0);
+	
+	while(iEnt > 0) {
+		remove_entity(iEnt)
+		iEnt = find_ent_by_owner(-1,"baalcopy",id,0);		
+	}
+	
+	iEnt = find_ent_by_owner(-1,"baalcopyweap",id,0);
+	
+	while(iEnt > 0) {
+		remove_entity(iEnt)
+		iEnt = find_ent_by_owner(-1,"baalcopyweap",id,0);		
+	}
+	baal_copyed[id]=0
+}
 ////////////////////////////////////////////////////////////////////////////////
 //                             koniec z nozami                                //
 ////////////////////////////////////////////////////////////////////////////////
@@ -12392,7 +12450,7 @@ public mod_info(id)
 {
 	client_print(id,print_console,"Добро пожаловать в Diablo Mod от HiTmAnY")
 	client_print(id,print_console,"     Читай инфо о моде на сайте")
-	client_print(id,print_console,"        http://lp.hitmany.net")
+	client_print(id,print_console,"        http://lpstrike.ru")
 	client_print(id,print_console,"        Текущая версия %s",mod_version)
 	return PLUGIN_HANDLED
 }
@@ -13046,6 +13104,18 @@ public call_cast(id)
 			else
 			{
 				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+			}
+		}
+		case Baal:
+		{
+			if(baal_copyed[id] == 0)
+			{
+				create_baal_copy(id)
+				show_hudmessage(id, "[Баал] Ваша копия создана и будет удалена через 30 секунд") 
+			}
+			else
+			{
+				hudmsg(id,5.0,"Не больше одной копии. Дождитесь ее удаления!");
 			}
 		}
 		case Zakarum:
