@@ -219,6 +219,8 @@ new ghoststate[33]
 new naswietlony[33]
 
 new spider_traps[33]
+new mephisto_fires[33]
+new mephisto_touch[33]
 new is_trap_active[33]
 new owner_radar_trap[33] //Кто владелец ловушки показать ему на радаре
 new spider_hook_disabled[33] //Кто владелец ловушки показать ему на радаре
@@ -503,8 +505,8 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Mephisto", "Hephasto", "Diablo", "Баал", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
-new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,120,123,110,100,135,100,100,140,115,120,145,145,145,145 }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Мефисто", "Hephasto", "Diablo", "Баал", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,130,123,110,100,135,100,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
 14300,15730,17300,19030,20900,23000,24000,25200,26400,27700,29000,30500,32000,33600,35300,37000,39000,41000,43000,45100,//41
@@ -2190,6 +2192,7 @@ public plugin_precache()
 	precache_model("sprites/diablo_lp/portal_tt.spr")
 	precache_model("sprites/diablo_lp/portal_ct.spr")
 	precache_model("sprites/diablo_lp/cold_expo.spr")
+	precache_model("sprites/diablo_lp/firewall.spr")
 	sprite_bloodraven = precache_model("sprites/diablo_lp/blood_dead2.spr")
 		
 	precache_sound(SOUND_START)
@@ -2257,6 +2260,7 @@ public plugin_precache()
 	precache_sound( "diablo_lp/brdeath.wav" );
 	precache_sound( "diablo_lp/bonecast.wav" );
 	precache_sound( "diablo_lp/bonespear1.wav" );
+	precache_sound( "diablo_lp/fwall2.wav" );
 	
 	precache_model(cbow_VIEW)
     precache_model(cvow_PLAYER)
@@ -3433,6 +3437,33 @@ public Damage(id)
 						engfunc(EngFunc_EmitAmbientSound, 0, origin, "diablo_lp/fireball3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 					}
 				}
+				if(player_class[id] ==  Mephisto)
+				{
+			
+					new pOrgign[3], vTargetOrigin[3], iDistance
+					const range = 600
+					
+					// Get origin of target
+					get_user_origin( attacker_id, vTargetOrigin );
+					get_user_origin( id, pOrgign );
+
+					// Get distance in b/t target and caster
+					iDistance = get_distance( pOrgign, vTargetOrigin );
+					if((iDistance < range) && (get_user_team( attacker_id ) != get_user_team( id )))
+					{
+						const Float:mephisto_chance = 0.3						
+						new Float:chance = random_float(0.0, 1.0 )
+						if( chance <= mephisto_chance )
+						{
+							new dmg = float((player_intelligence[id] - player_dextery[attacker_id])/2);
+							
+							if (dmg > 0)
+							{
+								puscBlyskawice(id, attacker_id, dmg);
+							}
+						}
+					}
+				}
 				if(weapon==CSW_KNIFE && player_class[attacker_id] == Viper)
 				{
 					new Float:viper_chance = player_intelligence[attacker_id]/160
@@ -3780,7 +3811,7 @@ public client_PreThink ( id )
 	
 	//USE Button actives USEMAGIC
 	
-	if (get_entity_flags(id) & FL_ONGROUND && (!(button2 & (IN_FORWARD+IN_BACK+IN_MOVELEFT+IN_MOVERIGHT)) || (player_class[id] == Mag && player_b_fireball[id]==0)) && is_user_alive(id) && !bow[id] && (on_knife[id] || (player_class[id] == Mag && player_b_fireball[id])) && player_class[id]!=NONE && player_class[id]!=Necromancer && invisible_cast[id]==0)
+	if (get_entity_flags(id) & FL_ONGROUND && (!(button2 & (IN_FORWARD+IN_BACK+IN_MOVELEFT+IN_MOVERIGHT)) || (player_class[id] == Mag && player_b_fireball[id]==0) || player_class[id] == Viper || player_class[id] == Mephisto) && is_user_alive(id) && !bow[id] && (on_knife[id] || (player_class[id] == Mag && player_b_fireball[id])) && player_class[id]!=NONE && player_class[id]!=Necromancer && invisible_cast[id]==0)
 	{
 		if(casting[id]==1 && halflife_time()>cast_end[id])
 		{
@@ -4617,6 +4648,23 @@ public pfn_touch ( ptr, ptd )
 			remove_entity(ptd)
 		}
 	}
+	if(equal(szClassName, "firewall"))
+	{
+		new owner = pev(ptd,pev_owner)
+		//Touch
+		if (get_user_team(owner) != get_user_team(ptr))
+		{
+			if(mephisto_touch[ptr] != ptd)
+			{
+				new dmg, Float:dmgsumm
+				dmgsumm = player_intelligence[owner]/2.5 - player_dextery[ptr]/5
+				dmg = floatround(dmgsumm, floatround_ceil)
+				if(dmg < 10) { dmg = 10; }
+				d2_damage( ptr, owner, dmg, "firewall")
+				mephisto_touch[ptr] = ptd
+			}
+		}
+	}
 	if(equal(szClassName, "viperball"))
 	{
 		new owner = pev(ptd,pev_owner)
@@ -4627,14 +4675,25 @@ public pfn_touch ( ptr, ptd )
 			if ((get_user_team(owner) != get_user_team(ptr)) && (owner != ptr))
 			{
 				new dmg, Float:dmgsumm
-				dmgsumm = player_intelligence[owner]/5 - player_dextery[ptr]/10
+				dmgsumm = player_intelligence[owner]/2.5 - player_dextery[ptr]/5
 				dmg = floatround(dmgsumm, floatround_ceil)
 				if(dmg < 10) { dmg = 10; }
 				d2_damage( ptr, owner, dmg, "bone spear")
 			}
 		}
 	}
-	
+	if(equal(szClassName, "fireball"))
+	{
+		new owner = pev(ptd,pev_owner)
+		//Touch
+		if (get_user_team(owner) != get_user_team(ptr))
+		{
+			new Float:origin[3]
+			pev(ptd,pev_origin,origin)
+			Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250,1)
+			remove_entity(ptd)
+		}
+	}
 	if (ptr != 0 && pev_valid(ptr))
 	{
 		new szClassNameOther[32]
@@ -4821,7 +4880,7 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 			new total = get_user_health(a)-dam
 			if (total < 5)
 			{
-				UTIL_Kill(id,a,"grenade")
+				UTIL_Kill(id,a,"fire explode")
 			}
 			else
 			{
@@ -7327,6 +7386,83 @@ public create_baal_copy(id)
 	return PLUGIN_CONTINUE
 }
 
+public create_firewall(id)
+{
+	if (is_user_alive(id) == 1 && freeze_ended == true)
+	{
+		new Float:fOrigin[3],enOrigin[3]
+		get_user_origin(id, enOrigin)
+		new ent = create_entity("env_sprite")
+
+		IVecFVec(enOrigin, fOrigin)
+
+
+		entity_set_string(ent, EV_SZ_classname, "firewall")
+		entity_set_model(ent, "sprites/diablo_lp/firewall.spr")
+		entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
+		entity_set_float(ent, EV_FL_framerate, 19.0)
+
+		DispatchSpawn(ent)
+		entity_set_origin(ent, fOrigin)
+		entity_set_size(ent, Float:{-20.0, -20.0, -20.0}, Float:{20.0, 20.0, 20.0})
+		entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
+		entity_set_int(ent, EV_INT_movetype, MOVETYPE_NOCLIP)
+		entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
+		entity_set_float(ent, EV_FL_renderamt, 255.0)
+		entity_set_float(ent, EV_FL_scale, 1.0)
+		entity_set_edict(ent,EV_ENT_owner, id)
+		
+		//Send forward
+		new Float:fl_iNewVelocity[3]
+		VelocityByAim(id, 800, fl_iNewVelocity)
+		fl_iNewVelocity[2] = 0.0
+		entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
+		mephisto_fires[id] = 1
+		set_task(0.1,"create_firewall_next",id)
+		set_task(4.0,"removeEntity",ent)
+		emit_sound(ent, CHAN_VOICE, "diablo_lp/fwall2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+		//set_pev(ent, pev_nextthink, (get_gametime() + 4.0))
+	}
+}
+
+public create_firewall_next(id)
+{
+	mephisto_fires[id]++
+	new Float:fOrigin[3],enOrigin[3]
+	get_user_origin(id, enOrigin)
+	new ent = create_entity("env_sprite")
+
+	IVecFVec(enOrigin, fOrigin)
+
+
+	entity_set_string(ent, EV_SZ_classname, "firewall")
+	entity_set_model(ent, "sprites/diablo_lp/firewall.spr")
+	entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
+	entity_set_float(ent, EV_FL_framerate, 19.0)
+
+	DispatchSpawn(ent)
+	entity_set_origin(ent, fOrigin)
+	entity_set_size(ent, Float:{-20.0, -20.0, -20.0}, Float:{20.0, 20.0, 20.0})
+	entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
+	entity_set_int(ent, EV_INT_movetype, MOVETYPE_NOCLIP)
+	entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
+	entity_set_float(ent, EV_FL_renderamt, 255.0)
+	entity_set_float(ent, EV_FL_scale, 1.0)
+	entity_set_edict(ent,EV_ENT_owner, id)
+	
+	//Send forward
+	new Float:fl_iNewVelocity[3]
+	VelocityByAim(id, 800, fl_iNewVelocity)
+	fl_iNewVelocity[2] = 0.0
+	entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
+	if(mephisto_fires[id] < 4)
+	{
+		set_task(0.1,"create_firewall_next",id)
+	}
+	set_task(4.0,"removeEntity",ent)
+	//set_pev(ent, pev_nextthink, (get_gametime() + 4.0))
+}
+
 public add_bonus_redirect(id)
 {
 	if (player_b_redirect[id] > 0)
@@ -8256,7 +8392,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yMephisto^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -8313,7 +8449,6 @@ public PressedKlasy(id, key)
 		{    
 			player_class[id] = Mephisto
 			c_silent[id]=1
-			c_jump[id]=2
 			MYSQLX_SetDataForRace( id )
 		}
 		case 3: 
@@ -8334,7 +8469,6 @@ public PressedKlasy(id, key)
 		case 5: 
 		{    
 			player_class[id] = Baal
-			c_antyarchy[id]=0
 			c_blink[id] = floatround(halflife_time())
 			MYSQLX_SetDataForRace( id )
 		}
@@ -8599,10 +8733,6 @@ public add_barbarian_bonus(id)
 	if (player_class[id] == Barbarian)
 	{	
 		change_health(id,30,0,"")
-	}
-	if (player_class[id] == Mephisto)
-	{	
-		change_health(id,15,0,"")
 	}
 	if (player_class[id] == Baal)
 	{	
@@ -10865,32 +10995,6 @@ public set_renderchange(id)
 				
 				set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, render)
 			}
-			else if (player_class[id] == Mephisto)
-			{
-				new inv_bonus = 255 - player_b_inv[id]
-				render = 150
-				
-				if(player_b_inv[id]>0)
-				{
-					while(inv_bonus>0)
-					{
-						inv_bonus-=20
-						render--
-					}
-				}
-				
-				if(player_b_usingwind[id]==1)
-				{
-					render/=2
-				}
-				
-				if(render<0) render=0
-				
-				if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target)) render*=2	
-				
-				set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, render)
-				
-			}
 			else if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target))
 			{
 				if (player_b_usingwind[id]==1) set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, 75)
@@ -10927,12 +11031,6 @@ public set_gravitychange(id)
 	if(is_user_alive(id) && is_user_connected(id))
 	{
 		if(player_class[id] == Ninja)
-		{
-			if(player_b_gravity[id]>6) set_user_gravity(id, 0.17)
-			else if(player_b_gravity[id]>3) set_user_gravity(id, 0.2)
-			else set_user_gravity(id, 0.25)
-		}
-		else if(player_class[id] == Mephisto)
 		{
 			if(player_b_gravity[id]>6) set_user_gravity(id, 0.17)
 			else if(player_b_gravity[id]>3) set_user_gravity(id, 0.2)
@@ -13117,6 +13215,11 @@ public call_cast(id)
 			{
 				hudmsg(id,5.0,"Не больше одной копии. Дождитесь ее удаления!");
 			}
+		}
+		case Mephisto:
+		{
+			create_firewall(id)
+			show_hudmessage(id, "[Мефисто] Огненная стена") 
 		}
 		case Zakarum:
 		{
