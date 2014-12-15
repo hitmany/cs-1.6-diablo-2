@@ -8294,7 +8294,7 @@ public PokazKlasy(id)
 	new flags[28]
 	get_cvar_string("diablo_classes",flags,27) //<--- tu, gdzie jest 16 wpisz liczbк swoich klas
 	new text3[512]
-	format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\yЖдите5 сек прежде чем выбрать класс^n\dlpstrike.ru^n\dСайт сервера",
+	format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][1],player_class_lvl[id][2],player_class_lvl[id][3],player_class_lvl[id][4],player_class_lvl[id][5],player_class_lvl[id][6],player_class_lvl[id][7],player_class_lvl[id][8])
 
 	new keyspiata
@@ -8525,7 +8525,7 @@ public PokazZwierze(id)
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yГигантский комар^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yГигантский паук^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \yАдский кот^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\yЖдите 5сек прежде чем выбрать класс^n\dlpstrike.ru^n\dСайт сервера");
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера");
 	
 	static key
 	key = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
