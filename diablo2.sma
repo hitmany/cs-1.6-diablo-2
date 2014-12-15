@@ -3441,7 +3441,7 @@ public Damage(id)
 				{
 			
 					new pOrgign[3], vTargetOrigin[3], iDistance
-					const range = 600
+					const range = 1000
 					
 					// Get origin of target
 					get_user_origin( attacker_id, vTargetOrigin );
