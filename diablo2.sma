@@ -395,6 +395,8 @@ new Float:falen_fires_time[33];
 new fallen_fires[33]
 new frozen_colds[33]
 new is_frozen[33]
+new is_fired[33]
+new imp_fires[33]
 new is_poisoned[33]
 new Float:is_touched[33]
 new cel // do pokazywania statusu
@@ -513,8 +515,8 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Izual, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Изуал", "Diablo", "Баал", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
-new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,130,123,110,100,135,100,100,140,115,120,145,145,145,145 }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Изуал", "Diablo", "Баал", "Fallen", "Бес", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,120,120,140,130,130,123,110,100,135,100,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
 14300,15730,17300,19030,20900,23000,24000,25200,26400,27700,29000,30500,32000,33600,35300,37000,39000,41000,43000,45100,//41
@@ -977,6 +979,7 @@ public plugin_init()
 	//register_touch("frozencold", "func_door_rotating",	"touchWorld2")
 	//register_touch("frozencold", "func_wall_toggle",	"touchWorld2")
 	register_touch("frozencold", "dbmod_shild",		"touchWorld2")
+	register_touch("impfires", "player", "imp_touch")
 	//register_touch( g_SabreSmokeClassname, "worldspawn", "FwdTouch_FakeSmoke" );
 	//register_think( g_SabreSmokeClassname, "FwdThink_FakeSmoke" );
 	register_think( "saber_smoke3", "FwdThink_FakeSmoke2" );
@@ -2280,6 +2283,7 @@ public plugin_precache()
 	precache_sound( "diablo_lp/bonespear1.wav" );
 	precache_sound( "diablo_lp/fwall2.wav" );
 	precache_sound( "diablo_lp/izual_ring2.wav" );
+	precache_sound("ambience/flameburst1.wav")
 	
 	precache_model(cbow_VIEW)
     precache_model(cvow_PLAYER)
@@ -2784,16 +2788,13 @@ public RoundStart(){
 		}
 		if(player_class[i] == Imp)
 		{
-			if(!g_bWeaponsDisabled)
+			if(floatround(player_lvl[i]/2.0) < 10)
 			{
-				fm_give_item(i,"weapon_hegrenade")
-				fm_give_item(i,"weapon_flashbang")
-				fm_give_item(i,"weapon_flasgbang")
-				fm_give_item(i,"weapon_smokegrenade")
+				imp_fires[i] = 10
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				imp_fires[i] = floatround(player_lvl[i]/2.0);
 			}
 		}
 		if(player_class[i] == Diablo)
@@ -3542,8 +3543,15 @@ public Damage(id)
 						change_health(id,damage/2,0,"")
 					}
 				}
-				if (player_class[ attacker_id ] == Imp && is_user_alive(id)&&random_num(1,30)==1)
-				client_cmd(id, "weapon_knife")
+				if (player_class[ attacker_id ] == Imp && is_user_alive(id))
+				{
+					new Float:imp_chance = player_intelligence[id]/500.0					
+					new Float:chance = random_float(0.0, 1.0 )
+					if( chance <= imp_chance )
+					{
+						client_cmd(id, "weapon_knife")
+					}
+				}
 			}
 				
 			#if defined CHEAT
@@ -3801,6 +3809,14 @@ public client_PreThink ( id )
 		if(can_cast[id] == 1)
 		{
 			frozen_key(id)
+		}
+	}
+	
+	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Imp){
+		//button[id] = 1;
+		if(can_cast[id] == 1)
+		{
+			imp_key(id)
 		}
 	}
 	
@@ -4829,12 +4845,41 @@ public frozen_touch(entity, player)
 			Display_Icon(player ,2 ,"dmg_cold" ,0,206,209)
 		}
 		new dmg, Float:dmgsumm
-		dmgsumm = (player_intelligence[owner]/5.0) - (player_dextery[player]/10.0)
+		dmgsumm = (player_intelligence[owner]/1.25) - (player_dextery[player]/5.0)
 		dmg = floatround(dmgsumm, floatround_ceil)
-		if(dmg < 2) { dmg = 1; }
+		if(dmg < 10) { dmg = 10; }
 		change_health(player,-dmg,owner,"cold")
 		remove_entity(entity)
-		emit_sound(owner, CHAN_STATIC, "diablo_lp/frozne_blast.wav", VOL_NULL, ATTN_NONE, SND_STOP, PITCH_NONE)
+		//emit_sound(owner, CHAN_STATIC, "diablo_lp/frozne_blast.wav", VOL_NULL, ATTN_NONE, SND_STOP, PITCH_NONE)
+	}
+}
+
+public imp_touch(entity, player)
+{
+	new owner = pev(entity,pev_owner)
+	
+	if(is_user_alive(player)) 
+	{
+		if(owner == player) return
+		
+		if((get_user_team(player) == get_user_team(owner)) || (player_class[player] == Imp)) return
+		
+		if(is_fired[player] == 0)
+		{
+			new Float:colddelay
+			colddelay = player_intelligence[owner] * 0.2
+			if(colddelay < 4.0) { colddelay = 4.0; }
+			glow_player(player, colddelay, 255, 188, 0)
+			set_task(colddelay, "unfired", player, "", 0, "a", 1)
+			is_fired[player] = 1
+			Display_Icon(player ,2 ,"dmg_heat" ,255,188,0)
+		}
+		new dmg, Float:dmgsumm
+		dmgsumm = (player_intelligence[owner]/1.25) - (player_dextery[player]/5.0)
+		dmg = floatround(dmgsumm, floatround_ceil)
+		if(dmg < 10) { dmg = 10; }
+		change_health(player,-dmg,owner,"fire")
+		remove_entity(entity)
 	}
 }
 
@@ -4843,6 +4888,12 @@ public unfreeze(id)
 	is_frozen[id] = 0
 	Display_Icon(id ,0 ,"dmg_cold" ,0,0,0)
 	set_speedchange(id)
+}
+
+public unfired(id)
+{
+	is_fired[id] = 0
+	Display_Icon(id ,0 ,"dmg_heat" ,0,0,0)
 }
 
 public unpoison(id)
@@ -7556,6 +7607,7 @@ public boostattack(id)
 			
 			if ( iDistance < boostrange )
 			{
+				hudmsg(target,5.0,"Ярость Дуриеля поразила вас")
 				dmgsumm = player_intelligence[id]/1.6 - player_dextery[target]/4
 				dmg = floatround(dmgsumm, floatround_ceil)
 				if(dmg < 10) { dmg = 10; }
@@ -8626,7 +8678,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -8737,6 +8789,14 @@ public PressedKlasy(id, key)
 		{    
 			player_class[id] = Imp
 			c_blink[id] = floatround(halflife_time())
+			if(floatround(player_lvl[id]/2.0) < 10)
+			{
+				imp_fires[id] = 10
+			}
+			else
+			{
+				imp_fires[id] = floatround(player_lvl[id]/2.0);
+			}
 			MYSQLX_SetDataForRace( id )
 		}
 		case 9: 
@@ -9634,7 +9694,6 @@ public UTIL_Teleport(id,distance)
 	get_user_origin(id,origin)
 	if(player_class[id] == Zakarum && player_lvl[id] > 49)
 	{
-		emit_sound(id,CHAN_STATIC,"diablo_lp/teleport.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 		message_begin(MSG_BROADCAST ,SVC_TEMPENTITY) //message begin
 		write_byte(TE_PARTICLEBURST )
 		write_coord(origin[0]) // origin
@@ -9656,9 +9715,9 @@ public UTIL_Teleport(id,distance)
 		write_short(20) // radius
 		write_byte(1) // particle color
 		write_byte(4) // duration * 10 will be randomized a bit
-		message_end()
-	
+		message_end()	
 	}
+	emit_sound(id,CHAN_STATIC,"diablo_lp/teleport.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 }
 
 stock Set_Origin_Forward(id, distance) 
@@ -14879,6 +14938,67 @@ public frozen_key(id)
 		set_task(0.15, "cancast", id, "", 0, "a", 1);
 		emit_sound(id,CHAN_STATIC, "diablo_lp/frozne_blast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 		frozen_colds[id]--
+	}
+	
+	return PLUGIN_CONTINUE;
+}
+
+public imp_key(id)
+{
+  
+	if(imp_fires[id] == 0)
+	{
+		client_print(id, print_center, "У вас закончился огонь!");
+		return PLUGIN_CONTINUE;
+	}	
+	if(player_intelligence[id] < 4)
+	{
+			client_print(id, print_center, "Необходимо 4 интеллекта!");
+			return PLUGIN_CONTINUE;
+	}
+	
+	if (is_user_alive(id))
+	{	
+			
+		//falen_fires_time[id] = get_gametime();
+		//fallen_fires[id]--;
+		can_cast[id] = 0
+		
+		new Float:fOrigin[3],enOrigin[3]
+		get_user_origin(id, enOrigin)
+		new ent = create_entity("env_sprite")
+   
+		IVecFVec(enOrigin, fOrigin)
+
+   
+		entity_set_string(ent, EV_SZ_classname, "impfires")
+		entity_set_model(ent, "sprites/explode1.spr")
+		entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
+		entity_set_float(ent, EV_FL_animtime, 1.0)
+		entity_set_float(ent, EV_FL_frame, 2.0)
+		entity_set_float(ent, EV_FL_framerate, 9.0)
+
+		DispatchSpawn(ent)
+
+		entity_set_origin(ent, fOrigin)
+		entity_set_size(ent, Float:{-30.0, -30.0, -30.0}, Float:{30.0, 30.0, 30.0})
+		entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
+		entity_set_int(ent, EV_INT_movetype, MOVETYPE_NOCLIP)
+		entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
+		entity_set_float(ent, EV_FL_renderamt, 255.0)
+		//entity_set_float(ent, EV_FL_scale, 1.5)
+		//new Float:impscale
+		//impscale = 0.3 + (player_intelligence[id] * 0.02)
+		//entity_set_float(ent, EV_FL_scale, 1.1)
+		entity_set_edict(ent,EV_ENT_owner, id)
+		//Send forward
+		new Float:fl_iNewVelocity[3]
+		VelocityByAim(id, 800, fl_iNewVelocity)
+		entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
+		set_task(0.4, "removeEntity", ent, "", 0, "a", 1);
+		set_task(0.15, "cancast", id, "", 0, "a", 1);
+		emit_sound(id, CHAN_WEAPON, "ambience/flameburst1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+		imp_fires[id]--
 	}
 	
 	return PLUGIN_CONTINUE;
