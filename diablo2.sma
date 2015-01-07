@@ -3873,6 +3873,7 @@ public client_PreThink ( id )
 			else if(player_class[id] == Paladin) time_delay*=1.4
 			else if(player_class[id] == SabreCat) time_delay*=2.0
 			else if(player_class[id] == Infidel) time_delay*=2.0
+			else if(player_class[id] == Duriel) time_delay*=4.0
 			
 			cast_end[id]=halflife_time()+time_delay
 			
@@ -7529,8 +7530,8 @@ public duriel_boosting(id)
 	entity_set_vector(id, EV_VEC_velocity, fl_iNewVelocity)
 	set_task(1.0,"removeboostdelay",id)
 	
-	duriel_boost_ent[id] = 0
-	boostattack(id)
+	duriel_boost_ent[id] = 1
+	set_task(0.5,"boostattack",id)
 	
 	return PLUGIN_CONTINUE;
 }
@@ -7558,7 +7559,7 @@ public boostattack(id)
 			
 			if ( iDistance < boostrange )
 			{
-				dmgsumm = player_intelligence[id]+10 - player_dextery[target]/5
+				dmgsumm = player_intelligence[id]/1.6 - player_dextery[target]/4
 				dmg = floatround(dmgsumm, floatround_ceil)
 				if(dmg < 10) { dmg = 10; }
 				d2_damage( target, id, dmg, "durielboost")
@@ -7567,7 +7568,7 @@ public boostattack(id)
 
 				vVelocity[0] = random_float(100.0, 400.0 );
 				vVelocity[1] = random_float(100.0, 400.0 );
-				vVelocity[2] = random_float(400.0, 700.0 );
+				vVelocity[2] = random_float(400.0, 600.0 );
 
 				entity_set_vector( target, EV_VEC_velocity, vVelocity );
 				for(new i2 = 0; i2 < sizeof primaryWeapons; i2++)
@@ -7576,11 +7577,6 @@ public boostattack(id)
 				}
 			}
 		}
-	}
-	duriel_boost_ent[id]++
-	if(duriel_boost_ent[id] < 6)
-	{
-		set_task(0.2,"boostattack",id)
 	}
 }
 
