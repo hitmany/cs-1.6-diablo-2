@@ -231,6 +231,9 @@ new duriel_boost[33]
 new duriel_boost_delay[33]
 new duriel_boost_ent[33]
 
+new izual_ring[33]
+new Float:izual_ringing[33]
+
 new const primaryWeapons[][] = {
 	"weapon_shield",
 	"weapon_scout",
@@ -509,8 +512,8 @@ new const szTables[TOTAL_TABLES][] =
 };
 
 
-enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Hephasto", "Diablo", "Баал", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Izual, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Изуал", "Diablo", "Баал", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,130,123,110,100,135,100,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -753,7 +756,7 @@ public plugin_init()
 	g_MaxPlayers = get_maxplayers()
 	//register_forward(FM_CmdStart, "Fwd_CmdStart");
 	register_forward(FM_CmdStart, "FwdCmdStart");
-	RegisterHam(Ham_TakeDamage, "player", "lustrzanypocisk")
+	RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage")
 	new szWeaponName[32] 
     new NOSHOT_BITSUM = (1<<CSW_KNIFE) | (1<<CSW_HEGRENADE) | (1<<CSW_FLASHBANG) | (1<<CSW_SMOKEGRENADE) 
     for(new iId = CSW_P228; iId <= CSW_P90; iId++) 
@@ -2276,6 +2279,7 @@ public plugin_precache()
 	precache_sound( "diablo_lp/bonecast.wav" );
 	precache_sound( "diablo_lp/bonespear1.wav" );
 	precache_sound( "diablo_lp/fwall2.wav" );
+	precache_sound( "diablo_lp/izual_ring2.wav" );
 	
 	precache_model(cbow_VIEW)
     precache_model(cvow_PLAYER)
@@ -2809,23 +2813,10 @@ public RoundStart(){
 				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
-		if(player_class[i] == Hephasto)
+		if(player_class[i] == Izual)
 		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(i,"weapon_hegrenade")
-				fm_give_item(i,"weapon_deagle")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-			}
-			else
-			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-			}
+			izual_ring[i] = 1
+			c_blink[i]=floatround(halflife_time())
 		}
 		//Fallen Code
 		if(player_class[i] == Fallen && player_lvl[i] > 49)
@@ -3823,6 +3814,11 @@ public client_PreThink ( id )
 		duriel_boosting(id)
 	}
 	
+	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Izual)
+	{
+		izualring(id)
+	}
+	
 	if ((!(button2 & IN_RELOAD)) && on_knife[id] && button[id]==1) button[id]=0
 	//
 	
@@ -3874,6 +3870,7 @@ public client_PreThink ( id )
 			else if(player_class[id] == SabreCat) time_delay*=2.0
 			else if(player_class[id] == Infidel) time_delay*=2.0
 			else if(player_class[id] == Duriel) time_delay*=4.0
+			else if(player_class[id] == Izual) time_delay*=2.0
 			
 			cast_end[id]=halflife_time()+time_delay
 			
@@ -7542,7 +7539,7 @@ public boostattack(id)
 	new target, iDistance, dmg, Float:dmgsumm, num;
 	static boostrange = 330
 	
-	get_players(players,num,"h","TERRORIST");
+	get_players(players,num,"h");
 	
 	get_user_origin( id, pOrigin );
 	
@@ -7583,6 +7580,121 @@ public boostattack(id)
 public removeboostdelay(id)
 {
 	duriel_boost_delay[id] = 0
+}
+
+stock Create_TE_BEAMCYLINDER(origin[3], center[3], axis[3], iSprite, startFrame, frameRate, life, width, amplitude, red, green, blue, brightness, speed){
+
+	message_begin( MSG_PAS, SVC_TEMPENTITY, origin )
+	write_byte( TE_BEAMCYLINDER )
+	write_coord( center[0] )			// center position (X)
+	write_coord( center[1] )			// center position (Y)
+	write_coord( center[2] )			// center position (Z)
+	write_coord( axis[0] )				// axis and radius (X)
+	write_coord( axis[1] )				// axis and radius (Y)
+	write_coord( axis[2] )				// axis and radius (Z)
+	write_short( iSprite )				// sprite index
+	write_byte( startFrame )			// starting frame
+	write_byte( frameRate )				// frame rate in 0.1's
+	write_byte( life )					// life in 0.1's
+	write_byte( width )					// line width in 0.1's
+	write_byte( amplitude )				// noise amplitude in 0.01's
+	write_byte( red )					// color (red)
+	write_byte( green )					// color (green)
+	write_byte( blue )					// color (blue)
+	write_byte( brightness )			// brightness
+	write_byte( speed )					// scroll speed in 0.1's
+	message_end()
+}
+
+stock create_izual_implosion(position[3], radius, count, life)
+{
+
+	message_begin( MSG_BROADCAST, SVC_TEMPENTITY )
+	write_byte ( TE_IMPLOSION )
+	write_coord( position[0] )			// position (X)
+	write_coord( position[1] )			// position (Y)
+	write_coord( position[2] )			// position (Z)
+	write_byte ( radius )				// radius
+	write_byte ( count )				// count
+	write_byte ( life )					// life in 0.1's
+	message_end()
+}
+
+public create_izual_ring(vOrigin[3], radius)
+{
+	new vPosition[3];
+	
+	//vOrigin[2] = vOrigin[2] - 16;
+
+	vPosition[0] = vOrigin[0];
+	vPosition[1] = vOrigin[1];
+	vPosition[2] = vOrigin[2] + radius;
+	
+	Create_TE_BEAMCYLINDER( vOrigin, vOrigin, vPosition, g_shock, 0, 0, 6, 16, 0, 188, 220, 255, 255, 0 );
+
+	vOrigin[2] = ( vOrigin[2] - radius ) + ( radius / 2 );
+
+	Create_TE_BEAMCYLINDER( vOrigin, vOrigin, vPosition, g_shock, 0, 0, 6, 16, 0, 188, 220, 255, 255, 0 );
+}
+
+public izualring(id)
+{
+	if(izual_ring[id] < 1)
+	{
+		client_print(id, print_center, "У вас закончились кольца!");
+		return PLUGIN_CONTINUE;
+	}
+	if(izual_ringing[id] + 10.0 > get_gametime())
+	{
+		client_print(id, print_center, "Подождите 10 секунд. Кольцо заблокированно!");
+		return PLUGIN_CONTINUE;
+	}
+	izual_ringing[id]=get_gametime()
+	izual_ring[id]--
+	new players[MAXPLAYERS], vTargetOrigin[3], pOrigin[3];
+	new target, iDistance, dmg, Float:dmgsumm, num;
+	static range = 600
+	get_user_origin( id, pOrigin );
+	
+	// Create an implosion effect
+	create_izual_implosion( pOrigin, range, 20, 5 );
+	create_izual_ring( pOrigin, range )
+	emit_sound(id, CHAN_VOICE, "diablo_lp/izual_ring2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+	
+	get_players(players,num,"h");
+	
+	for(new i=0 ; i<num ; i++)
+	{
+		target = players[i]
+		if((get_user_team(target) != get_user_team(id)) && is_user_alive(target))
+		{
+			// Get origin of target
+			get_user_origin( target, vTargetOrigin );
+
+			// Get distance in b/t target and caster
+			iDistance = get_distance( pOrigin, vTargetOrigin );
+			
+			if ( iDistance < range )
+			{
+				dmgsumm = ((player_intelligence[id]*0.6) + 30) - (player_dextery[target]/3)
+				dmg = floatround(dmgsumm, floatround_ceil)
+				if(dmg < 30) { dmg = 30; }
+				d2_damage( target, id, dmg, "izual_ring")
+				
+				if(is_frozen[target] == 0)
+				{
+					new Float:colddelay
+					colddelay = player_intelligence[id] * 0.2
+					if(colddelay < 4.0) { colddelay = 4.0; }
+					glow_player(target, colddelay, 0, 0, 255)
+					set_user_maxspeed(target, 100.0)
+					set_task(colddelay, "unfreeze", target, "", 0, "a", 1)
+					is_frozen[target] = 1
+					Display_Icon(target ,2 ,"dmg_cold" ,0,206,209)
+				}
+			}
+		}
+	}
 }
 
 public add_bonus_redirect(id)
@@ -8514,7 +8626,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -8529,7 +8641,7 @@ public PressedKlasy(id, key)
 	* 1:BloodRaven
 	* 2:Duriel
 	* 3:Mephisto
-	* 4:Hephasto
+	* 4:Izual
 	* 5:Diablo
 	* 6:Baal
 	* 7:Fallen
@@ -8574,8 +8686,9 @@ public PressedKlasy(id, key)
 		}
 		case 3: 
 		{    
-			player_class[id] = Hephasto
-			c_grenade[id] = 6
+			player_class[id] = Izual
+			izual_ring[id] = 1
+			c_blink[id]=floatround(halflife_time())
 			MYSQLX_SetDataForRace( id )
 		}
 		case 4: 
@@ -13411,15 +13524,15 @@ public call_cast(id)
 			}
 			else show_hudmessage(id, "[Barbarian] У вас %i Ultra Armor",ultra_armor[id]) 
 		}
-		case Hephasto:
+		case Izual:
 		{
-			ultra_armor[id]++
-			if(ultra_armor[id]>2)
+			izual_ring[id]++
+			if(izual_ring[id]>2)
 			{
-				ultra_armor[id]=2
-				hudmsg(id,5.0,"[Hephasto] Максимальное значение магич. доспехов - 2",ultra_armor[id]) 
+				izual_ring[id]=2
+				hudmsg(id,5.0,"[Изуал] У вас максимум колец - 2") 
 			}
-			else show_hudmessage(id, "[Hephasto] У вас %i магических доспехов",ultra_armor[id]) 
+			else show_hudmessage(id, "[Изуал] %d/2 колец",izual_ring[id]) 
 		}
 		case Griswold:
 		{
@@ -16241,14 +16354,23 @@ stock fm_get_weapon_ent_owner(ent)
 	return get_pdata_cbase(ent, 41, 4);
 }
 
-public lustrzanypocisk(this, idinflictor, idattacker, Float:damage, damagebits)
+public HamTakeDamage(victim, inflictor, attacker, Float:damage, damagebits)
 {
-        if(damagebits&(1<<1) && lustrzany_pocisk[this] > 0)
+		if(player_class[victim] ==  Izual)
+		{
+			new Float:izual_chance = player_intelligence[victim]/250.0					
+			new Float:chance = random_float(0.0, 1.0 )
+			if( chance <= izual_chance )
+			{
+				return FMRES_SUPERCEDE;
+			}
+		}
+		if(damagebits&(1<<1) && lustrzany_pocisk[victim] > 0)
         {
-                SetHamParamEntity(1, idattacker);
-                SetHamParamEntity(2,this );
-                SetHamParamEntity(3,this );
-                lustrzany_pocisk[this]--;
+                SetHamParamEntity(1, attacker);
+                SetHamParamEntity(2,victim );
+                SetHamParamEntity(3,victim );
+                lustrzany_pocisk[victim]--;
                 return HAM_HANDLED;
         }
         return HAM_IGNORED;
