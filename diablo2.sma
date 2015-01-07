@@ -226,6 +226,11 @@ new owner_radar_trap[33] //Кто владелец ловушки показат
 new spider_hook_disabled[33] //Кто владелец ловушки показать ему на радаре
 new Float:spider_regen_time[33]
 
+new duriel_slowweap[33]
+new duriel_boost[33]
+new duriel_boost_delay[33]
+new duriel_boost_ent[33]
+
 new const primaryWeapons[][] = {
 	"weapon_shield",
 	"weapon_scout",
@@ -505,7 +510,7 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Hephasto, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Duriel", "Мефисто", "Hephasto", "Diablo", "Баал", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Hephasto", "Diablo", "Баал", "Fallen", "Imp", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
 new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,130,120,140,130,130,123,110,100,135,100,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
@@ -749,6 +754,16 @@ public plugin_init()
 	//register_forward(FM_CmdStart, "Fwd_CmdStart");
 	register_forward(FM_CmdStart, "FwdCmdStart");
 	RegisterHam(Ham_TakeDamage, "player", "lustrzanypocisk")
+	new szWeaponName[32] 
+    new NOSHOT_BITSUM = (1<<CSW_KNIFE) | (1<<CSW_HEGRENADE) | (1<<CSW_FLASHBANG) | (1<<CSW_SMOKEGRENADE) 
+    for(new iId = CSW_P228; iId <= CSW_P90; iId++) 
+    { 
+        if( ~NOSHOT_BITSUM & 1<<iId && get_weaponname(iId, szWeaponName, charsmax(szWeaponName) )) 
+        { 
+            RegisterHam(Ham_Weapon_PrimaryAttack, szWeaponName, "fwd_AttackSpeed", 1) 
+			RegisterHam(Ham_Item_Deploy , szWeaponName, "fwd_AttackSpeed", 1)
+		} 
+   }
 
 	
 	register_plugin("DiabloMod","2.0","HiTmAnY") 
@@ -2732,6 +2747,10 @@ public RoundStart(){
 			}
 			viper_gases[i] = floatround(gas,floatround_round);
 		}
+		if(player_class[i] == Duriel)
+		{
+			duriel_boost[i] = 0
+		}
 		if(player_class[i] == Baal)
 		{
 			c_blink[i]=floatround(halflife_time())
@@ -2846,8 +2865,7 @@ public RoundStart(){
 		
 		golden_bulet[i]=0
 		c_ulecz[i] = false
-		if(player_class[i] == Duriel) ilosc_rakiet_gracza[i]=3
-		else if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
+		if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
 		else if(player_class[i] == Demonolog) ilosc_rakiet_gracza[i]=3
 		if(player_class[i] == Frozen)
 		{
@@ -3464,6 +3482,20 @@ public Damage(id)
 						}
 					}
 				}
+				if(player_class[id] ==  Duriel)
+				{
+					new Float:duriel_chance = player_intelligence[id]/125.0					
+					new Float:chance = random_float(0.0, 1.0 )
+					if( chance <= duriel_chance )
+					{
+						if(duriel_slowweap[attacker_id] == 0)
+						{
+							duriel_slowweap[attacker_id] = 1
+							set_task(3.0, "unslowweap", attacker_id)
+							hudmsg(attacker_id,5.0,"Дуриель замедлил ваши ВЫСТРЕЛЫ")
+						}
+					}
+				}
 				if(weapon==CSW_KNIFE && player_class[attacker_id] == Viper)
 				{
 					new Float:viper_chance = player_intelligence[attacker_id]/160
@@ -3784,6 +3816,11 @@ public client_PreThink ( id )
 	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Viper)
 	{
 		viper_gas(id)
+	}
+	
+	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Duriel)
+	{
+		duriel_boosting(id)
 	}
 	
 	if ((!(button2 & IN_RELOAD)) && on_knife[id] && button[id]==1) button[id]=0
@@ -4614,6 +4651,11 @@ public pfn_touch ( ptr, ptd )
 		return PLUGIN_CONTINUE;
 	}
 	
+	if(!pev_valid(ptd))
+	{
+		return PLUGIN_CONTINUE;
+	}
+	
 	new szClassName[32], szClassNameOther[32];
 	entity_get_string(ptd, EV_SZ_classname, szClassName, 31)
 	if(ptr && pev_valid(ptr)) 
@@ -4823,6 +4865,10 @@ public enablehook(id)
 	spider_hook_disabled[id] = 0
 }
 
+public unslowweap(id)
+{
+	duriel_slowweap[id] = 0
+}
 
 /* ==================================================================================================== */
 
@@ -7463,6 +7509,86 @@ public create_firewall_next(id)
 	//set_pev(ent, pev_nextthink, (get_gametime() + 4.0))
 }
 
+public duriel_boosting(id)
+{
+	if(duriel_boost[id] == 0)
+	{
+		client_print(id, print_center, "У вас закончилась ярость!");
+		return PLUGIN_CONTINUE;
+	}
+	if(duriel_boost_delay[id] == 1)
+	{
+		return PLUGIN_CONTINUE;
+	}
+
+	duriel_boost[id]--
+	duriel_boost_delay[id] = 1
+	
+	new Float:fl_iNewVelocity[3]
+	VelocityByAim(id, 4000, fl_iNewVelocity)
+	entity_set_vector(id, EV_VEC_velocity, fl_iNewVelocity)
+	set_task(1.0,"removeboostdelay",id)
+	
+	duriel_boost_ent[id] = 0
+	boostattack(id)
+	
+	return PLUGIN_CONTINUE;
+}
+
+public boostattack(id)
+{
+	new players[MAXPLAYERS], vTargetOrigin[3], pOrigin[3], Float:vVelocity[3];
+	new target, iDistance, dmg, Float:dmgsumm, num;
+	static boostrange = 330
+	
+	get_players(players,num,"h","TERRORIST");
+	
+	get_user_origin( id, pOrigin );
+	
+	for(new i=0 ; i<num ; i++)
+	{
+		target = players[i]
+		if((get_user_team(target) != get_user_team(id)) && is_user_alive(target))
+		{
+			// Get origin of target
+			get_user_origin( target, vTargetOrigin );
+
+			// Get distance in b/t target and caster
+			iDistance = get_distance( pOrigin, vTargetOrigin );
+			
+			if ( iDistance < boostrange )
+			{
+				dmgsumm = player_intelligence[id]+10 - player_dextery[target]/5
+				dmg = floatround(dmgsumm, floatround_ceil)
+				if(dmg < 10) { dmg = 10; }
+				d2_damage( target, id, dmg, "durielboost")
+				
+				entity_get_vector( target, EV_VEC_velocity, vVelocity );
+
+				vVelocity[0] = random_float(100.0, 400.0 );
+				vVelocity[1] = random_float(100.0, 400.0 );
+				vVelocity[2] = random_float(400.0, 700.0 );
+
+				entity_set_vector( target, EV_VEC_velocity, vVelocity );
+				for(new i2 = 0; i2 < sizeof primaryWeapons; i2++)
+				{
+					engclient_cmd(target, "drop", primaryWeapons[i2])
+				}
+			}
+		}
+	}
+	duriel_boost_ent[id]++
+	if(duriel_boost_ent[id] < 6)
+	{
+		set_task(0.2,"boostattack",id)
+	}
+}
+
+public removeboostdelay(id)
+{
+	duriel_boost_delay[id] = 0
+}
+
 public add_bonus_redirect(id)
 {
 	if (player_b_redirect[id] > 0)
@@ -8392,7 +8518,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yDuriel^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yHephasto^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yImp^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -8442,7 +8568,6 @@ public PressedKlasy(id, key)
 		case 1: 
 		{    
 			player_class[id] = Duriel
-			niewidzialnosc_kucanie[id] = 1;
 			MYSQLX_SetDataForRace( id )
 		}
 		case 2: 
@@ -10887,7 +11012,6 @@ public set_speedchange(id)
 		else if(player_class[id] == Assassin) speeds= 30 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Baal) speeds= 40 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Mag) speeds= 20 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == Duriel) speeds= -10 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Barbarian) speeds= -10 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == SabreCat) speeds= 30 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == BloodRaven) speeds= 30 + floatround(player_dextery[id]*1.3)
@@ -13163,7 +13287,7 @@ public call_cast(id)
 				show_hudmessage(id, "[Monk] Стенка установленна") 
 				createBlockAiming(id)
 			}
-			else show_hudmessage(id, "[Monk] Вы не можете строить") 
+			else hudmsg(id,5.0,"[Monk] Вы не можете строить") 
 		}
 		case Paladin:
 		{
@@ -13172,7 +13296,7 @@ public call_cast(id)
 			if(golden_bulet[id]>3)
 			{
 				golden_bulet[id]=3
-				show_hudmessage(id, "[Paladin] У вас максимальное кол-во магических пулей - 3",golden_bulet[id]) 
+				hudmsg(id,5.0,"[Paladin] У вас максимальное кол-во магических пулей - 3",golden_bulet[id]) 
 			}
 			else if(golden_bulet[id]==1)show_hudmessage(id, "[Paladin] У вас одна магическая пуля") 
 			else if(golden_bulet[id]>1)show_hudmessage(id, "[Paladin] У вас %i магических пулей",golden_bulet[id]) 
@@ -13185,8 +13309,8 @@ public call_cast(id)
 		}
 		case Ninja:
 		{
-			show_hudmessage(id, "[Нинзя] Временное увеличение скорости") 
 			set_user_maxspeed(id,get_user_maxspeed(id)+25.0)
+			show_hudmessage(id, "[Нинзя] +25 к скорости. %f",get_user_maxspeed(id)) 
 		}
 		case Necromancer:
 		{
@@ -13221,6 +13345,18 @@ public call_cast(id)
 			create_firewall(id)
 			show_hudmessage(id, "[Мефисто] Огненная стена") 
 		}
+		case Duriel:
+		{
+			if(duriel_boost[id] < 3)
+			{
+				duriel_boost[id]++
+				show_hudmessage(id, "[Дуриель] +Ярость %d/3",duriel_boost[id]) 
+			}
+			else
+			{
+				hudmsg(id,5.0,"У вас максимум ярости")
+			}
+		}
 		case Zakarum:
 		{
 			new Float:zak_maxspeed
@@ -13244,7 +13380,7 @@ public call_cast(id)
 			}
 			else
 			{
-				show_hudmessage(id, "У вас максимум стрел")
+				hudmsg(id,5.0,"У вас максимум стрел")
 			}
 		}
 		case Mosquito:
@@ -13256,7 +13392,7 @@ public call_cast(id)
 			}
 			else
 			{
-				show_hudmessage(id, "У вас максимум ядовитых жал")
+				hudmsg(id,5.0,"У вас максимум ядовитых жал")
 			}
 		}
 		case Frozen:
@@ -13275,7 +13411,7 @@ public call_cast(id)
 			if(ultra_armor[id]>7)
 			{
 				ultra_armor[id]=7
-				show_hudmessage(id, "[Barbarian] Достигнуто масимальное кол-во Ultra Armor - 7",ultra_armor[id]) 
+				hudmsg(id,5.0,"[Barbarian] Достигнуто масимальное кол-во Ultra Armor - 7",ultra_armor[id]) 
 			}
 			else show_hudmessage(id, "[Barbarian] У вас %i Ultra Armor",ultra_armor[id]) 
 		}
@@ -13285,7 +13421,7 @@ public call_cast(id)
 			if(ultra_armor[id]>2)
 			{
 				ultra_armor[id]=2
-				show_hudmessage(id, "[Hephasto] Максимальное значение магич. доспехов - 2",ultra_armor[id]) 
+				hudmsg(id,5.0,"[Hephasto] Максимальное значение магич. доспехов - 2",ultra_armor[id]) 
 			}
 			else show_hudmessage(id, "[Hephasto] У вас %i магических доспехов",ultra_armor[id]) 
 		}
@@ -13313,7 +13449,7 @@ public call_cast(id)
 		{
 			if(player_item_id[id] != 0)
 			{
-			show_hudmessage(id, "[The Smith] У вас уже есть Item")
+			hudmsg(id,5.0,"[The Smith] У вас уже есть Item")
 			}
 			else 
 			{
@@ -13333,7 +13469,7 @@ public call_cast(id)
 		{
 			if(player_item_id[id] != 0)
 			{
-			show_hudmessage(id, "[Demonolog] У вас уже есть Item")
+			hudmsg(id,5.0,"[Demonolog] У вас уже есть Item")
 			}
 			else 
 			{
@@ -16100,6 +16236,15 @@ public AutoCheck_Afk()
 		}
 	}
 }*/
+
+stock fm_get_weapon_ent_owner(ent)
+{
+	if(pev_valid(ent) != 2)
+		return -1;
+	
+	return get_pdata_cbase(ent, 41, 4);
+}
+
 public lustrzanypocisk(this, idinflictor, idattacker, Float:damage, damagebits)
 {
         if(damagebits&(1<<1) && lustrzany_pocisk[this] > 0)
@@ -16112,6 +16257,24 @@ public lustrzanypocisk(this, idinflictor, idattacker, Float:damage, damagebits)
         }
         return HAM_IGNORED;
 }
+
+public fwd_AttackSpeed( const weapon_ent )
+{	
+	if (!pev_valid(weapon_ent))
+        return HAM_IGNORED
+	
+	new id = fm_get_weapon_ent_owner(weapon_ent)
+	if(duriel_slowweap[id] == 1)
+	{
+		new Float:primary_speed = get_pdata_float(weapon_ent, 46, 4)*2.0
+		new Float:secondary_speed = get_pdata_float(weapon_ent, 47, 4)*2.0
+		set_pdata_float(weapon_ent, 46, primary_speed, 4)
+		set_pdata_float(weapon_ent, 47, secondary_speed, 4)
+	}
+	
+	return HAM_IGNORED;
+}
+
 CreateHealBot()
 {
 		new Bot = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "info_target"));
