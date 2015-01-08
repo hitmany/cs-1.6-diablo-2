@@ -91,6 +91,7 @@ new DemageTake1[33]
 #define TASK_NAME 48424
 #define TASK_FLASH_LIGHT 81184
 #define TASK_REMOVE_BAAL 81185
+#define TASK_BURN 81186
 #define FL_ONGROUND (1<<9)
 #define message_begin_f(%1,%2,%3,%4) engfunc(EngFunc_MessageBegin, %1, %2, %3, %4)
 #define write_coord_f(%1) engfunc(EngFunc_WriteCoord, %1)
@@ -164,6 +165,8 @@ new g_msg_bartime
 new g_msg_screenfade
 new g_msg_statusicon
 new g_msg_clcorpse
+new g_msgDamage
+new g_MsgText
 
 new cvar_revival_time
 new cvar_revival_health
@@ -202,6 +205,10 @@ new player, bossPower
 new old_mp_autoteambalance, Float:old_mp_roundtime, Float:old_mp_buytime, old_mp_freezetime, old_mp_startmoney
 
 new bool:freeze_ended
+
+// Remembers when the round starts
+new Float:gF_starttime
+
 new c4state[33]
 new c4bombc[33][3] 
 new c4fake[33]
@@ -266,14 +273,23 @@ new sprite_line = 0
 new sprite_lgt = 0
 new sprite_laser = 0
 new sprite_ignite = 0
+new sprite_flame = 0
 new sprite_smoke = 0
 new sprite_sabrecat = 0
 new sprite_bloodraven = 0
+new g_smokeSpr
+
+// Player burning sounds
+new const grenade_fire_player[][] = { "scientist/sci_fear8.wav", "scientist/sci_pain1.wav", "scientist/scream02.wav" }
+
+new const sprite_grenade_smoke[] = "sprites/black_smoke3.spr"
 new coldGibs;
 //new sound_fireball = 0
 //new sound_explode = 0
 new sprite_blast;
 new sprite;
+new diablolght;
+new diablo_lights[33];
 
 new player_xp[33] = 0		//Holds players experience
 new player_lvl[33] = 1			//Holds players level
@@ -515,8 +531,8 @@ new const szTables[TOTAL_TABLES][] =
 
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Izual, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Изуал", "Diablo", "Баал", "Fallen", "Бес", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
-new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,120,120,140,130,130,123,110,100,135,100,100,140,115,120,145,145,145,145 }
+new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Изуал", "Диабло", "Баал", "Fallen", "Бес", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,120,120,140,150,130,123,110,100,135,100,100,140,115,120,145,145,145,145 }
 
 new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
 14300,15730,17300,19030,20900,23000,24000,25200,26400,27700,29000,30500,32000,33600,35300,37000,39000,41000,43000,45100,//41
@@ -745,6 +761,8 @@ public plugin_init()
 	g_msg_clcorpse	= get_user_msgid("ClCorpse")
 	g_msg_screenfade= get_user_msgid("ScreenFade")
 	g_msg_statusicon= get_user_msgid("StatusIcon")
+	g_msgDamage = get_user_msgid("Damage")
+	g_MsgText 		= get_user_msgid("TextMsg")
 
 	register_message(g_msg_clcorpse, "message_clcorpse")
 	
@@ -768,8 +786,10 @@ public plugin_init()
             RegisterHam(Ham_Weapon_PrimaryAttack, szWeaponName, "fwd_AttackSpeed", 1) 
 			RegisterHam(Ham_Item_Deploy , szWeaponName, "fwd_AttackSpeed", 1)
 		} 
-   }
-
+	}
+	//Diablo napalm
+	RegisterHam(Ham_Think, "grenade", "fw_ThinkGrenade",0)
+	RegisterHam(Ham_Touch, "player", "fw_TouchPlayer")
 	
 	register_plugin("DiabloMod","2.0","HiTmAnY") 
 	register_cvar("diablomod_version",mod_version,FCVAR_SERVER)
@@ -835,6 +855,15 @@ public plugin_init()
 	player=0
 	register_concmd("amx_givehook", "give_hook", ADMIN_IMMUNITY, "<Username> - Give somebody access to the hook")
 	register_concmd("amx_takehook", "take_hook", ADMIN_IMMUNITY, "<UserName> - Take away somebody his access to the hook")
+	
+	//Diablo nades unlimit ammo
+	
+	// Buy grenades old style
+	register_menucmd(register_menuid("BuyItem"), (1<<3), "cmd_HeBuy")
+	// Buy grenades new style (VGUI)
+	register_menucmd(-34, (1<<3), "cmd_HeBuy")	
+	// Buy grenades through console commands
+	register_clcmd("hegren", "cmd_HeBuy")
 	
 	register_clcmd("say class","changerace")
 	register_clcmd("say /who","cmd_who")	
@@ -2194,6 +2223,7 @@ public plugin_precache()
 	sprite_blood_drop = precache_model("sprites/blood.spr")
 	sprite_blood_spray = precache_model("sprites/bloodspray.spr")
 	sprite_ignite = precache_model("addons/amxmodx/diablo/flame.spr")
+	sprite_flame = precache_model("sprites/flame.spr")
 	sprite_smoke = precache_model("sprites/steam1.spr")
 	sprite_laser = precache_model("sprites/laserbeam.spr")
 	sprite_boom = precache_model("sprites/zerogxplode.spr") 
@@ -2202,11 +2232,17 @@ public plugin_precache()
 	sprite_white = precache_model("sprites/white.spr") 
 	sprite_fire = precache_model("sprites/explode1.spr")	
 	sprite_gibs = precache_model("models/hgibs.mdl")
+	
+	//Diablo napalm
+	for (new i = 0; i < sizeof grenade_fire_player; i++)
+		precache_sound(grenade_fire_player[i])
+		
 	coldGibs = precache_model("models/diablomod/cold.mdl")
 	precache_model("sprites/diablo_lp/xcold.spr")
 	precache_model("sprites/zbeam4.spr") 
 	g_shock = precache_model("sprites/shockwave.spr")
 	sprite = precache_model("sprites/lgtning.spr");
+	diablolght = precache_model("sprites/diablo_lp/diablo_lght.spr");
 	precache_model("sprites/xfireball3.spr")
 	precache_model("sprites/diablo_lp/bone1.spr")
 	precache_model("models/portal/portal.mdl")
@@ -2215,6 +2251,7 @@ public plugin_precache()
 	precache_model("sprites/diablo_lp/cold_expo.spr")
 	precache_model("sprites/diablo_lp/firewall.spr")
 	sprite_bloodraven = precache_model("sprites/diablo_lp/blood_dead2.spr")
+	g_smokeSpr = engfunc(EngFunc_PrecacheModel, sprite_grenade_smoke)
 		
 	precache_sound(SOUND_START)
 	precache_sound(SOUND_FINISHED)
@@ -2275,6 +2312,7 @@ public plugin_precache()
 	precache_model("models/diablomod/w_throwingknife.mdl")
 	precache_model("models/diablomod/bm_block_platform.mdl")
 	sprite_sabrecat = precache_model( "sprites/gas_puff_01g.spr" ); // SabreCat
+	precache_sound( "weapons/hegrenade-1.wav" ); // SabreCat
 	precache_sound( "weapons/grenade_hit1.wav" ); // SabreCat
 	precache_sound( "diablo_lp/bow2.wav" ); // Bows
 	precache_sound( "diablo_lp/bloodraventaunt1.wav" );
@@ -2666,6 +2704,8 @@ public on_EndRound()
 }
 
 public RoundStart(){
+	// Everu round we refresh this time, used for detecting if the buytime has passed
+	gF_starttime = get_gametime()
 	kill_all_entity("przedmiot")
 	kill_all_entity("saber_smoke3")
 	kill_all_entity("spidertrap")
@@ -2799,15 +2839,16 @@ public RoundStart(){
 		}
 		if(player_class[i] == Diablo)
 		{
+			if(player_intelligence[i] > 0)
+			{
+				diablo_lights[i] = 1
+			}
 			if(!g_bWeaponsDisabled)
 			{
-				fm_give_item(i,"weapon_elite")
-				fm_give_item(i,"ammo_9mm")
-				fm_give_item(i,"ammo_9mm")
-				fm_give_item(i,"ammo_9mm")
-				fm_give_item(i,"ammo_9mm")
-				fm_give_item(i,"ammo_9mm")
-				fm_give_item(i,"ammo_9mm")
+				if ( !user_has_weapon( i , CSW_HEGRENADE ) )
+				{
+					fm_give_item(i, "weapon_hegrenade")
+				}
 			}
 			else
 			{
@@ -3745,7 +3786,7 @@ public client_PreThink ( id )
 	}
 	if (button2 & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2))
 	{
-        if((player_class[id]==Diablo && weapon != CSW_KNIFE) || (player_class[id]==BloodRaven && bow[id]))
+        if(player_class[id]==BloodRaven && bow[id])
 		{
 			if (weapon != CSW_AWP && weapon != CSW_SCOUT)
 			{
@@ -3820,6 +3861,14 @@ public client_PreThink ( id )
 		}
 	}
 	
+	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Diablo)
+	{
+		if(can_cast[id] == 1)
+		{
+			diablo_lght(id)
+		}
+	}
+	
 	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Viper)
 	{
 		viper_gas(id)
@@ -3887,6 +3936,7 @@ public client_PreThink ( id )
 			else if(player_class[id] == Infidel) time_delay*=2.0
 			else if(player_class[id] == Duriel) time_delay*=4.0
 			else if(player_class[id] == Izual) time_delay*=2.0
+			else if(player_class[id] == Diablo) time_delay*=4.5
 			
 			cast_end[id]=halflife_time()+time_delay
 			
@@ -3993,7 +4043,7 @@ public client_PreThink ( id )
 							case 0: g_TrapMode[id] = 1
 							case 1: g_TrapMode[id] = 0
 						}
-						client_print(id, print_center, "Grenade Trap %s", g_TrapMode[id] ? "[ON]" : "[OFF]")
+						client_print(id, print_center, "Граната-ловушка %s", g_TrapMode[id] ? "[ON]" : "[OFF]")
 						g_PreThinkDelay[id] = get_gametime()
 					}
 				}
@@ -4618,13 +4668,13 @@ public dropitem(id)
 		
 	if (item_durability[id] <= 0) 
 	{
-		hudmsg(id,3.0,"Item потерял свою силу!")
+		hudmsg(id,3.0,"Предмет потерял свою силу!")
 		emit_sound(id,CHAN_STATIC,"diablo_lp/itembroken.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	}
 	else 
 	{
 		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
-		show_hudmessage(id, "Item выброшенн")
+		show_hudmessage(id, "Предмет выброшенн")
 		emit_sound(id,CHAN_STATIC,"diablo_lp/flippy.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	}
 	player_item_id[id] = 0
@@ -6679,16 +6729,7 @@ public add_grenade_bonus(id,attacker_id,weapon)
 		new roll = random_num(1,player_b_grenade[attacker_id])
 		if (roll == 1)
 		{
-			set_user_health(id, 0)
-			message_begin( MSG_ALL, gmsgDeathMsg,{0,0,0},0) 
-			write_byte(attacker_id) 
-			write_byte(id) 
-			write_byte(0) 
-			write_string("grenade") 
-			message_end() 
-			set_user_frags(attacker_id, get_user_frags(attacker_id)+1) 
-			set_user_frags(id, get_user_frags(id)+1)
-			cs_set_user_money(attacker_id, cs_get_user_money(attacker_id)+150) 
+			UTIL_Kill( id, attacker_id, "grenade")
 		}
 	}
 	if (c_grenade[attacker_id] > 0 && weapon == CSW_HEGRENADE && player_b_fireshield[id] == 0)	//Fireshield check
@@ -6696,16 +6737,7 @@ public add_grenade_bonus(id,attacker_id,weapon)
 		new roll = random_num(1,c_grenade[attacker_id])
 		if (roll == 1)
 		{
-			set_user_health(id, 0)
-			message_begin( MSG_ALL, gmsgDeathMsg,{0,0,0},0) 
-			write_byte(attacker_id) 
-			write_byte(id) 
-			write_byte(0) 
-			write_string("grenade") 
-			message_end() 
-			set_user_frags(attacker_id, get_user_frags(attacker_id)+1) 
-			set_user_frags(id, get_user_frags(id)+1)
-			cs_set_user_money(attacker_id, cs_get_user_money(attacker_id)+150) 
+			UTIL_Kill( id, attacker_id, "grenade")
 		}
 	}
 }
@@ -7747,6 +7779,8 @@ public izualring(id)
 			}
 		}
 	}
+	
+	return PLUGIN_CONTINUE;
 }
 
 public add_bonus_redirect(id)
@@ -8678,7 +8712,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yDiablo^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yДиабло^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -8746,9 +8780,7 @@ public PressedKlasy(id, key)
 		case 4: 
 		{    
 			player_class[id] = Diablo
-			c_jump[id]=1
 			c_silent[id]=1
-			c_blind[id] = 20
 			MYSQLX_SetDataForRace( id )
 			emit_sound(id,CHAN_STATIC,"diablo_lp/diablo_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 		}
@@ -9584,7 +9616,7 @@ public Postthink_Doubeljump(id)
 public eventGrenade(id) 
 {
 	new id = read_data(1)
-	if (player_b_grenade[id] > 0 || player_b_smokehit[id] > 0)
+	if (player_b_grenade[id] > 0 || player_b_smokehit[id] > 0 || player_class[id] == Diablo)
 	{
 		set_task(0.1, "makeGlow", id)
 	}
@@ -9600,7 +9632,7 @@ public makeGlow(id)
 	{	
 		entity_get_string(grenade, EV_SZ_model, greModel, 99)
 		
-		if(equali(greModel, "models/w_hegrenade.mdl" ) && player_b_grenade[id] > 0 || c_grenade[id] > 0)	
+		if(equali(greModel, "models/w_hegrenade.mdl" ) && player_b_grenade[id] > 0 || c_grenade[id] > 0 || player_class[id] == Diablo)	
 			set_rendering(grenade, kRenderFxGlowShell, 255,0,0, kRenderNormal, 255)
 		
 		if(equali(greModel, "models/w_smokegrenade.mdl" ) && player_b_smokehit[id] > 0 )	
@@ -10994,6 +11026,386 @@ public fw_SetModel(entity, model[])
     return FMRES_IGNORED
 }
 
+//Diablo grenade
+
+create_blast2(const Float:originF[3])
+{
+	// Smallest ring
+	engfunc(EngFunc_MessageBegin, MSG_PVS, SVC_TEMPENTITY, originF, 0)
+	write_byte(TE_BEAMCYLINDER) // TE id
+	engfunc(EngFunc_WriteCoord, originF[0]) // x
+	engfunc(EngFunc_WriteCoord, originF[1]) // y
+	engfunc(EngFunc_WriteCoord, originF[2]) // z
+	engfunc(EngFunc_WriteCoord, originF[0]) // x axis
+	engfunc(EngFunc_WriteCoord, originF[1]) // y axis
+	engfunc(EngFunc_WriteCoord, originF[2]+385.0) // z axis
+	write_short(g_shock) // sprite
+	write_byte(0) // startframe
+	write_byte(0) // framerate
+	write_byte(4) // life
+	write_byte(60) // width
+	write_byte(0) // noise
+	write_byte(200) // red
+	write_byte(100) // green
+	write_byte(0) // blue
+	write_byte(200) // brightness
+	write_byte(0) // speed
+	message_end()
+	
+	// Medium ring
+	engfunc(EngFunc_MessageBegin, MSG_PVS, SVC_TEMPENTITY, originF, 0)
+	write_byte(TE_BEAMCYLINDER) // TE id
+	engfunc(EngFunc_WriteCoord, originF[0]) // x
+	engfunc(EngFunc_WriteCoord, originF[1]) // y
+	engfunc(EngFunc_WriteCoord, originF[2]) // z
+	engfunc(EngFunc_WriteCoord, originF[0]) // x axis
+	engfunc(EngFunc_WriteCoord, originF[1]) // y axis
+	engfunc(EngFunc_WriteCoord, originF[2]+470.0) // z axis
+	write_short(g_shock) // sprite
+	write_byte(0) // startframe
+	write_byte(0) // framerate
+	write_byte(4) // life
+	write_byte(60) // width
+	write_byte(0) // noise
+	write_byte(200) // red
+	write_byte(50) // green
+	write_byte(0) // blue
+	write_byte(200) // brightness
+	write_byte(0) // speed
+	message_end()
+	
+	// Largest ring
+	engfunc(EngFunc_MessageBegin, MSG_PVS, SVC_TEMPENTITY, originF, 0)
+	write_byte(TE_BEAMCYLINDER) // TE id
+	engfunc(EngFunc_WriteCoord, originF[0]) // x
+	engfunc(EngFunc_WriteCoord, originF[1]) // y
+	engfunc(EngFunc_WriteCoord, originF[2]) // z
+	engfunc(EngFunc_WriteCoord, originF[0]) // x axis
+	engfunc(EngFunc_WriteCoord, originF[1]) // y axis
+	engfunc(EngFunc_WriteCoord, originF[2]+555.0) // z axis
+	write_short(g_shock) // sprite
+	write_byte(0) // startframe
+	write_byte(0) // framerate
+	write_byte(4) // life
+	write_byte(60) // width
+	write_byte(0) // noise
+	write_byte(200) // red
+	write_byte(0) // green
+	write_byte(0) // blue
+	write_byte(200) // brightness
+	write_byte(0) // speed
+	message_end()
+}
+
+// Player Touch Forward
+public fw_TouchPlayer(self, other)
+{
+	// not touching a player
+	if (!is_user_alive(other))
+		return;
+	
+	// Toucher not on fire or touched player already on fire
+	if (!task_exists(self+TASK_BURN) || task_exists(other+TASK_BURN))
+		return;
+	
+	// Check if friendly fire is allowed
+	if (get_user_team(self) == get_user_team(other))
+		return;
+	
+	// Heat icon
+	message_begin(MSG_ONE_UNRELIABLE, g_msgDamage, _, other)
+	write_byte(0) // damage save
+	write_byte(0) // damage take
+	write_long(DMG_BURN) // damage type
+	write_coord(0) // x
+	write_coord(0) // y
+	write_coord(0) // z
+	message_end()
+	
+	// Our task params
+	static params[2]
+	params[0] = 15 // duration (reduced a bit)
+	params[1] = self // attacker
+	
+	// Set burning task on victim
+	set_task(0.1, "burning_flame", other+TASK_BURN, params, sizeof params)
+}
+
+public fw_ThinkGrenade(entity)
+{
+	
+	if(pev(entity, pev_flTimeStepSound) != 681856) return HAM_IGNORED;
+	
+	if (!pev_valid(entity)) return HAM_IGNORED;
+	
+	static Float:dmgtime
+	pev(entity, pev_dmgtime, dmgtime)
+	
+	if (dmgtime > get_gametime())
+		return HAM_IGNORED;
+	
+	//set_pev(entity, pev_flTimeStepSound, 0)
+	
+	static Float:originF[3]
+	pev(entity, pev_origin, originF)
+	
+	create_blast2(originF)
+	
+	napalm_explode(entity)
+	
+	engfunc(EngFunc_RemoveEntity, entity)
+	return HAM_SUPERCEDE;
+	
+}
+
+// Napalm Grenade Explosion
+napalm_explode(ent)
+{
+	// Get attacker and its team
+	static attacker, attacker_team
+	attacker = pev(ent, pev_owner)
+	attacker_team = pev(ent, pev_team)
+	
+	// Get origin
+	static Float:originF[3]
+	pev(ent, pev_origin, originF)
+	
+	// Napalm explosion sound
+	engfunc(EngFunc_EmitSound, ent, CHAN_WEAPON, "weapons/hegrenade-1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+	
+	// Collisions
+	static victim
+	victim = -1
+	
+	while ((victim = engfunc(EngFunc_FindEntityInSphere, victim, originF, 240.0)) != 0)
+	{
+		// Only effect alive players
+		if (!is_user_alive(victim))
+			continue;
+		
+		// Check if myself is allowed
+		if (victim == attacker)
+			continue;
+		
+		// Check if friendly fire is allowed
+		if (attacker_team == get_user_team(victim))
+			continue;
+		
+		// Heat icon
+		message_begin(MSG_ONE_UNRELIABLE, g_msgDamage, _, victim)
+		write_byte(0) // damage save
+		write_byte(0) // damage take
+		write_long(DMG_BURN) // damage type
+		write_coord(0) // x
+		write_coord(0) // y
+		write_coord(0) // z
+		message_end()
+		
+		// Our task params
+		static params[2]
+		new duration, Float:durationsumm
+		durationsumm = (player_intelligence[attacker]/2.0) - (player_dextery[victim]/4.0)
+		duration = floatround(durationsumm, floatround_ceil)
+		params[0] = duration // duration
+		params[1] = attacker // attacker
+		
+		// Set burning task on victim
+		set_task(0.1, "burning_flame", victim+TASK_BURN, params, sizeof params)
+	}
+}
+
+sendTxtMsg(any: ...)
+{
+	new numstring = numargs() - 2
+	new string[100]
+	
+	message_begin(MSG_ONE, g_MsgText, _, getarg(0))
+	write_byte(getarg(1))
+	
+	for (new i=0; i < numstring; i++)
+	{
+		// Here we copy the sting that we want to send to a player
+		format_args(string, charsmax(string), i + 2)
+		
+		// Send it!
+		write_string(string)
+	}
+	
+	// End the function chain
+	message_end()
+}
+
+public cmd_HeBuy(id) 
+{
+	if(!is_user_alive(id))
+		return PLUGIN_CONTINUE
+	
+	new CsTeams:team = cs_get_user_team(id)
+	
+	if (team == CS_TEAM_SPECTATOR || team == CS_TEAM_UNASSIGNED)
+		return PLUGIN_CONTINUE
+	
+	if(!cs_get_user_buyzone(id))
+	{
+		client_print(id, print_center, "You are not in a buy zone.")
+		return PLUGIN_HANDLED
+	}
+	
+	if (cs_get_user_vip(id))
+	{
+		client_print(id, print_center, "You cannot buy this item because you are VIP!")
+		return PLUGIN_HANDLED
+	}
+	
+	new Float:timepassed = get_gametime() - gF_starttime
+	new Float:buytimesec = get_cvar_float("mp_buytime") * 60.0
+	
+	if(timepassed > buytimesec)
+	{
+		new buffer[10]
+		num_to_str(floatround(buytimesec), buffer, charsmax(buffer))
+		sendTxtMsg(id, print_center, "#Cstrike_TitlesTXT_Cant_buy", buffer)
+		return PLUGIN_HANDLED
+	}
+	
+	new max_ammo
+	
+	if(player_class[id] == Diablo)
+	{
+		max_ammo = 2
+	}
+	else
+	{
+		max_ammo = 1
+	}
+	
+	new clip,cur_ammo
+    get_user_ammo(id,CSW_HEGRENADE,clip,cur_ammo)
+	
+	// Block the buy if we have less ammo than we want, block the touch.
+	if ((cur_ammo + 1) > max_ammo)
+	{
+		client_print(id , print_center, "#Cstrike_TitlesTXT_Cannot_Carry_Anymore")
+		return PLUGIN_HANDLED
+	}
+	
+	new cost = 300
+	new money = cs_get_user_money(id)
+
+	if(money - cost < 0) 
+	{
+		client_print(id , print_center, "#Cstrike_TitlesTXT_Not_Enough_Money")
+		return PLUGIN_HANDLED
+	}
+	
+	if ( !user_has_weapon( id , CSW_HEGRENADE ) )
+        give_item( id , "weapon_hegrenade" );
+
+    cs_set_user_bpammo(id, CSW_HEGRENADE, cur_ammo + 1);
+	cs_set_user_money(id, money - cost, 1)
+	
+	return PLUGIN_HANDLED
+}
+
+// Burning Task
+public burning_flame(args[2], taskid)
+{
+	// Player died/disconnected
+	new ID_BURN = taskid - TASK_BURN
+	new BURN_DURATION = args[0]
+	new BURN_ATTACKER = args[1]
+	if (!is_user_alive(ID_BURN))
+		return PLUGIN_CONTINUE;
+		
+	if(BURN_DURATION < 1)
+	{
+		return PLUGIN_CONTINUE;
+	}
+	
+	// Get player origin and flags
+	static Float:originF[3], flags
+	pev(ID_BURN, pev_origin, originF)
+	flags = pev(ID_BURN, pev_flags)
+	
+	// In water or burning stopped
+	if ((flags & FL_INWATER) || BURN_DURATION < 1)
+	{
+		// Smoke sprite
+		engfunc(EngFunc_MessageBegin, MSG_PVS, SVC_TEMPENTITY, originF, 0)
+		write_byte(TE_SMOKE) // TE id
+		engfunc(EngFunc_WriteCoord, originF[0]) // x
+		engfunc(EngFunc_WriteCoord, originF[1]) // y
+		engfunc(EngFunc_WriteCoord, originF[2]-50.0) // z
+		write_short(g_smokeSpr) // sprite
+		write_byte(random_num(15, 20)) // scale
+		write_byte(random_num(10, 20)) // framerate
+		message_end()
+		
+		return PLUGIN_CONTINUE;
+	}
+	
+	// Randomly play burning sounds
+	if (random_num(1, 20) == 1)
+		engfunc(EngFunc_EmitSound, ID_BURN, CHAN_VOICE, grenade_fire_player[random_num(0, sizeof grenade_fire_player - 1)], 1.0, ATTN_NORM, 0, PITCH_NORM)
+	
+	// Fire slow down
+	if (flags & FL_ONGROUND)
+	{
+		static Float:velocity[3]
+		pev(ID_BURN, pev_velocity, velocity)
+		xs_vec_mul_scalar(velocity, 0.5, velocity)
+		set_pev(ID_BURN, pev_velocity, velocity)
+	}
+	
+	// Get victim's health
+	static health
+	health = get_user_health(ID_BURN)
+	
+	// Take damage from the fire
+	if ((health - 2) > 0)
+	{
+		d2_damage( ID_BURN, BURN_ATTACKER, 2, "diablo napalm")
+	}
+	else
+	{
+		// Kill victim
+		UTIL_Kill(BURN_ATTACKER,ID_BURN,"diablo napalm")
+		
+		// Smoke sprite
+		engfunc(EngFunc_MessageBegin, MSG_PVS, SVC_TEMPENTITY, originF, 0)
+		write_byte(TE_SMOKE) // TE id
+		engfunc(EngFunc_WriteCoord, originF[0]) // x
+		engfunc(EngFunc_WriteCoord, originF[1]) // y
+		engfunc(EngFunc_WriteCoord, originF[2]-50.0) // z
+		write_short(g_smokeSpr) // sprite
+		write_byte(random_num(15, 20)) // scale
+		write_byte(random_num(10, 20)) // framerate
+		message_end()
+		
+		return PLUGIN_CONTINUE;
+	}
+	
+	// Flame sprite
+	engfunc(EngFunc_MessageBegin, MSG_PVS, SVC_TEMPENTITY, originF, 0)
+	write_byte(TE_SPRITE) // TE id
+	engfunc(EngFunc_WriteCoord, originF[0]+random_float(-5.0, 5.0)) // x
+	engfunc(EngFunc_WriteCoord, originF[1]+random_float(-5.0, 5.0)) // y
+	engfunc(EngFunc_WriteCoord, originF[2]+random_float(-10.0, 10.0)) // z
+	write_short(sprite_flame) // sprite
+	write_byte(random_num(5, 10)) // scale
+	write_byte(200) // brightness
+	message_end()
+		
+	// Decrease task cycle count
+	BURN_DURATION = BURN_DURATION-1
+	args[0] = BURN_DURATION 
+	
+	// Keep sending flame messages
+	set_task(0.2, "burning_flame", taskid, args, sizeof args)
+	client_print(ID_BURN,print_console,"task, dur %d", BURN_DURATION)
+	
+	return PLUGIN_CONTINUE
+}
 /* ==================================================================================================== */	
 
 //Find the owner that has target as target and the specific classname
@@ -13078,7 +13490,12 @@ public charge_amazon(parms[])
 }
 
 public grenade_throw(id, ent, wID)
-{	
+{
+	if((player_class[id] == Diablo) && is_valid_ent(ent) && (wID==4))
+	{
+		set_pev(ent, pev_flTimeStepSound, 681856)
+	}
+	
 	if(!g_TrapMode[id] || !is_valid_ent(ent))
 		return PLUGIN_CONTINUE
 		
@@ -13512,6 +13929,22 @@ public call_cast(id)
 		{
 			create_firewall(id)
 			show_hudmessage(id, "[Мефисто] Огненная стена") 
+		}
+		case Diablo:
+		{
+			if(player_intelligence[id] < 1)
+			{
+				hudmsg(id,5.0,"Необходим интеллект!");
+			}
+			else if(diablo_lights[id] > 3)
+			{
+				hudmsg(id,5.0,"У вас максимум молний");
+			}
+			else
+			{
+				diablo_lights[id]++
+				show_hudmessage(id, "[Диабло] +Молния %d/2", diablo_lights[id]) 
+			}
 		}
 		case Duriel:
 		{
@@ -14999,6 +15432,65 @@ public imp_key(id)
 		set_task(0.15, "cancast", id, "", 0, "a", 1);
 		emit_sound(id, CHAN_WEAPON, "ambience/flameburst1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 		imp_fires[id]--
+	}
+	
+	return PLUGIN_CONTINUE;
+}
+
+public diablo_lght(id)
+{
+	if(player_intelligence[id] < 1)
+	{
+		client_print(id, print_center, "Необходим интеллект!");
+		return PLUGIN_CONTINUE;
+	}
+	if(diablo_lights[id] < 1)
+	{
+		client_print(id, print_center, "У вас нет молний!");
+		return PLUGIN_CONTINUE;
+	}
+	
+	if (is_user_alive(id))
+	{
+		can_cast[id] = 0
+		new players[32], numberofplayers, origin[3];
+		get_user_origin( id, origin );
+		get_players( players, numberofplayers, "h" );
+		
+		new i, iTargetID, vTargetOrigin[3], iDistance, dmg;
+		new iTeam = get_user_team( id );
+		
+		new br_range = 600
+		new targets
+		
+		for ( i = 0; i < numberofplayers; i++ )
+		{
+		
+			iTargetID = players[i];
+			
+			// Get origin of target
+			get_user_origin( iTargetID, vTargetOrigin );
+
+			// Get distance in b/t target and caster
+			iDistance = get_distance( origin, vTargetOrigin );
+			
+			dmg = float((player_intelligence[id] - player_dextery[iTargetID])/2);
+			
+			if ( iDistance < br_range && iTeam != get_user_team( iTargetID ) && dmg > 0 && is_user_alive(iTargetID))
+			{
+				puscBlyskawice(id, iTargetID, dmg);
+				targets++
+			}
+		}
+		if(targets > 0 )
+		{
+			diablo_lights[id]--
+		}
+		else
+		{
+			client_print(id, print_center, "Нет целей в радиусе действия!");
+		}
+		set_task(0.15, "cancast", id, "", 0, "a", 1);
 	}
 	
 	return PLUGIN_CONTINUE;
@@ -19219,14 +19711,21 @@ stock Create_ScreenFade(id, duration, holdtime, fadetype, red, green, blue, alph
 	message_end()
 }
 
-puscBlyskawice(id, ofiara, Float:fObrazenia)
+puscBlyskawice(id, victim, Float:fObrazenia)
 {
 	new Float:fCzas = 1.0;
 	
 	//Piorun
-	Create_TE_BEAMENTS(id, ofiara, sprite, 0, 10, floatround(fCzas*10), 150, 5, 200, 200, 200, 200, 10);
-	glow_player(ofiara, 1.0, 255, 255, 255)
-	d2_damage( ofiara, id, floatround( fObrazenia ), "diablomod Lightning")
+	if(player_class[id] == Diablo)
+	{
+		Create_TE_BEAMENTS(id, victim, diablolght, 0, 10, floatround(fCzas*10), 150, 5, 200, 200, 200, 200, 10);
+	}
+	else
+	{
+		Create_TE_BEAMENTS(id, victim, sprite, 0, 10, floatround(fCzas*10), 150, 5, 200, 200, 200, 200, 10);
+	}
+	glow_player(victim, 1.0, 255, 255, 255)
+	d2_damage( victim, id, floatround( fObrazenia ), "diablomod Lightning")
 		
 	//Dzwiek
 	emit_sound(id,CHAN_STATIC,gszSound, 1.0, ATTN_NORM, 0, PITCH_NORM)
