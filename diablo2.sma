@@ -532,13 +532,41 @@ new const szTables[TOTAL_TABLES][] =
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Izual, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
 new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Изуал", "Диабло", "Баал", "Fallen", "Бес", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
-new race_heal[28] = { 100,110,150,130,140,110,120,140,140,110,120,120,140,150,130,123,110,100,135,100,100,140,115,120,145,145,145,145 }
+new race_heal[28] = { 100, //No
+110, //Mag
+150, //Monk
+130, //Paladin
+140, //Assassin
+110, //Necromancer
+120, //Barbarian
+140, //Ninja
+140, //Amazon
+110, //BloodRaven
+120, //Duriel
+120, //Mephisto
+140, //Izual
+150, //Diablo
+130, //Baal
+123, //Fallen
+110, //Imp
+100, //Zakarum
+135, //Viper
+100, //Mosquito
+100, //Frozen
+140, //Infidel
+115, //GiantSpider
+120, //SabreCat
+145, //Griswold
+145, //TheSmith
+145, //Demonolog
+145 /*VipCztery*/}
 
-new LevelXP[101] = { 0,50,125,225,340,510,765,1150,1500,1950,2550,3300,4000,4800,5800,7000,8500,9500,10500,11750,13000, //21
-14300,15730,17300,19030,20900,23000,24000,25200,26400,27700,29000,30500,32000,33600,35300,37000,39000,41000,43000,45100,//41
-47400,49800,52300,55000,57800,60700,63700,66900,70200,73700,77400,80000,82400,84900,87500,90000,92700,95500,98300,101000,//61
-104000,107000,110000,113000,116000,120000,123000,126700,130000,134000,138000,142000,146000,150000,154000,158000,163000,168000,173000,178000,//81
-183000,188000,194000,200000,206000,212000,218000,225000,232000,239000,246000,253000,261000,269000,277000,285000,294000,303000,500000,9999999/*101*/}
+new LevelXP[101] = { 0, 50, 125, 225, 340, 510, 765, 1150, 1500, 1950, 2550, 3300, 4000, 4800, 5800, 7000, 8500, 9500, 10500, 11750, 13000, //21
+14300, 15730, 17300, 19030, 20900, 23000, 24000, 25200, 26400, 27700, 29000, 30500, 32000, 33600, 35300, 37000, 39000, //38
+41000, 43000, 45100, 47400, 49800, 52300, 55000, 57800, 60700, 63700, 66900, 70200, //50
+73700, 77400, 80000, 82400, 84900, 87500, 90000, 92700, 95500, 98300, 101000, 104000, 107000, 110000, 113000, 116000, 120000, //67
+123000, 126700, 130000, 134000, 138000, 142000, 146000, 150000, 154000, 158000, 163000, 168000, 173000, //80
+178000, 183000, 188000, 194000, 200000, 216000, 232000, 255000, 282000, 309000, 325000, 367000, 401000, 427000, 464000, 482000, 505000, 537000, 559000, 579000, 600000/*101*/}
 
 new player_class_lvl[33][28]
 new player_class_lvl_save[33]
@@ -651,7 +679,6 @@ new ultra_armor[33]
 new after_bullet[33]
 new num_shild[33]
 new invisible_cast[33]
-new player_dmg[33]
 
 //SabreCat smoke
 //new const g_SabreSmokeClassname[] = "colored_smokenade";
@@ -899,10 +926,11 @@ public plugin_init()
 	gmsgStatusText = get_user_msgid("StatusText")
 	gmsgBartimer = get_user_msgid("BarTime") 
 	gmsgScoreInfo = get_user_msgid("ScoreInfo") 
-	register_cvar("diablo_dmg_exp","20",0)
-	register_cvar("diablo_xpbonus","10",0)
-	register_cvar("diablo_xpbonus2","50",0)
-	register_cvar("diablo_xpbonus3","20",0)
+	register_cvar("diablo_xpdmg","10",0)
+	register_cvar("diablo_xpbonus","20",0)
+	register_cvar("diablo_xpbonus_type","1",0)
+	register_cvar("diablo_xp_multi","2",0)
+	register_cvar("diablo_xp_multi2","2",0)
 	register_cvar("diablo_durability","5",0) 
 	register_cvar("SaveXP", "1")
 	set_msg_block ( gmsgDeathMsg, BLOCK_SET ) 
@@ -3393,10 +3421,8 @@ public Damage(id)
 			if (is_user_connected(attacker_id) && attacker_id != id)
 			{
 				if(get_user_team(id) != get_user_team(attacker_id))
-				{				
-					if(damage>175) player_dmg[attacker_id]+=damage/2
-					else player_dmg[attacker_id]+=damage
-					dmg_exp(attacker_id)
+				{
+					dmg_exp(attacker_id, damage)
 				}
 				
 				add_damage_bonus(id,damage,attacker_id)
@@ -4215,16 +4241,27 @@ public got_bomb(id){
 
 public award_plant()
 {
-	new Players[32], playerCount, id
-	get_players(Players, playerCount, "aeh", "TERRORIST") 
-		
+	new Players[32], Players2[32], playerCount, playerCount2, id, xp
+	get_players(Players, playerCount, "aeh", "TERRORIST")
+	if(get_cvar_num("diablo_xpbonus_type") == 1)
+	{
+		get_players(Players2, playerCount2, "ch")
+	}
+	else
+	{
+		playerCount2 = get_playersnum()
+	}
+	
+	xp = playerCount2 * get_cvar_num("diablo_xp_multi")
+	
 	for (new i=0; i<playerCount; i++) 
 	{
 		id = Players[i]
-		Give_Xp(id,get_cvar_num("diablo_xpbonus"))	
-		ColorChat(id, GREEN, "Выданно^x03 *%i*^x01 exp за установку бомбы твоей командой",get_cvar_num("diablo_xpbonus2"))
+		Give_Xp(id,xp)	
+		ColorChat(id, GREEN, "Выданно^x03 %i^x01 exp за установку бомбы твоей командой",xp)
 	}	
-	Give_Xp(planter,get_cvar_num("diablo_xpbonus2"))
+	Give_Xp(planter,xp)
+	ColorChat(planter, GREEN, "Выданно^x03 %i^x01 exp за установку бомбы",xp)
 }
 
 public bomb_defusing(id){ 
@@ -4234,22 +4271,48 @@ public bomb_defusing(id){
 
 public award_defuse()
 {
-	new Players[32], playerCount, id
-	get_players(Players, playerCount, "aeh", "CT") 
+	new Players[32], Players2[32], playerCount, playerCount2, id, xp
+	get_players(Players, playerCount, "aeh", "CT")
+	if(get_cvar_num("diablo_xpbonus_type") == 1)
+	{
+		get_players(Players2, playerCount2, "ch")
+	}
+	else
+	{
+		playerCount2 = get_playersnum()
+	}
+	
+	xp = playerCount2 * get_cvar_num("diablo_xp_multi")
 		
 	for (new i=0; i<playerCount; i++) 
 	{
 		id = Players[i] 
-		Give_Xp(id,get_cvar_num("diablo_xpbonus"))	
-		ColorChat(id, GREEN, "Выданно^x03 *%i*^x01 exp за разминирование бомбы твоей командой",get_cvar_num("diablo_xpbonus2"))
+		Give_Xp(id,xp)	
+		ColorChat(id, GREEN, "Выданно^x03 %i^x01 exp за разминирование бомбы твоей командой",xp)
 	}
-	Give_Xp(defuser,get_cvar_num("diablo_xpbonus2"))
+	Give_Xp(defuser,xp)
+	ColorChat(defuser, GREEN, "Выданно^x03 %i^x01 exp за разминирование бомбы",xp)
 }
 
 public award_hostageALL(id)
 {
+	new Players2[32], playerCount2, xp
+	if(get_cvar_num("diablo_xpbonus_type") == 1)
+	{
+		get_players(Players2, playerCount2, "ch")
+	}
+	else
+	{
+		playerCount2 = get_playersnum()
+	}
+	
+	xp = playerCount2 * get_cvar_num("diablo_xp_multi")
+	
 	if (is_user_connected(id) == 1)
-		Give_Xp(id,get_cvar_num("diablo_xpbonus2")/2)	
+	{
+		Give_Xp(id,xp)
+		ColorChat(id, GREEN, "Выданно^x03 %i^x01 exp за спасение всех заложников",xp)
+	}
 }
 
 /* ==================================================================================================== */
@@ -4279,12 +4342,10 @@ public award_kill(killer_id,victim_id)
 		
 	new more_lvl=player_lvl[victim_id]-player_lvl[killer_id]
 	
-	if(more_lvl>0) xp_award += floatround((get_cvar_num("diablo_xpbonus")/7)*(more_lvl*((2.0-more_lvl/40.0)/3.0)))
-	else if(more_lvl<-50)xp_award -= get_cvar_num("diablo_xpbonus")*(2/3)
-	else if(more_lvl<-40)xp_award -= get_cvar_num("diablo_xpbonus")/2
-	else if(more_lvl<-30)xp_award -= get_cvar_num("diablo_xpbonus")/3
-	else if(more_lvl<-20)xp_award -= get_cvar_num("diablo_xpbonus")/4
-	else if(more_lvl<-10)xp_award -= get_cvar_num("diablo_xpbonus")/7
+	if(more_lvl>2)
+	{
+		xp_award += floatround(more_lvl/2)
+	}
 	
 	Give_Xp(killer_id,xp_award)
 
@@ -6852,6 +6913,11 @@ public d2_damage( iVictim, iAttacker, iDamage, iWeapon[])
 		set_user_health( iVictim, iHealth - iDamage );
 	}
 	
+	if(iVictim!=iAttacker) 
+	{
+		dmg_exp(iAttacker, iDamage)
+	}
+		
 	return;
 }
 
@@ -13681,8 +13747,7 @@ public change_health(id,hp,attacker,weapon[])
 		
 		if(id!=attacker && hp<0) 
 		{
-			player_dmg[attacker]-=hp
-			dmg_exp(attacker)
+			dmg_exp(attacker, -hp)
 		}
 	}
 }
@@ -14252,17 +14317,17 @@ stock Float:distance_to_floor(Float:start[3], ignoremonsters = 1) {
     return ret > 0 ? ret : 0.0;
 }
 
-public dmg_exp(id)
+public dmg_exp(id, dmg)
 {
-	new min=get_cvar_num("diablo_dmg_exp")
-	if(min<1) return
-	new exp=0
-	while(player_dmg[id]>min)
+	if(dmg > 0)
 	{
-		player_dmg[id]-=min
-		exp++
+		new Float:exp = dmg/get_cvar_num("diablo_xpdmg")
+		new xp = floatround(exp)
+		if(xp > 0)
+		{
+			Give_Xp(id,xp)
+		}
 	}
-	Give_Xp(id,exp)
 }
 
 public native_get_user_xp(id)
@@ -16805,33 +16870,55 @@ public fwd_touch(ent,id)
     return FMRES_IGNORED; 
 }
 public TTWin() {
-        new play[32], nr, id;
+        new play[32], nr, id, Players2[32], playerCount2, xp
         get_players(play, nr, "h");
+		
+		if(get_cvar_num("diablo_xpbonus_type") == 1)
+		{
+			get_players(Players2, playerCount2, "ch")
+		}
+		else
+		{
+			playerCount2 = get_playersnum()
+		}
+		
+		xp = playerCount2 * get_cvar_num("diablo_xp_multi2")
+		
         for(new i=0; i<nr; i++) 
 		{
-                id = play[i];
-                if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_T) 
-				{
-                        new dziel = is_user_alive(id) ? 1 : 2;
-                        Give_Xp(id, get_cvar_num("diablo_xpbonus3")/dziel);
-                        ColorChat(id, GREEN, "Полученно^x03 *%i*^x01 опыта за победу твоей команды в раунде", get_cvar_num("diablo_xpbonus3")/dziel);
-                }
+			id = play[i];
+			if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_T) 
+			{
+				Give_Xp(id, xp);
+				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта за победу твоей команды в раунде", xp);
+			}
         }
 }
 
 public CTWin() 
 {
-        new play[32], nr, id;
+        new play[32], nr, id, Players2[32], playerCount2, xp
         get_players(play, nr, "h");
+		
+		if(get_cvar_num("diablo_xpbonus_type") == 1)
+		{
+			get_players(Players2, playerCount2, "ch")
+		}
+		else
+		{
+			playerCount2 = get_playersnum()
+		}
+		
+		xp = playerCount2 * get_cvar_num("diablo_xp_multi2")
+		
         for(new i=0; i<nr; i++) 
 		{
-                id = play[i];
-                if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_CT) 
-				{
-                        new dziel = is_user_alive(id) ? 1 : 2;
-                        Give_Xp(id, get_cvar_num("diablo_xpbonus3")/dziel);
-                        ColorChat(id, GREEN, "Полученно^x03 *%i*^x01 опыта за победу твоей команды в раунде", get_cvar_num("diablo_xpbonus3")/dziel);
-                }
+			id = play[i];
+			if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_CT) 
+			{
+				Give_Xp(id, xp);
+				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта за победу твоей команды в раунде", xp);
+			}
         }
 }
 public add_bonus_shake(attacker_id,id)
