@@ -2834,13 +2834,25 @@ public RoundStart(){
 		{
 			if(get_user_team(i) == 1)
 			{
-				engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_tt.spr")
-				engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_tt.spr")
+				if(player_portal_sprite_1[i] > 0)
+				{
+					engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_tt.spr")
+				}
+				if(player_portal_sprite_2[i] > 0)
+				{
+					engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_tt.spr")
+				}
 			}
 			else if(get_user_team(i) == 2)
 			{
-				engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_ct.spr")
-				engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_ct.spr")
+				if(player_portal_sprite_1[i] > 0)
+				{
+					engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_ct.spr")
+				}
+				if(player_portal_sprite_2[i] > 0)
+				{
+					engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_ct.spr")
+				}
 			}
 		}
 		
@@ -8534,7 +8546,7 @@ public showmenu(id)
 	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<9)
 	
 	
-	format(text, 512, "\rОпции\R^n^n\y1.\w Инфо о предмете^n\y2.\w Выкинуть текущий item^n\y3.\w Помощь^n\y4.\w Использовать силу item^n\y5.\w Магазин Рун^n\y6.\w Инфо о скиллах^n\y7.\w Выбор/Смена Класса^n\y0.\w Закрыть") 
+	format(text, 512, "\rОпции\R^n^n\y1.\w Инфо о предмете^n\y2.\w Выкинуть текущий item^n\y3.\w Помощь^n\y4.\w Информация об игроках^n\y5.\w Магазин^n\y6.\w Инфо о скиллах^n\y7.\w Смена Класса^n\y0.\w Выход") 
 	
 	show_menu(id, keys, text) 
 	return PLUGIN_HANDLED  
@@ -8560,11 +8572,11 @@ public option_menu(id, key)
 		}
 		case 3:
 		{
-			Use_Spell(id)
+			cmd_who(id)
 		}
 		case 4:
 		{
-			mana1(id)
+			mana4(id)
 		}
 		case 5:
 		{
@@ -19638,9 +19650,13 @@ public mana3a(id, menu, item){
 public mana4(id){
 	new mana4=menu_create("Предметы - Другое","mana4a");
 	
-	menu_additem(mana4,"\y Случайный item \d[10 золота]")
-	menu_additem(mana4,"\y Улучшить\Починить item \d[2 золота]")
-	menu_additem(mana4,"\y Свиток Портала \d[25 золота]")
+	menu_additem(mana4,"\wОружие")
+	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
+	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
+	menu_additem(mana4,"\wСвиток портала \d[25 золота]")
+	menu_additem(mana4,"\dЗелье противоядия [золота]")
+	menu_additem(mana4,"\dЗелье оттаивания [золота]")
+	menu_additem(mana4,"\dЗелье охлаждения [золота]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
@@ -19655,10 +19671,23 @@ public mana4a(id, menu, item)
 	{
 		case 0:
 		{
+			if(!g_bWeaponsDisabled)
+			{
+				mana2(id)
+			}
+			else
+			{
+				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
+				mana4(id)
+			}
+		}
+		case 1:
+		{
 			new koszt = 10;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				mana4(id)
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -19667,12 +19696,13 @@ public mana4a(id, menu, item)
 				award_item(id,0)
 			}
 		}
-		case 1:
+		case 2:
 		{
 			new koszt = 2;
 			if (mana_gracza[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				mana4(id)
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
@@ -19682,12 +19712,13 @@ public mana4a(id, menu, item)
 				upgrade_item(id)
 			}
 		}
-		case 2:
+		case 3:
 		{
 			new koszt = 25;
 			if (mana_gracza[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				mana4(id)
 				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
