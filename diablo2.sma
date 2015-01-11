@@ -415,7 +415,6 @@ new is_poisoned[33]
 new Float:is_touched[33]
 new cel // do pokazywania statusu
 new item_info[513] //id itemu  
-new item_name[513][128] //nazwa itemu
 new player_artifact[33][4]
 new player_artifact_time[33][4]
 new const modelitem[]="models/winebottle.mdl" //tutaj zmieniacie model itemu
@@ -3452,7 +3451,7 @@ public DeathMsg(id)
 	if (is_user_connected(kid) && is_user_connected(vid) && get_user_team(kid) != get_user_team(vid))
 	{
 		show_deadmessage(kid,vid,headshot,weaponname)
-		create_itm(vid,0,"Случайный Item")
+		create_itm(vid,0)
 		award_kill(kid,vid)
 		if(headshot)
 		{
@@ -16886,14 +16885,16 @@ public itminfo(id,cel)
         static clas[32];
         pev(cel,pev_classname,clas,31);
         
-        if (!equali(clas,"przedmiot")) return PLUGIN_CONTINUE
-        set_hudmessage(255, 170, 0, 0.3, 0.56, 0, 6.0, 0.1)
-        show_hudmessage(id, "Item: %s ",item_name[cel])
+        if (equali(clas,"przedmiot"))
+		{
+			set_hudmessage(255, 170, 0, 0.3, 0.56, 0, 6.0, 0.1)
+			show_hudmessage(id, "Предмет: присядь чтобы подобрать")
+		}
         
         return PLUGIN_CONTINUE
 }
 
-public create_itm(id,id_item,name_item[128])
+public create_itm(id,id_item)
 { 
     new Float:origins[3]
     pev(id,pev_origin,origins); // pobranie coordow gracza
@@ -16912,9 +16913,7 @@ public create_itm(id,id_item,name_item[128])
         
     engfunc(EngFunc_DropToFloor,entit);
         
-    item_info[entit]=id_item //parametry przepisujemy do globalnej tablicy potrzebnej nam potem
-        
-    item_name[entit]=name_item      
+    item_info[entit]=id_item //parametry przepisujemy do globalnej tablicy potrzebnej nam potem    
 }
 public fwd_touch(ent,id)
 {       
