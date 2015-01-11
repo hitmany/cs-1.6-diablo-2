@@ -299,10 +299,7 @@ new player_item_name[33][128]   //The items name
 new player_intelligence[33]
 new player_strength[33]
 new player_agility[33]
-new player_agility_best[33]
 new player_dextery[33]
-new player_stamina[33]
-new player_vitality[33]
 new mana_gracza[33]
 new player_TotalLVL[33]
 new Float:player_damreduction[33]
@@ -935,10 +932,30 @@ public plugin_init()
 	register_clcmd("say /s","speed")
 	//register_clcmd("flash", "cmdBlyskawica");
 	register_concmd("rocket","StworzRakiete")
-	register_concmd("fallen","FallenShaman")
-	register_concmd("pluginflash","Flesh")
+	//register_concmd("fallen","FallenShaman")
+	//register_concmd("pluginflash","Flesh")
 	register_clcmd("say /portal","cmd_place_portal")
 	register_clcmd("say portal","cmd_place_portal")
+	register_clcmd("say class","changerace")
+	register_clcmd("say /who","cmd_who")	
+	register_clcmd("say /skills", "showskills")
+	register_clcmd("say skills", "showskills")
+	register_clcmd("say /menu","showmenu") 
+	register_clcmd("menu","showmenu")
+	register_clcmd("say /commands","komendy")
+	//register_clcmd("pomoc","helpme") 
+	//register_clcmd("say /rune","mana4") 
+	//register_clcmd("rune","mana4")
+	//register_clcmd("say /r","mana4")
+	//register_clcmd("say /savexp","savexpcom")
+	register_clcmd("say /reset","reset_skill")
+	//register_clcmd("say /exp", "exp")
+	//register_clcmd("say exp", "exp")
+	//register_clcmd("reset","reset_skill")	 
+	//register_clcmd("/reset","reset_skill")
+	//register_clcmd("say /gold","mana1")
+	//register_clcmd("say /g","mana1")		
+	register_clcmd("mod","mod_info")
 	//register_concmd("dynamit","PolozDynamit")
 	//register_concmd("paladin","check_palek")
 	register_concmd("setmine","item_mine")
@@ -962,28 +979,7 @@ public plugin_init()
 	// Buy grenades through console commands
 	register_clcmd("hegren", "cmd_HeBuy")
 	
-	register_clcmd("say class","changerace")
-	register_clcmd("say /who","cmd_who")	
-	register_clcmd("say /skills", "showskills")
-	register_clcmd("say skills", "showskills")
-	register_clcmd("say /menu","showmenu") 
-	register_clcmd("menu","showmenu")
-	register_clcmd("say /commands","komendy")
-	//register_clcmd("pomoc","helpme") 
-	register_clcmd("say /rune","mana4") 
-	register_clcmd("rune","mana4")
-	register_clcmd("say /r","mana4")
-	//register_clcmd("say /savexp","savexpcom")
-	register_clcmd("say /reset","reset_skill")
-	//register_clcmd("say /exp", "exp")
-	//register_clcmd("say exp", "exp")
-	//register_clcmd("reset","reset_skill")	 
-	//register_clcmd("/reset","reset_skill")
-	register_clcmd("say /gold","mana1")
-	register_clcmd("say /g","mana1")		
-	register_clcmd("mod","mod_info")
-	
-	register_menucmd(register_menuid("Выбери Скилл"), 1023, "skill_menu")
+	register_menucmd(register_menuid("Навыки"), 1023, "skill_menu")
 	register_menucmd(register_menuid("Опции"), 1023, "option_menu")
 	register_menucmd(register_menuid("ChooseClass"), 1023, "select_class_menu")
 	register_menucmd(register_menuid("ChooseRune"), 1023, "select_rune_menu")
@@ -1777,26 +1773,31 @@ public MYSQLX_Save( id )
 
 		return;
 	}
-
-	// Save the user's XP!
+	
 	new szQuery[512];
-	format( szQuery, 511, "REPLACE INTO `class` ( `id` , `class` , `xp` ) VALUES ( '%d', '%d', '%d');", iUniqueID, player_class[id], player_xp[id] );
-	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
-
-	if ( !SQL_Execute( query ) )
+	new Handle:query
+	
+	// Save the user's XP!
+	if ( player_xp[id] > 0 && player_class[id] != 0 )
 	{
-		client_print( id, print_chat, "Error, unable to save your XP, please contact a server administrator" );
+		format( szQuery, 511, "REPLACE INTO `class` ( `id` , `class` , `xp` ) VALUES ( '%d', '%d', '%d');", iUniqueID, player_class[id], player_xp[id] );
+		query = SQL_PrepareQuery( g_DBConn, szQuery );
 
-		MYSQLX_Error( query, szQuery, 4 );
+		if ( !SQL_Execute( query ) )
+		{
+			client_print( id, print_chat, "Error, unable to save your XP, please contact a server administrator" );
 
-		return;
+			MYSQLX_Error( query, szQuery, 4 );
+
+			return;
+		}
 	}
 
 	
 	// Then we need to save this!
-	if ( player_xp[id] >= 0 )
+	if ( player_xp[id] > 0 && player_class[id] != 0 )
 	{
-		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_vitality[id], player_intelligence[id], player_dextery[id] );
+		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_dmg`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility[id], player_intelligence[id], player_dextery[id] );
 		query = SQL_PrepareQuery( g_DBConn, szQuery );
 	
 		if ( !SQL_Execute( query ) )
@@ -1880,21 +1881,24 @@ public MYSQLX_Save_T( id )
 
 		return;
 	}
+	
+	new szQuery[512];
 
 	// Save the user's XP!
-	new szQuery[512];
-	if ( player_xp[id] > 0 && player_class[id] != 0)
+	if ( player_xp[id] > 0 && player_class[id] != 0 )
 	{
-		format( szQuery, 511, "REPLACE INTO `class` ( `id` , `class` , `xp` ) VALUES ( '%d', '%d', '%d');", iUniqueID, player_class[id], player_xp[id] );
-		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
+		if ( player_xp[id] > 0 && player_class[id] != 0)
+		{
+			format( szQuery, 511, "REPLACE INTO `class` ( `id` , `class` , `xp` ) VALUES ( '%d', '%d', '%d');", iUniqueID, player_class[id], player_xp[id] );
+			SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
+		}
 	}
-
 
 	// Only save skill levels if the user does NOT play chameleon
 	// Then we need to save this!
 	if ( player_xp[id] > 0)
 	{
-		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility_best[id], player_agility[id], player_stamina[id], player_vitality[id], player_intelligence[id], player_dextery[id] );
+		format( szQuery, 511, "REPLACE INTO `skill` (`id`, `class`, `str`, `agi_dmg`, `int`, `dex_dmg`) VALUES ('%d', '%d', '%d', '%d', '%d', '%d');", iUniqueID, player_class[id], player_strength[id], player_agility[id], player_intelligence[id], player_dextery[id] );
 		SQL_ThreadQuery( g_DBTuple, "_MYSQLX_Save_T", szQuery );
 	}
 	
@@ -1931,7 +1935,7 @@ public MYSQLX_SetDataForRace( id )
 	new iUniqueID = DB_GetUniqueID( id );
 	
 	new szQuery[256];
-	format( szQuery, 255, "SELECT `str`, `agi_best`, `agi_dmg`, `sta`, `dur`, `int` ,`dex_dmg` FROM `skill` WHERE `id` = '%d' AND `class` = '%d';", iUniqueID, player_class[id] );
+	format( szQuery, 255, "SELECT `str`, `agi_dmg`, `int` ,`dex_dmg` FROM `skill` WHERE `id` = '%d' AND `class` = '%d';", iUniqueID, player_class[id] );
 	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
 	
 	if ( !SQL_Execute( query ) )
@@ -1948,19 +1952,9 @@ public MYSQLX_SetDataForRace( id )
 	else
 	{
 		player_strength[id] = SQL_ReadResult( query, 0 );
-		player_agility_best[id] = SQL_ReadResult( query, 1 );
-		player_agility[id] = SQL_ReadResult( query, 2 );
-		player_stamina[id] = SQL_ReadResult( query, 3 );
-		player_vitality[id] = SQL_ReadResult( query, 4 );
-		player_intelligence[id] = SQL_ReadResult( query, 5 );
-		player_dextery[id] = SQL_ReadResult( query, 6 );
-		
-		player_point[id]=(player_lvl[id]-1)*2-player_intelligence[id]-player_strength[id]-player_dextery[id]-player_agility[id]	
-		if(player_point[id]<0) 
-		{
-			player_point[id]=0
-			player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
-		}
+		player_agility[id] = SQL_ReadResult( query, 1 );
+		player_intelligence[id] = SQL_ReadResult( query, 2 );
+		player_dextery[id] = SQL_ReadResult( query, 3 );
 	}
 	
 	// While we have a result!
@@ -1982,11 +1976,29 @@ public MYSQLX_SetDataForRace( id )
 			player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
 		}
 	}*/
-
+	
 	// Free the handle
 	SQL_FreeHandle( query );
 	player_lvl[id] = player_class_lvl[id][player_class[id]];
 	player_xp[id] = player_class_xp[id][player_class[id]];
+	player_point[id]=(player_lvl[id]-1)*2-player_intelligence[id]-player_strength[id]-player_dextery[id]-player_agility[id]	
+	if(player_point[id]==0) 
+	{
+		player_point[id]=0
+		player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
+	}
+	else
+	{
+		if(player_point[id]<0)
+		{
+			player_point[id] = player_lvl[id]*2-2
+			player_intelligence[id] = 0
+			player_strength[id] = 0 
+			player_agility[id] = 0
+			player_dextery[id] = 0
+		}
+		skilltree(id)
+	}
 
 	// This user's XP has been set + retrieved! We can save now
 	//bDBXPRetrieved[id] = true;
@@ -2044,8 +2056,8 @@ public D2_ChangeRaceStart( id )
 	if ( SHARED_IsOnTeam( id ) )
 	{
 			// This function will also display the changerace menu
-			MYSQLX_GetAllXP( id );
 			loaded_xp[id] = 1;
+			MYSQLX_GetAllXP( id );
 	}
 	else
 	{
@@ -2370,9 +2382,8 @@ public plugin_precache()
 	precache_sound("diablo_lp/flippy.wav");
 	precache_sound("diablo_lp/ring.wav");
 	precache_sound("diablo_lp/diablo_1.wav");
-	precache_sound("diablo_lp/fireball2.wav");
+	precache_sound("diablo_lp/firelaunch2.wav");
 	precache_sound("diablo_lp/fireball3.wav");
-	precache_sound("diablo_lp/fallen_fireball.wav");
 	precache_sound("diablo_lp/fallen_hit1.wav");
 	precache_sound("diablo_lp/fallen_hit2.wav");
 	precache_sound("diablo_lp/fallen_hit3.wav");
@@ -2762,7 +2773,7 @@ public look_for_none()
 public reset_skill(id)
 {	
 	client_print(id,print_chat,"Сброс навыков")
-	player_point[id] = player_lvl[id]*2-2
+	player_point[id] = (player_lvl[id]-1)*2
 	player_intelligence[id] = 0
 	player_strength[id] = 0 
 	player_agility[id] = 0
@@ -2796,7 +2807,7 @@ public freeze_begin()
 public on_EndRound()
 {
 	// Threaded saves on end round!
-	DB_SaveAll(1);
+	DB_SaveAll(2);
 	
 	return;
 }
@@ -3636,6 +3647,7 @@ public Damage(id)
 							set_task(colddelay, "unfreeze", id)
 							is_frozen[id] = 1
 							Display_Icon(id ,2 ,"dmg_cold" ,0,206,209)
+							Create_ScreenFade( id, (1<<15), (1<<10), (1<<12), 0, 206, 209, 150 );
 						}
 						change_health(id,-new_damage,attacker_id,"cold")				
 					}
@@ -3975,6 +3987,10 @@ public client_PreThink ( id )
 	{
 		izualring(id)
 	}
+	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Fallen && player_lvl[id]>49)
+	{
+		FallenShaman(id)
+	}
 	
 	if ((!(button2 & IN_RELOAD)) && on_knife[id] && button[id]==1) button[id]=0
 	//
@@ -4222,11 +4238,13 @@ public client_AddToFullPack(ent_state,e,edict_t_ent,edict_t_host,hostflags,playe
 
 public skilltree(id)
 {
+	if(player_point[id] == 0) return PLUGIN_HANDLED
+	
 	new text[513] 
 	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)
 	
 	
-	format(text, 512, "\yВыбери Скилл- \rОчков: %i^n^n\w1. Intelligence [%i] [Больше и дольше сила Item]^n\w2. Strength [%i] [Больше ХП \r%i\w]^n\w3. Agility [%i] [Улучшенный поиск item и урона]^n\w4. Dextery [%i] [Увел. скорость и снижает ущерб от магии]",player_point[id],player_intelligence[id],player_strength[id],player_strength[id]*2,player_agility[id],player_dextery[id]) 
+	format(text, 512, "\yНавыки - \rОчки: %i^n^n\w1.Интеллект [%i] Сила магии и предметов^n\w2.Выносливость [%i] +\r%i\w HP^n\w3.Сила [%i] Редкость предметов, -урон^n\w4.Ловкость [%i] +к скорости, -урон от магии^n^n\w5.Качать все по одному пункту",player_point[id],player_intelligence[id],player_strength[id],player_strength[id]*2,player_agility[id],player_dextery[id]) 
 	
 	keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)
 	show_menu(id, keys, text) 
@@ -4236,43 +4254,68 @@ public skilltree(id)
 
 public skill_menu(id, key) 
 { 
+	new Float:max_skill = (player_lvl[id]-1)*0.5
+	new max_skill_count = floatround(max_skill,floatround_floor)+2
 	switch(key) 
 	{ 
 		case 0: 
 		{	
-			if (player_intelligence[id]<50){
+			if ((player_intelligence[id]<50) && (player_intelligence[id] < max_skill_count)){
 				player_point[id]-=1
 				player_intelligence[id]+=1
 			}
-			else client_print(id,print_center,"Маскисмально Intelligence достигнуто")
+			else client_print(id,print_center,"Максимум интеллекта")
 			
 		}
 		case 1: 
 		{	
-			if (player_strength[id]<50){
+			if ((player_strength[id]<50) && (player_strength[id] < max_skill_count)){
 				player_point[id]-=1	
 				player_strength[id]+=1
 			}
-			else client_print(id,print_center,"Маскисмально Strength достигнуто")
+			else client_print(id,print_center,"Маскимум выносливости")
 		}
 		case 2: 
 		{	
-			if (player_agility[id]<50){
+			if ((player_agility[id]<50) && (player_agility[id] < max_skill_count)){
 				player_point[id]-=1
 				player_agility[id]+=1
 				player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
 			}
-			else client_print(id,print_center,"Маскисмально Agility достигнуто")
+			else client_print(id,print_center,"Маскимум силы")
 			
 		}
 		case 3: 
 		{	
-			if (player_dextery[id]<50){
+			if ((player_dextery[id]<50) && (player_dextery[id] < max_skill_count)){
 				player_point[id]-=1
 				player_dextery[id]+=1
 				set_speedchange(id)
 			}
-			else client_print(id,print_center,"Маскисмально Dextery достигнуто")
+			else client_print(id,print_center,"Маскимум ловкости")
+		}
+		case 4: 
+		{	
+			while((player_intelligence[id]<50) && (player_intelligence[id] < max_skill_count))
+			{
+				player_point[id]-=1
+				player_intelligence[id]+=1
+			}
+			while((player_strength[id]<50) && (player_strength[id] < max_skill_count))
+			{
+				player_point[id]-=1
+				player_strength[id]+=1
+			}
+			while((player_agility[id]<50) && (player_agility[id] < max_skill_count))
+			{
+				player_point[id]-=1
+				player_agility[id]+=1
+			}
+			while(player_point[id] > 0)
+			{
+				player_point[id]-=1
+				player_dextery[id]+=1
+			}
 		}
 	}
 	
@@ -4854,18 +4897,6 @@ public pfn_touch ( ptr, ptd )
 		}		
 		entity_get_string(ptr, EV_SZ_classname, szClassNameOther, 31);                
     }
-	if(equal(szClassName, "fireball"))
-	{
-		new owner = pev(ptd,pev_owner)
-		//Touch
-		if (get_user_team(owner) != get_user_team(ptr))
-		{
-			new Float:origin[3]
-			pev(ptd,pev_origin,origin)
-			Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250,1)
-			remove_entity(ptd)
-		}
-	}
 	if(equal(szClassName, "fallenball"))
 	{
 		new owner = pev(ptd,pev_owner)
@@ -5017,6 +5048,7 @@ public frozen_touch(entity, player)
 			set_task(colddelay, "unfreeze", player, "", 0, "a", 1)
 			is_frozen[player] = 1
 			Display_Icon(player ,2 ,"dmg_cold" ,0,206,209)
+			Create_ScreenFade( player, (1<<15), (1<<10), (1<<12), 0, 206, 209, 150 );
 		}
 		new dmg, Float:dmgsumm
 		dmgsumm = (player_intelligence[owner]/1.25) - (player_dextery[player]/5.0)
@@ -7110,6 +7142,7 @@ public add_bonus_explode(id)
 				dam = floatround(dam2,floatround_round);
 				if(dam<1) dam=0
 				change_health(a,-dam,id,"cold")
+				Create_ScreenFade( a, (1<<15), (1<<10), (1<<12), 0, 206, 209, 150 );
 				Display_Icon(a ,2 ,"dmg_cold" ,rgb[0],rgb[1],rgb[2])
 				set_task(3.0, "remove_frozencold", a)		
 			}
@@ -7357,38 +7390,38 @@ public item_fireball(id)
 	if (fired[id] == 0 && is_user_alive(id) == 1)
 	{
 		fired[id] = 1
-		new Float:vOrigin[3]
-		new fEntity
-		entity_get_vector(id,EV_VEC_origin, vOrigin)
-		fEntity = create_entity("info_target")
-		entity_set_model(fEntity, "models/rpgrocket.mdl")
-		entity_set_origin(fEntity, vOrigin)
-		entity_set_int(fEntity,EV_INT_effects,64)
-		entity_set_string(fEntity,EV_SZ_classname,"fireball")
-		entity_set_int(fEntity, EV_INT_solid, SOLID_BBOX)
-		entity_set_int(fEntity,EV_INT_movetype,5)
-		entity_set_edict(fEntity,EV_ENT_owner,id)
-		
-		
-		
+		new Float:fOrigin[3],enOrigin[3]
+		get_user_origin(id, enOrigin)
+		new ent = create_entity("env_sprite")
+   
+		IVecFVec(enOrigin, fOrigin)
+
+   
+		entity_set_string(ent, EV_SZ_classname, "fireball")
+		//entity_set_model(ent, "sprites/xfireball3.spr")
+		//entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
+		//entity_set_float(ent, EV_FL_framerate, 30.0)
+		entity_set_model(ent, "sprites/explode1.spr")
+		entity_set_int(ent, EV_INT_spawnflags, SF_SPRITE_STARTON)
+		entity_set_float(ent, EV_FL_animtime, 1.0)
+		entity_set_float(ent, EV_FL_frame, 2.0)
+		entity_set_float(ent, EV_FL_framerate, 9.0)
+
+		DispatchSpawn(ent)
+
+		entity_set_origin(ent, fOrigin)
+		entity_set_size(ent, Float:{-5.0, -5.0, -5.0}, Float:{5.0, 5.0, 5.0})
+		entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
+		entity_set_int(ent, EV_INT_movetype, 5)
+		entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
+		entity_set_float(ent, EV_FL_renderamt, 255.0)
+		entity_set_float(ent, EV_FL_scale, 0.8)
+		entity_set_edict(ent,EV_ENT_owner, id)
 		//Send forward
 		new Float:fl_iNewVelocity[3]
 		VelocityByAim(id, 700, fl_iNewVelocity)
-		entity_set_vector(fEntity, EV_VEC_velocity, fl_iNewVelocity)
-		emit_sound(fEntity, CHAN_VOICE, "diablo_lp/fireball2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
-		
-		
-		message_begin(MSG_BROADCAST, SVC_TEMPENTITY) 
-		write_byte(22) 
-		write_short(fEntity) 
-		write_short(sprite_fire) 
-		write_byte(45) 
-		write_byte(4) 
-		write_byte(255) 
-		write_byte(0) 
-		write_byte(0) 
-		write_byte(25)
-		message_end() 
+		entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
+		emit_sound(ent, CHAN_VOICE, "diablo_lp/firelaunch2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 	}	
 	return PLUGIN_HANDLED
 }
@@ -9806,7 +9839,7 @@ public SelectBotRace(id)
 public showskills(id)
 {
 	new Skillsinfo[768]
-	format(Skillsinfo,767,"У вас %i Strength - это даёт тебе %i HP<br><br>У вас %i Dextery - увел. скорость на %i% и умен. урон от магии на %i%<br>У вас %i Agility - Повышает щанс найти улучш. item и умен. урон на %0.0f%%<br><br>У вас %i Intelligence - увел. прочность и силу действия item<br>",
+	format(Skillsinfo,767,"У вас %i Выносливости - это даёт тебе %i HP<br><br>У вас %i ловкость - увел. скорость на %i% и умен. урон от магии на %i%<br>У вас %i силы - Повышает щанс найти улучш. предмет и умен. урон на %0.0f%%<br><br>У вас %i интеллекта - увел. прочность и силу действия item<br>",
 	player_strength[id],
 	player_strength[id]*2,
 	player_dextery[id],
@@ -10156,9 +10189,16 @@ public changerace(id)
 {
 	if(round_status==1 && player_class[id]!=0)
 	{
-		set_user_health(id,0)
+		if(loaded_xp[id]==0)
+		{
+			set_user_health(id,0)
+			MYSQLX_Save(id)
+			player_class[id]=0
+			client_connect(id) 
+			D2_ChangeRaceStart(id)
+		}
 	}
-	if(player_class[id]!=0) 
+	else if(player_class[id]!=0) 
 	{
 		if(loaded_xp[id]==0)
 		{
@@ -11505,7 +11545,6 @@ public burning_flame(args[2], taskid)
 	
 	// Keep sending flame messages
 	set_task(0.2, "burning_flame", taskid, args, sizeof args)
-	client_print(ID_BURN,print_console,"task, dur %d", BURN_DURATION)
 	
 	return PLUGIN_CONTINUE
 }
@@ -13938,10 +13977,10 @@ public call_cast(id)
 		{
 			if(num_shild[id])
 			{
-				show_hudmessage(id, "[Монах] Стенка установленна") 
 				createBlockAiming(id)
+				show_hudmessage(id, "[Монах] Стенка установленна.^n%d осталось",num_shild[id]) 
 			}
-			else hudmsg(id,5.0,"[Монах] Вы не можете строить") 
+			else hudmsg(id,5.0,"[Монах] У вас нет стенок") 
 		}
 		case Paladin:
 		{
@@ -15313,7 +15352,7 @@ public FallenShaman(id)
 				case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 				case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
 			}
-			emit_sound(ent, CHAN_VOICE, "diablo_lp/fallen_fireball.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
+			emit_sound(ent, CHAN_VOICE, "diablo_lp/firelaunch2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 		}
 	}
 	else
@@ -17056,11 +17095,9 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage, damagebits)
 					d2_damage( victim, attacker, -dmg_difference, weaponname)
 				}
 				monk_lastshot[victim] = get_gametime()
-				client_print(victim, print_console, "monk_lastshot %f",monk_lastshot[victim])
 				return FMRES_SUPERCEDE;
 			}
 			monk_lastshot[victim] = get_gametime()
-			client_print(victim, print_console, "monk_lastshot %f",monk_lastshot[victim])
 		}
         return HAM_IGNORED;
 }
@@ -17319,7 +17356,6 @@ public fallen_respawn()
 			
 			if(((monk_lastshot[i] + float(monk_timer)) < get_gametime()) && (monk_energy[i] < monk_maxenergy[i]))
 			{
-				client_print(i, print_console, "monk_timer %d, diff %f",monk_timer, (get_gametime() - (monk_lastshot[i] + float(monk_timer)))); 
 				//Check max energy
 				monk_energy[i] += 10
 				if(monk_energy[i] > monk_maxenergy[i])
@@ -17936,7 +17972,8 @@ public Effect_Fleshuj_Totem_Think(ent)
 			continue
 			
 			if (is_user_alive(pid)){
-				client_cmd(pid, "pluginflash")
+				//client_cmd(pid, "pluginflash")
+				Flesh(pid)
 				set_task(15.0, "off_fleshuj", pid)
 			}			
 		}
@@ -19800,7 +19837,7 @@ stock Create_TE_BEAMENTS(startEntity, endEntity, iSprite, startFrame, frameRate,
 stock Create_ScreenFade(id, duration, holdtime, fadetype, red, green, blue, alpha)
 {
 
-	message_begin( MSG_ONE,gmsgScreenFade,{0,0,0},id )			
+	message_begin( MSG_ONE,g_msg_screenfade,{0,0,0},id )			
 	write_short( duration )			// fade lasts this long duration
 	write_short( holdtime )			// fade lasts this long hold time
 	write_short( fadetype )			// fade type (in / out)
