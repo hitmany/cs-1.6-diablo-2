@@ -747,6 +747,8 @@ new after_bullet[33]
 new num_shild[33]
 new invisible_cast[33]
 
+new cvar_max_gold
+
 //SabreCat smoke
 //new const g_SabreSmokeClassname[] = "colored_smokenade";
 
@@ -998,6 +1000,7 @@ public plugin_init()
 	register_cvar("diablo_xp_multi","2",0)
 	register_cvar("diablo_xp_multi2","2",0)
 	register_cvar("diablo_durability","5",0) 
+	cvar_max_gold 	= register_cvar("diablo_maxgold","250") 
 	register_cvar("SaveXP", "1")
 	set_msg_block ( gmsgDeathMsg, BLOCK_SET ) 
 	set_task(5.0, "Timed_Healing", 0, "", 0, "b")
@@ -1709,6 +1712,10 @@ public MYSQLX_GetAllXP( id )
 	{
 		mana_gracza[id] = SQL_ReadResult( query, 0 );
 		player_TotalLVL[id] = SQL_ReadResult( query, 1 );
+		if(mana_gracza[id] > get_pcvar_num(cvar_max_gold))
+		{
+			mana_gracza[id] = get_pcvar_num(cvar_max_gold)
+		}
 	}
 
 	// Free the last handle!
@@ -3359,7 +3366,10 @@ public DeathMsg(id)
 				set_user_frags(kid, get_user_frags(kid) + 1)
 				if(headshot)
 				{
-					mana_gracza[kid]+=1
+					if((mana_gracza[kid]+1) < get_pcvar_num(cvar_max_gold))
+					{
+						mana_gracza[kid]+=1
+					}
 				}
 				award_kill(kid,vid)
 			}
@@ -3374,7 +3384,10 @@ public DeathMsg(id)
 				set_user_frags(kid, get_user_frags(kid) + 1)
 				if(headshot)
 				{
-					mana_gracza[kid]+=1
+					if((mana_gracza[kid]+1) < get_pcvar_num(cvar_max_gold))
+					{
+						mana_gracza[kid]+=1
+					}
 				}
 				award_kill(kid,vid)
 			}
@@ -3431,7 +3444,10 @@ public DeathMsg(id)
 		award_kill(kid,vid)
 		if(headshot)
 		{
-			mana_gracza[kid]+=3
+			if((mana_gracza[kid]+3) < get_pcvar_num(cvar_max_gold))
+			{
+				mana_gracza[kid]+=3
+			}
 		}
 	
 		add_respawn_bonus(vid)
