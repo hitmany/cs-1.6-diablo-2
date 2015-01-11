@@ -505,6 +505,13 @@ new LeaderT = -1
 new JumpsLeft[33]
 new JumpsMax[33]
 
+new monk_energy[33]
+new monk_maxenergy[33]
+new Float:monk_lastshot[33]
+
+new fallens_ct
+new fallens_tt
+
 new loaded_xp[33]
 new asked_sql[33]
 new olny_one_time=0
@@ -597,7 +604,7 @@ Race[27][] = "VipCztery"*/
 
 new race_heal[28] = { 100, //No
 110, //Mag
-150, //Monk
+100, //Monk
 130, //Paladin
 140, //Assassin
 110, //Necromancer
@@ -2802,6 +2809,8 @@ public RoundStart(){
 	kill_all_entity("spidertrap")
 	kill_all_entity("baalcopy")
 	kill_all_entity("baalcopyweap")
+	fallens_tt=0
+	fallens_ct=0
 	for (new i=0; i < 33; i++){
 		if(player_portals[i] > 0)
 		{
@@ -2860,6 +2869,11 @@ public RoundStart(){
 		{	
 			g_haskit[i]=0
 		}
+		if(player_class[i] == Monk)
+		{
+			monk_maxenergy[i] = player_intelligence[i]*2
+			monk_energy[i]=monk_maxenergy[i]
+		}
 		if(player_class[i] == Viper)
 		{
 			new Float:gas = player_intelligence[i]/10.0;
@@ -2880,7 +2894,7 @@ public RoundStart(){
 		if(player_class[i] == Mosquito)
 		{
 			mosquito_sting[i] = 0
-			entity_set_string(i, EV_SZ_viewmodel, "")
+			entity_set_string(i, EV_SZ_weaponmodel, "")
 		}
 		if(player_class[i] == SabreCat)
 		{
@@ -2931,6 +2945,17 @@ public RoundStart(){
 			c_blink[i]=floatround(halflife_time())
 		}
 		//Fallen Code
+		if(player_class[i] == Fallen)
+		{
+			if(get_user_team(i) == 1)
+			{
+				fallens_tt++
+			}
+			else if(get_user_team(i) == 2)
+			{
+				fallens_ct++
+			}
+		}
 		if(player_class[i] == Fallen && player_lvl[i] > 49)
 		{
 			fallen_fires[i] = floatround(player_lvl[i]/5.0, floatround_floor);
@@ -3190,7 +3215,7 @@ public CurWeapon(id)
 		
 		if(player_class[id] == Mosquito)
 		{
-			entity_set_string(id, EV_SZ_viewmodel, "")
+			entity_set_string(id, EV_SZ_weaponmodel, "")
 		}
 		
 		set_gravitychange(id)
@@ -4651,21 +4676,28 @@ public write_hud(id)
 	{
 		Racename = "Падший шаман"
 	}
-	if(player_class[id]!=Paladin)
+	if(player_class[id]==Paladin)
+	{
+		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПрыжки: %i/%i^nПредмет: %s^nПрочность: %i^nЗолото: %i",
+		get_user_health(id), Racename, player_lvl[id],
+		floatround(perc,floatround_round),"%",JumpsLeft[id],JumpsMax[id],
+		player_item_name[id], item_durability[id],mana_gracza[id])
+	}
+	else if(player_class[id]==Monk)
+	{
+		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nЩит: %i^nПредмет: %s^nПрочность: %i^nЗолото: %i",
+		get_user_health(id), Racename, player_lvl[id],
+		floatround(perc,floatround_round),"%",monk_energy[id],
+		player_item_name[id], item_durability[id],mana_gracza[id])
+	}
+	else
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
 		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПредмет: \
 		%s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id],
 		floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
-	}
-	else
-	{
-		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^n \
-		Прыжки: %i/%i^nПредмет: %s^nПрочность: %i^nЗолото: %i",
-		get_user_health(id), Racename, player_lvl[id],
-		floatround(perc,floatround_round),"%",JumpsLeft[id],JumpsMax[id],
-		player_item_name[id], item_durability[id],mana_gracza[id])
 	}
 	
 	message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
@@ -17005,6 +17037,31 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage, damagebits)
                 lustrzany_pocisk[victim]--;
                 return HAM_HANDLED;
         }
+		if(player_class[victim] == Monk)
+		{
+			if(monk_energy[victim] > 0)
+			{
+				new dmg_difference = monk_energy[victim] - floatround(damage)
+				if(dmg_difference >= 0)
+				{
+					monk_energy[victim] = dmg_difference
+				}
+				else
+				{
+					monk_energy[victim] = 0
+					new weapon = get_user_weapon( attacker ,_,_)
+					new weaponname[32];
+					get_weaponname( weapon, weaponname, 31 );
+					replace(weaponname, 31, "weapon_", "")
+					d2_damage( victim, attacker, -dmg_difference, weaponname)
+				}
+				monk_lastshot[victim] = get_gametime()
+				client_print(victim, print_console, "monk_lastshot %f",monk_lastshot[victim])
+				return FMRES_SUPERCEDE;
+			}
+			monk_lastshot[victim] = get_gametime()
+			client_print(victim, print_console, "monk_lastshot %f",monk_lastshot[victim])
+		}
         return HAM_IGNORED;
 }
 
@@ -17182,44 +17239,47 @@ public fallen_respawn()
 	{
 		if(player_class[i] == Fallen && player_lvl[i] > 49 && round_status==1 && is_user_alive(i))
 		{
-			new falltime = floatround(1515.0/player_lvl[i], floatround_floor);
-			if(player_fallen_tr[i] > falltime)
+			if((get_user_team(i) == 1 && fallens_tt > 1) || (get_user_team(i) == 2 && fallens_ct > 1))
 			{
-				new fplayers[32],numfplayers,i2,name[32],player,name2[32]
-				new Array:a_fallens=ArrayCreate(32) 
-				get_players(fplayers, numfplayers, "bh")
-				for (i2=0; i2<numfplayers; i2++)
+				new falltime = floatround(1515.0/player_lvl[i], floatround_floor);
+				if(player_fallen_tr[i] > falltime)
 				{
-					player = fplayers[i2]
-					if(get_user_team(i) == get_user_team(player) && player_class[player] == Fallen)
+					new fplayers[32],numfplayers,i2,name[32],player,name2[32]
+					new Array:a_fallens=ArrayCreate(32) 
+					get_players(fplayers, numfplayers, "bh")
+					for (i2=0; i2<numfplayers; i2++)
 					{
-						ArrayPushCell(a_fallens, player) 
+						player = fplayers[i2]
+						if(get_user_team(i) == get_user_team(player) && player_class[player] == Fallen)
+						{
+							ArrayPushCell(a_fallens, player) 
+						}
+					}
+					new a_size=ArraySize(a_fallens)
+					player=random(a_size)
+					if(a_size != 0)
+					{
+						player=ArrayGetCell(a_fallens,player) 
+						get_user_name(player,name,31)
+						ExecuteHamB(Ham_CS_RoundRespawn, player)
+						hudmsg2(i,1.0,"Воскрешенн Падший ^nиз твоей команды:^n %s",name)
+						player_fallen_tr[i]=1;
+						emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+						emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+						get_user_name(i,name2,31)
+						for(new i3=0; i3<33; i3++)
+						{
+							client_print(i3, print_chat, "Падший шаман %s воскресил Падшего %s",name2,name)
+						}
+						ArrayDestroy(a_fallens) 
 					}
 				}
-				new a_size=ArraySize(a_fallens)
-				player=random(a_size)
-				if(a_size != 0)
+				else
 				{
-					player=ArrayGetCell(a_fallens,player) 
-					get_user_name(player,name,31)
-					ExecuteHamB(Ham_CS_RoundRespawn, player)
-					hudmsg2(i,1.0,"Воскрешенн Падший ^nиз твоей команды:^n %s",name)
-					player_fallen_tr[i]=1;
-					emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-					emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-					get_user_name(i,name2,31)
-					for(new i3=0; i3<33; i3++)
-					{
-						client_print(i3, print_chat, "Падший шаман %s воскресил Падшего %s",name2,name)
-					}
-					ArrayDestroy(a_fallens) 
+					new normaltime = falltime - player_fallen_tr[i];
+					hudmsg2(i,1.0,"Воскрешение Падшего через %i секунд",normaltime)
+					player_fallen_tr[i]=player_fallen_tr[i]+1;
 				}
-			}
-			else
-			{
-				new normaltime = falltime - player_fallen_tr[i];
-				hudmsg2(i,1.0,"Воскрешение Падшего через %i секунд",normaltime)
-				player_fallen_tr[i]=player_fallen_tr[i]+1;
 			}
 		}
 		if(player_class[i] == Zakarum && round_status==1 && is_user_alive(i))
@@ -17252,6 +17312,22 @@ public fallen_respawn()
 					}
 				}
 			}
+		}
+		if(player_class[i] == Monk && round_status==1 && is_user_alive(i))
+		{
+			new monk_timer = floatround(20.0-player_intelligence[i]/5.0)
+			
+			if(((monk_lastshot[i] + float(monk_timer)) < get_gametime()) && (monk_energy[i] < monk_maxenergy[i]))
+			{
+				client_print(i, print_console, "monk_timer %d, diff %f",monk_timer, (get_gametime() - (monk_lastshot[i] + float(monk_timer)))); 
+				//Check max energy
+				monk_energy[i] += 10
+				if(monk_energy[i] > monk_maxenergy[i])
+				{
+					monk_energy[i] = monk_maxenergy[i]
+				}
+			}
+			
 		}
     }
 }
