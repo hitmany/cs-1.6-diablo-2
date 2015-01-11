@@ -3449,6 +3449,13 @@ public DeathMsg(id)
 				mana_gracza[kid]+=3
 			}
 		}
+		else
+		{
+			if((mana_gracza[kid]+1) < get_pcvar_num(cvar_max_gold))
+			{
+				mana_gracza[kid]+=1
+			}
+		}
 	
 		add_respawn_bonus(vid)
 		add_bonus_explode(vid)
