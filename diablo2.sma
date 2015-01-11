@@ -4774,8 +4774,6 @@ public UpdateHUD()
 			
 			if(index >= 0 && index < MAX && is_user_connected(index) && is_user_alive(index)) 
 			{
-				new pname[32]
-				get_user_name(index,pname,31)
 				
 				new Msg[512]
 				set_hudmessage(255, 255, 255, 0.78, 0.65, 0, 6.0, 3.0)
@@ -4785,7 +4783,10 @@ public UpdateHUD()
 				{
 					Racename = "Падший шаман"
 				}
-				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nЗолото: %i",pname,player_lvl[index],Racename,player_item_name[index], mana_gracza[index])		
+				format(Msg,511,"Жизни: %i^nУровень: %i^nКласс: %s^nПредмет: %s^nПрочность: %i^nЗолото: %i",
+				get_user_health(index),player_lvl[index],Racename,
+				player_item_name[index], item_durability[index],
+				mana_gracza[index])		
 				show_hudmessage(id, Msg)
 				
 			}
