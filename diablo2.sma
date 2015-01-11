@@ -404,7 +404,8 @@ new player_sword[33] 		//nowyitem
 new player_ring[33]		//ring stats bust +5
 new Float:poprzednia_rakieta_gracza[33];
 new ilosc_rakiet_gracza[33];
-new ilosc_blyskawic[33],poprzednia_blyskawica[33];
+new ilosc_blyskawic[33]
+new Float:poprzednia_blyskawica[33];
 //new ilosc_dynamitow_gracza[33];
 new Float:g_wallorigin[33][3]
 new Float:falen_fires_time[33];
@@ -529,9 +530,71 @@ new const szTables[TOTAL_TABLES][] =
 	"CREATE TABLE IF NOT EXISTS `item`  ( `id` int(8) unsigned NOT NULL, `item` int(3) unsigned NOT NULL, `item_number` int(1) NOT NULL, `expire_time` int(14) NOT NULL, PRIMARY KEY (`id`,`item`,`item_number`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
 };
 
-
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Izual, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
-new Race[28][] = { "Нет","Mag","Monk","Paladin","Assassin","Necromancer","Barbarian", "Ninja", "Amazon","Кровавый ворон", "Дуриель", "Мефисто", "Изуал", "Диабло", "Баал", "Fallen", "Бес", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+new Race[28][] = 
+{
+	"Нет",
+	"Маг",
+	"Монах",
+	"Паладин",
+	"Ассассин",
+	"Некромант",
+	"Варвар",
+	"Ниндзя",
+	"Амазонка",
+	"Кровавый ворон",
+	"Дуриель",
+	"Мефисто",
+	"Изуал",
+	"Диабло",
+	"Баал",
+	"Падший",
+	"Бес",
+	"Закарум",
+	"Саламандра",
+	"Гигантский комар",
+	"Ледяной ужас",
+	"Инфидель",
+	"Гигантский паук",
+	"Адский кот",
+	"Griswold",
+	"The Smith",
+	"Demonolog",
+	"VipCztery"
+}
+/*
+Race[0][] = "Нет"
+Race[1][] = "Маг"
+Race[2][] = "Монах"
+Race[3][] = "Паладин"
+Race[4][] = "Ассассин"
+Race[5][] = "Некромант"
+Race[6][] = "Варвар"
+Race[7][] = "Ниндзя"
+Race[8][] = "Амазонка"
+Race[9][] = "Кровавый ворон"
+Race[10][] = "Дуриель"
+Race[11][] = "Мефисто"
+Race[12][] = "Изуал"
+Race[13][] = "Диабло"
+Race[14][] = "Баал"
+Race[15][] = "Падший"
+Race[16][] = "Бес"
+Race[17][] = "Закарум"
+Race[18][] = "Саламандра"
+Race[19][] = "Гигантский комар"
+Race[20][] = "Ледяной ужас"
+Race[21][] = "Инфидель"
+Race[22][] = "Гигантский паук"
+Race[23][] = "Адский кот"
+Race[24][] = "Griswold"
+Race[25][] = "The Smith"
+Race[26][] = "Demonolog"
+Race[27][] = "VipCztery"*/
+
+
+//race1,race2,race3,"Ассассин","Некромант","Варвар", "Ниндзя", "Амазонка","Кровавый ворон", "Дуриель", "Мефисто", "Изуал", "Диабло", "Баал", "Падший", "Бес", "Закарум", "Саламандра", "Гигантский комар", "Ледяной ужас", "Инфидель", "Гигантский паук", "Адский кот","Griswold","The Smith","Demonolog","VipCztery" }
+
 new race_heal[28] = { 100, //No
 110, //Mag
 150, //Monk
@@ -547,7 +610,7 @@ new race_heal[28] = { 100, //No
 140, //Izual
 150, //Diablo
 130, //Baal
-123, //Fallen
+130, //Fallen
 110, //Imp
 100, //Zakarum
 135, //Viper
@@ -863,14 +926,14 @@ public plugin_init()
 	register_clcmd("say /class","changerace")
 	register_clcmd("say /speed","speed")
 	register_clcmd("say /s","speed")
-	register_clcmd("flash", "cmdBlyskawica");
+	//register_clcmd("flash", "cmdBlyskawica");
 	register_concmd("rocket","StworzRakiete")
 	register_concmd("fallen","FallenShaman")
 	register_concmd("pluginflash","Flesh")
 	register_clcmd("say /portal","cmd_place_portal")
 	register_clcmd("say portal","cmd_place_portal")
 	//register_concmd("dynamit","PolozDynamit")
-	register_concmd("paladin","check_palek")
+	//register_concmd("paladin","check_palek")
 	register_concmd("setmine","item_mine")
 	register_clcmd("+rope", "make_hook")
 	register_clcmd("-rope", "del_hook")
@@ -2797,23 +2860,6 @@ public RoundStart(){
 		{	
 			g_haskit[i]=0
 		}
-		if(player_class[i] == Amazon)
-		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(i,"weapon_deagle")       
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-				fm_give_item(i,"ammo_50ae")
-			}
-			else
-			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
-			}
-		}
 		if(player_class[i] == Viper)
 		{
 			new Float:gas = player_intelligence[i]/10.0;
@@ -2840,15 +2886,11 @@ public RoundStart(){
 		{
 			fm_give_item(i, "weapon_smokegrenade")
 		}
-		if(player_class[i] == Zakarum && player_lvl[i] > 49)
-		{
-			new Float:dmg = player_intelligence[i]/2.0;
-			ilosc_blyskawic[i] = floatround(dmg,floatround_round);
-		}
 		if(player_class[i] == Zakarum)
 		{
 			new Float:random_time = random_float(15.0, 20.0);
 			set_task(random_time, "play_idle", i+2000, _, _, "b")
+			ilosc_blyskawic[i] = floatround(player_intelligence[i]/5.0)
 		}
 		if(player_class[i] == GiantSpider)
 		{
@@ -2856,7 +2898,7 @@ public RoundStart(){
 		}
 		if(player_class[i] == Imp)
 		{
-			if(floatround(player_lvl[i]/2.0) < 10)
+			if(floatround(player_intelligence[i]/2.5) < 10)
 			{
 				imp_fires[i] = 10
 			}
@@ -2902,7 +2944,7 @@ public RoundStart(){
 		}
 		if(player_class[i] == Frozen)
 		{
-			if(floatround(player_lvl[i]/2.0) < 10)
+			if(floatround(player_intelligence[i]/2.5) < 10)
 			{
 				frozen_colds[i] = 10
 			}
@@ -2928,15 +2970,10 @@ public RoundStart(){
 		c_ulecz[i] = false
 		if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
 		else if(player_class[i] == Demonolog) ilosc_rakiet_gracza[i]=3
-		if(player_class[i] == Frozen)
+		if(player_class[i] == TheSmith)
 		{
 			ilosc_blyskawic[i]=3;
-			poprzednia_blyskawica[i]=0
-		}
-		else if(player_class[i] == TheSmith)
-		{
-			ilosc_blyskawic[i]=3;
-			poprzednia_blyskawica[i]=0
+			poprzednia_blyskawica[i]=get_gametime()
 		}
 		//else ilosc_rakiet_gracza[i]=0
 		/*if(player_class[i] == Kernel) ilosc_dynamitow_gracza[i]=1
@@ -2950,7 +2987,7 @@ public RoundStart(){
 		
 		ultra_armor[i]=0
 		lustrzany_pocisk[i]=0
-		num_shild[i]=2+floatround(player_intelligence[i]/25.0,floatround_floor)
+		num_shild[i]=1+floatround(player_intelligence[i]/8.0,floatround_floor)
 		
 		set_renderchange(i)
 		if(is_user_connected(i)&&player_item_id[i]==66)
@@ -3612,7 +3649,7 @@ public Damage(id)
 				}
 				if (player_class[ attacker_id ] == Imp && is_user_alive(id))
 				{
-					new Float:imp_chance = player_intelligence[id]/500.0					
+					new Float:imp_chance = player_intelligence[attacker_id]/500.0					
 					new Float:chance = random_float(0.0, 1.0 )
 					if( chance <= imp_chance )
 					{
@@ -3893,6 +3930,10 @@ public client_PreThink ( id )
 		{
 			diablo_lght(id)
 		}
+	}
+	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Zakarum)
+	{
+		cmdBlyskawica(id)
 	}
 	
 	if ((button2 & IN_RELOAD) && on_knife[id] && player_class[id]==Viper)
@@ -4608,25 +4649,23 @@ public write_hud(id)
 	copy(Racename, charsmax(Racename), Race[player_class[id]]);
 	if(player_class[id]==Fallen && player_lvl[id]>49)
 	{
-		Racename = "Fallen Shaman"
-	}
-	else if(player_class[id]==Zakarum && player_lvl[id]<50)
-	{
-		Racename = "Закарум маньяк"
-	}
-	else if(player_class[id]==Zakarum && player_lvl[id]>49)
-	{
-		Racename = "Закарум жрец"
+		Racename = "Падший шаман"
 	}
 	if(player_class[id]!=Paladin)
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПредмет: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПредмет: \
+		%s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id],
+		floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
 	}
 	else
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
-		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i^n(%i%s)^nПредмет: %i/%i^nItem: %s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id], floatround(perc,floatround_round),"%%",JumpsLeft[id],JumpsMax[id], player_item_name[id], item_durability[id],mana_gracza[id])
+		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^n \
+		Прыжки: %i/%i^nПредмет: %s^nПрочность: %i^nЗолото: %i",
+		get_user_health(id), Racename, player_lvl[id],
+		floatround(perc,floatround_round),"%",JumpsLeft[id],JumpsMax[id],
+		player_item_name[id], item_durability[id],mana_gracza[id])
 	}
 	
 	message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
@@ -4669,15 +4708,7 @@ public UpdateHUD()
 				copy(Racename, charsmax(Racename), Race[player_class[index]]);
 				if(player_class[index]==Fallen && player_lvl[index]>49)
 				{
-					Racename = "Fallen Shaman"
-				}
-				else if(player_class[index]==Zakarum && player_lvl[index]<50)
-				{
-					Racename = "Закарум маньяк"
-				}
-				else if(player_class[index]==Zakarum && player_lvl[index]>49)
-				{
-					Racename = "Закарум жрец"
+					Racename = "Падший шаман"
 				}
 				format(Msg,511,"Ник: %s^nУровень: %i^nКласс: %s^nItem: %s^nЗолото: %i",pname,player_lvl[index],Racename,player_item_name[index], mana_gracza[index])		
 				show_hudmessage(id, Msg)
@@ -4857,7 +4888,7 @@ public pfn_touch ( ptr, ptd )
 		{
 			new Float:origin[3]
 			pev(ptd,pev_origin,origin)
-			Explode_Origin(owner,origin,50+player_intelligence[owner]*2,250,1)
+			Explode_Origin(owner,origin,55+player_intelligence[owner],250,1)
 			remove_entity(ptd)
 		}
 	}
@@ -5969,7 +6000,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Stealth Shoes"
 			player_item_id[id] = rannum
 			player_b_silent[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бесшумный шаг (эфект рассы assassin).",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли item: %s :: бесшумный шаг (эфект рассы Ассассин).",player_item_name[id])	
 		}
 		case 32:
 		{
@@ -7061,7 +7092,7 @@ public remove_frozencold(id)
 
 public add_bonus_zakarum(id)
 {
-	if (player_class[id] == Zakarum && player_lvl[id] > 49)
+	if (player_class[id] == Zakarum)
 	{
 		
 		emit_sound(id,CHAN_STATIC, "diablo_lp/zakarum_death1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
@@ -7248,7 +7279,7 @@ public item_c4fake(id)
 				{
 					if(player_b_antymeek[a] > 0 || c_antymeek[a] > 0)
 					return PLUGIN_HANDLED;
-					UTIL_Kill(id,a,"grenade")
+					UTIL_Kill(id,a,"meekstone")
 				}
 			}
 		}
@@ -8072,47 +8103,26 @@ public Create_Line(id,origin1[3],origin2[3],bool:draw)
 
 public Prethink_Blink(id)
 {
-	if(player_class[id] == Zakarum && (player_lvl[id] > 49))
-	{
-		if( get_user_button(id) & IN_RELOAD && !(get_user_oldbutton(id) & IN_RELOAD) && is_user_alive(id)) 
-		{			
-			if (on_knife[id] && (player_intelligence[id] > 0))
+	if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
+	{			
+		if (on_knife[id] && (player_b_blink[id] != 0))
+		{
+			if (halflife_time()-player_b_blink[id] <= 3) return PLUGIN_HANDLED		
+			player_b_blink[id] = floatround(halflife_time())	
+			UTIL_Teleport(id,300+15*player_intelligence[id])			
+		}		
+		if (on_knife[id] && (player_intelligence[id] > 0) && (c_blink[id] != 0))
+		{
+			new Float:blink_timer = 160.0/player_intelligence[id] 
+			if(blink_timer > 32.0) { blink_timer = 32.0; }
+			if ((floatround(halflife_time())-c_blink[id]) > floatround(blink_timer))
 			{
-				new Float:blink_timer = 160.0/player_intelligence[id] 
-				if(blink_timer > 32.0) { blink_timer = 32.0; }
-				if ((floatround(halflife_time())-c_blink[id]) > floatround(blink_timer))
-				{
-					c_blink[id] = floatround(halflife_time())
-					UTIL_Teleport(id,300+15*player_intelligence[id])
-				}			
+				c_blink[id] = floatround(halflife_time())
+				UTIL_Teleport(id,300+15*player_intelligence[id])
 			}
 		}
 	}
-	else
-	{
-		if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
-		{			
-			if (on_knife[id] && (player_b_blink[id] != 0))
-			{
-				if (halflife_time()-player_b_blink[id] <= 3) return PLUGIN_HANDLED		
-				player_b_blink[id] = floatround(halflife_time())	
-				UTIL_Teleport(id,300+15*player_intelligence[id])			
-			}
-		}
-		if( get_user_button(id) & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2) && is_user_alive(id)) 
-		{			
-			if (on_knife[id] && (player_intelligence[id] > 0))
-			{
-				new Float:blink_timer = 160.0/player_intelligence[id] 
-				if(blink_timer > 32.0) { blink_timer = 32.0; }
-				if ((floatround(halflife_time())-c_blink[id]) > floatround(blink_timer))
-				{
-					c_blink[id] = floatround(halflife_time())
-					UTIL_Teleport(id,300+15*player_intelligence[id])
-				}
-			}
-		}
-	}
+	
 	return PLUGIN_CONTINUE
 }
 
@@ -8614,7 +8624,7 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 public select_class(id)
 {
 new text4[512]  
-format(text4, 511,"^n\wВаш общий уровень: %d^nУ вас %d золота.^n^n\yВыбери Класс: ^n^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n^n^n\r4. \wСоветы: Что выбрать?^n^n^n\dРазработал: HiTmanY^nСайт сервера:^nlpstrike.ru", player_TotalLVL[id], mana_gracza[id]) 
+format(text4, 511,"^n\wВаш общий уровень: %d^n^n\yВыбери Класс: ^n^n\r1. \wГерои^n\r2. \wДемоны^n\r3. \wЖивотные^n^n^n\r4. \wСоветы: Что выбрать?^n^n^n\dРазработал: HiTmanY^nСайт сервера:^nlpstrike.ru", player_TotalLVL[id]) 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -8680,7 +8690,7 @@ public PokazKlasy(id)
 	new flags[28]
 	get_cvar_string("diablo_classes",flags,27) //<--- tu, gdzie jest 16 wpisz liczbк swoich klas
 	new text3[512]
-	format(text3, 512,"\yГерои: ^n\w1. \yMag^t\wУровень: \r%i^n\w2. \yMonk^t\wУровень: \r%i^n\w3. \yPaladin^t\wУровень: \r%i^n\w4. \yAssassin^t\wУровень: \r%i^n\w5. \yNecromancer^t\wУровень: \r%i^n\w6. \yBarbarian^t\wУровень: \r%i^n\w7. \yNinja^t\wУровень: \r%i^n\w8. \yAmazon^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text3, 512,"\yГерои: ^n\w1. \yМаг^t\wУровень: \r%i^n\w2. \yМонах^t\wУровень: \r%i^n\w3. \yПаладин^t\wУровень: \r%i^n\w4. \yАссассин^t\wУровень: \r%i^n\w5. \yНекромант^t\wУровень: \r%i^n\w6. \yВарвар^t\wУровень: \r%i^n\w7. \yНиндзя^t\wУровень: \r%i^n\w8. \yАмазонка^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][1],player_class_lvl[id][2],player_class_lvl[id][3],player_class_lvl[id][4],player_class_lvl[id][5],player_class_lvl[id][6],player_class_lvl[id][7],player_class_lvl[id][8])
 
 	new keyspiata
@@ -8716,13 +8726,11 @@ switch(key)
     case 0: 
     {    
         player_class[id] = Mag
-	c_shake[id]=20
         MYSQLX_SetDataForRace( id )       
     }
     case 1: 
     {    
         player_class[id] = Monk
-	c_damage[id]=3
 	zmiana_skinu[id]=1
 	changeskin(id,0)
         MYSQLX_SetDataForRace( id )
@@ -8735,16 +8743,14 @@ switch(key)
     case 3: 
     {    
         player_class[id] = Assassin
-	c_jump[id]=1
-	c_mine[id]=2
         MYSQLX_SetDataForRace( id )
     }
     case 4: 
     {            
         player_class[id] = Necromancer
         g_haskit[id] = 1
-	c_respawn[id]=4
-	c_vampire[id]=random_num(1,3)
+		c_respawn[id]=4
+		c_vampire[id]=random_num(1,3)
         MYSQLX_SetDataForRace( id )
     }
     case 5: 
@@ -8778,7 +8784,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yДиабло^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yFallen^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yДиабло^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yПадший^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -8953,7 +8959,7 @@ public PokazZwierz( id, item )
 		{    
 			player_class[id] = Zakarum
 			MYSQLX_SetDataForRace( id )
-			if(player_lvl[id] > 49) { c_blink[id] = floatround(halflife_time()); }
+			c_blink[id] = floatround(halflife_time());
 		}
 		case 1: 
 		{    
@@ -9757,8 +9763,7 @@ public SelectBotRace(id)
 	
 	if (player_class[id] == 0)
 	{
-		//player_class[id] = random_num(1,24)
-		player_class[id] = Mag
+		player_class[id] = random_num(1,23)
 	}
 	
 	return PLUGIN_CONTINUE
@@ -9790,7 +9795,7 @@ public UTIL_Teleport(id,distance)
 	
 	new origin[3]
 	get_user_origin(id,origin)
-	if(player_class[id] == Zakarum && player_lvl[id] > 49)
+	if(player_class[id] == Zakarum)
 	{
 		message_begin(MSG_BROADCAST ,SVC_TEMPENTITY) //message begin
 		write_byte(TE_PARTICLEBURST )
@@ -11657,10 +11662,10 @@ public set_speedchange(id)
 		if(player_class[id] == Ninja) speeds= 40 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Assassin) speeds= 30 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Baal) speeds= 40 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == Mag) speeds= 20 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Barbarian) speeds= -10 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == SabreCat) speeds= 30 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == BloodRaven) speeds= 30 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == Infidel) speeds= 40 + floatround(player_dextery[id]*1.3)
 		else speeds= floatround(player_dextery[id]*1.3)
 		set_user_maxspeed(id, agi + speeds)
 	}
@@ -11740,31 +11745,6 @@ public set_renderchange(id)
 					set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, 255)
 				}
 			}
-			else if (player_class[id] == Monk)
-			{
-				new inv_bonus = 255 - player_b_inv[id]
-				render = 200
-				
-				if(player_b_inv[id]>0)
-				{
-					while(inv_bonus>0)
-					{
-						inv_bonus-=20
-						render--
-					}
-				}
-				
-				if(player_b_usingwind[id]==1)
-				{
-					render/=2
-				}
-				
-				if(render<0) render=0
-				
-				if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target)) render*=2	
-				
-				set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, render)
-			}
 			else if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target))
 			{
 				if (player_b_usingwind[id]==1) set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, 75)
@@ -11841,15 +11821,7 @@ public cmd_who(id)
 		copy(Racename, charsmax(Racename), Race[player_class[playerid]]);
 		if(player_class[playerid]==Fallen && player_lvl[playerid]>49)
 		{
-			Racename = "Fallen Shaman"
-		}
-		else if(player_class[playerid]==Zakarum && player_lvl[playerid]<50)
-		{
-			Racename = "Закарум маньяк"
-		}
-		else if(player_class[playerid]==Zakarum && player_lvl[playerid]>49)
-		{
-			Racename = "Закарум жрец"
+			Racename = "Падший шаман"
 		}
 		len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>",name,Racename, player_lvl[playerid],team,player_item_name[playerid])
 	}
@@ -13899,7 +13871,7 @@ public make_shild(id,Float:vOrigin[3],Float:vAngles[3],Float:gfBlockSizeMin[3],F
 		entity_set_string(ent, EV_SZ_classname, "dbmod_shild")
 		entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
 		entity_set_int(ent, EV_INT_movetype, MOVETYPE_NONE)
-		entity_set_float(ent,EV_FL_health,50.0+float(player_intelligence[id]*2))
+		entity_set_float(ent,EV_FL_health,200.0+float(player_intelligence[id]*2))
 		entity_set_float(ent,EV_FL_takedamage,1.0)
 				
 		entity_set_model(ent, "models/diablomod/bm_block_platform.mdl");
@@ -13926,7 +13898,7 @@ public call_cast(id)
 	{
 		case Mag:
 		{
-			show_hudmessage(id, "[Mag] Выстрел огненным шаром") 
+			show_hudmessage(id, "[Маг] Выстрел огненным шаром") 
 			fired[id]=0
 			item_fireball(id)
 		}
@@ -13934,10 +13906,10 @@ public call_cast(id)
 		{
 			if(num_shild[id])
 			{
-				show_hudmessage(id, "[Monk] Стенка установленна") 
+				show_hudmessage(id, "[Монах] Стенка установленна") 
 				createBlockAiming(id)
 			}
-			else hudmsg(id,5.0,"[Monk] Вы не можете строить") 
+			else hudmsg(id,5.0,"[Монах] Вы не можете строить") 
 		}
 		case Paladin:
 		{
@@ -13946,14 +13918,14 @@ public call_cast(id)
 			if(golden_bulet[id]>3)
 			{
 				golden_bulet[id]=3
-				hudmsg(id,5.0,"[Paladin] У вас максимальное кол-во магических пулей - 3",golden_bulet[id]) 
+				hudmsg(id,5.0,"[Паладин] У вас максимальное кол-во магических пулей - 3",golden_bulet[id]) 
 			}
 			else if(golden_bulet[id]==1)show_hudmessage(id, "[Paladin] У вас одна магическая пуля") 
 			else if(golden_bulet[id]>1)show_hudmessage(id, "[Paladin] У вас %i магических пулей",golden_bulet[id]) 
 		}
 		case Assassin:
 		{
-			show_hudmessage(id, "[Assassin] Вы временно невидимыми (только нож)") 
+			show_hudmessage(id, "[Ассассин] Вы временно невидимыми (только нож)") 
 			invisible_cast[id]=1
 			set_renderchange(id)
 		}
@@ -13961,22 +13933,6 @@ public call_cast(id)
 		{
 			set_user_maxspeed(id,get_user_maxspeed(id)+25.0)
 			show_hudmessage(id, "[Нинзя] +25 к скорости. %f",get_user_maxspeed(id)) 
-		}
-		case Necromancer:
-		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(id, "weapon_mp5navy")
-				fm_give_item(id, "ammo_9mm")
-				fm_give_item(id, "ammo_9mm")
-				fm_give_item(id, "ammo_9mm")
-				fm_give_item(id, "ammo_9mm")
-				show_hudmessage(id, "[Necromancer] Вы получили MP5")
-			}
-			else
-			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-			}
 		}
 		case Baal:
 		{
@@ -14077,9 +14033,9 @@ public call_cast(id)
 			if(ultra_armor[id]>7)
 			{
 				ultra_armor[id]=7
-				hudmsg(id,5.0,"[Barbarian] Достигнуто масимальное кол-во Ultra Armor - 7",ultra_armor[id]) 
+				hudmsg(id,5.0,"[Варвар] У вас макс магической брони - 7",ultra_armor[id]) 
 			}
-			else show_hudmessage(id, "[Barbarian] У вас %i Ultra Armor",ultra_armor[id]) 
+			else show_hudmessage(id, "[Варвар] +Магическая броня(%i/7)",ultra_armor[id]) 
 		}
 		case Izual:
 		{
@@ -14169,7 +14125,7 @@ public call_cast(id)
 			{
 				fm_give_item(id, "weapon_flashbang")
 				fm_give_item(id, "weapon_flashbang")
-				show_hudmessage(id, "[Fallen] Вы получили 2 Flash гранаты")
+				show_hudmessage(id, "[Падший] Вы получили 2 Flash гранаты")
 			}
 			else
 			{
@@ -14596,7 +14552,7 @@ public native_set_user_item(id, item)
 		{
 			player_item_name[id] = "Stealth Shoes"
 			player_b_silent[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бесшумный шаг (эфект рассы assassin).",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли item: %s :: бесшумный шаг (эфект рассы Ассассин).",player_item_name[id])	
 		}
 		case 32:
 		{
@@ -15330,7 +15286,7 @@ public FallenShaman(id)
 	}
 	else
 	{
-		client_print(id, print_center, "Вы не Fallen Shaman!");
+		client_print(id, print_center, "Вы не Падший шаман!");
 		return PLUGIN_CONTINUE;
 	}	
 	return PLUGIN_CONTINUE;
@@ -16956,30 +16912,7 @@ public add_bonus_shaked(attacker_id,id)
         }
         return PLUGIN_HANDLED
 }
-public item_ulecz(id)
-{
-		if (used_item[id])
-		{
-			hudmsg(id,2.0,"Лечится можно 1 раз за раунд!")
-			return PLUGIN_CONTINUE
-		}
-		new m_healthf = race_heal[player_class[id]]+player_strength[id]*2
-		new CurHealthf =get_user_health(id)
-		new NewHealthf = (CurHealthf+50<m_healthf)? CurHealthf+50:m_healthf
-		set_user_health(id, NewHealthf)
-		used_item[id] = true
-		
-		return PLUGIN_CONTINUE
-}
-public check_palek(id)
-{
-        if (player_class[id] == Paladin && is_user_alive(id))
-        { 
-                c_ulecz[id] = true;
-                item_ulecz(id)
-        }
-        return PLUGIN_HANDLED
-}
+
 public player_Think(id){
         if(!is_user_alive(id) || !niewidzialnosc_kucanie[id])
 		{
@@ -17270,14 +17203,14 @@ public fallen_respawn()
 					player=ArrayGetCell(a_fallens,player) 
 					get_user_name(player,name,31)
 					ExecuteHamB(Ham_CS_RoundRespawn, player)
-					hudmsg2(i,1.0,"Воскрешенн Fallen ^nиз твоей команды:^n %s",name)
+					hudmsg2(i,1.0,"Воскрешенн Падший ^nиз твоей команды:^n %s",name)
 					player_fallen_tr[i]=1;
 					emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 					emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 					get_user_name(i,name2,31)
 					for(new i3=0; i3<33; i3++)
 					{
-						client_print(i3, print_chat, "Fallen Shaman %s воскресил Fallena %s",name2,name)
+						client_print(i3, print_chat, "Падший шаман %s воскресил Падшего %s",name2,name)
 					}
 					ArrayDestroy(a_fallens) 
 				}
@@ -17285,11 +17218,11 @@ public fallen_respawn()
 			else
 			{
 				new normaltime = falltime - player_fallen_tr[i];
-				hudmsg2(i,1.0,"Воскрешение Fallena через %i секунд",normaltime)
+				hudmsg2(i,1.0,"Воскрешение Падшего через %i секунд",normaltime)
 				player_fallen_tr[i]=player_fallen_tr[i]+1;
 			}
 		}
-		if(player_class[i] == Zakarum && player_lvl[i] > 49 && round_status==1 && is_user_alive(i))
+		if(player_class[i] == Zakarum && round_status==1 && is_user_alive(i))
 		{
 			new revivername[32]
 			new Float:radius = 800.0 //revive radius
@@ -19745,9 +19678,9 @@ public cmdBlyskawica(id)
 		client_print(id,print_center,"У вас нет молний");
 		return PLUGIN_HANDLED;
     }
-    if(poprzednia_blyskawica[id]+2.0>get_gametime()) 
+    if(poprzednia_blyskawica[id]+5.0>get_gametime()) 
 	{
-		client_print(id,print_center,"Вы можете использовать молнии каждые 5 секунд.");
+		client_print(id,print_center,"Пускать молнии можно раз в 5 секунд.");
 		return PLUGIN_HANDLED;
     }
     new ofiara, body;
@@ -19759,8 +19692,12 @@ public cmdBlyskawica(id)
 		if(dmg < 1.0) { dmg = 1.0; }
 		puscBlyskawice(id, ofiara, dmg);
 		ilosc_blyskawic[id]--;
-		poprzednia_blyskawica[id]=floatround(get_gametime());
+		poprzednia_blyskawica[id]=get_gametime()
     }
+	else
+	{
+		client_print(id,print_center,"Нет целей.");
+	}
     return PLUGIN_HANDLED;
 }
 stock Create_TE_BEAMENTS(startEntity, endEntity, iSprite, startFrame, frameRate, life, width, noise, red, green, blue, alpha, speed)
