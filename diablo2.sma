@@ -65,8 +65,8 @@
 #define PITCH_NONE    0
 new Float:agi=BASE_SPEED
 new round_status
-new DemageTake[33]
-new DemageTake1[33]
+//new DemageTake[33]
+//new DemageTake1[33]
 //new weapon, clip, ammo
 #define x 0
 #define y 1
@@ -173,7 +173,6 @@ new cvar_revival_health
 new cvar_revival_dis
 
 new attacker
-new attacker1
 new flashlight[33]
 new flashbattery[33]
 new flashlight_r
@@ -361,7 +360,6 @@ new c_mine[33]
 new c_shake[33]
 new c_shaked[33]
 new c_damage[33]
-new bool:c_ulecz[33]
 new c_jump[33]
 new c_respawn[33]
 new c_vampire[33]
@@ -393,7 +391,6 @@ new player_b_fleshujtotem[33] = 1
 new player_b_kasatotem[33] = 1
 new player_b_kasaqtotem[33] = 1
 new player_b_wywaltotem[33] = 1
-new uzyl_przedmiot[33];
 new skinchanged[33]
 new player_dc_name[33][99]	//Information about last disconnected players name
 new player_dc_item[33]		//Information about last disconnected players item
@@ -2007,6 +2004,8 @@ public MYSQLX_SetDataForRace( id )
 		}
 		skilltree(id)
 	}
+	
+	InitRace(id, player_class[id], 1)
 
 	// This user's XP has been set + retrieved! We can save now
 	//bDBXPRetrieved[id] = true;
@@ -2826,6 +2825,262 @@ public Task_DB_SaveAll()
 	DB_SaveAll(1);
 }
 
+public ResetRace(id)
+{
+	fire_bows[id] = 0
+	ultra_armor[id]=0
+	
+	cs2_reset_player_model(id);
+	
+	g_haskit[id] = 0
+	c_shake[id]=0
+	c_shaked[id]=0
+	c_damage[id]=0
+	c_jump[id]=0
+	c_mine[id]=0
+	c_respawn[id]=0
+	c_vampire[id]=0
+	c_silent[id]=0
+	c_antyarchy[id]=0
+	c_antymeek[id]=0
+	c_antyorb[id]=0
+	c_antyfs[id]=0
+	niewidzialnosc_kucanie[id] = 0;
+	c_grenade[id] = 0
+	c_blind[id] = 0
+	c_darksteel[id]=0
+	anty_flesh[id]=0
+	c_blink[id]=0
+	c_redirect[id]=0
+	c_awp[id]=0
+	//niewidka[id]=0
+	zmiana_skinu[id]=0
+	
+	CurWeapon(id)
+	give_knife(id)
+	//quest_gracza[id] = wczytaj_aktualny_quest(id);
+	changeskin(id,1)
+}
+
+public ResetItemsXPAndETC(id)
+{
+	flashbattery[id] = MAX_FLASH
+	player_xp[id] = 0		
+	player_lvl[id] = 1	
+	player_premium[id] = 1	
+	player_point[id] = 0	
+	player_item_id[id] = 0			
+	player_agility[id] = 0
+	player_strength[id] = 0
+	player_intelligence[id] = 0
+	player_dextery[id] = 0
+	player_b_oldsen[id] = 0.0
+	player_class[id] = 0
+	player_damreduction[id] = 0.0
+	last_update_xp[id] = -1
+	player_item_name[id] = "Нет"
+	player_b_gamble[id]=0
+	lustrzany_pocisk[id] = 0
+	
+	g_GrenadeTrap[id] = 0
+	g_TrapMode[id] = 0
+	player_infidel[id] = 0
+	baal_copyed[id] = 0
+	
+	player_ring[id]=0
+	
+	reset_item_skills(id) // Juz zaladowalo xp wiec juz nic nie zepsuje <lol2>
+	reset_player(id)
+
+}
+
+//type 1 - menu, 2 - roundstart
+public InitRace(id, racenum, type)
+{
+	//play idle fallen and zakarum
+	if(task_exists(id+2000))
+	{
+		remove_task(id+2000)
+	}
+	
+	switch(racenum) 
+	{
+		case 2: //Mon
+		{
+			zmiana_skinu[id]=1
+			changeskin(id,0)
+			monk_maxenergy[id] = player_intelligence[id]*2
+			monk_energy[id]=monk_maxenergy[id]
+			num_shild[id]=1+floatround(player_intelligence[id]/8.0,floatround_floor)
+		}
+		case 3: //Paladin
+		{
+			golden_bulet[id]=0
+			count_jumps(id)
+		}
+		case 4: //Assassin
+		{
+			invisible_cast[id]=0
+			give_knife(id)
+		}
+		case 5: //Necromancer
+		{
+			g_haskit[id] = 1
+			c_respawn[id]=4
+			c_vampire[id]=random_num(1,3)
+		}
+		case 7: //Ninja
+		{
+			give_knife(id)
+		}
+		case 8: //Amazon
+		{
+			g_GrenadeTrap[id] = 1
+		}
+		case 9: //BloodRaven
+		{
+			if(type == 1)
+			{
+				emit_sound(id,CHAN_STATIC,"diablo_lp/bloodraventaunt1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+			}
+		}
+		case 10: //Duriel
+		{
+			duriel_boost[id] = 0
+		}
+		case 11: //Mephisto
+		{
+			c_silent[id]=1
+		}
+		case 12: //Izual
+		{
+			izual_ring[id] = 1
+			c_blink[id]=floatround(halflife_time())
+		}
+		case 13: //Diablo
+		{
+			c_silent[id]=1
+			if(type == 1)
+			{
+				emit_sound(id,CHAN_STATIC,"diablo_lp/diablo_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+			}
+			if(player_intelligence[id] > 0)
+			{
+				diablo_lights[id] = 1
+			}
+		}
+		case 14: //Baal
+		{
+			c_blink[id] = floatround(halflife_time())
+		}
+		case 15: //Fallen
+		{
+			player_fallen_tr[id]=1;
+			c_darksteel[id]=29
+			c_blind[id] = 20
+			anty_flesh[id]=1
+			c_shaked[id]=5
+			if(player_lvl[id]>49)
+			{
+				//new float:summa = player_lvl[id]/10.0;
+				fallen_fires[id] = floatround(player_lvl[id]/10.0, floatround_floor);
+			}
+			if(type == 1)
+			{
+				new rnds = random_num(1, 2);
+				switch(rnds)
+				{
+				  case 1:
+				  {
+					emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				  }
+				  case 2:
+				  {
+					emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				  }
+				}
+			}
+			if(get_user_team(id) == 1)
+			{
+				fallens_tt++
+			}
+			else if(get_user_team(id) == 2)
+			{
+				fallens_ct++
+			}
+			if(player_lvl[id] > 49)
+			{
+				fallen_fires[id] = floatround(player_lvl[id]/5.0, floatround_floor);
+				new Float:random_time = random_float(25.0, 35.0);
+				set_task(random_time, "play_idle", id+2000, _, _, "b")
+			}
+			else
+			{
+				new Float:random_time = random_float(10.0, 15.0);
+				set_task(random_time, "play_idle", id+2000, _, _, "b")
+			}
+		}
+		case 16: //Imp
+		{
+			c_blink[id] = floatround(halflife_time())
+			if(floatround(player_lvl[id]/2.0) < 10)
+			{
+				imp_fires[id] = 10
+			}
+			else
+			{
+				imp_fires[id] = floatround(player_lvl[id]/2.0);
+			}
+		}
+		case 17: //Zakarum
+		{
+			c_blink[id] = floatround(halflife_time())
+			new Float:random_time = random_float(15.0, 20.0);
+			set_task(random_time, "play_idle", id+2000, _, _, "b")
+			ilosc_blyskawic[id] = floatround(player_intelligence[id]/5.0)
+		}
+		case 18: //Viper
+		{
+			new Float:gas = player_intelligence[id]/10.0;
+			if(gas < 1.0)
+			{
+				gas = 1.0
+			}
+			viper_gases[id] = floatround(gas,floatround_round);
+		}
+		case 19: //Mosquito
+		{
+			mosquito_sting[id] = 0
+			entity_set_string(id, EV_SZ_weaponmodel, "")
+			cs2_set_player_model(id, mosquito_model_short);
+		}
+		case 20: //Frozen
+		{
+			c_silent[id]=1
+			if(floatround(player_lvl[id]/2.0) < 10)
+			{
+				frozen_colds[id] = 10
+			}
+			else
+			{
+				frozen_colds[id] = floatround(player_lvl[id]/2.0);
+			}
+		}
+		case 21: //Infidel
+		{
+			cs2_set_player_model(id, infidel_model_short);
+		}
+		case 22: //GiantSpider
+		{
+			spider_traps[id] = 0
+		}
+		case 23: //SabreCat
+		{
+			fm_give_item(id, "weapon_smokegrenade")
+		}
+	}
+}
+
 public RoundStart(){
 	// Everu round we refresh this time, used for detecting if the buytime has passed
 	gF_starttime = get_gametime()
@@ -2834,9 +3089,16 @@ public RoundStart(){
 	kill_all_entity("spidertrap")
 	kill_all_entity("baalcopy")
 	kill_all_entity("baalcopyweap")
+	kill_all_entity("throwing_knife")
 	fallens_tt=0
 	fallens_ct=0
-	for (new i=0; i < 33; i++){
+	
+	new Players[32], playerCount, i
+	get_players(Players, playerCount, "h") 
+	
+	for (new countP=0; i<playerCount; countP++) 
+	{
+		i = Players[countP] 
 		if(player_portals[i] > 0)
 		{
 			if(get_user_team(i) == 1)
@@ -2863,107 +3125,36 @@ public RoundStart(){
 			}
 		}
 		
-		if(player_class[i] == Frozen)
-		{
-			c_silent[i] = 0
-		}
-		else
-		{
-			zmiana_skinu[i] = 0
-		}
+		ResetRace(i)
+		InitRace(i, player_class[i], 2)
 		
+		//ResetParams
+		//HERE
 		used_item[i] = false
 		naswietlony[i] = 0;
 		losowe_itemy[i] = 0
-		fire_bows[i] = 0
-		uzyl_przedmiot[i] = 0
-		DemageTake1[i]=1
-		count_jumps(i)
-		give_knife(i)
-		JumpsLeft[i]=JumpsMax[i]
-		message_begin(MSG_BROADCAST, SVC_TEMPENTITY);
-		write_byte(TE_KILLBEAM);
-		write_short(i);
-		message_end();
+		JumpsLeft[i]=JumpsMax[i]		
 		is_frozen[i] = 0
 		is_poisoned[i] = 0
 		is_touched[i] = 0.0
 		hit_key[i] = false
 		use_fly[i] = false
+		lustrzany_pocisk[i]=0
 		
-		player_fallen_tr[i]=1;
-		//play idle
-		remove_task(i+2000)
+		//RESET OBJECTS
 		//baal
-		remove_task(i+TASK_REMOVE_BAAL)
-		baal_copyed[i] = 0
-		
-		if(player_class[i] == Necromancer)
+		if(task_exists(i+TASK_REMOVE_BAAL))
 		{
-			g_haskit[i]=1
+			remove_task(i+TASK_REMOVE_BAAL)
+			baal_copyed[i] = 0
 		}
-		else 
-		{	
-			g_haskit[i]=0
-		}
-		if(player_class[i] == Monk)
-		{
-			monk_maxenergy[i] = player_intelligence[i]*2
-			monk_energy[i]=monk_maxenergy[i]
-		}
-		if(player_class[i] == Viper)
-		{
-			new Float:gas = player_intelligence[i]/10.0;
-			if(gas < 1.0)
-			{
-				gas = 1.0
-			}
-			viper_gases[i] = floatround(gas,floatround_round);
-		}
-		if(player_class[i] == Duriel)
-		{
-			duriel_boost[i] = 0
-		}
-		if(player_class[i] == Baal)
-		{
-			c_blink[i]=floatround(halflife_time())
-		}
-		if(player_class[i] == Mosquito)
-		{
-			mosquito_sting[i] = 0
-			entity_set_string(i, EV_SZ_weaponmodel, "")
-		}
-		if(player_class[i] == SabreCat)
-		{
-			fm_give_item(i, "weapon_smokegrenade")
-		}
-		if(player_class[i] == Zakarum)
-		{
-			new Float:random_time = random_float(15.0, 20.0);
-			set_task(random_time, "play_idle", i+2000, _, _, "b")
-			ilosc_blyskawic[i] = floatround(player_intelligence[i]/5.0)
-		}
-		if(player_class[i] == GiantSpider)
-		{
-			spider_traps[i] = 0
-		}
-		if(player_class[i] == Imp)
-		{
-			if(floatround(player_intelligence[i]/2.5) < 10)
-			{
-				imp_fires[i] = 10
-			}
-			else
-			{
-				imp_fires[i] = floatround(player_lvl[i]/2.0);
-			}
-		}
+		message_begin(MSG_BROADCAST, SVC_TEMPENTITY);
+		write_byte(TE_KILLBEAM);
+		write_short(i);
+		message_end();
+
 		if(player_class[i] == Diablo)
 		{
-			if(player_intelligence[i] > 0)
-			{
-				diablo_lights[i] = 1
-			}
 			if(!g_bWeaponsDisabled)
 			{
 				if ( !user_has_weapon( i , CSW_HEGRENADE ) )
@@ -2976,89 +3167,28 @@ public RoundStart(){
 				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
 			}
 		}
-		if(player_class[i] == Izual)
+		
+		set_renderchange(i)
+		
+		if(is_user_connected(i)&&player_item_id[i]==66)
 		{
-			izual_ring[i] = 1
-			c_blink[i]=floatround(halflife_time())
-		}
-		//Fallen Code
-		if(player_class[i] == Fallen)
-		{
-			if(get_user_team(i) == 1)
-			{
-				fallens_tt++
-			}
-			else if(get_user_team(i) == 2)
-			{
-				fallens_ct++
-			}
-		}
-		if(player_class[i] == Fallen && player_lvl[i] > 49)
-		{
-			fallen_fires[i] = floatround(player_lvl[i]/5.0, floatround_floor);
-			new Float:random_time = random_float(25.0, 35.0);
-			set_task(random_time, "play_idle", i+2000, _, _, "b")
-		}
-		if(player_class[i] == Fallen && player_lvl[i] < 49)
-		{
-			new Float:random_time = random_float(10.0, 15.0);
-			set_task(random_time, "play_idle", i+2000, _, _, "b")
-		}
-		if(player_class[i] == Frozen)
-		{
-			if(floatround(player_intelligence[i]/2.5) < 10)
-			{
-				frozen_colds[i] = 10
-			}
-			else
-			{
-				frozen_colds[i] = floatround(player_lvl[i]/2.0);
-			}
-		}
-		if(player_class[i] == Infidel)
-		{
-			cs2_set_player_model(i, infidel_model_short);
-		}
-		else if(player_class[i] == Mosquito)
-		{
-			cs2_set_player_model(i, mosquito_model_short);
-		}
-		else
-		{
-			cs2_reset_player_model(i);
+			changeskin(i,0) 
 		}
 		
-		golden_bulet[i]=0
-		c_ulecz[i] = false
-		if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
+		/*if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
 		else if(player_class[i] == Demonolog) ilosc_rakiet_gracza[i]=3
 		if(player_class[i] == TheSmith)
 		{
 			ilosc_blyskawic[i]=3;
 			poprzednia_blyskawica[i]=get_gametime()
-		}
-		//else ilosc_rakiet_gracza[i]=0
-		/*if(player_class[i] == Kernel) ilosc_dynamitow_gracza[i]=1
-		else if(player_class[i] == SabreCat) ilosc_dynamitow_gracza[i]=1
-		else if(player_class[i] == TheSmith) ilosc_dynamitow_gracza[i]=1*/
+		}*/
 		//else ilosc_rakiet_gracza[i]=0
 		
-		
-		invisible_cast[i]=0
-		niewidka[i] = 0
-		
-		ultra_armor[i]=0
-		lustrzany_pocisk[i]=0
-		num_shild[i]=1+floatround(player_intelligence[i]/8.0,floatround_floor)
-		
-		set_renderchange(i)
-		if(is_user_connected(i)&&player_item_id[i]==66)
-		{
-			changeskin(i,0) 
-		}
+		//else if(player_class[i] == TheSmith) ilosc_dynamitow_gracza[i]=1
+		//else ilosc_rakiet_gracza[i]=0
+		//Smith to init
+		//niewidka[i] = 0
 	}
-		
-	kill_all_entity("throwing_knife")
 	
 	Bot_Setup()		
 	ghost_check = false
@@ -4505,8 +4635,8 @@ public award_kill(killer_id,victim_id)
 
 public Give_Xp(id,amount)
 {
-		new Players[32], zablokuj;
-		get_players(Players, zablokuj, "ch");
+		//new Players[32], zablokuj;
+		//get_players(Players, zablokuj, "ch");
 		//if(zablokuj < 4 && amount < 200) return PLUGIN_CONTINUE;
 		if(player_class_lvl[id][player_class[id]]==player_lvl[id])
 		{
@@ -4599,7 +4729,6 @@ public client_connect(id)
 	player_damreduction[id] = 0.0
 	last_update_xp[id] = -1
 	player_item_name[id] = "Нет"
-	DemageTake[id]=0
 	player_b_gamble[id]=0
 	lustrzany_pocisk[id] = 0
 	
@@ -4663,7 +4792,6 @@ public client_putinserver(id)
 	player_damreduction[id] = 0.0
 	last_update_xp[id] = -1
 	player_item_name[id] = "Нет"
-	DemageTake[id]=0
 	player_b_gamble[id]=0
 	lustrzany_pocisk[id] = 0
 	
@@ -8740,29 +8868,6 @@ show_menu(id, keys,text4, -1, "ChooseClass")
 public select_class_menu(id, key) 
 { 
 	//new lx[28] // <-- w nawiasie wpisz liczbк swoich klas + 1(none)
-	g_haskit[id] = 0
-	c_shake[id]=0
-	c_shaked[id]=0
-	c_damage[id]=0
-	c_jump[id]=0
-	c_mine[id]=0
-	c_respawn[id]=0
-	c_vampire[id]=0
-	c_silent[id]=0
-	c_antyarchy[id]=0
-	c_antymeek[id]=0
-	c_antyorb[id]=0
-	c_antyfs[id]=0
-	niewidzialnosc_kucanie[id] = 0;
-	c_grenade[id] = 0
-	c_blind[id] = 0
-	c_darksteel[id]=0
-	anty_flesh[id]=0
-	c_blink[id]=0
-	c_redirect[id]=0
-	c_awp[id]=0
-	niewidka[id]=0
-	zmiana_skinu[id]=0
 	cs2_reset_player_model(id);
 	switch(key) 
 	{ 
@@ -8782,11 +8887,6 @@ public select_class_menu(id, key)
 		{
 		}
 	}
-
-	CurWeapon(id)
-	give_knife(id)
-	quest_gracza[id] = wczytaj_aktualny_quest(id);
-	changeskin(id,1)
 	
 	return PLUGIN_HANDLED
 }
@@ -8819,14 +8919,6 @@ public PokazMeni(id, key)
 * 0:Wstecz
 */
 //new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
-g_haskit[id] = 0
-c_shake[id]=0
-c_damage[id]=0
-c_jump[id]=0
-c_mine[id]=0
-c_respawn[id]=0
-c_vampire[id]=0
-zmiana_skinu[id]=0
 switch(key) 
 { 
 	case 0: 
@@ -8837,8 +8929,6 @@ switch(key)
 	case 1: 
 	{
 		player_class[id] = Monk
-		zmiana_skinu[id]=1
-		changeskin(id,0)
 		MYSQLX_SetDataForRace( id )
 	}
 	case 2: 
@@ -8880,9 +8970,6 @@ switch(key)
 		select_class(id)
 	}
 }
-CurWeapon(id)
-quest_gracza[id] = wczytaj_aktualny_quest(id);
-give_knife(id)
 
 return PLUGIN_HANDLED
 }
@@ -8913,21 +9000,6 @@ public PressedKlasy(id, key)
 	* 0:Wstecz
 	*/
 	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
-	g_haskit[id] = 0
-	c_vampire[id]=0
-	c_silent[id]=0
-	c_jump[id]=0
-	c_antyarchy[id]=0
-	c_antymeek[id]=0
-	c_antyorb[id]=0
-	c_antyfs[id]=0
-	niewidzialnosc_kucanie[id] = 0;
-	c_silent[id]=0
-	c_grenade[id] = 0
-	c_darksteel[id]=0
-	c_shaked[id]=0
-	c_blink[id]=0
-
 
 	switch (key) 
 	{
@@ -9014,10 +9086,6 @@ public PressedKlasy(id, key)
 			select_class(id)
 		}
 	}
-	CurWeapon(id)
-	give_knife(id)
-	quest_gracza[id] = wczytaj_aktualny_quest(id);
-	changeskin(id,1)
 	
 	return PLUGIN_HANDLED
 }
@@ -9051,14 +9119,6 @@ public PokazZwierz( id, item )
 	* 0:Wstecz
 	*/
 	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none) 
-	
-	g_haskit[id] = 0
-	c_redirect[id]=0
-	c_antymeek[id]=0
-	c_silent[id]=0
-	c_awp[id]=0
-	c_jump[id]=0
-	c_vampire[id]=0
 
 	switch (item) {
 		case 0:
@@ -9116,9 +9176,6 @@ public PokazZwierz( id, item )
 			select_class(id)
 		}
 	}
-	CurWeapon(id)
-	give_knife(id)
-	quest_gracza[id] = wczytaj_aktualny_quest(id);
 	
 	return PLUGIN_HANDLED
 }
@@ -9144,13 +9201,6 @@ public PokazPremium(id, key)
 	* 0:Wstecz
 	*/
 	//new lx[28] // <-- tutaj wpisz liczbк swoich klas + 1(none)
-	g_haskit[id] = 0
-	c_antymeek[id]=0
-	c_silent[id]=0
-	c_antyarchy[id]=0
-	c_jump[id]=0
-	c_vampire[id]=0
-	niewidka[id]=0
 
 	switch (key)
 	{
@@ -9210,9 +9260,6 @@ public PokazPremium(id, key)
 			select_class(id)
 		}
 	}
-	CurWeapon(id)
-	give_knife(id)
-	quest_gracza[id] = wczytaj_aktualny_quest(id);
 		
 	return PLUGIN_HANDLED
 } 
@@ -10228,24 +10275,13 @@ public Greet_Player(id)
 
 public changerace(id)
 {
-	if(round_status==1 && player_class[id]!=0)
-	{
-		if(loaded_xp[id]==0)
-		{
-			set_user_health(id,0)
-			MYSQLX_Save_T(id)
-			player_class[id]=0
-			client_connect(id) 
-			D2_ChangeRaceStart(id)
-		}
-	}
-	else if(player_class[id]!=0) 
+	if(player_class[id]!=0)
 	{
 		if(loaded_xp[id]==0)
 		{
 			MYSQLX_Save_T(id)
-			player_class[id]=0
-			client_connect(id) 
+			ResetRace(id)
+			ResetItemsXPAndETC(id)
 			D2_ChangeRaceStart(id)
 		}
 	}
@@ -11734,7 +11770,7 @@ public freeze_begin1()
 	round_status=0
 }
 
-public funcReleaseVic(id) 
+/*public funcReleaseVic(id) 
 {	
 	DemageTake[id]=0
 	remove_task(id+GLUTON)
@@ -11753,12 +11789,11 @@ public funcDemageVic(id,attacker)
 		if(get_user_health(id)>10)
 		set_task(2.0, "funcDemageVic", id+GLUTON)
 		DoDamage(id, attacker1, 5);
-}
+}*/
 
 public set_speedchange(id)
 {
-	if(DemageTake[id]==1) agi=(BASE_SPEED / 2)
-	else agi=BASE_SPEED
+	agi=BASE_SPEED
 	
 	if(is_frozen[id] || is_poisoned[id])
 	{
@@ -12034,7 +12069,7 @@ stock get_weapon_ent(id,wpnid=0,wpnName[]="")
 	return ent;
 }
 
-DoDamage(iTargetID, iShooterID, iDamage/*, iDamageCause, bIsWeaponID = false, iHeadShot = 0*/)
+/*DoDamage(iTargetID, iShooterID, iDamage, iDamageCause, bIsWeaponID = false, iHeadShot = 0)
 {
 	if(is_user_connected(iTargetID)&&is_user_connected(iShooterID))
 	if ( is_user_alive(iTargetID))
@@ -12079,9 +12114,9 @@ DoDamage(iTargetID, iShooterID, iDamage/*, iDamageCause, bIsWeaponID = false, iH
 			refill_ammo(iShooterID)
 		}
 	}
-}
+}*/
 
-public funcDemageVic3(id) 
+/*public funcDemageVic3(id) 
 {
 	if(DemageTake1[id]==1)
 	{
@@ -12096,7 +12131,7 @@ public funcDemageVic3(id)
 public funcReleaseVic3(id) 
 {	
 	DemageTake1[id]=1
-}
+}*/
  
 public event_flashlight(id) {
 	if(!get_cvar_num("flashlight_custom")) {
@@ -12183,7 +12218,7 @@ public event_hltv()
 	{
 		if(is_user_connected(players[i]))
 		{
-			set_task(0.0, "funcReleaseVic", i)
+			//set_task(0.0, "funcReleaseVic", i)
 			reset_player(players[i])
 			msg_bartime(players[i], 0)
 			trace_bool[players[i]] = 0
@@ -13569,12 +13604,7 @@ public touchWorld2(arrow, world)
 	new szClassName[32]
 	entity_get_string(arrow, EV_SZ_classname, szClassName, 31)
 	new owner = pev(arrow,pev_owner)
-	if(equal(szClassName, "frozencold"))
-	{
-		remove_task(arrow)
-		emit_sound(owner, CHAN_STATIC, "diablo_lp/frozne_blast.wav", VOL_NULL, ATTN_NONE, SND_STOP, PITCH_NONE)
-	}
-	else if(equal(szClassName, "xbow_arrow") && fire_bows[owner])
+	if(equal(szClassName, "xbow_arrow") && fire_bows[owner])
 	{
 		fire_bows[owner]--
 		new Float:origin[3]
@@ -13588,11 +13618,6 @@ public removeEntity(ent)
 {
 	new szClassName[32]
 	entity_get_string(ent, EV_SZ_classname, szClassName, 31)
-	new owner = pev(ent,pev_owner)
-	if(equal(szClassName, "frozencold"))
-	{
-		emit_sound(owner, CHAN_STATIC, "diablo_lp/frozne_blast.wav", VOL_NULL, ATTN_NONE, SND_STOP, PITCH_NONE)
-	}
 	remove_entity(ent)
 }
 
@@ -15497,7 +15522,7 @@ public frozen_key(id)
 		entity_set_origin(ent, fOrigin)
 		//entity_set_size(ent, Float:{-30.0, -30.0, -30.0}, Float:{30.0, 30.0, 30.0})
 		entity_set_int(ent, EV_INT_solid, SOLID_BBOX)
-		entity_set_int(ent, EV_INT_movetype, 5)
+		entity_set_int(ent, EV_INT_movetype, MOVETYPE_NOCLIP)
 		entity_set_int(ent, EV_INT_rendermode, kRenderTransAdd)
 		entity_set_float(ent, EV_FL_renderamt, 255.0)
 		//entity_set_float(ent, EV_FL_scale, 1.5)
@@ -17342,24 +17367,17 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					if(weapon == CSW_GLOCK18 || weapon == CSW_USP || weapon == CSW_P228 || weapon == CSW_DEAGLE || weapon == CSW_ELITE || weapon == CSW_FIVESEVEN)
 					{			
 						agi=(BASE_SPEED / 2)
-						set_speedchange(id)		
-						if(DemageTake[id]==0)
-						{
-							DemageTake[id]=1
-							set_task(11.0, "funcReleaseVic", id)
-							set_task(11.0, "funcReleaseVic2", id)
-							set_task(2.0, "funcDemageVic", id+GLUTON)
-						}
+						set_speedchange(id)
 					}
 				}
 					
-				if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Assassin)
+				/*if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Assassin)
 				{	
 					if(weapon == CSW_GLOCK18 || weapon == CSW_USP || weapon == CSW_P228 || weapon == CSW_DEAGLE || weapon == CSW_ELITE || weapon == CSW_FIVESEVEN)
 					{
 						set_task(1.5, "funcDemageVic3", id)
 					}
-				}
+				}*/
 				
 				if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Amazon)
 				{	
@@ -17900,10 +17918,41 @@ public admingivexp(id, level, cid)
 	new iTarget=cmd_target(id,szName,0);
 	if(iTarget)
 	{
-			new szItem[10], iItem;
-			read_argv(2, szItem, 9);
-			iItem=str_to_num(szItem);
-			native_set_user_xp(iTarget, iItem)
+		new szItem[10], iItem;
+		read_argv(2, szItem, 9);
+		iItem=str_to_num(szItem);
+		player_xp[iTarget]+=iItem
+		player_lvl[iTarget]=0
+		for (new i = 1; i <= sizeof(LevelXP)-1; i++ )
+		{
+			// User has enough XP to advance to the next level
+			if ( player_xp[iTarget] >= LevelXP[i])
+			{
+				player_lvl[iTarget] = i+1;
+			}
+			else
+			{
+				break;
+			}
+		}
+		player_point[iTarget]=(player_lvl[iTarget]-1)*2-player_intelligence[iTarget]-player_strength[iTarget]-player_dextery[iTarget]-player_agility[iTarget]	
+		
+		if(player_point[iTarget]==0) 
+		{
+			player_damreduction[iTarget] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[iTarget])))/100)
+		}
+		else
+		{
+			if(player_point[iTarget]<0)
+			{
+				player_point[iTarget] = player_lvl[iTarget]*2-2
+				player_intelligence[iTarget] = 0
+				player_strength[iTarget] = 0 
+				player_agility[iTarget] = 0
+				player_dextery[iTarget] = 0
+			}
+			skilltree(iTarget)
+		}
 	}
 	return PLUGIN_HANDLED
 }
@@ -17950,17 +17999,17 @@ public admingivegold(id, level, cid)
 	new iTarget=cmd_target(id,szName,0);
 	if(iTarget)
 	{
-			new szItem[10], iItem;
-			read_argv(2, szItem, 9);
-			iItem=str_to_num(szItem);
-			if((mana_gracza[iTarget]+iItem) < get_pcvar_num(cvar_max_gold))
-			{
-				mana_gracza[iTarget]+=iItem
-			}
-			else
-			{
-				mana_gracza[iTarget]=get_pcvar_num(cvar_max_gold)
-			}
+		new szItem[10], iItem;
+		read_argv(2, szItem, 9);
+		iItem=str_to_num(szItem);
+		if((mana_gracza[iTarget]+iItem) < get_pcvar_num(cvar_max_gold))
+		{
+			mana_gracza[iTarget]+=iItem
+		}
+		else
+		{
+			mana_gracza[iTarget]=get_pcvar_num(cvar_max_gold)
+		}
 	}
 	return PLUGIN_HANDLED
 }
@@ -17975,15 +18024,15 @@ public giveitem(id, level, cid)
 	new iTarget=cmd_target(id,szName,0);
 	if(iTarget)
 	{
-			get_user_name(iTarget, szName, 31);
-			new szItem[10], iItem;
-			read_argv(2, szItem, 9);
-			iItem=str_to_num(szItem);
-			client_print(id, print_console, "Игроку %s выдан item %d",szName, iItem);
-			award_item(iTarget, iItem);
-			set_gravitychange(iTarget)
-			set_speedchange(iTarget)
-			set_renderchange(iTarget)
+		get_user_name(iTarget, szName, 31);
+		new szItem[10], iItem;
+		read_argv(2, szItem, 9);
+		iItem=str_to_num(szItem);
+		client_print(id, print_console, "Игроку %s выдан item %d",szName, iItem);
+		award_item(iTarget, iItem);
+		set_gravitychange(iTarget)
+		set_speedchange(iTarget)
+		set_renderchange(iTarget)
 	}
 	return PLUGIN_HANDLED
 }
@@ -20023,7 +20072,7 @@ public mana4(id){
 	
 	menu_additem(mana4,"\wОружие")
 	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
-	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
+	menu_additem(mana4,"\wПочинить предмет \d[2 золота]")
 	menu_additem(mana4,"\wСвиток портала \d[25 золота]")
 	menu_additem(mana4,"\dЗелье противоядия [золота]")
 	menu_additem(mana4,"\dЗелье оттаивания [золота]")
@@ -20057,7 +20106,7 @@ public mana4a(id, menu, item)
 			new koszt = 10;
 			if (mana_gracza[id]<koszt && player_item_id[id]>0)
 			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть предмет");
 				mana4(id)
 				return PLUGIN_CONTINUE;
 			}
