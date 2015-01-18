@@ -1499,6 +1499,8 @@ public sql_start()
 	// Create tables!
 	MYSQLX_CreateTables();
 	
+	SQL_SimpleQuery(g_DBConn, "SET NAMES 'UTF8'");
+	
 }
 
 public DB_GetUniqueID( id )
@@ -1552,7 +1554,8 @@ public MYSQLX_FetchUniqueID( id )
 
 	new szQuery[512], szName[70];
 	get_user_name( id, szName, 69 );
-	format( szQuery, 511, "SELECT `id` FROM `player` WHERE `name` = '%s';", szName);
+	replace_all(szName, 99, "'", "\'")
+	format( szQuery, 511, "SELECT `id` FROM `player` WHERE `name` = ^"%s^";", szName);
 	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
 
 	if ( !SQL_Execute( query ) )
