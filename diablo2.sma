@@ -313,6 +313,7 @@ new player_portal_infotrg_2[33] = 0 //portal2
 new player_portal_sprite_1[33] = 0
 new player_portal_sprite_2[33] = 0
 new player_infidel[33]
+new Float:g_Knockback[33][3] // velocity from your knockback position
 
 //Item attributes
 new player_b_vampire[33] = 1	//Vampyric damage
@@ -869,6 +870,7 @@ public plugin_init()
 	//register_forward(FM_CmdStart, "Fwd_CmdStart");
 	register_forward(FM_CmdStart, "FwdCmdStart");
 	RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage")
+	RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage_Post", 1)
 	new szWeaponName[32] 
 	new NOSHOT_BITSUM = (1<<CSW_KNIFE) | (1<<CSW_HEGRENADE) | (1<<CSW_FLASHBANG) | (1<<CSW_SMOKEGRENADE)
 	for(new iId = CSW_P228; iId <= CSW_P90; iId++) 
@@ -17147,6 +17149,11 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 		{
 			new weapon
 			new bodypart
+			// Engine Knockback disabled
+			if(player_class[victim] == Infidel)
+			{
+				pev(victim, pev_velocity, g_Knockback[victim])
+			}
 			if(get_user_attacker(id,weapon,bodypart)!=0)
 			{
 				new damage = floatround(damage2)
@@ -17451,6 +17458,20 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 		}
 		
 		return HAM_IGNORED;
+}
+
+// Ham Take Damage Post Forward
+public fwd_TakeDamage_Post(victim)
+{
+	if (player_class[victim] != Infidel) return;
+	
+	// Engine Knockback disabled
+	static Float:push[3]
+	pev(victim, pev_velocity, push)
+	xs_vec_sub(push, g_Knockback[victim], push)
+	xs_vec_mul_scalar(push, 0.0, push)
+	xs_vec_add(push, g_Knockback[victim], push)
+	set_pev(victim, pev_velocity, push)
 }
 
 public fwd_AttackSpeed( const weapon_ent )
