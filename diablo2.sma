@@ -4246,7 +4246,7 @@ public client_PreThink ( id )
 
 	if(player_class[id] == Infidel && is_user_alive(id))
 	{
-		if ((Velocity[0] > 0.0 || Velocity[1] > 0.0 || Velocity[2] > 0.0))  
+		if ((Velocity[0] != 0.0 || Velocity[1] != 0.0 || Velocity[2] != 0.0))  
 		{
 			player_infidel[id] = 1
 			client_print(id, print_center, "НЕвидим")
