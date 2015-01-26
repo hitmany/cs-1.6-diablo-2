@@ -302,6 +302,8 @@ new player_dextery[33]
 new mana_gracza[33]
 new player_TotalLVL[33]
 new Float:player_damreduction[33]
+new player_firstspawn[33]
+new player_newclass[33]		
 new player_class[33]		
 new Float:player_huddelay[33]
 new player_premium[33] = 0  //Holds players premium
@@ -870,7 +872,8 @@ public plugin_init()
 	//register_forward(FM_CmdStart, "Fwd_CmdStart");
 	register_forward(FM_CmdStart, "FwdCmdStart");
 	RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage")
-	RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage_Post", 1)
+	RegisterHam(Ham_Spawn, "player", "fwHamPlayerSpawnPost", 1)  
+	//RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage_Post", 1)
 	new szWeaponName[32] 
 	new NOSHOT_BITSUM = (1<<CSW_KNIFE) | (1<<CSW_HEGRENADE) | (1<<CSW_FLASHBANG) | (1<<CSW_SMOKEGRENADE)
 	for(new iId = CSW_P228; iId <= CSW_P90; iId++) 
@@ -895,8 +898,7 @@ public plugin_init()
 	register_cvar("flashlight_decay","90");
 	register_event("Flashlight","event_flashlight","b");
 		
-	register_event("CurWeapon","CurWeapon","be", "1=1") 
-	register_event("ResetHUD", "ResetHUD", "abe")
+	register_event("CurWeapon","CurWeapon","be", "1=1")
 	register_event("ScreenFade","det_fade","be","1!0","2!0","7!0")
 	register_event("DeathMsg","DeathMsg","ade") 
 	//register_event("Damage", "Damage", "ae", "2!0")
@@ -980,7 +982,7 @@ public plugin_init()
 	register_clcmd("hegren", "cmd_HeBuy")
 	
 	register_menucmd(register_menuid("Навыки"), 1023, "skill_menu")
-	register_menucmd(register_menuid("Опции"), 1023, "option_menu")
+	register_menucmd(register_menuid("ShowMenu"), 1023, "option_menu")
 	register_menucmd(register_menuid("ChooseClass"), 1023, "select_class_menu")
 	register_menucmd(register_menuid("ChooseRune"), 1023, "select_rune_menu")
 	register_menucmd(register_menuid("Новые Предметы"), 1023, "nowe_itemy")
@@ -2009,9 +2011,8 @@ public MYSQLX_SetDataForRace( id )
 		}
 		skilltree(id)
 	}
-	
-	InitRace(id, player_class[id], 1)
 
+	InitRace(id, player_newclass[id], 1)
 	// This user's XP has been set + retrieved! We can save now
 	//bDBXPRetrieved[id] = true;
 
@@ -2776,7 +2777,7 @@ public look_for_none()
 		{
 			if(player_class[i]==0)
 			{
-				MYSQLX_GetAllXP( i )
+				D2_ChangeRaceStart( i )
 			}
 		}
 	}
@@ -2937,6 +2938,7 @@ public InitRace(id, racenum, type)
 		case 7: //Ninja
 		{
 			give_knife(id)
+			set_user_armor(id,100)
 		}
 		case 8: //Amazon
 		{
@@ -3131,7 +3133,18 @@ public RoundStart(){
 		}
 		
 		ResetRace(i)
-		InitRace(i, player_class[i], 2)
+		if(player_newclass[i] > 0)
+		{
+			ResetItemsXPAndETC(i)
+			player_class[i] = player_newclass[i]
+			MYSQLX_SetDataForRace( i )
+			player_newclass[i] = 0
+			ColorChat(i, GREEN, "Вы сменили расу")
+		}
+		else
+		{
+			InitRace(i, player_class[i], 2)
+		}
 		
 		//ResetParams
 		//HERE
@@ -3175,7 +3188,7 @@ public RoundStart(){
 		
 		set_renderchange(i)
 		
-		if(is_user_connected(i)&&player_item_id[i]==66)
+		if(player_item_id[i]==66)
 		{
 			changeskin(i,0) 
 		}
@@ -3193,11 +3206,76 @@ public RoundStart(){
 		//else ilosc_rakiet_gracza[i]=0
 		//Smith to init
 		//niewidka[i] = 0
+		/*=========== FROM ResetHUD ============*/
+		remove_task(i+GLUTON)
+		change_health(i,9999,0,"")	
+		
+		
+		if (c4fake[i] > 0)
+		{
+			remove_entity(c4fake[i])
+			c4fake[i] = 0
+		}
+		SubtractStats(i,player_b_extrastats[i])
+		SubtractRing(i)
+		if ((player_intelligence[i]+player_strength[i]+player_agility[i]+player_dextery[i])>(player_lvl[i]*2)) reset_skill(i)
+		
+		BoostStats(i,player_b_extrastats[i])
+		BoostRing(i)
+		
+		fired[i] = 0
+		fired_viper[i] = 0
+		
+		player_ultra_armor_left[i]=player_ultra_armor[i]
+		
+		player_b_dagfired[i] = false
+		ghoststate[i] = 0
+		earthstomp[i] = 0
+		
+		if (player_b_blink[i] > 0)
+			player_b_blink[i] = 1
+		
+		if (player_b_usingwind[i] > 0) 
+		{
+			player_b_usingwind[i] = 0
+		}
+		
+		if (player_point[i] > 0 ) skilltree(i)
+		if (player_class[i] == 0) D2_ChangeRaceStart( i )
+		
+		add_bonus_gamble(i)				//MUST be first
+		c4state[i] = 0
+		client_cmd(i,"hud_centerid 0")  
+		auto_help(i)
+		add_money_bonus(i)
+		set_gravitychange(i)
+		add_redhealth_bonus(i)
+		SelectBotRace(i)
+		set_renderchange(i)
+		if (gRestart[i])
+		{
+			gRestart[i] = false
+			return
+		}
+		if (gUpdate[i])
+		{
+			gUpdate[i] = false
+			return
+		}
+		if (gHooked[i])
+		{
+			remove_hook(i)
+		}
+		if (get_pcvar_num(pMaxHooks) > 0)
+		{
+			gHooksUsed[i] = 0
+			statusMsg(0, "[Паутина] 0 из %d паутин использованно.", get_pcvar_num(pMaxHooks))
+		}
+		/*===============================*/
 	}
 	
 	Bot_Setup()		
 	ghost_check = false
-	check_class()
 	use_addtofullpack = false
 }
 
@@ -3398,80 +3476,6 @@ public CurWeapon(id)
 		else g_haskit[id] = false
 		
 		write_hud(id)
-	}
-}
-
-
-public ResetHUD(id)
-{
-	
-	if (is_user_connected(id))
-	{	
-		remove_task(id+GLUTON)
-		change_health(id,9999,0,"")
-		
-		
-		
-		if (c4fake[id] > 0)
-		{
-			remove_entity(c4fake[id])
-			c4fake[id] = 0
-		}
-		SubtractStats(id,player_b_extrastats[id])
-		SubtractRing(id)
-		if ((player_intelligence[id]+player_strength[id]+player_agility[id]+player_dextery[id])>(player_lvl[id]*2)) reset_skill(id)
-		
-		BoostStats(id,player_b_extrastats[id])
-		BoostRing(id)
-		
-		fired[id] = 0
-		fired_viper[id] = 0
-		
-		player_ultra_armor_left[id]=player_ultra_armor[id]
-		
-		player_b_dagfired[id] = false
-		ghoststate[id] = 0
-		earthstomp[id] = 0
-		
-		if (player_b_blink[id] > 0)
-			player_b_blink[id] = 1
-		
-		if (player_b_usingwind[id] > 0) 
-		{
-			player_b_usingwind[id] = 0
-		}
-		
-		if (player_point[id] > 0 ) skilltree(id)
-		if (player_class[id] == 0) MYSQLX_GetAllXP( id )
-		
-		add_bonus_gamble(id)				//MUST be first
-		c4state[id] = 0
-		client_cmd(id,"hud_centerid 0")  
-		auto_help(id)
-		add_money_bonus(id)
-		set_gravitychange(id)
-		add_redhealth_bonus(id)
-		SelectBotRace(id)
-		set_renderchange(id)
-		if (gRestart[id])
-		{
-			gRestart[id] = false
-			return
-		}
-		if (gUpdate[id])
-		{
-			gUpdate[id] = false
-			return
-		}
-		if (gHooked[id])
-		{
-			remove_hook(id)
-		}
-		if (get_pcvar_num(pMaxHooks) > 0)
-		{
-			gHooksUsed[id] = 0
-			statusMsg(0, "[Паутина] 0 из %d паутин использованно.", get_pcvar_num(pMaxHooks))
-		}
 	}
 }
 
@@ -4751,6 +4755,7 @@ public client_connect(id)
 
 public client_putinserver(id)
 {
+	player_firstspawn[id] = 1
 	loaded_xp[id]=0
 	player_class_lvl_save[id]=0
 	player_class[id] = 0
@@ -8681,12 +8686,12 @@ showitem(id,"Flashbang necklece","общий","нет","<br>")
 public showmenu(id)
 {
 	new text[513] 
-	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<9)
+	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
 	
 	
-	format(text, 512, "\rОпции\R^n^n\y1.\w Инфо о предмете^n\y2.\w Выкинуть текущий предмет^n\y3.\w Помощь^n\y4.\w Информация об игроках^n\y5.\w Магазин^n\y6.\w Инфо о скиллах^n\y7.\w Смена класса^n\y0.\w Выход") 
+	format(text, 512, "\rДиабло меню\R^n^n\y1.\w Описание предмета^n\y2.\w Выкинуть текущий предмет^n\y3.\w Помощь^n\y4.\w Информация об игроках^n\y5.\w Магазин^n\y6.\w Мои навыки^n\y7.\w Сменить расу^n^n\y0.\w Выход") 
 	
-	show_menu(id, keys, text) 
+	show_menu(id, keys, text, -1, "ShowMenu")
 	return PLUGIN_HANDLED  
 } 
 
@@ -8873,7 +8878,6 @@ show_menu(id, keys,text4, -1, "ChooseClass")
 public select_class_menu(id, key) 
 { 
 	//new lx[28] // <-- w nawiasie wpisz liczbк swoich klas + 1(none)
-	cs2_reset_player_model(id);
 	switch(key) 
 	{ 
 		case 0: 
@@ -8928,47 +8932,43 @@ switch(key)
 { 
 	case 0: 
 	{
-		player_class[id] = Mag
-		MYSQLX_SetDataForRace( id )
+		player_newclass[id] = Mag
+		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 	}
 	case 1: 
 	{
-		player_class[id] = Monk
-		MYSQLX_SetDataForRace( id )
+		player_newclass[id] = Monk
+		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 	}
 	case 2: 
 	{
-		player_class[id] =  Paladin
-		MYSQLX_SetDataForRace( id )
+		player_newclass[id] =  Paladin
+		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 	}
 	case 3: 
 	{
-		player_class[id] = Assassin
-		MYSQLX_SetDataForRace( id )
+		player_newclass[id] = Assassin
+		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 	}
 	case 4: 
 	{
-		player_class[id] = Necromancer
-		g_haskit[id] = 1
-		c_respawn[id]=4
-		c_vampire[id]=random_num(1,3)
-		MYSQLX_SetDataForRace( id )
+		player_newclass[id] = Necromancer
+		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 	}
 	case 5: 
 	{
-		player_class[id] = Barbarian
-		MYSQLX_SetDataForRace( id )
+		player_newclass[id] = Barbarian
+		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 	}
 	case 6: 
 	{
-		player_class[id] = Ninja
-		MYSQLX_SetDataForRace( id )
+		player_newclass[id] = Ninja
+		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 	}
 	case 7: 
 	{
-		player_class[id] = Amazon
-		g_GrenadeTrap[id] = 1
-		MYSQLX_SetDataForRace( id )
+		player_newclass[id] = Amazon
+		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 	}
 	case 9: 
 	{ 
@@ -9010,81 +9010,43 @@ public PressedKlasy(id, key)
 	{
 		case 0:
 		{
-			player_class[id] = BloodRaven
-			MYSQLX_SetDataForRace( id )
-			emit_sound(id,CHAN_STATIC,"diablo_lp/bloodraventaunt1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+			player_newclass[id] = BloodRaven
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 1: 
 		{
-			player_class[id] = Duriel
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = Duriel
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 2: 
 		{
-			player_class[id] = Mephisto
-			c_silent[id]=1
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = Mephisto
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 3: 
 		{
-			player_class[id] = Izual
-			izual_ring[id] = 1
-			c_blink[id]=floatround(halflife_time())
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = Izual
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 4: 
 		{
-			player_class[id] = Diablo
-			c_silent[id]=1
-			MYSQLX_SetDataForRace( id )
-			emit_sound(id,CHAN_STATIC,"diablo_lp/diablo_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+			player_newclass[id] = Diablo
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 5: 
 		{
-			player_class[id] = Baal
-			c_blink[id] = floatround(halflife_time())
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = Baal
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 6: 
 		{
-			player_class[id] = Fallen
-			c_darksteel[id]=29
-			c_blind[id] = 20
-			anty_flesh[id]=1
-			c_shaked[id]=5
-	  
-			MYSQLX_SetDataForRace( id )
-			if(player_lvl[id]>49)
-			{
-				//new float:summa = player_lvl[id]/10.0;
-				fallen_fires[id] = floatround(player_lvl[id]/10.0, floatround_floor);
-			}
-			new rnds = random(1);
-			switch(rnds)
-			{
-			  case 0:
-			  {
-				emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			  }
-			  case 1:
-			  {
-				emit_sound(id,CHAN_STATIC,"diablo_lp/fallen_2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			  }
-			}
+			player_newclass[id] = Fallen	  
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 7: 
 		{
-			player_class[id] = Imp
-			c_blink[id] = floatround(halflife_time())
-			if(floatround(player_lvl[id]/2.0) < 10)
-			{
-				imp_fires[id] = 10
-			}
-			else
-			{
-				imp_fires[id] = floatround(player_lvl[id]/2.0);
-			}
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = Imp
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 9: 
 		{ 
@@ -9128,53 +9090,38 @@ public PokazZwierz( id, item )
 	switch (item) {
 		case 0:
 		{
-			player_class[id] = Zakarum
-			MYSQLX_SetDataForRace( id )
-			c_blink[id] = floatround(halflife_time());
+			player_newclass[id] = Zakarum
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 1: 
 		{
-			player_class[id] = Viper
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = Viper
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 2: 
 		{
-			player_class[id] = Mosquito
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = Mosquito
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 3: 
 		{
-			player_class[id] = Frozen
-			c_silent[id]=1
-			MYSQLX_SetDataForRace( id )
-			if(floatround(player_lvl[id]/2.0) < 10)
-			{
-				frozen_colds[id] = 10
-			}
-			else
-			{
-				frozen_colds[id] = floatround(player_lvl[id]/2.0);
-			}
+			player_newclass[id] = Frozen
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 4: 
 		{
-			player_class[id] = Infidel
-			cs2_set_player_model(id, infidel_model_short);
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = Infidel
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 5: 
 		{
-			player_class[id] = GiantSpider
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = GiantSpider
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 6: 
 		{
-			player_class[id] = SabreCat
-			if(is_user_alive(id))
-			{
-				fm_give_item(id, "weapon_smokegrenade")
-			}
-			MYSQLX_SetDataForRace( id )
+			player_newclass[id] = SabreCat
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 9: 
 		{ 
@@ -9218,7 +9165,7 @@ public PokazPremium(id, key)
 			c_antyarchy[id]=1
 			c_jump[id]=2
 			c_vampire[id]=random_num(1,2)
-			MYSQLX_SetDataForRace( id )
+			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		else
 		{
@@ -9235,7 +9182,7 @@ public PokazPremium(id, key)
 				c_jump[id]=2
 				niewidka[id]=1
 				c_vampire[id]=random_num(1,2)
-				MYSQLX_SetDataForRace( id )
+				ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 			}
 			else
 			{
@@ -9253,7 +9200,7 @@ public PokazPremium(id, key)
 				c_antyarchy[id]=1
 				c_jump[id]=2
 				c_vampire[id]=random_num(1,2)
-				MYSQLX_SetDataForRace( id )
+				ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 			}
 			else
 			{
@@ -9267,22 +9214,7 @@ public PokazPremium(id, key)
 	}
 		
 	return PLUGIN_HANDLED
-} 
-
-/* ==================================================================================================== */
-public check_class()
-{
-	for (new id=0; id < 33; id++)
-	{
-  		if((player_class[id] == Ninja) && (is_user_connected(id)))
-		{
-			if (is_user_alive(id)) set_user_armor(id,100)	
-		}
-		set_gravitychange(id)
-		set_renderchange(id)
-	}
 }
-/* ==================================================================================================== */
 
 public add_barbarian_bonus(id)
 {
@@ -10280,15 +10212,9 @@ public Greet_Player(id)
 
 public changerace(id)
 {
-	if(player_class[id]!=0)
+	if(loaded_xp[id]==0)
 	{
-		if(loaded_xp[id]==0)
-		{
-			MYSQLX_Save_T(id)
-			ResetRace(id)
-			ResetItemsXPAndETC(id)
-			D2_ChangeRaceStart(id)
-		}
+		D2_ChangeRaceStart(id)
 	}
 }
 
@@ -14083,7 +14009,7 @@ public call_cast(id)
 		case Ninja:
 		{
 			set_user_maxspeed(id,get_user_maxspeed(id)+25.0)
-			show_hudmessage(id, "[Нинзя] +25 к скорости. %f",get_user_maxspeed(id)) 
+			show_hudmessage(id, "[Ниндзя] +25 к скорости (%d)",floatround(get_user_maxspeed(id))) 
 		}
 		case Baal:
 		{
@@ -14484,13 +14410,8 @@ public native_get_user_class(id)
 
 public native_set_user_class(id, class)
 {
-	g_haskit[id] = 0
-	player_class[id] = class		
-
-	MYSQLX_SetDataForRace( id )
-	CurWeapon(id)
-	
-	give_knife(id)
+	player_newclass[id] = class
+	ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 }
 
 
@@ -17139,6 +17060,15 @@ stock fm_get_weapon_ent_owner(ent)
 	
 	return get_pdata_cbase(ent, 41, 4);
 }
+
+public fwHamPlayerSpawnPost(id)
+{
+	if (is_user_alive(id) && player_firstspawn[id] == 1) 
+	{
+		MYSQLX_GetAllXP(id)
+		player_firstspawn[id] = 0
+	}
+}  
 
 public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 {
@@ -20092,7 +20022,7 @@ public mana3a(id, menu, item){
 }
 */
 public mana4(id){
-	new mana4=menu_create("Предметы - Другое","mana4a");
+	new mana4=menu_create("Магазин","mana4a");
 	
 	menu_additem(mana4,"\wОружие")
 	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
