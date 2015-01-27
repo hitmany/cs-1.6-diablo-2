@@ -4644,12 +4644,16 @@ public award_kill(killer_id,victim_id)
 
 public Give_Xp(id,amount)
 {
-		//new Players[32], zablokuj;
-		//get_players(Players, zablokuj, "ch");
-		//if(zablokuj < 4 && amount < 200) return PLUGIN_CONTINUE;
-		if(player_class_lvl[id][player_class[id]]==player_lvl[id])
+	//new Players[32], zablokuj;
+	//get_players(Players, zablokuj, "ch");
+	//if(zablokuj < 4 && amount < 200) return PLUGIN_CONTINUE;
+	//Перстень Леорика
+	if(player_item_id[id]==75) amount=amount*2;
+	
+	if(player_class_lvl[id][player_class[id]]==player_lvl[id])
+	{
+		if(player_xp[id]+amount!=0 && get_playersnum()>1)
 		{
-		if(player_xp[id]+amount!=0 && get_playersnum()>1){
 			player_xp[id]+=amount
 			if(player_lvl[id] < sizeof(LevelXP))
 			{
@@ -6019,7 +6023,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Bronze Amplifier"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(1,3)
-			show_hudmessage(id, "Вы нашли item: %s ::  +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
 		}
 		
 		case 2:
@@ -6027,7 +6031,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Silver Amplifier"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
 		}
 		
 		case 3:
@@ -6035,49 +6039,49 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Gold Amplifier"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(6,10)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])	
 		}
 		case 4:
 		{
 			player_item_name[id] = "Vampyric Staff"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(1,4)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 5:
 		{
 			player_item_name[id] = "Vampyric Amulet"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(4,6)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 6:
 		{
 			player_item_name[id] = "Vampyric Scepter"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 7:
 		{
 			player_item_name[id] = "Small bronze bag"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(150,500)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 8:
 		{
 			player_item_name[id] = "Medium silver bag"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(500,1200)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 9:
 		{
 			player_item_name[id] = "Large gold bag"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(1200,3000)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 10:
 		{
@@ -6087,7 +6091,7 @@ public award_item(id, itemnum)
 			
 			if (is_user_alive(id))
 				set_gravitychange(id)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
 		}
 		case 11:
 		{
@@ -6098,7 +6102,7 @@ public award_item(id, itemnum)
 			if (is_user_alive(id))
 				set_gravitychange(id)
 				
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
 			
 		}
 		case 12:
@@ -6106,35 +6110,35 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Invisibility Rope"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(150,200)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 13:
 		{
 			player_item_name[id] = "Invisibility Coat"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(110,150)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 14:
 		{
 			player_item_name[id] = "Invisibility Armor"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 15:
 		{
 			player_item_name[id] = "Firerope"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: +1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
 		}
 		case 16:
 		{
 			player_item_name[id] = "Fire Amulet"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(2,4)
-			show_hudmessage(id, "Вы нашли item: %s :: +1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
 		}
 		case 17:
 		{
@@ -6145,238 +6149,238 @@ public award_item(id, itemnum)
 			item_durability[id] = 100
 			
 			if (is_user_alive(id)) set_user_health(id,5)		
-			show_hudmessage(id, "Вы нашли item: %s :: практически полная невидимость, но у вас 5 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпрактически полная невидимость, но у вас 5 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
 		}
 		case 18:
 		{
 			player_item_name[id] = "Arabian Boots"
 			player_item_id[id] = rannum
 			player_b_theif[id] = random_num(500,1000)
-			show_hudmessage(id, "Вы нашли item: %s :: с каждым выстрелом высасывает с противника деньги, в зависимости от дамага",player_item_name[id],player_b_theif[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nс каждым выстрелом высасывает с противника деньги, в зависимости от дамага",player_item_name[id],player_b_theif[id])	
 		}
 		case 19:
 		{
 			player_item_name[id] = "Phoenix Ring"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 20:
 		{
 			player_item_name[id] = "Sorcerers ring"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 21:
 		{
 			player_item_name[id] = "Chaos Orb"
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(150,275)
-			show_hudmessage(id, "Вы нашли item: %s :: после смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпосле смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 22:
 		{
 			player_item_name[id] = "Hell Orb"
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(200,400)
-			show_hudmessage(id, "Вы нашли item: %s :: после смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпосле смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 23:
 		{
 			player_item_name[id] = "Gold statue"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(5,10)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 24:
 		{
 			player_item_name[id] = "Daylight Diamond"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 25:
 		{
 			player_item_name[id] = "Blood Diamond"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 26:
 		{
 			player_item_name[id] = "Wheel of Fortune"
 			player_item_id[id] = rannum
 			player_b_gamble[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 27:
 		{
 			player_item_name[id] = "Four leaf Clover"
 			player_item_id[id] = rannum
 			player_b_gamble[id] = random_num(4,5)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 28:
 		{
 			player_item_name[id] = "Amulet of the sun"
 			player_item_id[id] = rannum
 			player_b_blind[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
 		}
 		case 29:
 		{
 			player_item_name[id] = "Sword of the sun"
 			player_item_id[id] = rannum
 			player_b_blind[id] = random_num(2,5)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
 		}
 		case 30:
 		{
 			player_item_name[id] = "Fireshield"
 			player_item_id[id] = rannum
 			player_b_fireshield[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии Е активируется щит который наносит дамаг противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии Е активируется щит который наносит дамаг противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
 		}
 		case 31:
 		{
 			player_item_name[id] = "Stealth Shoes"
 			player_item_id[id] = rannum
 			player_b_silent[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бесшумный шаг (эфект рассы Ассассин).",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nбесшумный шаг (эфект рассы Ассассин).",player_item_name[id])	
 		}
 		case 32:
 		{
 			player_item_name[id] = "Meekstone"
 			player_item_id[id] = rannum
 			player_b_meekstone[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бомба на дистанционом управлении. Е положить бомбу, второе нажатие Е взорвать.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nбомба на дистанционом управлении. Е положить бомбу, второе нажатие Е взорвать.",player_item_name[id])	
 		}
 		case 33:
 		{
 			player_item_name[id] = "Medicine Glar"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли item: %s :: При атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 34:
 		{
 			player_item_name[id] = "Medicine Totem"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(20,30)
-			show_hudmessage(id, "Вы нашли item: %s :: При атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 35:
 		{
 			player_item_name[id] = "Iron Armor"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 36:
 		{
 			player_item_name[id] = "Mitril Armor"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(6,11)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 37:
 		{
 			player_item_name[id] = "Godly Armor"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(10,15)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 38:
 		{
 			player_item_name[id] = "Fireball staff"
 			player_item_id[id] = rannum
 			player_b_fireball[id] = random_num(50,100)
-			show_hudmessage(id, "Вы нашли item: %s :: Запускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЗапускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 39:
 		{
 			player_item_name[id] = "Fireball scepter"
 			player_item_id[id] = rannum
 			player_b_fireball[id] = random_num(100,200)
-			show_hudmessage(id, "Вы нашли item: %s :: Запускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЗапускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 40:
 		{
 			player_item_name[id] = "Ghost Rope"
 			player_item_id[id] = rannum
 			player_b_ghost[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: Возможность ходить сквозь стены, эфект длиться %i секунд",player_item_name[id],player_b_ghost[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВозможность ходить сквозь стены, эфект длиться %i секунд",player_item_name[id],player_b_ghost[id])	
 		}
 		case 41:
 		{
 			player_item_name[id] = "Nicolas Eye"
 			player_item_id[id] = rannum
 			player_b_eye[id] = -1
-			show_hudmessage(id, "Вы нашли item: %s :: Устанавливает камеру на стене.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nУстанавливает камеру на стене.",player_item_name[id])	
 		}
 		case 42:
 		{
 			player_item_name[id] = "Knife Ruby"
 			player_item_id[id] = rannum
 			player_b_blink[id] = floatround(halflife_time())
-			show_hudmessage(id, "Вы нашли item: %s :: при использовании ножа второй конопкой телепортирует вас на небольшое растояние",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри использовании ножа второй конопкой телепортирует вас на небольшое растояние",player_item_name[id])	
 		}
 		case 43:
 		{
 			player_item_name[id] = "Lothars Edge"
 			player_item_id[id] = rannum
 			player_b_windwalk[id] = random_num(4,7)
-			show_hudmessage(id, "Вы нашли item: %s :: на %i секунд даёт среднюю прозрачность + сильно увеличивает ваш бег.",player_item_name[id],player_b_windwalk[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nна %i секунд даёт среднюю прозрачность + сильно увеличивает ваш бег.",player_item_name[id],player_b_windwalk[id])	
 		}
 		case 44:
 		{
 			player_item_name[id] = "Sword"
 			player_item_id[id] = rannum
 			player_sword[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: увеличивает урон ножу",player_item_name[id])		
+			show_hudmessage(id, "Вы нашли предмет: %s^nувеличивает урон ножу",player_item_name[id])		
 		}
 		case 45:
 		{
 			player_item_name[id] = "Mageic Booster"
 			player_item_id[id] = rannum
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: каждые 3 секунды сидя вы очень длинно прыгаете.(item не всегда работает)",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nкаждые 3 секунды сидя вы очень длинно прыгаете.(item не всегда работает)",player_item_name[id])	
 		}
 		case 46:
 		{
 			player_item_name[id] = "Dagon I"
 			player_item_id[id] = rannum
 			player_b_dagon[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии USE наносит дамаг противнику на близком растоянии раз в 20 секунд",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии USE наносит дамаг противнику на близком растоянии раз в 20 секунд",player_item_name[id])	
 		}
 		case 47:
 		{
 			player_item_name[id] = "Scout Extender"
 			player_item_id[id] = rannum
 			player_b_sniper[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
 		}
 		case 48:
 		{
 			player_item_name[id] = "Scout Amplifier"
 			player_item_id[id] = rannum
 			player_b_sniper[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
 		}
 		case 49:
 		{
 			player_item_name[id] = "Air booster"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: Вы можете сделать двойной прыжок в воздухе",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать двойной прыжок в воздухе",player_item_name[id],player_b_sniper[id])	
 		}
 		case 50:
 		{
 			player_item_name[id] = "Iron Spikes"
 			player_item_id[id] = rannum
 			player_b_smokehit[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: убивает дымовой гранатой, если попасть ей в противника",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nубивает дымовой гранатой, если попасть ей в противника",player_item_name[id])	
 		}
 		case 51:
 		{
@@ -6384,49 +6388,49 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_extrastats[id] = random_num(1,3)
 			BoostStats(id,player_b_extrastats[id])
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i очков к каждому умнению",player_item_name[id],player_b_extrastats[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i очков к каждому умнению",player_item_name[id],player_b_extrastats[id])	
 		}
 		case 52:
 		{
 			player_item_name[id] = "Totem amulet"
 			player_item_id[id] = rannum
 			player_b_firetotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
 		}
 		case 53:
 		{
 			player_item_name[id] = "Mageic Hook"
 			player_item_id[id] = rannum
 			player_b_hook[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии USE притягивает к себе врага",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии USE притягивает к себе врага",player_item_name[id])	
 		}
 		case 54:
 		{
 			player_item_name[id] = "Darksteel Glove"
 			player_item_id[id] = rannum
 			player_b_darksteel[id] = random_num(1,5)
-			show_hudmessage(id, "Вы нашли item: %s :: усиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный дамаг при атаке противника со спины.",player_item_name[id])	
 		}
 		case 55:
 		{
 			player_item_name[id] = "Darksteel Gaunlet"
 			player_item_id[id] = rannum
 			player_b_darksteel[id] = random_num(7,9)
-			show_hudmessage(id, "Вы нашли item: %s :: усиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный дамаг при атаке противника со спины.",player_item_name[id])	
 		}
 		case 56:
 		{
 			player_item_name[id] = "Illusionists Cape"
 			player_item_id[id] = rannum
 			player_b_illusionist[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии на Е вы становитесь полностью (100%)невидимым. однако и вы никого не видите и умираете от 1 выстрела.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е вы становитесь полностью (100%)невидимым. однако и вы никого не видите и умираете от 1 выстрела.",player_item_name[id])	
 		}
 		case 57:
 		{
 			player_item_name[id] = "Techies scepter"
 			player_item_id[id] = rannum
 			player_b_mine[id] = 3
-			show_hudmessage(id, "Вы нашли item: %s :: ставит 3 полуневидимые мины.",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nставит 3 полуневидимые мины.",player_item_name[id])
 		}
 		
 		case 58:
@@ -6435,7 +6439,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_blink[id] = floatround(halflife_time())
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: Нож позволяет вам телепортироваться каждые 3 секунды. Зажмите DUCK чтобы прыгнуть далеко.",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nНож позволяет вам телепортироваться каждые 3 секунды. Зажмите DUCK чтобы прыгнуть далеко.",player_item_name[id])
 		}
 		case 59:	
 		{
@@ -6443,7 +6447,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_ring[id]=1
 			player_b_fireball[id] = random_num(50,80)
-			show_hudmessage(id, "Вы нашли item : %s :: Возможность стрелять огненными шарами +5 интеллект",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nВозможность стрелять огненными шарами +5 интеллект",player_item_name[id])
 		}	
 		case 60:	
 		{
@@ -6451,7 +6455,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(2,4)
 			player_b_vampire[id] = random_num(3,5)	
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс возродиться после смерти. При попадании во врага, частично восполняет ваше НР",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс возродиться после смерти. При попадании во врага, частично восполняет ваше НР",player_item_name[id])
 		}
 		case 61:
 		{
@@ -6459,7 +6463,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(120,330)
 			player_ring[id]=2
-			show_hudmessage(id, "Вы нашли item : %s :: Когда вас убивают вы взрываетесь, нанося урон стоящим в близи врагам. +5 сила",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nКогда вас убивают вы взрываетесь, нанося урон стоящим в близи врагам. +5 сила",player_item_name[id])
 		}
 		case 62:
 		{
@@ -6467,7 +6471,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum	
 			player_b_redirect[id] = random_num(7,17)
 			player_b_blind[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли item : %s :: Снижение дамага по вам. Шанс ослепить противника",player_item_name[id])		
+			show_hudmessage(id, "Вы нашли предмет: %s^nСнижение дамага по вам. Шанс ослепить противника",player_item_name[id])		
 		}
 		case 63:
 		{
@@ -6475,7 +6479,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum	
 			player_b_grenade[id] = random_num(1,4)
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли item : %s :: Увиличивает урон наносимый гранатой. Восстанавливает здоровье",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nУвиличивает урон наносимый гранатой. Восстанавливает здоровье",player_item_name[id])
 		}	
 		case 64:
 		{
@@ -6483,21 +6487,21 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 1
 			player_ring[id]=3
-			show_hudmessage(id, "Вы нашли item : %s :: Двойной прыжок. +5 ловкость",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nДвойной прыжок. +5 ловкость",player_item_name[id])	
 		}	
 		case 65:
 		{
 			player_item_name[id] = "Flashbang necklace"	
 			player_item_id[id] = rannum	
 			wear_sun[id] = 1
-			show_hudmessage (id, "Вы нашли item : %s :: Иммунитет к ослепляющим гранатам",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nИммунитет к ослепляющим гранатам",player_item_name[id])
 		}
 		case 66:
 		{
 			player_item_name[id] = "Chameleon"	
 			player_item_id[id] = 66	
 			changeskin(id,0)  
-			show_hudmessage (id, "Вы нашли item : %s :: Превращение во врага (внешний вид)",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nПревращение во врага (внешний вид)",player_item_name[id])
 		}
 		case 67:
 		{
@@ -6505,7 +6509,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = 67	
 			player_ultra_armor[id]=random_num(3,6)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли item : %s :: Каждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nКаждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
 		}
 		case 68:
 		{
@@ -6513,21 +6517,21 @@ public award_item(id, itemnum)
 			player_item_id[id] = 68	
 			player_ultra_armor[id]=random_num(7,11)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли item : %s :: Каждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nКаждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
 		}
 		case 69:
 		{
 			player_item_name[id] = "Khalim Eye"
 			player_item_id[id] = rannum
 			player_b_radar[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Вы видите противников на радаре", player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы видите противников на радаре", player_item_name[id])
 		}
 		case 70:
 		{
 			player_item_name[id] = "Leaper Ring"
 			player_item_id[id] = rannum
 			player_b_autobh[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Даёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nДаёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
 		}
 		case 71:
 		{
@@ -6535,7 +6539,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_silent[id] = 1
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/2)
-			show_hudmessage (id, "Вы нашли item : %s :: Бесшумный и быстрый бег",player_item_name[id],player_b_silent[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nБесшумный и быстрый бег",player_item_name[id],player_b_silent[id])
 		}
 		case 72:
 		{
@@ -6543,7 +6547,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 4
 			set_user_gravity(id, 600.0)
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 4 прыжка в воздухе. Уменьшенна гравитация",player_item_name[id],player_b_jumpx[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы можете сделать 4 прыжка в воздухе. Уменьшенна гравитация",player_item_name[id],player_b_jumpx[id])
 		}
 		case 73:
 		{
@@ -6551,7 +6555,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_inv[id] = 95
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли item : %s :: Ваш видимость снижается до 95. Быстрый бег.",player_item_name[id],player_b_inv[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВаш видимость снижается до 95. Быстрый бег.",player_item_name[id],player_b_inv[id])
 		}
 		case 74:
 		{
@@ -6559,14 +6563,13 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_inv[id] = 155
 			player_b_damage[id] = 20
-			show_hudmessage (id, "Вы нашли item : %s :: Ваш видимость снижается до 155 +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВаш видимость снижается до 155 +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
 		}
 		case 75:
 		{
-			player_item_name[id] = "Exp Ring"
+			player_item_name[id] = "Перстень леорика"
 			player_item_id[id] = rannum
-			new xp_award = get_cvar_num("diablo_xpbonus")*2
-			show_hudmessage (id, "Вы нашли item : %s :: Удваивание опыта на %i",player_item_name[id],xp_award)
+			show_hudmessage (id, "Вы нашли предмет: %s^nУдваивание опыта на %i",player_item_name[id])
 		}
 		case 76:
 		{
@@ -6575,7 +6578,7 @@ public award_item(id, itemnum)
 			player_ring[id]=2
 			player_b_explode[id] = random_num(120,330)
 			player_b_redirect[id] = random_num(10, 100)
-			show_hudmessage (id, "Вы нашли item : %s :: Вы получаете +5 к силе и взрываетесь когда умираете(урон %i) -%i урона по вам",player_item_name[id],player_b_explode[id],player_b_redirect[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы получаете +5 к силе и взрываетесь когда умираете(урон %i) -%i урона по вам",player_item_name[id],player_b_explode[id],player_b_redirect[id])
 		}
 		case 77:
 		{
@@ -6583,7 +6586,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_blind[id] = random_num(1,5)
 			player_b_heal[id] =  random_num(1,15)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/%i ослепить врага, жми E чтобы установить исцеляющий тотем",player_item_name[id],player_b_blind[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i ослепить врага, жми E чтобы установить исцеляющий тотем",player_item_name[id],player_b_blind[id])
 		}
 		case 78:
 		{
@@ -6591,7 +6594,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(1,3)
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить HE гранаты и быстрый бег",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить HE гранаты и быстрый бег",player_item_name[id],player_b_grenade[id])
 		}
 		case 79:
 		{
@@ -6600,14 +6603,14 @@ public award_item(id, itemnum)
 			player_b_respawn[id] = 2
 			player_b_sniper[id] = 1
 			player_b_grenade[id] = 3
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/2 возродится, шанс 1/1 мгновенно убить со скаута,шанс 1/3 убить с HE",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/2 возродится, шанс 1/1 мгновенно убить со скаута,шанс 1/3 убить с HE",player_item_name[id])
 		}
 		case 80:
 		{
 			player_item_name[id] = "Vampire Gloves"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(5,15)
-			show_hudmessage(id, "Вы нашли item : %s :: Высасывает %i за каждое попадание во врага,за убийство +30hp",player_item_name[id],player_b_vampire[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nВысасывает %i за каждое попадание во врага,за убийство +30hp",player_item_name[id],player_b_vampire[id])
 		}
 		case 81:
 		{
@@ -6615,7 +6618,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 10
 			player_b_fireball[id] = 5
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 10 прыжков в воздух и пускать до 5 огненных шаров",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы можете сделать 10 прыжков в воздух и пускать до 5 огненных шаров",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
 		}
 		case 85:
 		{
@@ -6624,21 +6627,21 @@ public award_item(id, itemnum)
 			player_b_damage[id] = 20
 			player_b_redirect[id] = 40
 			set_user_gravity(id,3.0)
-			show_hudmessage (id, "Вы нашли item : %s :: +20 к урону и уменьшение урона на 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+20 к урону и уменьшение урона на 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
 		}
 		case 86:
 		{
 			player_item_name[id] = "RedBull"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 8
-			show_hudmessage(id, "Вы нашли item : %s :: Вы можете сделать 8 прыжков в воздухе",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать 8 прыжков в воздухе",player_item_name[id],player_b_sniper[id])	
 		}
 		case 87:
 		{
 			player_item_name[id] = "Dr House"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(45,65)
-			show_hudmessage(id, "Вы нашли item : %s :: Восстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечящий тотем %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВосстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечящий тотем %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 88:
 		{
@@ -6647,7 +6650,7 @@ public award_item(id, itemnum)
 			player_b_inv[id] = 8
 			player_b_reduceH[id] = 55
 			if (is_user_alive(id)) set_user_health(id,45)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы почти невидимы,но у вас 45 HP.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы почти невидимы,но у вас 45 HP.",player_item_name[id])	
 		}
 		case 89:
 		{
@@ -6658,7 +6661,7 @@ public award_item(id, itemnum)
 			item_durability[id] = 50
 			
 			if (is_user_alive(id)) set_user_health(id,10)		
-			show_hudmessage(id, "Вы нашли item : %s :: У вас 10 жизней,невидимость 1/255",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nУ вас 10 жизней,невидимость 1/255",player_item_name[id])	
 		}
 		case 90:
 		{
@@ -6666,7 +6669,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 8
 			set_user_gravity(id, 400.0)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы можете сделать 8 прыжков в воздухе и у вас высокая гравитация",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать 8 прыжков в воздухе и у вас высокая гравитация",player_item_name[id],player_b_sniper[id])	
 		}
 		case 91:
 		{
@@ -6677,28 +6680,28 @@ public award_item(id, itemnum)
 			player_b_blind[id] = random_num(3,4)
 			player_ultra_armor[id]=random_num(15,50)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage(id, "Вы нашли item : %s :: Item настолько мощный,что никто ещё не познал его волшебное действия",player_item_name[id])		
+			show_hudmessage(id, "Вы нашли предмет: %s^nItem настолько мощный,что никто ещё не познал его волшебное действия",player_item_name[id])		
 		}
 		case 92:
 		{
 			player_item_name[id] = "Purse Thief"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(1,16000)
-			show_hudmessage(id, "Вы нашли item : %s :: получаете %i денег в каждом раунде. Используйте чтобы защищаться.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
+			show_hudmessage(id, "Вы нашли предмет: %s^nполучаете %i денег в каждом раунде. Используйте чтобы защищаться.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
 		}
 		case 93:
 		{
 			player_item_name[id] = "Vampiric Blood"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(15,20)
-			show_hudmessage(id, "Вы нашли item : %s :: высасываете %i hp у противника",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nвысасываете %i hp у противника",player_item_name[id],player_b_vampire[id])	
 		}
 		case 94:
 		{
 			player_item_name[id] = "Revival Ring"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: 1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
 		}
 		case 95:
 		{
@@ -6706,7 +6709,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(30,55)
 			player_b_damage[id] = 50
-			show_hudmessage(id, "Вы нашли item : %s :: Восстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечащий тотем %i. +50 к урону",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВосстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечащий тотем %i. +50 к урону",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 96:
 		{
@@ -6714,7 +6717,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			changeskin(id,0)
 			player_b_grenade[id] = random_num(1,2)
-			show_hudmessage (id, "Вы нашли item : %s :: Ты выглядишь как противник.Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nТы выглядишь как противник.Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
 		}
 		case 97:
 		{
@@ -6723,7 +6726,7 @@ public award_item(id, itemnum)
 			player_b_damage[id] = 100
 			player_b_silent[id] = 1
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли item : %s :: Вы на носите %i урона с каждого выстрела.Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы на носите %i урона с каждого выстрела.Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
 		}
 		case 98:
 		{
@@ -6732,7 +6735,7 @@ public award_item(id, itemnum)
 			player_b_redirect[id] = 10
 			player_b_damage[id] = 10
 			player_b_respawn[id] = 2
-			show_hudmessage (id, "Вы нашли item : %s :: +10 к урону. -10 урона по вам. Шанс 1/2 возродится.",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+10 к урону. -10 урона по вам. Шанс 1/2 возродится.",player_item_name[id])
 		}
 		case 99:
 		{
@@ -6740,7 +6743,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_grenade[id] = 5
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/5 убить с НЕ гранаты.+%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/5 убить с НЕ гранаты.+%i к невидимости",player_item_name[id],255-player_b_inv[id])
 		}
 		case 100:
 		{
@@ -6748,7 +6751,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли item : %s :: +25урона || +%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+25урона || +%i к невидимости",player_item_name[id],255-player_b_inv[id])
 		}
 		case 101:
 		{
@@ -6756,7 +6759,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_damage[id] = 15
 			player_b_vampire[id] = 50
-			show_hudmessage (id, "Вы нашли item : %s :: +15 к урону. Высасывает 50hp с каждого выстрела",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+15 к урону. Высасывает 50hp с каждого выстрела",player_item_name[id])
 		}
 		case 102:
 		{
@@ -6765,7 +6768,7 @@ public award_item(id, itemnum)
 			player_b_damage[id] = 25
 			player_b_vampire[id] = 25
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли item : %s :: +25 к урону. Высасывает 25 HP с каждого выстрела",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+25 к урону. Высасывает 25 HP с каждого выстрела",player_item_name[id])
 		}
 		case 103:
 		{
@@ -6773,7 +6776,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(190,200)
-			show_hudmessage (id, "Вы нашли item : %s :: +25 к урону. +%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+25 к урону. +%i к невидимости",player_item_name[id],255-player_b_inv[id])
 		}
 		case 104:
 		{
@@ -6781,7 +6784,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_m4master[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
 		}
 		case 105:
 		{
@@ -6789,7 +6792,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_akmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
 		}
 		case 106:
 		{
@@ -6797,7 +6800,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_awpmaster[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
 		}
 		case 107:
 		{
@@ -6805,7 +6808,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_dglmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
 		}
 		case 108:
 		{
@@ -6813,7 +6816,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			item_durability[id] = 100
 			player_b_m3master[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
 		}
 		case 109:
 		{
@@ -6827,42 +6830,42 @@ public award_item(id, itemnum)
 			player_b_m4master[id] = random_num(5,8)
 			player_b_grenade[id] = random_num(3,8)
 			player_b_sniper[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
 		}
 		case 110:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 111:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 112:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 113:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 114:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		
 		case 115:
@@ -6870,70 +6873,70 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 116:
 		{
 			player_item_name[id] = "Diablo Shoes"
 			player_item_id[id] = rannum
 			player_b_antyarchy[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защитится от Arch angel", player_item_name[id], player_b_antyarchy[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от Arch angel", player_item_name[id], player_b_antyarchy[id])
 		}
 		case 117:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 118:
 		{
 			player_item_name[id] = "Anti Explosion"
 			player_item_id[id] = rannum
 			player_b_antyorb[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защитится от взрыва после убийства", player_item_name[id], player_b_antyorb[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от взрыва после убийства", player_item_name[id], player_b_antyorb[id])
 		}
 		case 119:
 		{
 			player_item_name[id] = "Anti HellFlare"
 			player_item_id[id] = rannum
 			player_b_antyfs[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от огня", player_item_name[id], player_b_antyfs[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от огня", player_item_name[id], player_b_antyfs[id])
 		}
 		case 120:
 		{
 			player_item_name[id] = "Gheed's Fortune"
 			player_item_id[id] = rannum
 			player_b_godmode[id] = random_num(4,10)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы становитесь бесмертным на %i секунд.", player_item_name[id], player_b_godmode[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы становитесь бесмертным на %i секунд.", player_item_name[id], player_b_godmode[id])
 		}
 		case 121:
 		{
 			player_item_name[id] = "Winter Totem"
 			player_item_id[id] = rannum
 			player_b_zamroztotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жмите Е чтобы установить замораживайщий тотем",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЖмите Е чтобы установить замораживайщий тотем",player_item_name[id])	
 		}
 		case 122:
 		{
 			player_item_name[id] = "Cash Totem"
 			player_item_id[id] = rannum
 			player_b_kasatotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который даёт вам и вашей команде деньги.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который даёт вам и вашей команде деньги.",player_item_name[id])	
 		}
 		case 123:
 		{
 			player_item_name[id] = "Thief Totem"
 			player_item_id[id] = rannum
 			player_b_kasaqtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
 		}
 		case 124:
 		{
 			player_item_name[id] = "Weapon Totem"
 			player_item_id[id] = rannum
 			player_b_wywaltotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который притягивает оружие противника.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который притягивает оружие противника.",player_item_name[id])	
 		}
 		case 125:
 		{
@@ -14430,57 +14433,57 @@ public native_set_user_item(id, item)
 		{
 			player_item_name[id] = "Bronze Amplifier"
 			player_b_damage[id] = random_num(1,3)
-			show_hudmessage(id, "Вы нашли item: %s ::  +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
 		}
 		
 		case 2:
 		{
 			player_item_name[id] = "Silver Amplifier"
 			player_b_damage[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
 		}
 		
 		case 3:
 		{
 			player_item_name[id] = "Gold Amplifier"
 			player_b_damage[id] = random_num(6,10)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])	
 		}
 		case 4:
 		{
 			player_item_name[id] = "Vampyric Staff"
 			player_b_vampire[id] = random_num(1,4)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 5:
 		{
 			player_item_name[id] = "Vampyric Amulet"
 			player_b_vampire[id] = random_num(4,6)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 6:
 		{
 			player_item_name[id] = "Vampyric Scepter"
 			player_b_vampire[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли item: %s :: %i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 7:
 		{
 			player_item_name[id] = "Small bronze bag"
 			player_b_money[id] = random_num(150,500)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 8:
 		{
 			player_item_name[id] = "Medium silver bag"
 			player_b_money[id] = random_num(500,1200)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 9:
 		{
 			player_item_name[id] = "Large gold bag"
 			player_b_money[id] = random_num(1200,3000)
-			show_hudmessage(id, "Вы нашли item: %s :: +%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 10:
 		{
@@ -14489,7 +14492,7 @@ public native_set_user_item(id, item)
 			
 			if (is_user_alive(id))
 				set_gravitychange(id)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
 		}
 		case 11:
 		{
@@ -14499,38 +14502,38 @@ public native_set_user_item(id, item)
 			if (is_user_alive(id))
 				set_gravitychange(id)
 				
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
 			
 		}
 		case 12:
 		{
 			player_item_name[id] = "Invisibility Rope"
 			player_b_inv[id] = random_num(150,200)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 13:
 		{
 			player_item_name[id] = "Invisibility Coat"
 			player_b_inv[id] = random_num(110,150)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 14:
 		{
 			player_item_name[id] = "Invisibility Armor"
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 15:
 		{
 			player_item_name[id] = "Firerope"
 			player_b_grenade[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: +1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
 		}
 		case 16:
 		{
 			player_item_name[id] = "Fire Amulet"
 			player_b_grenade[id] = random_num(2,4)
-			show_hudmessage(id, "Вы нашли item: %s :: +1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
 		}
 		case 17:
 		{
@@ -14540,248 +14543,248 @@ public native_set_user_item(id, item)
 			item_durability[id] = 100
 			
 			if (is_user_alive(id)) set_user_health(id,5)		
-			show_hudmessage(id, "Вы нашли item: %s :: практически полная невидимость, но у вас 5 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпрактически полная невидимость, но у вас 5 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
 		}
 		case 18:
 		{
 			player_item_name[id] = "Arabian Boots"
 			player_b_theif[id] = random_num(500,1000)
-			show_hudmessage(id, "Вы нашли item: %s :: с каждым выстрелом высасывает с противника деньги, в зависимости от дамага",player_item_name[id],player_b_theif[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nс каждым выстрелом высасывает с противника деньги, в зависимости от дамага",player_item_name[id],player_b_theif[id])	
 		}
 		case 19:
 		{
 			player_item_name[id] = "Phoenix Ring"
 			player_b_respawn[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 20:
 		{
 			player_item_name[id] = "Sorcerers ring"
 			player_b_respawn[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 21:
 		{
 			player_item_name[id] = "Chaos Orb"
 			player_b_explode[id] = random_num(150,275)
-			show_hudmessage(id, "Вы нашли item: %s :: после смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпосле смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 22:
 		{
 			player_item_name[id] = "Hell Orb"
 			player_b_explode[id] = random_num(200,400)
-			show_hudmessage(id, "Вы нашли item: %s :: после смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпосле смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 23:
 		{
 			player_item_name[id] = "Gold statue"
 			player_b_heal[id] = random_num(5,10)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 24:
 		{
 			player_item_name[id] = "Daylight Diamond"
 			player_b_heal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 25:
 		{
 			player_item_name[id] = "Blood Diamond"
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли item: %s :: При нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 26:
 		{
 			player_item_name[id] = "Wheel of Fortune"
 			player_b_gamble[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 27:
 		{
 			player_item_name[id] = "Four leaf Clover"
 			player_b_gamble[id] = random_num(4,5)
-			show_hudmessage(id, "Вы нашли item: %s :: даёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 28:
 		{
 			player_item_name[id] = "Amulet of the sun"
 			player_b_blind[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
 		}
 		case 29:
 		{
 			player_item_name[id] = "Sword of the sun"
 			player_b_blind[id] = random_num(2,5)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
 		}
 		case 30:
 		{
 			player_item_name[id] = "Fireshield"
 			player_b_fireshield[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии Е активируется щит который наносит дамаг противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии Е активируется щит который наносит дамаг противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
 		}
 		case 31:
 		{
 			player_item_name[id] = "Stealth Shoes"
 			player_b_silent[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бесшумный шаг (эфект рассы Ассассин).",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nбесшумный шаг (эфект рассы Ассассин).",player_item_name[id])	
 		}
 		case 32:
 		{
 			player_item_name[id] = "Meekstone"
 			player_b_meekstone[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: бомба на дистанционом управлении. Е положить бомбу, второе нажатие Е взорвать.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nбомба на дистанционом управлении. Е положить бомбу, второе нажатие Е взорвать.",player_item_name[id])	
 		}
 		case 33:
 		{
 			player_item_name[id] = "Medicine Glar"
 			player_b_teamheal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли item: %s :: При атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 34:
 		{
 			player_item_name[id] = "Medicine Totem"
 			player_b_teamheal[id] = random_num(20,30)
-			show_hudmessage(id, "Вы нашли item: %s :: При атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 35:
 		{
 			player_item_name[id] = "Iron Armor"
 			player_b_redirect[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 36:
 		{
 			player_item_name[id] = "Mitril Armor"
 			player_b_redirect[id] = random_num(6,11)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 37:
 		{
 			player_item_name[id] = "Godly Armor"
 			player_b_redirect[id] = random_num(10,15)
-			show_hudmessage(id, "Вы нашли item: %s :: снижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 38:
 		{
 			player_item_name[id] = "Fireball staff"
 			player_b_fireball[id] = random_num(50,100)
-			show_hudmessage(id, "Вы нашли item: %s :: запускает огненный шар, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nзапускает огненный шар, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 39:
 		{
 			player_item_name[id] = "Fireball scepter"
 			player_b_fireball[id] = random_num(100,200)
-			show_hudmessage(id, "Вы нашли item: %s :: запускает огненный шар, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nзапускает огненный шар, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 40:
 		{
 			player_item_name[id] = "Ghost Rope"
 			player_b_ghost[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли item: %s :: Возможность ходить сквозь стены, эфект длиться %i секунд",player_item_name[id],player_b_ghost[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВозможность ходить сквозь стены, эфект длиться %i секунд",player_item_name[id],player_b_ghost[id])	
 		}
 		case 41:
 		{
 			player_item_name[id] = "Nicolas Eye"
 			player_b_eye[id] = -1
-			show_hudmessage(id, "Вы нашли item: %s :: Устанавливает камеру на стене.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nУстанавливает камеру на стене.",player_item_name[id])	
 		}
 		case 42:
 		{
 			player_item_name[id] = "Knife Ruby"
 			player_b_blink[id] = floatround(halflife_time())
-			show_hudmessage(id, "Вы нашли item: %s :: при использовании ножа второй конопкой телепортирует вас на небольшое растояние",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри использовании ножа второй конопкой телепортирует вас на небольшое растояние",player_item_name[id])	
 		}
 		case 43:
 		{
 			player_item_name[id] = "Lothars Edge"
 			player_b_windwalk[id] = random_num(4,7)
-			show_hudmessage(id, "Вы нашли item: %s :: на %i секунд даёт среднюю прозрачность + сильно увеличивает ваш бег.",player_item_name[id],player_b_windwalk[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nна %i секунд даёт среднюю прозрачность + сильно увеличивает ваш бег.",player_item_name[id],player_b_windwalk[id])	
 		}
 		case 44:
 		{
 			player_item_name[id] = "Sword"
 			player_sword[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: увеличивает урон ножу",player_item_name[id])		
+			show_hudmessage(id, "Вы нашли предмет: %s^nувеличивает урон ножу",player_item_name[id])		
 		}
 		case 45:
 		{
 			player_item_name[id] = "Mageic Booster"
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: каждые 3 секунды сидя вы очень длинно прыгаете.(item не всегда работает)",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nкаждые 3 секунды сидя вы очень длинно прыгаете.(item не всегда работает)",player_item_name[id])	
 		}
 		case 46:
 		{
 			player_item_name[id] = "Dagon I"
 			player_b_dagon[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии USE наносит дамаг противнику на близком растоянии раз в 20 секунд",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии USE наносит дамаг противнику на близком растоянии раз в 20 секунд",player_item_name[id])	
 		}
 		case 47:
 		{
 			player_item_name[id] = "Scout Extender"
 			player_b_sniper[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
 		}
 		case 48:
 		{
 			player_item_name[id] = "Scout Amplifier"
 			player_b_sniper[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли item: %s :: шанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
 		}
 		case 49:
 		{
 			player_item_name[id] = "Air booster"
 			player_b_jumpx[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: Вы можете сделать двойной прыжок в воздухе",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать двойной прыжок в воздухе",player_item_name[id],player_b_sniper[id])	
 		}
 		case 50:
 		{
 			player_item_name[id] = "Iron Spikes"
 			player_b_smokehit[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: убивает дымовой гранатой, если попасть ей в противника",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nубивает дымовой гранатой, если попасть ей в противника",player_item_name[id])	
 		}
 		case 51:
 		{
 			player_item_name[id] = "Point Booster"
 			player_b_extrastats[id] = random_num(1,3)
 			BoostStats(id,player_b_extrastats[id])
-			show_hudmessage(id, "Вы нашли item: %s :: даёт +%i очков к каждому умнению",player_item_name[id],player_b_extrastats[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i очков к каждому умнению",player_item_name[id],player_b_extrastats[id])	
 		}
 		case 52:
 		{
 			player_item_name[id] = "Totem amulet"
 			player_b_firetotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
 		}
 		case 53:
 		{
 			player_item_name[id] = "Mageic Hook"
 			player_b_hook[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии USE притягивает к себе врага",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии USE притягивает к себе врага",player_item_name[id])	
 		}
 		case 54:
 		{
 			player_item_name[id] = "Darksteel Glove"
 			player_b_darksteel[id] = random_num(1,5)
-			show_hudmessage(id, "Вы нашли item: %s :: усиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный дамаг при атаке противника со спины.",player_item_name[id])	
 		}
 		case 55:
 		{
 			player_item_name[id] = "Darksteel Gaunlet"
 			player_b_darksteel[id] = random_num(7,9)
-			show_hudmessage(id, "Вы нашли item: %s :: усиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный дамаг при атаке противника со спины.",player_item_name[id])	
 		}
 		case 56:
 		{
 			player_item_name[id] = "Illusionists Cape"
 			player_b_illusionist[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: при нажатии на Е вы становитесь полностью (100%)невидимым. однако и вы никого не видите и умираете от 1 выстрела.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е вы становитесь полностью (100%)невидимым. однако и вы никого не видите и умираете от 1 выстрела.",player_item_name[id])	
 		}
 		case 57:
 		{
 			player_item_name[id] = "Techies scepter"
 			player_b_mine[id] = 3
-			show_hudmessage(id, "Вы нашли item: %s :: ставит 3 полуневидимые мины.",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nставит 3 полуневидимые мины.",player_item_name[id])
 		}
 		
 		case 58:
@@ -14789,121 +14792,120 @@ public native_set_user_item(id, item)
 			player_item_name[id] = "Ninja ring"
 			player_b_blink[id] = floatround(halflife_time())
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли item: %s :: Нож позволяет вам телепортироваться каждые 3 секунды. Зажмите DUCK чтобы прыгнуть далеко.",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nНож позволяет вам телепортироваться каждые 3 секунды. Зажмите DUCK чтобы прыгнуть далеко.",player_item_name[id])
 		}
 		case 59:	
 		{
 			player_item_name[id] = "Mage ring"
 			player_ring[id]=1
 			player_b_fireball[id] = random_num(50,80)
-			show_hudmessage(id, "Вы нашли item : %s :: Возможность стрелять огненными шарами +5 интеллект",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nВозможность стрелять огненными шарами +5 интеллект",player_item_name[id])
 		}	
 		case 60:	
 		{
 			player_item_name[id] = "Necromant ring"
 			player_b_respawn[id] = random_num(2,4)
 			player_b_vampire[id] = random_num(3,5)	
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс возродиться после смерти. При попадании во врага, частично восполняет ваше НР",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс возродиться после смерти. При попадании во врага, частично восполняет ваше НР",player_item_name[id])
 		}
 		case 61:
 		{
 			player_item_name[id] = "Barbarian ring"
 			player_b_explode[id] = random_num(120,330)
 			player_ring[id]=2
-			show_hudmessage(id, "Вы нашли item : %s :: Когда вас убивают вы взрываетесь, нанося урон стоящим в близи врагам. +5 сила",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nКогда вас убивают вы взрываетесь, нанося урон стоящим в близи врагам. +5 сила",player_item_name[id])
 		}
 		case 62:
 		{
 			player_item_name[id] = "Paladin ring"	
 			player_b_redirect[id] = random_num(7,17)
 			player_b_blind[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли item : %s :: Снижение дамага по вам. Шанс ослепить противника",player_item_name[id])		
+			show_hudmessage(id, "Вы нашли предмет: %s^nСнижение дамага по вам. Шанс ослепить противника",player_item_name[id])		
 		}
 		case 63:
 		{
 			player_item_name[id] = "Monk ring"
 			player_b_grenade[id] = random_num(1,4)
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли item : %s :: Увиличивает урон наносимый гранатой. Восстанавливает здоровье",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nУвиличивает урон наносимый гранатой. Восстанавливает здоровье",player_item_name[id])
 		}	
 		case 64:
 		{
 			player_item_name[id] = "Assassin ring"
 			player_b_jumpx[id] = 1
 			player_ring[id]=3
-			show_hudmessage(id, "Вы нашли item : %s :: Двойной прыжок. +5 ловкость",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nДвойной прыжок. +5 ловкость",player_item_name[id])	
 		}	
 		case 65:
 		{
 			player_item_name[id] = "Flashbang necklace"	
 			wear_sun[id] = 1
-			show_hudmessage (id, "Вы нашли item : %s :: Иммунитет к ослепляющим гранатам",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nИммунитет к ослепляющим гранатам",player_item_name[id])
 		}
 		case 66:
 		{
 			player_item_name[id] = "Chameleon"	
 			changeskin(id,0)  
-			show_hudmessage (id, "Вы нашли item : %s :: Превращение во врага (внешний вид)",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nПревращение во врага (внешний вид)",player_item_name[id])
 		}
 		case 67:
 		{
 			player_item_name[id] = "Stong Armor"	
 			player_ultra_armor[id]=random_num(3,6)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли item : %s :: Каждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nКаждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
 		}
 		case 68:
 		{
 			player_item_name[id] = "Ultra Armor"	
 			player_ultra_armor[id]=random_num(7,11)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли item : %s :: Каждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nКаждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
 		}
 		case 69:
 		{
 			player_item_name[id] = "Khalim Eye"
 			player_b_radar[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Вы видите противников на радаре", player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы видите противников на радаре", player_item_name[id])
 		}
 		case 70:
 		{
 			player_item_name[id] = "Leaper Ring"
 			player_b_autobh[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Даёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nДаёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
 		}
 		case 71:
 		{
 			player_item_name[id] = "Myrmidon Greaves"
 			player_b_silent[id] = 1
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/2)
-			show_hudmessage (id, "Вы нашли item : %s :: Бесшумный и быстрый бег",player_item_name[id],player_b_silent[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nБесшумный и быстрый бег",player_item_name[id],player_b_silent[id])
 		}
 		case 72:
 		{
 			player_item_name[id] = "Shoes of the Bone"
 			player_b_jumpx[id] = 4
 			set_user_gravity(id, 600.0)
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 4 прыжка в воздухе. Уменьшенна гравитация",player_item_name[id],player_b_jumpx[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы можете сделать 4 прыжка в воздухе. Уменьшенна гравитация",player_item_name[id],player_b_jumpx[id])
 		}
 		case 73:
 		{
 			player_item_name[id] = "Scarab Shoes"
 			player_b_inv[id] = 95
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли item : %s :: Ваш видимость снижается до 95. Быстрый бег.",player_item_name[id],player_b_inv[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВаш видимость снижается до 95. Быстрый бег.",player_item_name[id],player_b_inv[id])
 		}
 		case 74:
 		{
 			player_item_name[id] = "Hydra Blade"
 			player_b_inv[id] = 155
 			player_b_damage[id] = 20
-			show_hudmessage (id, "Вы нашли item : %s :: Ваш видимость снижается до 155 +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВаш видимость снижается до 155 +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
 		}
 		case 75:
 		{
-			player_item_name[id] = "Exp Ring"
-			new xp_award = get_cvar_num("diablo_xpbonus")*2
-			show_hudmessage (id, "Вы нашли item : %s :: Удваивание опыта на %i",player_item_name[id],xp_award)
+			player_item_name[id] = "Перстень леорика"
+			show_hudmessage (id, "Вы нашли предмет: %s^nУдваивание опыта",player_item_name[id])
 		}
 		case 76:
 		{
@@ -14911,21 +14913,21 @@ public native_set_user_item(id, item)
 			player_ring[id]=2
 			player_b_explode[id] = random_num(120,330)
 			player_b_redirect[id] = random_num(10, 100)
-			show_hudmessage (id, "Вы нашли item : %s :: Вы получаете +5 к силе и взрываетесь когда умираете(урон %i) -%i урона по вам",player_item_name[id],player_b_explode[id],player_b_redirect[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы получаете +5 к силе и взрываетесь когда умираете(урон %i) -%i урона по вам",player_item_name[id],player_b_explode[id],player_b_redirect[id])
 		}
 		case 77:
 		{
 			player_item_name[id] = "Polished Wand"
 			player_b_blind[id] = random_num(1,5)
 			player_b_heal[id] =  random_num(1,15)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/%i ослепить врага, жми E чтобы установить исцеляющий тотем",player_item_name[id],player_b_blind[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i ослепить врага, жми E чтобы установить исцеляющий тотем",player_item_name[id],player_b_blind[id])
 		}
 		case 78:
 		{
 			player_item_name[id] = "Heavenly Stone"
 			player_b_grenade[id] = random_num(1,3)
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить HE гранаты и быстрый бег",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить HE гранаты и быстрый бег",player_item_name[id],player_b_grenade[id])
 		}
 		case 79:
 		{
@@ -14933,20 +14935,20 @@ public native_set_user_item(id, item)
 			player_b_respawn[id] = 2
 			player_b_sniper[id] = 1
 			player_b_grenade[id] = 3
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/2 возродится, шанс 1/1 мгновенно убить со скаута,шанс 1/3 убить с HE",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/2 возродится, шанс 1/1 мгновенно убить со скаута,шанс 1/3 убить с HE",player_item_name[id])
 		}
 		case 80:
 		{
 			player_item_name[id] = "Vampire Gloves"
 			player_b_vampire[id] = random_num(5,15)
-			show_hudmessage(id, "Вы нашли item : %s :: Высасывает %i за каждое попадание во врага,за убийство +30hp",player_item_name[id],player_b_vampire[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nВысасывает %i за каждое попадание во врага,за убийство +30hp",player_item_name[id],player_b_vampire[id])
 		}
 		case 81:
 		{
 			player_item_name[id] = "Super Mario"
 			player_b_jumpx[id] = 10
 			player_b_fireball[id] = 5
-			show_hudmessage (id, "Вы нашли item : %s :: Вы можете сделать 10 прыжков в воздух и пускать до 5 ракет",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы можете сделать 10 прыжков в воздух и пускать до 5 ракет",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
 		}
 		case 85:
 		{
@@ -14954,19 +14956,19 @@ public native_set_user_item(id, item)
 			player_b_damage[id] = 20
 			player_b_redirect[id] = 40
 			set_user_gravity(id,3.0)
-			show_hudmessage (id, "Вы нашли item : %s :: +20 к урону и уменьшение урона на 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+20 к урону и уменьшение урона на 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
 		}
 		case 86:
 		{
 			player_item_name[id] = "RedBull"
 			player_b_jumpx[id] = 8
-			show_hudmessage(id, "Вы нашли item : %s :: Вы можете сделать 8 прыжков в воздухе",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать 8 прыжков в воздухе",player_item_name[id],player_b_sniper[id])	
 		}
 		case 87:
 		{
 			player_item_name[id] = "Dr House"
 			player_b_heal[id] = random_num(45,65)
-			show_hudmessage(id, "Вы нашли item : %s :: Восстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечящий тотем %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВосстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечящий тотем %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 88:
 		{
@@ -14974,7 +14976,7 @@ public native_set_user_item(id, item)
 			player_b_inv[id] = 8
 			player_b_reduceH[id] = 55
 			if (is_user_alive(id)) set_user_health(id,45)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы почти невидимы,но у вас 45 HP.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы почти невидимы,но у вас 45 HP.",player_item_name[id])	
 		}
 		case 89:
 		{
@@ -14984,14 +14986,14 @@ public native_set_user_item(id, item)
 			item_durability[id] = 50
 			
 			if (is_user_alive(id)) set_user_health(id,10)		
-			show_hudmessage(id, "Вы нашли item : %s :: У вас 10 жизней,невидимость 1/255",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nУ вас 10 жизней,невидимость 1/255",player_item_name[id])	
 		}
 		case 90:
 		{
 			player_item_name[id] = "Bul'Kathos Shoes"
 			player_b_jumpx[id] = 8
 			set_user_gravity(id, 400.0)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы можете сделать 8 прыжков в воздухе и у вас высокая гравитация",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать 8 прыжков в воздухе и у вас высокая гравитация",player_item_name[id],player_b_sniper[id])	
 		}
 		case 91:
 		{
@@ -15001,39 +15003,39 @@ public native_set_user_item(id, item)
 			player_b_blind[id] = random_num(3,4)
 			player_ultra_armor[id]=random_num(15,50)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage(id, "Вы нашли item : %s :: Item настолько мощный,что никто ещё не познал его волшебное действия",player_item_name[id])		
+			show_hudmessage(id, "Вы нашли предмет: %s^nItem настолько мощный,что никто ещё не познал его волшебное действия",player_item_name[id])		
 		}
 		case 92:
 		{
 			player_item_name[id] = "Purse Thief"
 			player_b_money[id] = random_num(1,16000)
-			show_hudmessage(id, "Вы нашли item : %s :: получаете %i денег в каждом раунде. Используйте чтобы защищаться.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
+			show_hudmessage(id, "Вы нашли предмет: %s^nполучаете %i денег в каждом раунде. Используйте чтобы защищаться.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
 		}
 		case 93:
 		{
 			player_item_name[id] = "Vampiric Blood"
 			player_b_vampire[id] = random_num(15,20)
-			show_hudmessage(id, "Вы нашли item : %s :: высасываете %i hp у противника",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nвысасываете %i hp у противника",player_item_name[id],player_b_vampire[id])	
 		}
 		case 94:
 		{
 			player_item_name[id] = "Revival Ring"
 			player_b_respawn[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: 1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
 		}
 		case 95:
 		{
 			player_item_name[id] = "Demon Assassin"
 			player_b_heal[id] = random_num(30,55)
 			player_b_damage[id] = 50
-			show_hudmessage(id, "Вы нашли item : %s :: Восстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечащий тотем %i. +50 к урону",player_item_name[id],player_b_heal[id],player_b_heal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nВосстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечащий тотем %i. +50 к урону",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 96:
 		{
 			player_item_name[id] = "Mystiqe"
 			changeskin(id,0)
 			player_b_grenade[id] = random_num(1,2)
-			show_hudmessage (id, "Вы нашли item : %s :: Ты выглядишь как противник.Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nТы выглядишь как противник.Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
 		}
 		case 97:
 		{
@@ -15041,7 +15043,7 @@ public native_set_user_item(id, item)
 			player_b_damage[id] = 100
 			player_b_silent[id] = 1
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли item : %s :: Вы на носите %i урона с каждого выстрела.Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы на носите %i урона с каждого выстрела.Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
 		}
 		case 98:
 		{
@@ -15049,28 +15051,28 @@ public native_set_user_item(id, item)
 			player_b_redirect[id] = 10
 			player_b_damage[id] = 10
 			player_b_respawn[id] = 2
-			show_hudmessage (id, "Вы нашли item : %s :: +10 к урону. -10 урона по вам. Шанс 1/2 возродится.",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+10 к урону. -10 урона по вам. Шанс 1/2 возродится.",player_item_name[id])
 		}
 		case 99:
 		{
 			player_item_name[id] = "Hellspawn"
 			player_b_grenade[id] = 5
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли item : %s :: Шанс 1/5 убить с НЕ гранаты.+%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/5 убить с НЕ гранаты.+%i к невидимости",player_item_name[id],255-player_b_inv[id])
 		}
 		case 100:
 		{
 			player_item_name[id] = "Shako"
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли item : %s :: +25урона || +%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+25урона || +%i к невидимости",player_item_name[id],255-player_b_inv[id])
 		}
 		case 101:
 		{
 			player_item_name[id] = "Annihilus"
 			player_b_damage[id] = 15
 			player_b_vampire[id] = 50
-			show_hudmessage (id, "Вы нашли item : %s :: +15 к урону. Высасывает 50hp с каждого выстрела",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+15 к урону. Высасывает 50hp с каждого выстрела",player_item_name[id])
 		}
 		case 102:
 		{
@@ -15078,49 +15080,49 @@ public native_set_user_item(id, item)
 			player_b_damage[id] = 25
 			player_b_vampire[id] = 25
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли item : %s :: +25 к урону. Высасывает 25 HP с каждого выстрела",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+25 к урону. Высасывает 25 HP с каждого выстрела",player_item_name[id])
 		}
 		case 103:
 		{
 			player_item_name[id] = "Mara's Kaleidoscope"
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(190,200)
-			show_hudmessage (id, "Вы нашли item : %s :: +25 к урону. +%i к невидимости",player_item_name[id],255-player_b_inv[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^n+25 к урону. +%i к невидимости",player_item_name[id],255-player_b_inv[id])
 		}
 		case 104:
 		{
 			player_item_name[id] = "M4A1 Special"
 			item_durability[id] = 100
 			player_b_m4master[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
 		}
 		case 105:
 		{
 			player_item_name[id] = "AK47 Special"
 			item_durability[id] = 100
 			player_b_akmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
 		}
 		case 106:
 		{
 			player_item_name[id] = "AWP Special"
 			item_durability[id] = 100
 			player_b_awpmaster[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
 		}
 		case 107:
 		{
 			player_item_name[id] = "Deagle Special"
 			item_durability[id] = 100
 			player_b_dglmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
 		}
 		case 108:
 		{
 			player_item_name[id] = "M3 Special"
 			item_durability[id] = 100
 			player_b_m3master[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
 		}
 		case 109:
 		{
@@ -15133,98 +15135,98 @@ public native_set_user_item(id, item)
 			player_b_m4master[id] = random_num(5,8)
 			player_b_grenade[id] = random_num(3,8)
 			player_b_sniper[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
 		}
 		case 110:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 111:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 112:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 113:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 114:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		
 		case 115:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 116:
 		{
 			player_item_name[id] = "Diablo Shoes"
 			player_b_antyarchy[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защитится от Arch angel", player_item_name[id], player_b_antyarchy[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от Arch angel", player_item_name[id], player_b_antyarchy[id])
 		}
 		case 117:
 		{
 			player_item_name[id] = "Minesweeper Vigilance"
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
 		}
 		case 118:
 		{
 			player_item_name[id] = "Anti Explosion"
 			player_b_antyorb[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защитится от взрыва после убийства", player_item_name[id], player_b_antyorb[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от взрыва после убийства", player_item_name[id], player_b_antyorb[id])
 		}
 		case 119:
 		{
 			player_item_name[id] = "Anti HellFlare"
 			player_b_antyfs[id] = 1
-			show_hudmessage(id, "Вы нашли item : %s :: Шанс 1/%i защиты от огня", player_item_name[id], player_b_antyfs[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от огня", player_item_name[id], player_b_antyfs[id])
 		}
 		case 120:
 		{
 			player_item_name[id] = "Gheed's Fortune"
 			player_b_godmode[id] = random_num(4,10)
-			show_hudmessage(id, "Вы нашли item : %s :: Вы становитесь бесмертным на %i секунд.", player_item_name[id], player_b_godmode[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nВы становитесь бесмертным на %i секунд.", player_item_name[id], player_b_godmode[id])
 		}
 		case 121:
 		{
 			player_item_name[id] = "Winter Totem"
 			player_b_zamroztotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жмите Е чтобы установить замораживайщий тотем",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЖмите Е чтобы установить замораживайщий тотем",player_item_name[id])	
 		}
 		case 122:
 		{
 			player_item_name[id] = "Cash Totem"
 			player_b_kasatotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который даёт вам и вашей команде деньги.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который даёт вам и вашей команде деньги.",player_item_name[id])	
 		}
 		case 123:
 		{
 			player_item_name[id] = "Thief Totem"
 			player_b_kasaqtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
 		}
 		case 124:
 		{
 			player_item_name[id] = "Weapon Totem"
 			player_b_wywaltotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли item : %s :: Жми E чтобы установить тотем который притягивает оружие противника.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который притягивает оружие противника.",player_item_name[id])	
 		}
 		case 125:
 		{
