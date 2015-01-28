@@ -3598,7 +3598,7 @@ public DeathMsg(id)
 	if (is_user_connected(kid) && is_user_connected(vid) && get_user_team(kid) != get_user_team(vid))
 	{
 		show_deadmessage(kid,vid,headshot,weaponname)
-		create_itm(vid,0)
+		create_itm(vid,kid,0)
 		award_kill(kid,vid)
 		if(headshot)
 		{
@@ -4903,7 +4903,7 @@ public write_hud(id)
 	}
 	if(player_class[id]==Paladin)
 	{
-		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
+		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0, 0.2, 0.3, 3)
 		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПрыжки: %i/%i^nПредмет: %s^nПрочность: %i^nЗолото: %i",
 		get_user_health(id), Racename, player_lvl[id],
 		floatround(perc,floatround_round),"%",JumpsLeft[id],JumpsMax[id],
@@ -4911,7 +4911,7 @@ public write_hud(id)
 	}
 	else if(player_class[id]==Monk)
 	{
-		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
+		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0, 0.2, 0.3, 3)
 		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nЩит: %i^nПредмет: %s^nПрочность: %i^nЗолото: %i",
 		get_user_health(id), Racename, player_lvl[id],
 		floatround(perc,floatround_round),"%",monk_energy[id],
@@ -4919,7 +4919,7 @@ public write_hud(id)
 	}
 	else
 	{
-		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0)
+		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0, 0.2, 0.3, 3)
 		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПредмет: \
 		%s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id],
 		floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
@@ -4958,7 +4958,7 @@ public UpdateHUD()
 			{
 				
 				new Msg[512]
-				set_hudmessage(255, 255, 255, 0.78, 0.65, 0, 6.0, 3.0)
+				set_hudmessage(255, 255, 255, 0.78, 0.65, 0, 6.0, 3.0, 0.2, 0.3, 3)
 				new Racename[32]
 				copy(Racename, charsmax(Racename), Race[player_class[index]]);
 				if(player_class[index]==Fallen && player_lvl[index]>49)
@@ -13824,7 +13824,7 @@ public UTIL_Kill(attacker,id,weapon[])
 		if(is_user_connected(attacker) && attacker!=id)
 		{
 			award_kill(attacker,id)
-			if(is_user_alive(attacker)) award_item(attacker,0)
+			//if(is_user_alive(attacker)) award_item(attacker,0)
 		}
 				
 		message_begin( MSG_ALL, gmsgDeathMsg,{0,0,0},0) 
@@ -16856,23 +16856,28 @@ public itminfo(id,cel)
 
 		if (equali(clas,"przedmiot"))
 		{
-			set_hudmessage(255, 170, 0, 0.3, 0.56, 0, 6.0, 0.1)
+			set_hudmessage(255, 170, 0, 0.3, 0.56, 0, 6.0, 0.1, 0.2, 0.3, 1)
 			show_hudmessage(id, "Предмет: присядь чтобы подобрать")
 		}
 
 		return PLUGIN_CONTINUE
 }
 
-public create_itm(id,id_item)
+public create_itm(vid,kid,id_item)
 { 
-	new Float:origins[3]
-	pev(id,pev_origin,origins); // pobranie coordow gracza
-	new entit=create_entity("info_target") // tworzymy byt
-	origins[0]+=40.0
+	new Float:origins[3], Float:killerOrigin[3]
+	pev(vid,pev_origin,origins);
+	pev(kid,pev_origin,killerOrigin);
+	new entit=create_entity("info_target")
 	origins[2]-=32.0
-	set_pev(entit,pev_origin,origins) //ustawiamy coordy
-	entity_set_model(entit,modelitem) // oraz model
-	set_pev(entit,pev_classname,"przedmiot");  // i klase
+	if((abs(origins[0]-killerOrigin[0])<20.0) && (abs(origins[1]-killerOrigin[1])<20.0)) //модуль числа
+	{
+		origins[0]+=40
+		origins[1]+=40
+	}
+	set_pev(entit,pev_origin,origins)
+	entity_set_model(entit,modelitem)
+	set_pev(entit,pev_classname,"przedmiot");
 
 	dllfunc(DLLFunc_Spawn, entit); 
 	set_pev(entit,pev_solid,SOLID_BBOX); 
@@ -16882,7 +16887,7 @@ public create_itm(id,id_item)
 		
 	engfunc(EngFunc_DropToFloor,entit);
 		
-	item_info[entit]=id_item //parametry przepisujemy do globalnej tablicy potrzebnej nam potem
+	item_info[entit]=id_item
 }
 public fwd_touch(ent,id)
 {       
