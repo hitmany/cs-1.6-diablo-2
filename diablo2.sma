@@ -359,6 +359,7 @@ new player_b_hook[33] = 1	//Ability to grap a player a hook him towards you
 new player_b_darksteel[33] = 1	//Ability to damage double from behind the target 	
 new player_b_illusionist[33] = 1	//Ability to use the illusionist escape
 new player_b_mine[33] = 1	//Ability to lay down mines
+new player_b_mine_seted[33]
 new c_mine[33]
 new c_shake[33]
 new c_shaked[33]
@@ -960,7 +961,7 @@ public plugin_init()
 	register_clcmd("mod","mod_info")
 	//register_concmd("dynamit","PolozDynamit")
 	//register_concmd("paladin","check_palek")
-	register_concmd("setmine","item_mine")
+	//register_concmd("setmine","item_mine")
 	register_clcmd("+rope", "make_hook")
 	register_clcmd("-rope", "del_hook")
 	register_clcmd("amx_boss","cmdMakeBoss",ADMIN_IMMUNITY,"<name or #userid> <power> - make player a boss. Power must be 201 to 999")
@@ -3166,6 +3167,11 @@ public RoundStart(){
 			remove_task(i+TASK_REMOVE_BAAL)
 			baal_copyed[i] = 0
 		}
+		if(player_b_mine[i] > 1)
+		{
+			player_b_mine[i] = 1
+			player_b_mine_seted[i] = 0
+		}
 		message_begin(MSG_BROADCAST, SVC_TEMPENTITY);
 		write_byte(TE_KILLBEAM);
 		write_short(i);
@@ -3969,6 +3975,11 @@ public FwdCmdStart(id, uc_handle)
 	{
 		// Player releases reload
 		del_hook(id)
+	}
+	
+	if ((Button & IN_USE) && !(OldButtons & IN_USE) && player_b_mine[id] > 0)
+	{
+		item_mine(id)
 	}
 } 
 
@@ -5966,15 +5977,18 @@ public iteminfo(id)
 	}
 	if (player_b_illusionist[id] > 0)
 	{
-		add(itemEffect,199,"при нажатии на Е вы становитесь полностью (100%)невидимым.Но и вы никого не видите и умираете от 1 выстрела. Эффект длится 5-7 секунд.")
+		add(itemEffect,199,"При нажатии на Е вы становитесь 100% невидимым. Но и вы никого не видите и умираете от 1 выстрела. Эффект длится 5-7 секунд.")
 	}
 	if (player_b_mine[id] > 0)
 	{
-		add(itemEffect,199,"Жми E чтобы устанвоить почти невидимую мину. Каждая мина взрывается нанося 50hp+intelligece урона. 3 Мины каждый раунд доступны.")
+		add(itemEffect,199,"Жми E чтобы для установки ловушки. Каждая ловушка наносит 15+интеллект. Mаксимум ")
+		num_to_str(player_b_mine[id],TempSkill,10)
+		add(itemEffect,199,TempSkill)
+		add(itemEffect,199," ловушек")
 	}
 	if (player_item_id[id]==66)
 	{
-		add(itemEffect,199,"Вы похожи на врага!")
+		add(itemEffect,199,"У вас скин врага")
 	}
 	if (player_ultra_armor[id]>0)
 	{
@@ -6427,10 +6441,11 @@ public award_item(id, itemnum)
 		}
 		case 57:
 		{
-			player_item_name[id] = "Techies scepter"
+			player_item_name[id] = "Взрывные ловушки"
 			player_item_id[id] = rannum
-			player_b_mine[id] = 3
-			show_hudmessage(id, "Вы нашли предмет: %s^nставит 3 полуневидимые мины.",player_item_name[id])
+			player_b_mine[id] = random_num(1,3)
+			player_b_mine_seted[id] = 0
+			show_hudmessage(id, "Вы нашли предмет: %s^nставит %d полуневидимые взрывные ловушки.",player_item_name[id], player_b_mine[id])
 		}
 		
 		case 58:
@@ -11013,18 +11028,10 @@ public item_mine(id)
 {
 	if (player_b_mine[id] >0 && is_user_alive(id) || c_mine[id] >0 && is_user_alive(id))
 	{
-	new count = 0
-	new ents = -1
-	ents = find_ent_by_owner(ents,"Mine",id)
-	while (ents > 0)
-	{
-		count++
-		ents = find_ent_by_owner(ents,"Mine",id)
-	}
 	
-	if (count > 2)
+	if (player_b_mine_seted[id] >= player_b_mine[id])
 	{
-		hudmsg(id,2.0,"Вы можете поставить до трех мин за раунд")
+		hudmsg(id,2.0,"Максимум ловушек")
 		return PLUGIN_CONTINUE
 	}
 	
@@ -11049,6 +11056,10 @@ public item_mine(id)
 	set_rendering(ent,kRenderFxNone, 0,0,0, kRenderTransTexture,50)	
 	
 	use_addtofullpack = true
+	
+	set_hudmessage(60, 200, 25, -1.0, 0.25, 0, 1.0, 3.0, 0.1, 0.4, 18)
+	show_hudmessage(id, "Ловушка установлена") 
+	player_b_mine_seted[id]++
 }
 	return PLUGIN_CONTINUE
 }
@@ -14782,9 +14793,10 @@ public native_set_user_item(id, item)
 		}
 		case 57:
 		{
-			player_item_name[id] = "Techies scepter"
-			player_b_mine[id] = 3
-			show_hudmessage(id, "Вы нашли предмет: %s^nставит 3 полуневидимые мины.",player_item_name[id])
+			player_item_name[id] = "Взрывные ловушки"
+			player_b_mine[id] = random_num(1,3)
+			player_b_mine_seted[id] = 0
+			show_hudmessage(id, "Вы нашли предмет: %s^nставит %d полуневидимые взрывные ловушки.",player_item_name[id], player_b_mine[id])
 		}
 		
 		case 58:
