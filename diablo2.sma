@@ -5840,10 +5840,14 @@ public iteminfo(id)
 	{
 		add(itemEffect,199,"Удерживайте назад +ПРИСЕСТЬ 3 секунды для длинного прыжка")
 	}
-	if (player_b_dagon[id] == 1)
+	if (player_b_dagon[id] > 0)
 	{
-		add(itemEffect,199,"Жми E чтобы выстрелить молнией в ближайшего врага - ты можешь улучших этот item руной")
-		add(itemEffect,199,"Intelligence увеличивает диапазон itema")
+		num_to_str(300+player_intelligence[id]*10,TempSkill,10)
+		add(itemEffect,199,"Жми E чтобы нанести урон врагу в радиусе ")
+		add(itemEffect,199,TempSkill)
+		add(itemEffect,199," множитель ")
+		num_to_str(player_b_dagon[id],TempSkill,10)
+		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_sniper[id] > 0) 
 	{
@@ -6363,10 +6367,10 @@ public award_item(id, itemnum)
 		}
 		case 46:
 		{
-			player_item_name[id] = "Dagon I"
+			player_item_name[id] = "Дагон I"
 			player_item_id[id] = rannum
 			player_b_dagon[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии USE наносит дамаг противнику на близком растоянии раз в 20 секунд",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на E наносит урон врагу",player_item_name[id])	
 		}
 		case 47:
 		{
@@ -9357,12 +9361,12 @@ public item_dagon(id)
 		return PLUGIN_HANDLED
 	}
 	//Target nearest non-friendly player
-	new target = UTIL_FindNearestOpponent(id,600+player_intelligence[id]*20)
+	new target = UTIL_FindNearestOpponent(id,300+player_intelligence[id]*10)
 	
 	if (target == -1) 
 		return PLUGIN_HANDLED
 	
-	new DagonDamage = player_b_dagon[id]*20
+	new DagonDamage = player_b_dagon[id]*30
 	new Red = 0
 	
 	if (player_b_dagon[id] == 1) Red = 175
@@ -9371,7 +9375,7 @@ public item_dagon(id)
 	
 	
 	//Dagon damage done is reduced by the targets dextery
-	DagonDamage-=player_dextery[target]*2
+	DagonDamage-=player_dextery[target]
 	
 	if (DagonDamage < 0)
 		DagonDamage = 0
@@ -9401,11 +9405,9 @@ public item_dagon(id)
 	
 	player_b_dagfired[id] = true
 	
-	//Apply damage
-
-	change_health(target,-DagonDamage,id,"dagon")
+	d2_damage( target, id, DagonDamage, "dagon")
 	Display_Fade(target,2600,2600,0,255,0,0,15)
-	hudmsg(id,2.0,"Ваши удары dagon %i, %i", DagonDamage, player_dextery[target]*2)
+	hudmsg(id,2.0,"Атака Дагон %i", DagonDamage)
 
 	return PLUGIN_HANDLED
 	
@@ -9532,7 +9534,27 @@ public upgrade_item(id)
 	if(player_b_ghost[id]>0) player_b_ghost[id]+= random_num(0,1)
 	if(player_b_windwalk[id]>0) player_b_windwalk[id] += random_num(0,1)
 
-	if(player_b_dagon[id]>0) player_b_dagon[id] += random_num(0,1)
+	if(player_b_dagon[id]>0)
+	{
+		player_b_dagon[id] += random_num(0,1)
+		if(player_b_dagon[id] == 1)
+		{
+			player_item_name[id] = "Дагон I"
+		}
+		else if(player_b_dagon[id] == 2)
+		{
+			player_item_name[id] = "Дагон II"
+		}
+		else if(player_b_dagon[id] == 3)
+		{
+			player_item_name[id] = "Дагон III"
+		}
+		else
+		{
+			player_item_name[id] = "Дагон I"
+			player_b_dagon[id] = 1
+		}
+	}
 	if(player_b_sniper[id]>0)
 	{
 		if(player_b_sniper[id]>5) player_b_sniper[id]-=random_num(0,2)
@@ -14728,7 +14750,7 @@ public native_set_user_item(id, item)
 		{
 			player_item_name[id] = "Dagon I"
 			player_b_dagon[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии USE наносит дамаг противнику на близком растоянии раз в 20 секунд",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на E наносит урон врагу",player_item_name[id])	
 		}
 		case 47:
 		{
@@ -20045,7 +20067,7 @@ public mana4(id){
 	
 	menu_additem(mana4,"\wОружие")
 	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
-	menu_additem(mana4,"\wПочинить предмет \d[2 золота]")
+	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
 	menu_additem(mana4,"\wСвиток портала \d[25 золота]")
 	menu_additem(mana4,"\dЗелье противоядия [золота]")
 	menu_additem(mana4,"\dЗелье оттаивания [золота]")
