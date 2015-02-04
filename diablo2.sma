@@ -3102,7 +3102,7 @@ public RoundStart(){
 	fallens_ct=0
 	
 	new Players[32], playerCount, i
-	get_players(Players, playerCount, "h") 
+	get_players(Players, playerCount) 
 	
 	for (new countP=0; i<playerCount; countP++) 
 	{
@@ -9893,7 +9893,7 @@ public SelectBotRace(id)
 	
 	if (player_class[id] == 0)
 	{
-		player_class[id] = random_num(1,23)
+		player_newclass[id] = random_num(1,23)
 	}
 	
 	return PLUGIN_CONTINUE
@@ -11911,35 +11911,86 @@ public cmd_who(id)
 {
 	static motd[9000],header[100],name[32],len,i
 	len = 0
-	new team[32]
-	static players[32], numplayers
-	get_players(players, numplayers, "h")
-	new playerid
+	static players_tt[32], numplayers_tt, players_ct[32], numplayers_ct
+	new playerid, racename[32], itemName[128]
 	// Table i background
+	len += formatex(motd[len],sizeof motd - 1 - len,"<style type='text/css'>")
+	len += formatex(motd[len],sizeof motd - 1 - len,"body {background-color: #000;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,".tt{color:#ff4040;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,".ct{color:#99ccff;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table { margin: 0 auto;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table.fixed {table-layout:fixed; width:700px;border-collapse:collapse;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table.fixed td {overflow:hidden;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table.fixed th:nth-of-type(1) {width:250px;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table.fixed th:nth-of-type(2) {width:130px;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table.fixed th:nth-of-type(3) {width:80px;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table.fixed th:nth-of-type(4) {width:280px;}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table.fixed thead.tt { border-bottom: 1px solid #ff4040;text-align:left}")
+	len += formatex(motd[len],sizeof motd - 1 - len,"table.fixed thead.ct { border-bottom: 1px solid #99ccff;text-align:left}</style>")
 	len += formatex(motd[len],sizeof motd - 1 - len,"<meta http-equiv='content-type' content='text/html; charset=UTF-8' />")
-	len += formatex(motd[len],sizeof motd - 1 - len,"<body bgcolor=#000000 text=#FFB000>")
-	len += formatex(motd[len],sizeof motd - 1 - len,"<center><table width=700 border=1 cellpadding=4 cellspacing=4>")
-	len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>Ник</td><td>Класс</td><td>Уровень</td><td>Команда</td></tr>")
+	len += formatex(motd[len],sizeof motd - 1 - len,"<body scroll='yes'>")
+	len += formatex(motd[len],sizeof motd - 1 - len,"<table class='fixed'>")
 	//Title
-	formatex(header,sizeof header - 1,"Diablo Mod Stats")
+	formatex(header,sizeof header - 1,"Player list")
 	
-	for (i=0; i< numplayers; i++)
+	//Get TT
+	get_players(players_tt, numplayers_tt, "eh", "TERRORIST");
+	//Get CT
+    get_players(players_ct, numplayers_ct, "eh", "CT");
+	
+	if(numplayers_tt)
 	{
-		playerid = players[i]
-		if ( get_user_team(playerid) == 1 ) team = "Terrorist"
-		else if ( get_user_team(playerid) == 2 ) team = "CT"
-				else team = "Spectator"
-		get_user_name( playerid, name, 31 )
-		//get_user_name( playerid, name, 31 )
-		new Racename[32]
-		copy(Racename, charsmax(Racename), Race[player_class[playerid]]);
-		if(player_class[playerid]==Fallen && player_lvl[playerid]>49)
+	
+		len += formatex(motd[len],sizeof motd - 1 - len,"<thead class='tt'>")
+		len += formatex(motd[len],sizeof motd - 1 - len,"<tr><th>Terrorists (%d)</th><th>Раса</th><th>Уровень</th><th>Предмет</th></tr>",numplayers_tt)
+		len += formatex(motd[len],sizeof motd - 1 - len,"</thead><tbody>")
+		for (i=0; i< numplayers_tt; i++)
 		{
-			Racename = "Падший шаман"
+			playerid = players_tt[i]
+			get_user_name( playerid, name, 31 )
+			//get_user_name( playerid, name, 31 )
+			copy(racename, charsmax(racename), Race[player_class[playerid]]);
+			copy(itemName, charsmax(itemName), player_item_name[playerid]);
+			if(player_class[playerid]==Fallen && player_lvl[playerid]>49)
+			{
+				racename = "Падший шаман"
+			}
+			if(player_item_id[playerid] == 0)
+			{
+				itemName = ""
+			}
+			len += formatex(motd[len],sizeof motd - 1 - len,"<tr class='tt'><td>%s</td><td>%s</td><td>%d</td><td> %s</td></tr>",name,racename, player_lvl[playerid],itemName)
 		}
-		len += formatex(motd[len],sizeof motd - 1 - len,"<tr><td>%s</td><td>%s</td><td>%d</td><td>%s</td><td>%s</td></tr>",name,Racename, player_lvl[playerid],team,player_item_name[playerid])
+		len += formatex(motd[len],sizeof motd - 1 - len,"<tr class='tt'><td><br></td><td></td><td></td><td></td></tr>")
+		len += formatex(motd[len],sizeof motd - 1 - len,"</tbody>")
+	
 	}
-	len += formatex(motd[len],sizeof motd - 1 - len,"</table></center>")
+	
+	if(numplayers_ct)
+	{	
+		len += formatex(motd[len],sizeof motd - 1 - len,"<thead class='ct'>")
+		len += formatex(motd[len],sizeof motd - 1 - len,"<tr><th>Counter-Terrorists (%d)</th><th>Раса</th><th>Уровень</th><th>Предмет</th></tr>",numplayers_ct)
+		len += formatex(motd[len],sizeof motd - 1 - len,"</thead><tbody>")
+		for (i=0; i< numplayers_ct; i++)
+		{
+			playerid = players_ct[i]
+			get_user_name( playerid, name, 31 )
+			//get_user_name( playerid, name, 31 )
+			copy(racename, charsmax(racename), Race[player_class[playerid]]);
+			copy(itemName, charsmax(itemName), player_item_name[playerid]);
+			if(player_class[playerid]==Fallen && player_lvl[playerid]>49)
+			{
+				racename = "Падший шаман"
+			}
+			if(player_item_id[playerid] == 0)
+			{
+				itemName = ""
+			}
+			len += formatex(motd[len],sizeof motd - 1 - len,"<tr class='ct'><td>%s</td><td>%s</td><td>%d</td><td> %s</td></tr>",name,racename, player_lvl[playerid],itemName)
+		}
+		len += formatex(motd[len],sizeof motd - 1 - len,"</tbody>")
+	}
+	len += formatex(motd[len],sizeof motd - 1 - len,"</table>")
 	
 	show_motd(id,motd,header)
 }
