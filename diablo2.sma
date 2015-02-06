@@ -5602,16 +5602,12 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	
 	new Data[768]
 	
-  //Header
-	format(Data,767,"<html><head><title>Информация</title></head>")
-	write_file(g_ItemFile,Data,-1)
-	
 	//Format
 	format(Data,767,"<meta http-equiv='content-type' content='text/html; charset=UTF-8' />")
 	write_file(g_ItemFile,Data,-1)
 	
 	//Background
-	format(Data,767,"<body text='#FFFF00' bgcolor='#000000' background='http://dbstats.lpstrike.ru/server/drkmotr.jpg'>")
+	format(Data,767,"<body text='#FFFF00' bgcolor='#000000' background='http://motdfiles.d2.diablomod.ru/server/iteminfo_fon.jpg'>")
 	write_file(g_ItemFile,Data,-1)
 	
 	//Table stuff
@@ -5619,7 +5615,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	write_file(g_ItemFile,Data,-1)
 	
 	//ss.gif image
-	format(Data,767,"<p align='center'><img border='0' src='http://dbstats.lpstrike.ru/server/ss.gif'></td>")
+	format(Data,767,"<p align='center'><img border='0' src='http://motdfiles.d2.diablomod.ru/server/iteminfo_shield.gif'></td>")
 	write_file(g_ItemFile,Data,-1)
 	
 
@@ -5640,15 +5636,15 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[])
 	write_file(g_ItemFile,Data,-1)
 	
 	//image ss
-	format(Data,767,"<td width='0'><p align='center'><img border='0' src='http://dbstats.lpstrike.ru/server/gf.gif'></td>")
+	format(Data,767,"<td width='0'><p align='center'><img border='0' src='http://motdfiles.d2.diablomod.ru/server/iteminfo_sword.gif'></td>")
 	write_file(g_ItemFile,Data,-1)
 	
 	//end
-	format(Data,767,"</tr></table></body></html>")
+	format(Data,767,"</tr></table>")
 	write_file(g_ItemFile,Data,-1)
 	
 	//show window with message
-	show_motd(id, g_ItemFile, "Item инфо")
+	show_motd(id, g_ItemFile, "Описание предмета")
 	
 	return PLUGIN_HANDLED
 	
@@ -5791,7 +5787,7 @@ public iteminfo(id)
 	{
 		num_to_str(player_b_teamheal[id],TempSkill,10)
 		add(itemEffect,199,"Жми E чтобы активировать защиту игрока.<br>")
-		add(itemEffect,199," Все повреждения отражаются. Вы умрёте если получите урон.")
+		add(itemEffect,199," Все повреждения отражаются. Вы умрёте если получите урон.<br>")
 	}
 	if (player_b_redirect[id] > 0) 
 	{
@@ -5816,16 +5812,16 @@ public iteminfo(id)
 	}
 	if(player_b_autobh[id] > 0)
 	{
-		add(itemEffect,199,"Даёт вам авто распрыжку. Удерживает в пространстве.")
+		add(itemEffect,199,"Даёт вам авто распрыжку. Удерживает в пространстве.<br>")
 	}
 	if (player_b_eye[id] > 0) 
 	{
-		add(itemEffect,199,"Жми E чтобы установить волшебный глаз (только одно место доступно) и жми E снова чтобы использовать или остановить")
+		add(itemEffect,199,"Жми E чтобы установить волшебный глаз (только одно место доступно) и жми E снова чтобы использовать или остановить<br>")
 		
 	}
 	if (player_b_blink[id] > 0) 
 	{
-		add(itemEffect,199,"Вы можете телепортироваться альтернативной атаков если у вас в руках нож. Intelligence увеличивает дистанцию")
+		add(itemEffect,199,"Вы можете телепортироваться альтернативной атаков если у вас в руках нож. Intelligence увеличивает дистанцию<br>")
 	}
 	
 	if (player_b_windwalk[id] > 0) 
@@ -5845,7 +5841,7 @@ public iteminfo(id)
 		num_to_str(300+player_intelligence[id]*10,TempSkill,10)
 		add(itemEffect,199,"Жми E чтобы нанести урон врагу в радиусе ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," множитель ")
+		add(itemEffect,199," множитель")
 		num_to_str(player_b_dagon[id],TempSkill,10)
 		add(itemEffect,199,TempSkill)
 	}
@@ -5900,56 +5896,56 @@ public iteminfo(id)
 	}
 	if (player_b_smokehit[id] > 0)
 	{
-		add(itemEffect,199,"Ваши дымовые гранаты мгновенно убивают если они попали во врага")
+		add(itemEffect,199,"Ваши дымовые гранаты мгновенно убивают если они попали во врага<br>")
 	}
 	if (player_b_extrastats[id] > 0)
 	{
 		num_to_str(player_b_extrastats[id],TempSkill,10)
 		add(itemEffect,199,"Вы получите +")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," к статистике если у вас есть этот item")
+		add(itemEffect,199," к статистике если у вас есть этот item<br>")
 	}
 	if (player_b_firetotem[id] > 0)
 	{
 		num_to_str(player_b_firetotem[id],TempSkill,10)
 		add(itemEffect,199,"Жми E чтобы установить огненный тотем который взрывается после 7с. Он сожжёт всех в радиусе ")
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," тотема")
+		add(itemEffect,199," тотема<br>")
 	}
 	if (player_b_zamroztotem[id] > 0)
 	{
 		num_to_str(player_b_zamroztotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который замораживает противника.")
+		add(itemEffect,199,"Жми E чтобы установить тотем который замораживает противника.<br>")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_fleshujtotem[id] > 0)
 	{
 		num_to_str(player_b_fleshujtotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который ослепляет противника.")
+		add(itemEffect,199,"Жми E чтобы установить тотем который ослепляет противника.<br>")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_wywaltotem[id] > 0)
 	{
 		num_to_str(player_b_wywaltotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который притягивает оружие противника.")
+		add(itemEffect,199,"Жми E чтобы установить тотем который притягивает оружие противника.<br>")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_kasatotem[id] > 0)
 	{
 		num_to_str(player_b_kasatotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который даёт вам и вашей команде деньги.")
+		add(itemEffect,199,"Жми E чтобы установить тотем который даёт вам и вашей команде деньги.<br>")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_kasaqtotem[id] > 0)
 	{
 		num_to_str(player_b_kasaqtotem[id],TempSkill,10)
-		add(itemEffect,199,"Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)")
+		add(itemEffect,199,"Жми E чтобы установить тотем который отнимает деньги врага(500$ в сек)<br>")
 		add(itemEffect,199,TempSkill)
 	}
 	if (player_b_hook[id] > 0)
 	{
 		num_to_str(player_b_hook[id],TempSkill,10)
-		add(itemEffect,199,"при нажатии E притягивает к себе врагав радиусе 600. Intelligence ускоряет hook")
+		add(itemEffect,199,"при нажатии E притягивает к себе врагав радиусе 600. Intelligence ускоряет hook<br>")
 	}
 	if (player_b_darksteel[id] > 0)
 	{		
@@ -5961,42 +5957,42 @@ public iteminfo(id)
 		add(itemEffect,199,"*strength: ")
 		num_to_str(ddam,TempSkill,10)
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," бонуса урона когда вы атакуете врага сзади ")
+		add(itemEffect,199," бонуса урона когда вы атакуете врага сзади<br>")
 	}
 	if (player_b_antyarchy[id] > 0)
 	{	
-		add(itemEffect,199,"Защита от всех видов arch angel")
+		add(itemEffect,199,"Защита от всех видов arch angel<br>")
 	}
 	if (player_b_antyarchy[id] > 0)
 	{	
-		add(itemEffect,199,"Защита от всех видов Meekstone")
+		add(itemEffect,199,"Защита от всех видов Meekstone<br>")
 	}
 	if (player_b_antyorb[id] > 0)
 	{	
-		add(itemEffect,199,"Вы устойчивы к взрывам")
+		add(itemEffect,199,"Вы устойчивы к взрывам<br>")
 	}
 	if (player_b_antyfs[id] > 0)
 	{	
-		add(itemEffect,199,"У вас есть огнестойкий щит")
+		add(itemEffect,199,"У вас есть огнестойкий щит<br>")
 	}
 	if (player_b_illusionist[id] > 0)
 	{
-		add(itemEffect,199,"При нажатии на Е вы становитесь 100% невидимым. Но и вы никого не видите и умираете от 1 выстрела. Эффект длится 5-7 секунд.")
+		add(itemEffect,199,"При нажатии на Е вы становитесь 100% невидимым. Но и вы никого не видите и умираете от 1 выстрела. Эффект длится 5-7 секунд.<br>")
 	}
 	if (player_b_mine[id] > 0)
 	{
 		add(itemEffect,199,"Жми E чтобы для установки ловушки. Каждая ловушка наносит 15+интеллект. Mаксимум ")
 		num_to_str(player_b_mine[id],TempSkill,10)
 		add(itemEffect,199,TempSkill)
-		add(itemEffect,199," ловушек")
+		add(itemEffect,199," ловушек<br>")
 	}
 	if (player_item_id[id]==66)
 	{
-		add(itemEffect,199,"У вас скин врага")
+		add(itemEffect,199,"У вас скин врага<br>")
 	}
 	if (player_ultra_armor[id]>0)
 	{
-		add(itemEffect,199,"У вас есть шанс отбрасывать пули от бронежелета")
+		add(itemEffect,199,"У вас есть шанс отбрасывать пули от бронежелета<br>")
 	}
 	
 	
