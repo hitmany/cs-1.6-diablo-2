@@ -942,7 +942,6 @@ public plugin_init()
 	register_clcmd("say skills", "showskills")
 	register_clcmd("showmenu","showmenu") 
 	register_clcmd("say menu","showmenu")
-	register_clcmd("say commands","komendy")
 	//register_clcmd("pomoc","helpme") 
 	//register_clcmd("say /rune","mana4") 
 	//register_clcmd("rune","mana4")
@@ -983,8 +982,6 @@ public plugin_init()
 	register_menucmd(register_menuid("Навыки"), 1023, "skill_menu")
 	register_menucmd(register_menuid("ShowMenu"), 1023, "option_menu")
 	register_menucmd(register_menuid("ChooseClass"), 1023, "select_class_menu")
-	register_menucmd(register_menuid("ChooseRune"), 1023, "select_rune_menu")
-	register_menucmd(register_menuid("Новые Предметы"), 1023, "nowe_itemy")
 	register_menucmd(register_menuid("Демоны"), 1023, "PressedKlasy")
 	register_menucmd(register_menuid("Heroes"), 1023, "PokazMeni")
 	register_menucmd(register_menuid("Звери"), 1023, "PokazZwierz")
@@ -3374,7 +3371,7 @@ public CurWeapon(id)
 		}
 		if(player_sword[id] == 0)
 		{	
-			if(on_knife[id])
+			if(on_knife[id] && bow[id]==0)
 			{
 				if(player_class[id] == Infidel)
 				{
@@ -3454,16 +3451,19 @@ public CurWeapon(id)
 		
 		if(bow[id]==1)
 		{
-			bow[id]=0
-			message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
-			write_byte( 0 ) 
-			write_byte( 0 ) 
-			message_end()
-			
-			if(on_knife[id])
+			if(weapon != 29)
 			{
-				entity_set_string(id, EV_SZ_viewmodel, KNIFE_VIEW)  
-				entity_set_string(id, EV_SZ_weaponmodel, KNIFE_PLAYER)  
+				bow[id]=0
+				message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
+				write_byte( 0 ) 
+				write_byte( 0 ) 
+				message_end()
+				
+				if(on_knife[id])
+				{
+					entity_set_string(id, EV_SZ_viewmodel, KNIFE_VIEW)  
+					entity_set_string(id, EV_SZ_weaponmodel, KNIFE_PLAYER)  
+				}
 			}
 		}
 		
@@ -4064,10 +4064,10 @@ public client_PreThink ( id )
 	if( is_user_alive(id)) itminfo(id,cel)
 	if(bow_zoom[id]==1)
 	{
-		bow[id]++
+		bow[id]=1
 		button[id] = 1
 		on_knife[id] = 1
-		command_bow(id)
+		command_bow(id,2)
 		bow_zoom[id]=2
 	}
 	if (button2 & IN_ATTACK2 && !(get_user_oldbutton(id) & IN_ATTACK2))
@@ -4123,7 +4123,7 @@ public client_PreThink ( id )
 	if (button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==Amazon || button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==Demonolog || button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==BloodRaven){
 		bow[id]++
 		button[id] = 1;
-		command_bow(id)
+		command_bow(id,1)
 		if (cs_get_user_zoom(id)==CS_SET_AUGSG552_ZOOM)
 		{	
 			cs_set_user_zoom(id,CS_SET_NO_ZOOM,1)
@@ -5560,20 +5560,7 @@ public auto_help(id)
 
 public helpme(id)
 {	 
-	//showitem(id,"Helpmenu","Common","None","Dostajesz przedmioty i doswiadczenie za zabijanie innych. Mozesz dostac go tylko wtedy, gdy nie masz na sobie innego<br><br>Aby dowiedziec sie wiecej o swoim przedmiocie napisz /przedmiot lub /item, a jak chcesz wyrzucic napisz /drop<br><br>Niektore przedmoty da sie uzyc za pomoca klawisza E<br><br>Napisz /czary zeby zobaczyc jakie masz staty<br><br>")
 	show_motd(id, "http://lpstrike.ru/diablo_help.html", "Помощь Diablo Mod")
-}
-
-
-/* ==================================================================================================== */
-
-
-
-/* ==================================================================================================== */
-
-public komendy(id)
-{
-showitem(id,"Команды","Общий","Нет","<br>","","","")
 }
 
 /* ==================================================================================================== */
@@ -9471,40 +9458,6 @@ public bool:UTIL_Buyformoney(id,amount)
 	}
 	
 	return false
-}
-public buyrune(id)
-{
-	//new text[513] 
-	
-	//format(text, 512, "\yМагазин item - ^n\w1. \yКупить случайный Item! \r$5000^n^n\w0. \yВыход^n\y/gold,/g - магазин золота") 
-	
-	//new keys = (1<<0)|(1<<9)
-	//show_menu(id, keys, text, -1, "ChooseRune") 
-	return PLUGIN_HANDLED  
-} 
-
-
-public select_rune_menu(id, key) 
-{ 
-	switch(key) 
-	{ 
-
-		case 0:
-		{	
-			if (!UTIL_Buyformoney(id,5000))
-				return PLUGIN_HANDLED
-			award_item(id,0)
-			return PLUGIN_HANDLED
-		}	
-		case 9: 
-		{	
-			return PLUGIN_HANDLED
-		}
-		
-
-	}
-	
-	return PLUGIN_HANDLED
 }
 
 public upgrade_item(id)
@@ -13553,7 +13506,7 @@ public command_arrow(id)
 	return PLUGIN_HANDLED
 }
 
-public command_bow(id) 
+public command_bow(id,type) 
 {
 	if(!is_user_alive(id)) return PLUGIN_HANDLED
  
@@ -13569,7 +13522,10 @@ public command_bow(id)
 			entity_set_string(id,EV_SZ_viewmodel,cbow_VIEW)
 			entity_set_string(id,EV_SZ_weaponmodel,cvow_PLAYER)
 		}
-		do_casting_bow(id)
+		if(type==1)
+		{
+			do_casting_bow(id)
+		}
 	}
 	else if(player_sword[id] == 1)
 	{
