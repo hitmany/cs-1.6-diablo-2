@@ -925,8 +925,6 @@ public plugin_init()
 	register_clcmd("say di","dropitem")
 	register_clcmd("say ii","iteminfo")
 	register_clcmd("iteminfo","iteminfo")
-	register_clcmd("say ringmenu","show_menu_item")
-	register_clcmd("say rm","show_menu_item")
 	register_clcmd("say help","helpme") 
 	register_clcmd("changerace","changerace")
 	register_clcmd("say class","changerace")
@@ -5633,8 +5631,16 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[],itemcolor[],
 	write_file(g_ItemFile,Data,-1)
 	
 	//Durability
-	format(Data,1999,"<ul class='item-armor-weapon item-weapon-dps'><li class='big'><span class='value'>%s</span></li><li>прочности</li></ul>",Durability)
-	write_file(g_ItemFile,Data,-1)
+	if(str_to_num(Durability) < 100)
+	{
+		format(Data,1999,"<ul class='item-low-dps'><li class='big'><span class='value'>%s</span></li><li>прочности</li></ul>",Durability)
+		write_file(g_ItemFile,Data,-1)
+	}
+	else
+	{
+		format(Data,1999,"<ul class='item-armor-weapon'><li class='big'><span class='value'>%s</span></li><li>прочности</li></ul>",Durability)
+		write_file(g_ItemFile,Data,-1)
+	}
 	
 	//Effects
 	format(Data,1999,"<ul class='item-armor-weapon item-weapon-damage'><li class='d3-color-%s'>%s</li></ul>",itemcolor,itemeffect)
@@ -5661,6 +5667,7 @@ public iteminfo(id)
 	
 	if (player_item_id[id] == 0) 
 	{
+		client_print(id, print_center, "У вас нет предмета");
 		return PLUGIN_HANDLED
 	}
 	
@@ -5778,6 +5785,11 @@ public iteminfo(id)
 		case 56:
 		{
 			itemimage = "helm"
+		}
+		case 100:
+		{
+			imagetype = "square"
+			format(itemimage,15,"rune%d",random_num(1,6))
 		}
 		default:
 		{
@@ -6157,7 +6169,8 @@ public award_item(id, itemnum)
 		award_unique_item(id)	
 		rannum = -1
 	}
-	if(rannum == 100) {rannum = 99;}
+	if(rannum == 100 && itemnum == 0) {rannum = 99;}
+	if(rannum == 100 && itemnum != 0) {award_unique_item(id);}
 	
 	//Set durability, make this item dependant?
 	item_durability[id] = 250
@@ -8729,101 +8742,6 @@ public host_killed(id)
 	}
 	
 }
-
-
-/* ==================================================================================================== */
-public show_menu_item(id)
-{
-	new text[513]
-
-	format(text, 512, "\yНовые item - ^n\w1. Mag ring^n\w2. Paladin ring^n\w3. Monk ring^n\w4. Barbarian ring^n\w5. Assassin ring^n\w6. Necromancer ring^n\w7. Ninja ring^n\w8. Flashbang necklace^n\w9. Больше") 
-
-	new keys 
-	keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<8)
-	show_menu(id, keys, text) 
-	return PLUGIN_HANDLED  
-} 
-
-public nowe_itemy(id, key) 
-{ 
-	switch(key) 
-	{ 
-		case 0: 
-		{	
-			magring(id)
-			
-		}
-		case 1: 
-		{	
-			paladinring(id)
-		}
-		case 2: 
-		{	
-			monkring(id)
-		}
-		case 3:
-		{
-			barbarianring(id)
-		}
-		case 4:
-		{
-			assassinring(id)
-		}
-		case 5:
-		{
-			nekromantring(id)
-		}
-		case 6:
-		{
-			ninjaring(id)
-		}
-		case 7:
-		{
-			flashbangnecklace(id)
-		}
-		case 8:
-		{
-			return PLUGIN_HANDLED
-		}
-	}
-	
-	return PLUGIN_HANDLED
-}
-public magring(id)
-{
-showitem(id,"Mag ring","общий","нет","<br>","","","")
-}
-public paladinring(id)
-{
-showitem(id,"Paladin ring","общий","нет","<br>","","","")
-}
-public monkring(id)
-{
-showitem(id,"Monk ring","общий","нет","<br>","","","")
-}
-public barbarianring(id)
-{
-showitem(id,"Barbarian ring","общий","нет","<br>","","","")
-}
-public assassinring(id)
-{
-showitem(id,"Assassin ring","общий","нет","<br>","","","")
-}
-public nekromantring(id)
-{
-showitem(id,"Necromancer ring","общий","нет","<br>","","","")
-}
-public ninjaring(id)
-{
-showitem(id,"Ninja ring","общий","нет","<br>","","","")
-}
-public flashbangnecklace(id)
-{
-showitem(id,"Flashbang necklece","общий","нет","<br>","","","")
-}
-
-/* ==================================================================================================== */
-
 
 public showmenu(id)
 {
