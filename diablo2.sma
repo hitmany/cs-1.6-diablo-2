@@ -3340,7 +3340,7 @@ public CurWeapon(id)
 	if (is_user_connected(id))
 	{
 
-		//if (player_item_id[id] == 17 || player_b_usingwind[id] == 1)// engclient_cmd(id,"weapon_knife") 	
+		if (player_item_id[id] == 17 || player_b_usingwind[id] == 1 || player_item_id[id] == 88 || player_item_id[id] == 89) engclient_cmd(id,"weapon_knife") 	
 				
 		if(player_sword[id] == 1)
 		{
@@ -5105,7 +5105,7 @@ public pfn_touch ( ptr, ptd )
 	{
 		new owner = pev(ptd,pev_owner)
 		//Touch
-		if (get_user_team(owner) != get_user_team(ptr))
+		if (get_user_team(owner) != get_user_team(ptr) && player_b_antyfs[ptr] != 1)
 		{
 			if(mephisto_touch[ptr] != ptd)
 			{
@@ -5139,7 +5139,7 @@ public pfn_touch ( ptr, ptd )
 	{
 		new owner = pev(ptd,pev_owner)
 		//Touch
-		if (get_user_team(owner) != get_user_team(ptr))
+		if (get_user_team(owner) != get_user_team(ptr) && player_b_antyfs[ptr] != 1)
 		{
 			new Float:origin[3]
 			pev(ptd,pev_origin,origin)
@@ -5162,7 +5162,7 @@ public pfn_touch ( ptr, ptd )
 		{
 			new owner = pev(ptd,pev_owner)
 			//Touch
-			if (get_user_team(owner) != get_user_team(ptr))
+			if (get_user_team(owner) != get_user_team(ptr) && player_b_antyorb[ptr] != 1)
 			{
 				new Float:origin[3]
 				pev(ptd,pev_origin,origin)
@@ -5260,7 +5260,7 @@ public imp_touch(entity, player)
 	{
 		if(owner == player) return
 		
-		if((get_user_team(player) == get_user_team(owner)) || (player_class[player] == Imp)) return
+		if((get_user_team(player) == get_user_team(owner)) || (player_class[player] == Imp) || (player_b_antyfs[player] == 1)) return
 		
 		if(is_fired[player] == 0)
 		{
@@ -5360,6 +5360,8 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 				
 		if (get_user_team(id) != get_user_team(a) && get_distance_f(aOrigin,origin) < dist+0.0)
 		{
+			if(index == 2 && player_b_antyorb[a] == 1) continue
+			if(index == 1 && player_b_antyfs[a] == 1) continue
 			new dam
 			if(player_class[id] != Fallen)
 			{
@@ -5707,11 +5709,11 @@ public iteminfo(id)
 		{
 			itemimage = "coat"
 		}
-		case 14,35,36,37,67,68:
+		case 7,8,9,14,35,36,37,67,68:
 		{
 			itemimage = "armor"
 		}
-		case 17,19,20,28,58,59,60,61,62,63,64,70,91,94:
+		case 17,19,20,28,58,59,60,61,62,63,64,70,91,94,95,104,105,106,107,108,109,110,111,112,113,114,115,117:
 		{
 			itemimage = "wing"
 			imagetype = "square"
@@ -5870,7 +5872,7 @@ public iteminfo(id)
 		num_to_str(player_b_explode[id],TempSkill,10)
 		add(itemEffect,399,"Когда вы умираете вы взрываетесь в радиусе ")
 		add(itemEffect,399,TempSkill)
-		add(itemEffect,399," нанося 75 урона всем вокруг вас - intelligence увеличивает радиус item<br>")
+		add(itemEffect,399," нанося 75 урона всем вокруг вас - интеллект увеличивает радиус предмета<br>")
 	}
 	if (player_b_heal[id] > 0) 
 	{
@@ -5897,13 +5899,13 @@ public iteminfo(id)
 	{
 		num_to_str(player_b_fireshield[id],TempSkill,10)
 		add(itemEffect,399,"Уменьшает ваше здоровье, 20 хп каждые 2 секунды.<br>")
-		add(itemEffect,399,"Вы не можете быть убиты chaos orb, hell orb или firerope.<br>")
+		add(itemEffect,399,"Вы не можете быть убиты Сферой Хаоса, Сферой Хаоса или Огненным вихрем.<br>")
 		add(itemEffect,399,"При нажатии Е активируется щит котрый наносит урон противнику.<br>")
 	}
 	if (player_b_meekstone[id] > 0) 
 	{
 		num_to_str(player_b_meekstone[id],TempSkill,10)
-		add(itemEffect,399,"Вы можете ставить фальшивую бомбу c4 нажатием клавишы E и взорвать ее снова нажав E<br>")
+		add(itemEffect,399,"Вы можете ставить фальшивую бомбу С4 нажатием клавишы E и взорвать ее снова нажав E<br>")
 	}
 	if(player_b_radar[id] > 0)
 	{
@@ -5925,7 +5927,7 @@ public iteminfo(id)
 	if (player_b_fireball[id] > 0) 
 	{
 		num_to_str(player_b_fireball[id],TempSkill,10)
-		add(itemEffect,399,"Метание огненного шара нажатием клавишы E - Intelligence ускоряет item. Он убьет всех в радиусе ")
+		add(itemEffect,399,"Метание огненного шара нажатием клавишы E - интеллект ускоряет предмет. Он убьет всех в радиусе ")
 		add(itemEffect,399,TempSkill)
 		add(itemEffect,399,"<br>")
 	}
@@ -5947,7 +5949,7 @@ public iteminfo(id)
 	}
 	if (player_b_blink[id] > 0) 
 	{
-		add(itemEffect,399,"Вы можете телепортироваться альтернативной атаков если у вас в руках нож. Intelligence увеличивает дистанцию<br>")
+		add(itemEffect,399,"Вы можете телепортироваться альтернативной атаков если у вас в руках нож. Интеллект увеличивает дистанцию<br>")
 	}
 	
 	if (player_b_windwalk[id] > 0) 
@@ -6029,7 +6031,7 @@ public iteminfo(id)
 		num_to_str(player_b_extrastats[id],TempSkill,10)
 		add(itemEffect,399,"Вы получите +")
 		add(itemEffect,399,TempSkill)
-		add(itemEffect,399," к статистике если у вас есть этот item<br>")
+		add(itemEffect,399," к статистике<br>")
 	}
 	if (player_b_firetotem[id] > 0)
 	{
@@ -6071,7 +6073,7 @@ public iteminfo(id)
 	if (player_b_hook[id] > 0)
 	{
 		num_to_str(player_b_hook[id],TempSkill,10)
-		add(itemEffect,399,"при нажатии E притягивает к себе врагав радиусе 600. Intelligence ускоряет hook<br>")
+		add(itemEffect,399,"при нажатии E притягивает к себе врагав радиусе 600. Интеллект ускоряет притягивание<br>")
 	}
 	if (player_b_darksteel[id] > 0)
 	{		
@@ -6087,11 +6089,11 @@ public iteminfo(id)
 	}
 	if (player_b_antyarchy[id] > 0)
 	{	
-		add(itemEffect,399,"Защита от всех видов arch angel<br>")
+		add(itemEffect,399,"Защита от всех видов Крыльев Ангела<br>")
 	}
 	if (player_b_antyarchy[id] > 0)
 	{	
-		add(itemEffect,399,"Защита от всех видов Meekstone<br>")
+		add(itemEffect,399,"Защита от всех видов Камня Смирения<br>")
 	}
 	if (player_b_antyorb[id] > 0)
 	{	
@@ -6107,7 +6109,7 @@ public iteminfo(id)
 	}
 	if (player_b_mine[id] > 0)
 	{
-		add(itemEffect,399,"Жми E чтобы для установки ловушки. Каждая ловушка наносит 15+интеллект. Mаксимум ")
+		add(itemEffect,399,"Жми E чтобы для установки ловушки. Каждая ловушка наносит 15+интеллект.")
 		num_to_str(player_b_mine[id],TempSkill,10)
 		add(itemEffect,399,TempSkill)
 		add(itemEffect,399," ловушек<br>")
@@ -6166,7 +6168,7 @@ public award_item(id, itemnum)
 	{
 		case 1:
 		{
-			player_item_name[id] = "Bronze Amplifier"
+			player_item_name[id] = "Бронзовый Усилитель"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(1,3)
 			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
@@ -6174,7 +6176,7 @@ public award_item(id, itemnum)
 		
 		case 2:
 		{
-			player_item_name[id] = "Silver Amplifier"
+			player_item_name[id] = "Серебряный Усилитель"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(3,6)
 			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
@@ -6182,113 +6184,113 @@ public award_item(id, itemnum)
 		
 		case 3:
 		{
-			player_item_name[id] = "Gold Amplifier"
+			player_item_name[id] = "Золотой Усилитель"
 			player_item_id[id] = rannum
 			player_b_damage[id] = random_num(6,10)
 			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])	
 		}
 		case 4:
 		{
-			player_item_name[id] = "Vampyric Staff"
+			player_item_name[id] = "Вампирический Посох"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(1,4)
-			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp вампиризма с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 5:
 		{
-			player_item_name[id] = "Vampyric Amulet"
+			player_item_name[id] = "Вампирический Амулет"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(4,6)
-			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp вампиризма с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 6:
 		{
-			player_item_name[id] = "Vampyric Scepter"
+			player_item_name[id] = "Вампирический Скипетр"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp вампиризма с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
 		}
 		case 7:
 		{
-			player_item_name[id] = "Small bronze bag"
+			player_item_name[id] = "Малый бронзовый щит"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(150,500)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i$ каждый раунд. При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 8:
 		{
-			player_item_name[id] = "Medium silver bag"
+			player_item_name[id] = "Средний серебряный щит"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(500,1200)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i$ каждый раунд. При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 9:
 		{
-			player_item_name[id] = "Large gold bag"
+			player_item_name[id] = "Большой золотой щит"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(1200,3000)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
+			show_hudmessage(id, "Вы нашли предмет: %s^n+%i$ каждый раунд. При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
 		}
 		case 10:
 		{
-			player_item_name[id] = "Small angel wings"
+			player_item_name[id] = "Малые Крылья Ангела"
 			player_item_id[id] = rannum
 			player_b_gravity[id] = random_num(1,5)
 			
 			if (is_user_alive(id))
 				set_gravitychange(id)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i к гравитации. При прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
 		}
 		case 11:
 		{
-			player_item_name[id] = "Arch angel wings"
+			player_item_name[id] = "Крылья АрхАнгела"
 			player_item_id[id] = rannum
 			player_b_gravity[id] = random_num(5,9)
 			
 			if (is_user_alive(id))
 				set_gravitychange(id)
 				
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i к гравитации. При прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
 			
 		}
 		case 12:
 		{
-			player_item_name[id] = "Invisibility Rope"
+			player_item_name[id] = "Повязка Невидимости"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(150,200)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i к невидимости.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 13:
 		{
-			player_item_name[id] = "Invisibility Coat"
+			player_item_name[id] = "Плащ Невидимости"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(110,150)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i к невидимости.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 14:
 		{
-			player_item_name[id] = "Invisibility Armor"
+			player_item_name[id] = "Доспехи Невидимости"
 			player_item_id[id] = rannum
 			player_b_inv[id] = random_num(70,110)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i к невидимости.",player_item_name[id],255-player_b_inv[id])	
 		}
 		case 15:
 		{
-			player_item_name[id] = "Firerope"
+			player_item_name[id] = "Огненный Вихрь"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(3,6)
 			show_hudmessage(id, "Вы нашли предмет: %s^n+1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
 		}
 		case 16:
 		{
-			player_item_name[id] = "Fire Amulet"
+			player_item_name[id] = "Огненный Амулет"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(2,4)
 			show_hudmessage(id, "Вы нашли предмет: %s^n+1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
 		}
 		case 17:
 		{
-			player_item_name[id] = "Stalkers ring"
+			player_item_name[id] = "Кольцо Сталкера"
 			player_item_id[id] = rannum
 			player_b_reduceH[id] = 95
 			player_b_inv[id] = 8	
@@ -6299,77 +6301,77 @@ public award_item(id, itemnum)
 		}
 		case 18:
 		{
-			player_item_name[id] = "Arabian Boots"
+			player_item_name[id] = "Персидские Сапоги"
 			player_item_id[id] = rannum
 			player_b_theif[id] = random_num(500,1000)
-			show_hudmessage(id, "Вы нашли предмет: %s^nс каждым выстрелом высасывает с противника деньги, в зависимости от дамага",player_item_name[id],player_b_theif[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nс каждым выстрелом высасывает с противника деньги, в зависимости от урона",player_item_name[id],player_b_theif[id])	
 		}
 		case 19:
 		{
-			player_item_name[id] = "Phoenix Ring"
+			player_item_name[id] = "Кольцо Феникса"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(3,6)
 			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 20:
 		{
-			player_item_name[id] = "Sorcerers ring"
+			player_item_name[id] = "Кольцо Вольшебницы"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(2,3)
 			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
 		}
 		case 21:
 		{
-			player_item_name[id] = "Chaos Orb"
+			player_item_name[id] = "Сфера Хаоса"
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(150,275)
 			show_hudmessage(id, "Вы нашли предмет: %s^nпосле смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 22:
 		{
-			player_item_name[id] = "Hell Orb"
+			player_item_name[id] = "Сфера Ада"
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(200,400)
 			show_hudmessage(id, "Вы нашли предмет: %s^nпосле смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
 		}
 		case 23:
 		{
-			player_item_name[id] = "Gold statue"
+			player_item_name[id] = "Золотая Статуя"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(5,10)
 			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 24:
 		{
-			player_item_name[id] = "Daylight Diamond"
+			player_item_name[id] = "Светлый Бриллиант"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(10,20)
 			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 25:
 		{
-			player_item_name[id] = "Blood Diamond"
+			player_item_name[id] = "Красный Бриллиант"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(20,35)
 			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 26:
 		{
-			player_item_name[id] = "Wheel of Fortune"
+			player_item_name[id] = "Колесо Фортуны"
 			player_item_id[id] = rannum
 			player_b_gamble[id] = random_num(2,3)
 			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 27:
 		{
-			player_item_name[id] = "Four leaf Clover"
+			player_item_name[id] = "Четырехлистный Клевер"
 			player_item_id[id] = rannum
 			player_b_gamble[id] = random_num(4,5)
 			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
 		}
 		case 28:
 		{
-			player_item_name[id] = "Amulet of the sun"
+			player_item_name[id] = "Солнечный Амулет"
 			player_item_id[id] = rannum
 			player_b_blind[id] = random_num(6,9)
 			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
@@ -6383,98 +6385,98 @@ public award_item(id, itemnum)
 		}
 		case 30:
 		{
-			player_item_name[id] = "Fireshield"
+			player_item_name[id] = "Огнещит"
 			player_item_id[id] = rannum
 			player_b_fireshield[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии Е активируется щит который наносит дамаг противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии Е активируется щит который наносит урон противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
 		}
 		case 31:
 		{
-			player_item_name[id] = "Stealth Shoes"
+			player_item_name[id] = "Стелс-Сапоги"
 			player_item_id[id] = rannum
 			player_b_silent[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^nбесшумный шаг (эффект рассы Ассассин).",player_item_name[id])	
 		}
 		case 32:
 		{
-			player_item_name[id] = "Meekstone"
+			player_item_name[id] = "Камень Смирения"
 			player_item_id[id] = rannum
 			player_b_meekstone[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^nбомба на дистанционом управлении. Е положить бомбу, второе нажатие Е взорвать.",player_item_name[id])	
 		}
 		case 33:
 		{
-			player_item_name[id] = "Medicine Glar"
+			player_item_name[id] = "Лечебная Пуля"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. При нажатии Е активирует на члене команды щит который возвращает урон.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 34:
 		{
-			player_item_name[id] = "Medicine Totem"
+			player_item_name[id] = "Лечебный Тотем"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(20,30)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. При нажатии Е активирует на члене команды щит который возвращает урон.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 35:
 		{
-			player_item_name[id] = "Iron Armor"
+			player_item_name[id] = "Железные Доспехи"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i урона по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 36:
 		{
-			player_item_name[id] = "Mitril Armor"
+			player_item_name[id] = "Доспехи Мифрила"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(6,11)
-			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i урона по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 37:
 		{
-			player_item_name[id] = "Godly Armor"
+			player_item_name[id] = "Божественные Доспехи"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = random_num(10,15)
-			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i урона по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
 		}
 		case 38:
 		{
-			player_item_name[id] = "Fireball staff"
+			player_item_name[id] = "Огненный Посох"
 			player_item_id[id] = rannum
 			player_b_fireball[id] = random_num(50,100)
 			show_hudmessage(id, "Вы нашли предмет: %s^nЗапускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 39:
 		{
-			player_item_name[id] = "Fireball scepter"
+			player_item_name[id] = "Огненный Скипетр"
 			player_item_id[id] = rannum
 			player_b_fireball[id] = random_num(100,200)
 			show_hudmessage(id, "Вы нашли предмет: %s^nЗапускает огненный шар, взрывающийся в радиусе %i",player_item_name[id],player_b_fireball[id])	
 		}
 		case 40:
 		{
-			player_item_name[id] = "Ghost Rope"
+			player_item_name[id] = "Призрачная Повязка"
 			player_item_id[id] = rannum
 			player_b_ghost[id] = random_num(3,6)
 			show_hudmessage(id, "Вы нашли предмет: %s^nВозможность ходить сквозь стены, эффект длиться %i секунд",player_item_name[id],player_b_ghost[id])	
 		}
 		case 41:
 		{
-			player_item_name[id] = "Nicolas Eye"
+			player_item_name[id] = "Глаз Николаса"
 			player_item_id[id] = rannum
 			player_b_eye[id] = -1
 			show_hudmessage(id, "Вы нашли предмет: %s^nУстанавливает камеру на стене.",player_item_name[id])	
 		}
 		case 42:
 		{
-			player_item_name[id] = "Knife Ruby"
+			player_item_name[id] = "Нож Руби"
 			player_item_id[id] = rannum
 			player_b_blink[id] = floatround(halflife_time())
 			show_hudmessage(id, "Вы нашли предмет: %s^nпри использовании ножа второй конопкой телепортирует вас на небольшое растояние",player_item_name[id])	
 		}
 		case 43:
 		{
-			player_item_name[id] = "Lothars Edge"
+			player_item_name[id] = "Лезвие Лотара"
 			player_item_id[id] = rannum
 			player_b_windwalk[id] = random_num(4,7)
 			show_hudmessage(id, "Вы нашли предмет: %s^nна %i секунд даёт среднюю прозрачность + сильно увеличивает ваш бег.",player_item_name[id],player_b_windwalk[id])	
@@ -6488,10 +6490,10 @@ public award_item(id, itemnum)
 		}
 		case 45:
 		{
-			player_item_name[id] = "Mageic Booster"
+			player_item_name[id] = "Магический Ускоритель"
 			player_item_id[id] = rannum
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nкаждые 3 секунды сидя вы очень длинно прыгаете.(item не всегда работает)",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nкаждые 3 секунды сидя вы очень далеко прыгаете",player_item_name[id])	
 		}
 		case 46:
 		{
@@ -6502,35 +6504,35 @@ public award_item(id, itemnum)
 		}
 		case 47:
 		{
-			player_item_name[id] = "Scout Extender"
+			player_item_name[id] = "Малый Усилетель Scout"
 			player_item_id[id] = rannum
 			player_b_sniper[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить из мухи(Scout).",player_item_name[id],player_b_sniper[id])	
 		}
 		case 48:
 		{
-			player_item_name[id] = "Scout Amplifier"
+			player_item_name[id] = "Усилетель Scout"
 			player_item_id[id] = rannum
 			player_b_sniper[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить из мухи(Scout).",player_item_name[id],player_b_sniper[id])	
 		}
 		case 49:
 		{
-			player_item_name[id] = "Air booster"
+			player_item_name[id] = "Воздушный Ускоритель"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать двойной прыжок в воздухе",player_item_name[id],player_b_sniper[id])	
 		}
 		case 50:
 		{
-			player_item_name[id] = "Iron Spikes"
+			player_item_name[id] = "Железные Шипы"
 			player_item_id[id] = rannum
 			player_b_smokehit[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^nубивает дымовой гранатой, если попасть ей в противника",player_item_name[id])	
 		}
 		case 51:
 		{
-			player_item_name[id] = "Point Booster"
+			player_item_name[id] = "Ускоритель Навыков"
 			player_item_id[id] = rannum
 			player_b_extrastats[id] = random_num(1,3)
 			BoostStats(id,player_b_extrastats[id])
@@ -6538,35 +6540,35 @@ public award_item(id, itemnum)
 		}
 		case 52:
 		{
-			player_item_name[id] = "Totem amulet"
+			player_item_name[id] = "Амулет Тотема"
 			player_item_id[id] = rannum
 			player_b_firetotem[id] = random_num(250,400)
 			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
 		}
 		case 53:
 		{
-			player_item_name[id] = "Mageic Hook"
+			player_item_name[id] = "Магический Крюк"
 			player_item_id[id] = rannum
 			player_b_hook[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии USE притягивает к себе врага",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии E притягивает к себе врага",player_item_name[id])	
 		}
 		case 54:
 		{
-			player_item_name[id] = "Darksteel Glove"
+			player_item_name[id] = "Темностальные Рукавицы"
 			player_item_id[id] = rannum
 			player_b_darksteel[id] = random_num(1,5)
-			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный урон при атаке противника со спины.",player_item_name[id])	
 		}
 		case 55:
 		{
-			player_item_name[id] = "Darksteel Gaunlet"
+			player_item_name[id] = "Темностальные Перчатки"
 			player_item_id[id] = rannum
 			player_b_darksteel[id] = random_num(7,9)
-			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный дамаг при атаке противника со спины.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный урон при атаке противника со спины.",player_item_name[id])	
 		}
 		case 56:
 		{
-			player_item_name[id] = "Illusionists Cape"
+			player_item_name[id] = "Шлем-Иллюзия"
 			player_item_id[id] = rannum
 			player_b_illusionist[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е вы становитесь полностью (100%)невидимым. однако и вы никого не видите и умираете от 1 выстрела.",player_item_name[id])	
@@ -6582,23 +6584,23 @@ public award_item(id, itemnum)
 		
 		case 58:
 		{
-			player_item_name[id] = "Ninja ring"
+			player_item_name[id] = "Кольцо Ниндзи"
 			player_item_id[id] = rannum
 			player_b_blink[id] = floatround(halflife_time())
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nНож позволяет вам телепортироваться каждые 3 секунды. Зажмите DUCK чтобы прыгнуть далеко.",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nНож позволяет вам телепортироваться каждые 3 секунды. Зажмите присесть для активации.",player_item_name[id])
 		}
 		case 59:	
 		{
-			player_item_name[id] = "Mage ring"
+			player_item_name[id] = "Кольцо Мага"
 			player_item_id[id] = rannum
 			player_ring[id]=1
 			player_b_fireball[id] = random_num(50,80)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВозможность стрелять огненными шарами +5 интеллект",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nСтреляет огненными шарами. +5 интеллект",player_item_name[id])
 		}	
 		case 60:	
 		{
-			player_item_name[id] = "Necromant ring"
+			player_item_name[id] = "Кольцо Некроманта"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(2,4)
 			player_b_vampire[id] = random_num(3,5)	
@@ -6606,7 +6608,7 @@ public award_item(id, itemnum)
 		}
 		case 61:
 		{
-			player_item_name[id] = "Barbarian ring"
+			player_item_name[id] = "Кольцо Варвара"
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(120,330)
 			player_ring[id]=2
@@ -6614,15 +6616,15 @@ public award_item(id, itemnum)
 		}
 		case 62:
 		{
-			player_item_name[id] = "Paladin ring"
+			player_item_name[id] = "Кольцо Паладина"
 			player_item_id[id] = rannum	
 			player_b_redirect[id] = random_num(7,17)
 			player_b_blind[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли предмет: %s^nСнижение дамага по вам. Шанс ослепить противника",player_item_name[id])		
+			show_hudmessage(id, "Вы нашли предмет: %s^nСнижение урона по вам. Шанс ослепить противника",player_item_name[id])		
 		}
 		case 63:
 		{
-			player_item_name[id] = "Monk ring"
+			player_item_name[id] = "Кольцо Монаха"
 			player_item_id[id] = rannum	
 			player_b_grenade[id] = random_num(1,4)
 			player_b_heal[id] = random_num(20,35)
@@ -6630,7 +6632,7 @@ public award_item(id, itemnum)
 		}	
 		case 64:
 		{
-			player_item_name[id] = "Assassin ring"
+			player_item_name[id] = "Кольцо Ассасина"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 1
 			player_ring[id]=3
@@ -6638,21 +6640,21 @@ public award_item(id, itemnum)
 		}	
 		case 65:
 		{
-			player_item_name[id] = "Flashbang necklace"	
+			player_item_name[id] = "Ожерелье Флешки"	
 			player_item_id[id] = rannum	
 			wear_sun[id] = 1
 			show_hudmessage (id, "Вы нашли предмет: %s^nИммунитет к ослепляющим гранатам",player_item_name[id])
 		}
 		case 66:
 		{
-			player_item_name[id] = "Chameleon"	
+			player_item_name[id] = "Хамелеон"	
 			player_item_id[id] = 66	
 			changeskin(id,0)  
-			show_hudmessage (id, "Вы нашли предмет: %s^nПревращение во врага (внешний вид)",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы носите форму врага(скин)",player_item_name[id])
 		}
 		case 67:
 		{
-			player_item_name[id] = "Stong Armor"	
+			player_item_name[id] = "Крепкая Броня"	
 			player_item_id[id] = 67	
 			player_ultra_armor[id]=random_num(3,6)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
@@ -6660,7 +6662,7 @@ public award_item(id, itemnum)
 		}
 		case 68:
 		{
-			player_item_name[id] = "Ultra Armor"	
+			player_item_name[id] = "Ультра Броня"	
 			player_item_id[id] = 68	
 			player_ultra_armor[id]=random_num(7,11)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
@@ -6668,21 +6670,21 @@ public award_item(id, itemnum)
 		}
 		case 69:
 		{
-			player_item_name[id] = "Khalim Eye"
+			player_item_name[id] = "Глаз Халима"
 			player_item_id[id] = rannum
 			player_b_radar[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^nВы видите противников на радаре", player_item_name[id])
 		}
 		case 70:
 		{
-			player_item_name[id] = "Leaper Ring"
+			player_item_name[id] = "Кольцо Прыгуна"
 			player_item_id[id] = rannum
 			player_b_autobh[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^nДаёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
 		}
 		case 71:
 		{
-			player_item_name[id] = "Myrmidon Greaves"
+			player_item_name[id] = "Наголенники Приспешника"
 			player_item_id[id] = rannum
 			player_b_silent[id] = 1
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/2)
@@ -6690,7 +6692,7 @@ public award_item(id, itemnum)
 		}
 		case 72:
 		{
-			player_item_name[id] = "Shoes of the Bone"
+			player_item_name[id] = "Костяные Сапоги"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 4
 			set_user_gravity(id, 600.0)
@@ -6698,7 +6700,7 @@ public award_item(id, itemnum)
 		}
 		case 73:
 		{
-			player_item_name[id] = "Scarab Shoes"
+			player_item_name[id] = "Сапоги Скарабея"
 			player_item_id[id] = rannum
 			player_b_inv[id] = 95
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
@@ -6706,11 +6708,11 @@ public award_item(id, itemnum)
 		}
 		case 74:
 		{
-			player_item_name[id] = "Hydra Blade"
+			player_item_name[id] = "Лезвие Гидры"
 			player_item_id[id] = rannum
 			player_b_inv[id] = 155
 			player_b_damage[id] = 20
-			show_hudmessage (id, "Вы нашли предмет: %s^nВаш видимость снижается до 155 +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВаша видимость снижается до 155. +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
 		}
 		case 75:
 		{
@@ -6720,7 +6722,7 @@ public award_item(id, itemnum)
 		}
 		case 76:
 		{
-			player_item_name[id] = "Aegis"
+			player_item_name[id] = "Эллада"
 			player_item_id[id] = rannum
 			player_ring[id]=2
 			player_b_explode[id] = random_num(120,330)
@@ -6729,15 +6731,15 @@ public award_item(id, itemnum)
 		}
 		case 77:
 		{
-			player_item_name[id] = "Polished Wand"
+			player_item_name[id] = "Отпалированный Жезл"
 			player_item_id[id] = rannum
 			player_b_blind[id] = random_num(1,5)
 			player_b_heal[id] =  random_num(1,15)
-			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i ослепить врага, жми E чтобы установить исцеляющий тотем",player_item_name[id],player_b_blind[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i ослепить врага, жми E чтобы установить исцеляющий Тотем",player_item_name[id],player_b_blind[id])
 		}
 		case 78:
 		{
-			player_item_name[id] = "Heavenly Stone"
+			player_item_name[id] = "Небесный Камень"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(1,3)
 			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
@@ -6745,23 +6747,23 @@ public award_item(id, itemnum)
 		}
 		case 79:
 		{
-			player_item_name[id] = "Festering Essence of Destruction"
+			player_item_name[id] = "Тухлая Эссенция Разрушения"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = 2
 			player_b_sniper[id] = 1
 			player_b_grenade[id] = 3
-			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/2 возродится, шанс 1/1 мгновенно убить со скаута,шанс 1/3 убить с HE",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/2 возродится, шанс 1/1 мгновенно убить из мухи(scout),шанс 1/3 убить с HE",player_item_name[id])
 		}
 		case 80:
 		{
-			player_item_name[id] = "Vampire Gloves"
+			player_item_name[id] = "Перчатки Вампира"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(5,15)
 			show_hudmessage(id, "Вы нашли предмет: %s^nВысасывает %i за каждое попадание во врага,за убийство +30hp",player_item_name[id],player_b_vampire[id])
 		}
 		case 81:
 		{
-			player_item_name[id] = "Super Mario"
+			player_item_name[id] = "Книга Хорадрика"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 10
 			player_b_fireball[id] = 5
@@ -6769,7 +6771,7 @@ public award_item(id, itemnum)
 		}
 		case 85:
 		{
-			player_item_name[id] = "Centurion"
+			player_item_name[id] = "Центурион"
 			player_item_id[id] = rannum
 			player_b_damage[id] = 20
 			player_b_redirect[id] = 40
@@ -6778,41 +6780,42 @@ public award_item(id, itemnum)
 		}
 		case 86:
 		{
-			player_item_name[id] = "RedBull"
+			player_item_name[id] = "Свиток Хорадрика"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 8
 			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать 8 прыжков в воздухе",player_item_name[id],player_b_sniper[id])	
 		}
 		case 87:
 		{
-			player_item_name[id] = "Dr House"
+			player_item_name[id] = "Куб Хорадрика"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(45,65)
 			show_hudmessage(id, "Вы нашли предмет: %s^nВосстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечящий тотем %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
 		}
 		case 88:
 		{
-			player_item_name[id] = "Own Invisible"
+			player_item_name[id] = "Серебрянное Кольцо Сталкера"
 			player_item_id[id] = rannum
 			player_b_inv[id] = 8
 			player_b_reduceH[id] = 55
+			item_durability[id] = 30
 			if (is_user_alive(id)) set_user_health(id,45)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВы почти невидимы,но у вас 45 HP.",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nпрактически полная невидимость, но у вас 45 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
 		}
 		case 89:
 		{
-			player_item_name[id] = "Mega Invisible"
+			player_item_name[id] = "Золотое Кольцо Сталкера"
 			player_item_id[id] = rannum
 			player_b_reduceH[id] = 90
 			player_b_inv[id] = 1	
-			item_durability[id] = 50
+			item_durability[id] = 20
 			
 			if (is_user_alive(id)) set_user_health(id,10)		
-			show_hudmessage(id, "Вы нашли предмет: %s^nУ вас 10 жизней,невидимость 1/255",player_item_name[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n полная невидимость, но у вас 10 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
 		}
 		case 90:
 		{
-			player_item_name[id] = "Bul'Kathos Shoes"
+			player_item_name[id] = "Сапоги Булькатоса"
 			player_item_id[id] = rannum
 			player_b_jumpx[id] = 8
 			set_user_gravity(id, 400.0)
@@ -6820,7 +6823,7 @@ public award_item(id, itemnum)
 		}
 		case 91:
 		{
-			player_item_name[id] = "Karik's Ring"
+			player_item_name[id] = "Кольцо Карика"
 			player_item_id[id] = rannum	
 			player_b_redirect[id] = random_num(15,50)
 			player_b_damage[id] = random_num(15,50)
@@ -6831,28 +6834,28 @@ public award_item(id, itemnum)
 		}
 		case 92:
 		{
-			player_item_name[id] = "Purse Thief"
+			player_item_name[id] = "Карманик"
 			player_item_id[id] = rannum
 			player_b_money[id] = random_num(1,16000)
 			show_hudmessage(id, "Вы нашли предмет: %s^nполучаете %i денег в каждом раунде. Используйте чтобы защищаться.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
 		}
 		case 93:
 		{
-			player_item_name[id] = "Vampiric Blood"
+			player_item_name[id] = "Куб Вампира"
 			player_item_id[id] = rannum
 			player_b_vampire[id] = random_num(15,20)
 			show_hudmessage(id, "Вы нашли предмет: %s^nвысасываете %i hp у противника",player_item_name[id],player_b_vampire[id])	
 		}
 		case 94:
 		{
-			player_item_name[id] = "Revival Ring"
+			player_item_name[id] = "Кольцо Инариуса"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^n1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
 		}
 		case 95:
 		{
-			player_item_name[id] = "Demon Assassin"
+			player_item_name[id] = "Кольцо Нафалемов"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(30,55)
 			player_b_damage[id] = 50
@@ -6860,24 +6863,24 @@ public award_item(id, itemnum)
 		}
 		case 96:
 		{
-			player_item_name[id] = "Mystiqe"	
+			player_item_name[id] = "Мистика"	
 			player_item_id[id] = rannum
 			changeskin(id,0)
 			player_b_grenade[id] = random_num(1,2)
-			show_hudmessage (id, "Вы нашли предмет: %s^nТы выглядишь как противник.Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nТы выглядишь как противник. Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
 		}
 		case 97:
 		{
-			player_item_name[id] = "Apocalypse Anihilation"
+			player_item_name[id] = "Апокалипсис"
 			player_item_id[id] = rannum
 			player_b_damage[id] = 100
 			player_b_silent[id] = 1
 			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли предмет: %s^nВы на носите %i урона с каждого выстрела.Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nВы на носите %i урона с каждого выстрела. Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
 		}
 		case 98:
 		{
-			player_item_name[id] = "Inferno"
+			player_item_name[id] = "Инферно"
 			player_item_id[id] = rannum
 			player_b_redirect[id] = 10
 			player_b_damage[id] = 10
@@ -6886,7 +6889,7 @@ public award_item(id, itemnum)
 		}
 		case 99:
 		{
-			player_item_name[id] = "Hellspawn"
+			player_item_name[id] = "Отродие Ада"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = 5
 			player_b_inv[id] = random_num(70,110)
@@ -6894,7 +6897,7 @@ public award_item(id, itemnum)
 		}
 		case 101:
 		{
-			player_item_name[id] = "Annihilus"
+			player_item_name[id] = "Анихилус"
 			player_item_id[id] = rannum
 			player_b_damage[id] = 15
 			player_b_vampire[id] = 50
@@ -6902,7 +6905,7 @@ public award_item(id, itemnum)
 		}
 		case 102:
 		{
-			player_item_name[id] = "Blizzard's Mystery"
+			player_item_name[id] = "Мистическая Буря"
 			player_item_id[id] = rannum
 			player_b_damage[id] = 25
 			player_b_vampire[id] = 25
@@ -6911,7 +6914,7 @@ public award_item(id, itemnum)
 		}
 		case 103:
 		{
-			player_item_name[id] = "Mara's Kaleidoscope"
+			player_item_name[id] = "Калейдоскоп Мара"
 			player_item_id[id] = rannum
 			player_b_damage[id] = 25
 			player_b_inv[id] = random_num(190,200)
@@ -6919,167 +6922,155 @@ public award_item(id, itemnum)
 		}
 		case 104:
 		{
-			player_item_name[id] = "M4A1 Special"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
-			item_durability[id] = 100
-			player_b_m4master[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
+			player_b_antymeek[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 105:
 		{
-			player_item_name[id] = "AK47 Special"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
-			item_durability[id] = 100
-			player_b_akmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
+			player_b_antymeek[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 106:
 		{
-			player_item_name[id] = "AWP Special"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
-			item_durability[id] = 100
-			player_b_awpmaster[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
+			player_b_antymeek[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 107:
 		{
-			player_item_name[id] = "Deagle Special"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
-			item_durability[id] = 100
-			player_b_dglmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
+			player_b_antymeek[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 108:
 		{
-			player_item_name[id] = "M3 Special"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
-			item_durability[id] = 100
-			player_b_m3master[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
+			player_b_antymeek[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 109:
 		{
-			player_item_name[id] = "Full Special"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
-			item_durability[id] = 100
-			player_b_m3master[id] = random_num(3,8)
-			player_b_dglmaster[id] = random_num(5,8)
-			player_b_awpmaster[id] = random_num(3,8)
-			player_b_akmaster[id] = random_num(5,8)
-			player_b_m4master[id] = random_num(5,8)
-			player_b_grenade[id] = random_num(3,8)
-			player_b_sniper[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
+			player_b_antymeek[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 110:
 		{
-			player_item_name[id] = "Minesweeper Vigilance"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 111:
 		{
-			player_item_name[id] = "Minesweeper Vigilance"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 112:
 		{
-			player_item_name[id] = "Minesweeper Vigilance"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 113:
 		{
-			player_item_name[id] = "Minesweeper Vigilance"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 114:
 		{
-			player_item_name[id] = "Minesweeper Vigilance"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		
 		case 115:
 		{
-			player_item_name[id] = "Minesweeper Vigilance"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 116:
 		{
-			player_item_name[id] = "Diablo Shoes"
+			player_item_name[id] = "Сапоги Диабло"
 			player_item_id[id] = rannum
 			player_b_antyarchy[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от Arch angel", player_item_name[id], player_b_antyarchy[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от Крыльев Ангела", player_item_name[id], player_b_antyarchy[id])
 		}
 		case 117:
 		{
-			player_item_name[id] = "Minesweeper Vigilance"
+			player_item_name[id] = "Кольцо Тал Раша"
 			player_item_id[id] = rannum
 			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
 		}
 		case 118:
 		{
-			player_item_name[id] = "Anti Explosion"
+			player_item_name[id] = "Сердце Халима"
 			player_item_id[id] = rannum
 			player_b_antyorb[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от взрыва после убийства", player_item_name[id], player_b_antyorb[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от взрыва", player_item_name[id], player_b_antyorb[id])
 		}
 		case 119:
 		{
-			player_item_name[id] = "Anti HellFlare"
+			player_item_name[id] = "Мозг Халима"
 			player_item_id[id] = rannum
 			player_b_antyfs[id] = 1
 			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от огня", player_item_name[id], player_b_antyfs[id])
 		}
 		case 120:
 		{
-			player_item_name[id] = "Gheed's Fortune"
+			player_item_name[id] = "Счастливый Гхид"
 			player_item_id[id] = rannum
 			player_b_godmode[id] = random_num(4,10)
 			show_hudmessage(id, "Вы нашли предмет: %s^nВы становитесь бесмертным на %i секунд.", player_item_name[id], player_b_godmode[id])
 		}
 		case 121:
 		{
-			player_item_name[id] = "Winter Totem"
+			player_item_name[id] = "Тотем Холода"
 			player_item_id[id] = rannum
 			player_b_zamroztotem[id] = random_num(250,400)
 			show_hudmessage(id, "Вы нашли предмет: %s^nЖмите Е чтобы установить замораживайщий тотем",player_item_name[id])	
 		}
 		case 122:
 		{
-			player_item_name[id] = "Cash Totem"
+			player_item_name[id] = "Тотем Денег"
 			player_item_id[id] = rannum
 			player_b_kasatotem[id] = random_num(250,400)
 			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который даёт вам и вашей команде деньги.",player_item_name[id])	
 		}
 		case 123:
 		{
-			player_item_name[id] = "Thief Totem"
+			player_item_name[id] = "Тотем Карманика"
 			player_item_id[id] = rannum
 			player_b_kasaqtotem[id] = random_num(250,400)
 			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
 		}
 		case 124:
 		{
-			player_item_name[id] = "Weapon Totem"
+			player_item_name[id] = "Тотем Оружия"
 			player_item_id[id] = rannum
 			player_b_wywaltotem[id] = random_num(250,400)
 			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который притягивает оружие противника.",player_item_name[id])	
 		}
 		case 125:
 		{
-			player_item_name[id] = "Flash Totem"
+			player_item_name[id] = "Тотем Ослепления"
 			player_item_id[id] = rannum
 			player_b_fleshujtotem[id] = random_num(250,400)
 			show_hudmessage(id, "Жми E чтобы установить тотем который ослепляет противника.",player_item_name[id])	
@@ -7100,17 +7091,17 @@ public award_unique_item(id)
 	new Unique_names_Suffix[10][100]
 	new Unique_names_Prefix[10][100]
 	
-	Unique_names_Suffix[1] = "Saintly amulet "
-	Unique_names_Suffix[2] = "Holy sword "
-	Unique_names_Suffix[3] = "Small staff "
-	Unique_names_Suffix[4] = "Bright rope "
-	Unique_names_Suffix[5] = "Shiny scepter "
+	Unique_names_Suffix[1] = "Святой амулет "
+	Unique_names_Suffix[2] = "Святой меч "
+	Unique_names_Suffix[3] = "Малый посох "
+	Unique_names_Suffix[4] = "Святая повязка "
+	Unique_names_Suffix[5] = "Блестящий скипетр "
 	
-	Unique_names_Prefix[1] = "of the stars"
-	Unique_names_Prefix[2] = "of power"
-	Unique_names_Prefix[3] = "of zod"
-	Unique_names_Prefix[4] = "of life"
-	Unique_names_Prefix[5] = "of the sun"
+	Unique_names_Prefix[1] = "звезд"
+	Unique_names_Prefix[2] = "силы"
+	Unique_names_Prefix[3] = "зода"
+	Unique_names_Prefix[4] = "жизни"
+	Unique_names_Prefix[5] = "солнца"
 	
 	//Generate the items name
 	
@@ -7646,7 +7637,7 @@ public item_c4fake(id)
 { 
 	if (c4state[id] > 1)
 	{
-		hudmsg(id,2.0,"Meekstone можно использовать один раз за раунд!")
+		hudmsg(id,2.0,"Камень Смирения можно использовать один раз за раунд!")
 		return PLUGIN_CONTINUE 
 	}
 	
@@ -7661,7 +7652,7 @@ public item_c4fake(id)
 				new origin1[3]
 				get_user_origin(a,origin1) 
 				
-				if(get_distance(c4bombc[id],origin1) < 300 && get_user_team(a) != get_user_team(id))
+				if(get_distance(c4bombc[id],origin1) < 300 && get_user_team(a) != get_user_team(id) && player_b_antyorb[a] != 1)
 				{
 					if(player_b_antymeek[a] > 0 || c_antymeek[a] > 0)
 					return PLUGIN_HANDLED;
@@ -8915,7 +8906,7 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 public select_class(id)
 {
 new text4[512]  
-format(text4, 511,"^n\wВаш общий уровень: %d^n^n\yВыбери класс: ^n^n\r1. \wЛюди^n\r2. \wДемоны^n\r3. \wЗвери^n^n^n\r4. \dОписание классов^n^n^n\dРазработал: hitmany^nСайт сервера:^nlpstrike.ru", player_TotalLVL[id]) 
+format(text4, 511,"^n\wВаш общий уровень: %d^n^n\yВыбери класс: ^n^n\r1. \wДемоны^n\r2. \wЗвери^n\r3. \wЛюди^n^n^n\r4. \dОписание классов^n^n^n\dРазработал: hitmany^nСайт сервера:^nlpstrike.ru", player_TotalLVL[id]) 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -8929,15 +8920,15 @@ public select_class_menu(id, key)
 	{ 
 		case 0: 
 		{
-			PokazKlasy(id)
-		}
-		case 1: 
-		{
 			ShowKlasy(id)
 		}
-		case 2:
+		case 1:
 		{
 			PokazZwierze(id)
+		}
+		case 2: 
+		{
+			PokazKlasy(id)
 		}
 		case 3:
 		{
@@ -9029,7 +9020,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yКровавый ворон^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yДиабло^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yПадший^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yПадший^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yДиабло^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yКровавый ворон^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
 	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
 
 	new szosta
@@ -9057,7 +9048,7 @@ public PressedKlasy(id, key)
 	{
 		case 0:
 		{
-			player_newclass[id] = BloodRaven
+			player_newclass[id] = Fallen
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 1: 
@@ -9087,7 +9078,7 @@ public PressedKlasy(id, key)
 		}
 		case 6: 
 		{
-			player_newclass[id] = Fallen	  
+			player_newclass[id] = BloodRaven	  
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
 		}
 		case 7: 
@@ -11097,7 +11088,7 @@ public item_teamshield(id)
 			return PLUGIN_CONTINUE
 		}
 		
-		if (pev(target,pev_rendermode) == kRenderTransTexture || player_item_id[target] == 17 || player_class[target] == Ninja || player_class[target] == Infidel)
+		if (pev(target,pev_rendermode) == kRenderTransTexture || player_item_id[target] == 17 || player_item_id[target] == 88 || player_item_id[target] == 89 || player_class[target] == Ninja || player_class[target] == Infidel)
 		{
 			hudmsg(id,2.0,"Не возможно использовать невидимый щит от игрока.")
 			return PLUGIN_CONTINUE
@@ -11287,7 +11278,7 @@ public fw_TouchPlayer(self, other)
 		return;
 	
 	// Check if friendly fire is allowed
-	if (get_user_team(self) == get_user_team(other))
+	if (get_user_team(self) == get_user_team(other) || player_b_antyfs[other] == 1)
 		return;
 	
 	// Heat icon
@@ -11368,6 +11359,11 @@ napalm_explode(ent)
 		// Check if friendly fire is allowed
 		if (attacker_team == get_user_team(victim))
 			continue;
+			
+		// Check anti fs
+		if (player_b_antyfs[victim] == 1)
+			continue;
+		
 		
 		// Heat icon
 		message_begin(MSG_ONE_UNRELIABLE, g_msgDamage, _, victim)
@@ -11923,12 +11919,12 @@ public cmd_who(id)
 	len += formatex(motd[len],sizeof motd - 1 - len,"<table class='fixed'>")
 	//Title
 	formatex(header,sizeof header - 1,"Player list")
-	
+
 	//Get TT
 	get_players(players_tt, numplayers_tt, "eh", "TERRORIST");
 	//Get CT
-    get_players(players_ct, numplayers_ct, "eh", "CT");
-	
+	get_players(players_ct, numplayers_ct, "eh", "CT");
+
 	if(numplayers_tt)
 	{
 	
@@ -14502,823 +14498,6 @@ public native_get_user_item(id)
 	return player_item_id[id]
 }
 
-/*public native_set_user_item(id, item)
-{
-	emit_sound(id,CHAN_STATIC,"diablo_lp/ring.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-	switch(item)
-	{
-		case 1:
-		{
-			player_item_name[id] = "Bronze Amplifier"
-			player_b_damage[id] = random_num(1,3)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
-		}
-		
-		case 2:
-		{
-			player_item_name[id] = "Silver Amplifier"
-			player_b_damage[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])
-		}
-		
-		case 3:
-		{
-			player_item_name[id] = "Gold Amplifier"
-			player_b_damage[id] = random_num(6,10)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i дополнительного урона с каждого выстрела.",player_item_name[id],player_b_damage[id])	
-		}
-		case 4:
-		{
-			player_item_name[id] = "Vampyric Staff"
-			player_b_vampire[id] = random_num(1,4)
-			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
-		}
-		case 5:
-		{
-			player_item_name[id] = "Vampyric Amulet"
-			player_b_vampire[id] = random_num(4,6)
-			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
-		}
-		case 6:
-		{
-			player_item_name[id] = "Vampyric Scepter"
-			player_b_vampire[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли предмет: %s^n%i hp высасывает с каждого выстрела.",player_item_name[id],player_b_vampire[id])	
-		}
-		case 7:
-		{
-			player_item_name[id] = "Small bronze bag"
-			player_b_money[id] = random_num(150,500)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
-		}
-		case 8:
-		{
-			player_item_name[id] = "Medium silver bag"
-			player_b_money[id] = random_num(500,1200)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
-		}
-		case 9:
-		{
-			player_item_name[id] = "Large gold bag"
-			player_b_money[id] = random_num(1200,3000)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+%i каждый раунд + При нажатии Е активируется щит котрый снижает урон по вам на 50% жрущий по 200$ каждые 2-3 секунды.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)	
-		}
-		case 10:
-		{
-			player_item_name[id] = "Small angel wings"
-			player_b_gravity[id] = random_num(1,5)
-			
-			if (is_user_alive(id))
-				set_gravitychange(id)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на небольшом радиусе.",player_item_name[id],player_b_gravity[id])	
-		}
-		case 11:
-		{
-			player_item_name[id] = "Arch angel wings"
-			player_b_gravity[id] = random_num(5,9)
-			
-			if (is_user_alive(id))
-				set_gravitychange(id)
-				
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i бонус к гравитации при прыжке и нажатии Е резко падает на землю и мгновенно убивает врага на среднем радиусе.",player_item_name[id],player_b_gravity[id])	
-			
-		}
-		case 12:
-		{
-			player_item_name[id] = "Invisibility Rope"
-			player_b_inv[id] = random_num(150,200)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
-		}
-		case 13:
-		{
-			player_item_name[id] = "Invisibility Coat"
-			player_b_inv[id] = random_num(110,150)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
-		}
-		case 14:
-		{
-			player_item_name[id] = "Invisibility Armor"
-			player_b_inv[id] = random_num(70,110)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i незначительную прозрачность чара.",player_item_name[id],255-player_b_inv[id])	
-		}
-		case 15:
-		{
-			player_item_name[id] = "Firerope"
-			player_b_grenade[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
-		}
-		case 16:
-		{
-			player_item_name[id] = "Fire Amulet"
-			player_b_grenade[id] = random_num(2,4)
-			show_hudmessage(id, "Вы нашли предмет: %s^n+1/%i  шанс мгновенно убить врага с гранаты",player_item_name[id],player_b_grenade[id])	
-		}
-		case 17:
-		{
-			player_item_name[id] = "Stalkers ring"
-			player_b_reduceH[id] = 95
-			player_b_inv[id] = 8	
-			item_durability[id] = 100
-			
-			if (is_user_alive(id)) set_user_health(id,5)		
-			show_hudmessage(id, "Вы нашли предмет: %s^nпрактически полная невидимость, но у вас 5 хп и из оружия только нож, можно ставить бомбу.",player_item_name[id])	
-		}
-		case 18:
-		{
-			player_item_name[id] = "Arabian Boots"
-			player_b_theif[id] = random_num(500,1000)
-			show_hudmessage(id, "Вы нашли предмет: %s^nс каждым выстрелом высасывает с противника деньги, в зависимости от дамага",player_item_name[id],player_b_theif[id])	
-		}
-		case 19:
-		{
-			player_item_name[id] = "Phoenix Ring"
-			player_b_respawn[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
-		}
-		case 20:
-		{
-			player_item_name[id] = "Sorcerers ring"
-			player_b_respawn[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
-		}
-		case 21:
-		{
-			player_item_name[id] = "Chaos Orb"
-			player_b_explode[id] = random_num(150,275)
-			show_hudmessage(id, "Вы нашли предмет: %s^nпосле смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
-		}
-		case 22:
-		{
-			player_item_name[id] = "Hell Orb"
-			player_b_explode[id] = random_num(200,400)
-			show_hudmessage(id, "Вы нашли предмет: %s^nпосле смерти взрываетесь в радиусе %i",player_item_name[id],player_b_explode[id])	
-		}
-		case 23:
-		{
-			player_item_name[id] = "Gold statue"
-			player_b_heal[id] = random_num(5,10)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
-		}
-		case 24:
-		{
-			player_item_name[id] = "Daylight Diamond"
-			player_b_heal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
-		}
-		case 25:
-		{
-			player_item_name[id] = "Blood Diamond"
-			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри нажатии на Е появляется тотем, котрый лечит вас и вашу команду. %i хп за 5 секунд, тотем активен в течении 7 секунд в пределах %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
-		}
-		case 26:
-		{
-			player_item_name[id] = "Wheel of Fortune"
-			player_b_gamble[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
-		}
-		case 27:
-		{
-			player_item_name[id] = "Four leaf Clover"
-			player_b_gamble[id] = random_num(4,5)
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт рандомно +%i бонусов каждый раунд.",player_item_name[id],player_b_gamble[id])	
-		}
-		case 28:
-		{
-			player_item_name[id] = "Amulet of the sun"
-			player_b_blind[id] = random_num(6,9)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
-		}
-		case 29:
-		{
-			player_item_name[id] = "Sword of the sun"
-			player_b_blind[id] = random_num(2,5)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i ослепить противника при атаке. Экран становиться почти польностью оранжевым в течении 7-10 секунд",player_item_name[id],player_b_blind[id])	
-		}
-		case 30:
-		{
-			player_item_name[id] = "Fireshield"
-			player_b_fireshield[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии Е активируется щит который наносит дамаг противнику. Уменьшает ваше здоровье, 20 хп каждые 2 секунды.",player_item_name[id],player_b_fireshield[id])	
-		}
-		case 31:
-		{
-			player_item_name[id] = "Stealth Shoes"
-			player_b_silent[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nбесшумный шаг (эффект рассы Ассассин).",player_item_name[id])	
-		}
-		case 32:
-		{
-			player_item_name[id] = "Meekstone"
-			player_b_meekstone[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nбомба на дистанционом управлении. Е положить бомбу, второе нажатие Е взорвать.",player_item_name[id])	
-		}
-		case 33:
-		{
-			player_item_name[id] = "Medicine Glar"
-			player_b_teamheal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
-		}
-		case 34:
-		{
-			player_item_name[id] = "Medicine Totem"
-			player_b_teamheal[id] = random_num(20,30)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. при нажатии Е активирует на члене команды щит котрый возвращает дамаг.",player_item_name[id],player_b_teamheal[id])	
-		}
-		case 35:
-		{
-			player_item_name[id] = "Iron Armor"
-			player_b_redirect[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
-		}
-		case 36:
-		{
-			player_item_name[id] = "Mitril Armor"
-			player_b_redirect[id] = random_num(6,11)
-			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
-		}
-		case 37:
-		{
-			player_item_name[id] = "Godly Armor"
-			player_b_redirect[id] = random_num(10,15)
-			show_hudmessage(id, "Вы нашли предмет: %s^nснижает +%i дамага по вам с каждого выстрела.",player_item_name[id],player_b_redirect[id])	
-		}
-		case 38:
-		{
-			player_item_name[id] = "Fireball staff"
-			player_b_fireball[id] = random_num(50,100)
-			show_hudmessage(id, "Вы нашли предмет: %s^nзапускает огненный шар, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
-		}
-		case 39:
-		{
-			player_item_name[id] = "Fireball scepter"
-			player_b_fireball[id] = random_num(100,200)
-			show_hudmessage(id, "Вы нашли предмет: %s^nзапускает огненный шар, взрывающуюся в радиусе %i",player_item_name[id],player_b_fireball[id])	
-		}
-		case 40:
-		{
-			player_item_name[id] = "Ghost Rope"
-			player_b_ghost[id] = random_num(3,6)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВозможность ходить сквозь стены, эффект длиться %i секунд",player_item_name[id],player_b_ghost[id])	
-		}
-		case 41:
-		{
-			player_item_name[id] = "Nicolas Eye"
-			player_b_eye[id] = -1
-			show_hudmessage(id, "Вы нашли предмет: %s^nУстанавливает камеру на стене.",player_item_name[id])	
-		}
-		case 42:
-		{
-			player_item_name[id] = "Knife Ruby"
-			player_b_blink[id] = floatround(halflife_time())
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри использовании ножа второй конопкой телепортирует вас на небольшое растояние",player_item_name[id])	
-		}
-		case 43:
-		{
-			player_item_name[id] = "Lothars Edge"
-			player_b_windwalk[id] = random_num(4,7)
-			show_hudmessage(id, "Вы нашли предмет: %s^nна %i секунд даёт среднюю прозрачность + сильно увеличивает ваш бег.",player_item_name[id],player_b_windwalk[id])	
-		}
-		case 44:
-		{
-			player_item_name[id] = "Sword"
-			player_sword[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nувеличивает урон ножу",player_item_name[id])		
-		}
-		case 45:
-		{
-			player_item_name[id] = "Mageic Booster"
-			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nкаждые 3 секунды сидя вы очень длинно прыгаете.(item не всегда работает)",player_item_name[id])	
-		}
-		case 46:
-		{
-			player_item_name[id] = "Dagon I"
-			player_b_dagon[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на E наносит урон врагу",player_item_name[id])	
-		}
-		case 47:
-		{
-			player_item_name[id] = "Scout Extender"
-			player_b_sniper[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
-		}
-		case 48:
-		{
-			player_item_name[id] = "Scout Amplifier"
-			player_b_sniper[id] = random_num(2,3)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить со скаута.",player_item_name[id],player_b_sniper[id])	
-		}
-		case 49:
-		{
-			player_item_name[id] = "Air booster"
-			player_b_jumpx[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать двойной прыжок в воздухе",player_item_name[id],player_b_sniper[id])	
-		}
-		case 50:
-		{
-			player_item_name[id] = "Iron Spikes"
-			player_b_smokehit[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nубивает дымовой гранатой, если попасть ей в противника",player_item_name[id])	
-		}
-		case 51:
-		{
-			player_item_name[id] = "Point Booster"
-			player_b_extrastats[id] = random_num(1,3)
-			BoostStats(id,player_b_extrastats[id])
-			show_hudmessage(id, "Вы нашли предмет: %s^nдаёт +%i очков к каждому умнению",player_item_name[id],player_b_extrastats[id])	
-		}
-		case 52:
-		{
-			player_item_name[id] = "Totem amulet"
-			player_b_firetotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
-		}
-		case 53:
-		{
-			player_item_name[id] = "Mageic Hook"
-			player_b_hook[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии USE притягивает к себе врага",player_item_name[id])	
-		}
-		case 54:
-		{
-			player_item_name[id] = "Darksteel Glove"
-			player_b_darksteel[id] = random_num(1,5)
-			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный дамаг при атаке противника со спины.",player_item_name[id])	
-		}
-		case 55:
-		{
-			player_item_name[id] = "Darksteel Gaunlet"
-			player_b_darksteel[id] = random_num(7,9)
-			show_hudmessage(id, "Вы нашли предмет: %s^nусиленный дамаг при атаке противника со спины.",player_item_name[id])	
-		}
-		case 56:
-		{
-			player_item_name[id] = "Illusionists Cape"
-			player_b_illusionist[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е вы становитесь полностью (100%)невидимым. однако и вы никого не видите и умираете от 1 выстрела.",player_item_name[id])	
-		}
-		case 57:
-		{
-			player_item_name[id] = "Взрывные ловушки"
-			player_b_mine[id] = random_num(1,3)
-			player_b_mine_seted[id] = 0
-			show_hudmessage(id, "Вы нашли предмет: %s^nставит %d полуневидимые взрывные ловушки.",player_item_name[id], player_b_mine[id])
-		}
-		
-		case 58:
-		{
-			player_item_name[id] = "Ninja ring"
-			player_b_blink[id] = floatround(halflife_time())
-			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nНож позволяет вам телепортироваться каждые 3 секунды. Зажмите DUCK чтобы прыгнуть далеко.",player_item_name[id])
-		}
-		case 59:	
-		{
-			player_item_name[id] = "Mage ring"
-			player_ring[id]=1
-			player_b_fireball[id] = random_num(50,80)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВозможность стрелять огненными шарами +5 интеллект",player_item_name[id])
-		}	
-		case 60:	
-		{
-			player_item_name[id] = "Necromant ring"
-			player_b_respawn[id] = random_num(2,4)
-			player_b_vampire[id] = random_num(3,5)	
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс возродиться после смерти. При попадании во врага, частично восполняет ваше НР",player_item_name[id])
-		}
-		case 61:
-		{
-			player_item_name[id] = "Barbarian ring"
-			player_b_explode[id] = random_num(120,330)
-			player_ring[id]=2
-			show_hudmessage(id, "Вы нашли предмет: %s^nКогда вас убивают вы взрываетесь, нанося урон стоящим в близи врагам. +5 сила",player_item_name[id])
-		}
-		case 62:
-		{
-			player_item_name[id] = "Paladin ring"	
-			player_b_redirect[id] = random_num(7,17)
-			player_b_blind[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли предмет: %s^nСнижение дамага по вам. Шанс ослепить противника",player_item_name[id])		
-		}
-		case 63:
-		{
-			player_item_name[id] = "Monk ring"
-			player_b_grenade[id] = random_num(1,4)
-			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли предмет: %s^nУвиличивает урон наносимый гранатой. Восстанавливает здоровье",player_item_name[id])
-		}	
-		case 64:
-		{
-			player_item_name[id] = "Assassin ring"
-			player_b_jumpx[id] = 1
-			player_ring[id]=3
-			show_hudmessage(id, "Вы нашли предмет: %s^nДвойной прыжок. +5 ловкость",player_item_name[id])	
-		}	
-		case 65:
-		{
-			player_item_name[id] = "Flashbang necklace"	
-			wear_sun[id] = 1
-			show_hudmessage (id, "Вы нашли предмет: %s^nИммунитет к ослепляющим гранатам",player_item_name[id])
-		}
-		case 66:
-		{
-			player_item_name[id] = "Chameleon"	
-			changeskin(id,0)  
-			show_hudmessage (id, "Вы нашли предмет: %s^nПревращение во врага (внешний вид)",player_item_name[id])
-		}
-		case 67:
-		{
-			player_item_name[id] = "Stong Armor"	
-			player_ultra_armor[id]=random_num(3,6)
-			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли предмет: %s^nКаждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
-		}
-		case 68:
-		{
-			player_item_name[id] = "Ultra Armor"	
-			player_ultra_armor[id]=random_num(7,11)
-			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли предмет: %s^nКаждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
-		}
-		case 69:
-		{
-			player_item_name[id] = "Khalim Eye"
-			player_b_radar[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nВы видите противников на радаре", player_item_name[id])
-		}
-		case 70:
-		{
-			player_item_name[id] = "Leaper Ring"
-			player_b_autobh[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nДаёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
-		}
-		case 71:
-		{
-			player_item_name[id] = "Myrmidon Greaves"
-			player_b_silent[id] = 1
-			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/2)
-			show_hudmessage (id, "Вы нашли предмет: %s^nБесшумный и быстрый бег",player_item_name[id],player_b_silent[id])
-		}
-		case 72:
-		{
-			player_item_name[id] = "Shoes of the Bone"
-			player_b_jumpx[id] = 4
-			set_user_gravity(id, 600.0)
-			show_hudmessage (id, "Вы нашли предмет: %s^nВы можете сделать 4 прыжка в воздухе. Уменьшенна гравитация",player_item_name[id],player_b_jumpx[id])
-		}
-		case 73:
-		{
-			player_item_name[id] = "Scarab Shoes"
-			player_b_inv[id] = 95
-			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли предмет: %s^nВаш видимость снижается до 95. Быстрый бег.",player_item_name[id],player_b_inv[id])
-		}
-		case 74:
-		{
-			player_item_name[id] = "Hydra Blade"
-			player_b_inv[id] = 155
-			player_b_damage[id] = 20
-			show_hudmessage (id, "Вы нашли предмет: %s^nВаш видимость снижается до 155 +20 к урону",player_item_name[id],player_b_inv[id],player_b_damage[id])
-		}
-		case 75:
-		{
-			player_item_name[id] = "Перстень леорика"
-			show_hudmessage (id, "Вы нашли предмет: %s^nУдваивание опыта",player_item_name[id])
-		}
-		case 76:
-		{
-			player_item_name[id] = "Aegis"
-			player_ring[id]=2
-			player_b_explode[id] = random_num(120,330)
-			player_b_redirect[id] = random_num(10, 100)
-			show_hudmessage (id, "Вы нашли предмет: %s^nВы получаете +5 к силе и взрываетесь когда умираете(урон %i) -%i урона по вам",player_item_name[id],player_b_explode[id],player_b_redirect[id])
-		}
-		case 77:
-		{
-			player_item_name[id] = "Polished Wand"
-			player_b_blind[id] = random_num(1,5)
-			player_b_heal[id] =  random_num(1,15)
-			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i ослепить врага, жми E чтобы установить исцеляющий тотем",player_item_name[id],player_b_blind[id])
-		}
-		case 78:
-		{
-			player_item_name[id] = "Heavenly Stone"
-			player_b_grenade[id] = random_num(1,3)
-			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
-			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить HE гранаты и быстрый бег",player_item_name[id],player_b_grenade[id])
-		}
-		case 79:
-		{
-			player_item_name[id] = "Festering Essence of Destruction"
-			player_b_respawn[id] = 2
-			player_b_sniper[id] = 1
-			player_b_grenade[id] = 3
-			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/2 возродится, шанс 1/1 мгновенно убить со скаута,шанс 1/3 убить с HE",player_item_name[id])
-		}
-		case 80:
-		{
-			player_item_name[id] = "Vampire Gloves"
-			player_b_vampire[id] = random_num(5,15)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВысасывает %i за каждое попадание во врага,за убийство +30hp",player_item_name[id],player_b_vampire[id])
-		}
-		case 81:
-		{
-			player_item_name[id] = "Super Mario"
-			player_b_jumpx[id] = 10
-			player_b_fireball[id] = 5
-			show_hudmessage (id, "Вы нашли предмет: %s^nВы можете сделать 10 прыжков в воздух и пускать до 5 ракет",player_item_name[id],player_b_jumpx[id], player_b_fireball[id])
-		}
-		case 85:
-		{
-			player_item_name[id] = "Centurion"
-			player_b_damage[id] = 20
-			player_b_redirect[id] = 40
-			set_user_gravity(id,3.0)
-			show_hudmessage (id, "Вы нашли предмет: %s^n+20 к урону и уменьшение урона на 40",player_item_name[id],player_b_damage[id],player_b_redirect[id])
-		}
-		case 86:
-		{
-			player_item_name[id] = "RedBull"
-			player_b_jumpx[id] = 8
-			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать 8 прыжков в воздухе",player_item_name[id],player_b_sniper[id])	
-		}
-		case 87:
-		{
-			player_item_name[id] = "Dr House"
-			player_b_heal[id] = random_num(45,65)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВосстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечящий тотем %i",player_item_name[id],player_b_heal[id],player_b_heal[id])	
-		}
-		case 88:
-		{
-			player_item_name[id] = "Own Invisible"
-			player_b_inv[id] = 8
-			player_b_reduceH[id] = 55
-			if (is_user_alive(id)) set_user_health(id,45)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВы почти невидимы,но у вас 45 HP.",player_item_name[id])	
-		}
-		case 89:
-		{
-			player_item_name[id] = "Mega Invisible"
-			player_b_reduceH[id] = 90
-			player_b_inv[id] = 1	
-			item_durability[id] = 50
-			
-			if (is_user_alive(id)) set_user_health(id,10)		
-			show_hudmessage(id, "Вы нашли предмет: %s^nУ вас 10 жизней,невидимость 1/255",player_item_name[id])	
-		}
-		case 90:
-		{
-			player_item_name[id] = "Bul'Kathos Shoes"
-			player_b_jumpx[id] = 8
-			set_user_gravity(id, 400.0)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВы можете сделать 8 прыжков в воздухе и у вас высокая гравитация",player_item_name[id],player_b_sniper[id])	
-		}
-		case 91:
-		{
-			player_item_name[id] = "Karik's Ring"
-			player_b_redirect[id] = random_num(15,50)
-			player_b_damage[id] = random_num(15,50)
-			player_b_blind[id] = random_num(3,4)
-			player_ultra_armor[id]=random_num(15,50)
-			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage(id, "Вы нашли предмет: %s^nItem настолько мощный,что никто ещё не познал его волшебное действия",player_item_name[id])		
-		}
-		case 92:
-		{
-			player_item_name[id] = "Purse Thief"
-			player_b_money[id] = random_num(1,16000)
-			show_hudmessage(id, "Вы нашли предмет: %s^nполучаете %i денег в каждом раунде. Используйте чтобы защищаться.",player_item_name[id],player_b_money[id]+player_intelligence[id]*50)
-		}
-		case 93:
-		{
-			player_item_name[id] = "Vampiric Blood"
-			player_b_vampire[id] = random_num(15,20)
-			show_hudmessage(id, "Вы нашли предмет: %s^nвысасываете %i hp у противника",player_item_name[id],player_b_vampire[id])	
-		}
-		case 94:
-		{
-			player_item_name[id] = "Revival Ring"
-			player_b_respawn[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^n1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
-		}
-		case 95:
-		{
-			player_item_name[id] = "Demon Assassin"
-			player_b_heal[id] = random_num(30,55)
-			player_b_damage[id] = 50
-			show_hudmessage(id, "Вы нашли предмет: %s^nВосстанавливает %i hp каждые 5 секунд. Жмите Е чтобы установить лечащий тотем %i. +50 к урону",player_item_name[id],player_b_heal[id],player_b_heal[id])	
-		}
-		case 96:
-		{
-			player_item_name[id] = "Mystiqe"
-			changeskin(id,0)
-			player_b_grenade[id] = random_num(1,2)
-			show_hudmessage (id, "Вы нашли предмет: %s^nТы выглядишь как противник.Шанс 1/%i мгновенно убить с гранаты HE",player_item_name[id],player_b_grenade[id])
-		}
-		case 97:
-		{
-			player_item_name[id] = "Apocalypse Anihilation"
-			player_b_damage[id] = 100
-			player_b_silent[id] = 1
-			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли предмет: %s^nВы на носите %i урона с каждого выстрела.Бесшумный бег.",player_item_name[id],player_b_damage[id],player_b_silent[id])
-		}
-		case 98:
-		{
-			player_item_name[id] = "Inferno"
-			player_b_redirect[id] = 10
-			player_b_damage[id] = 10
-			player_b_respawn[id] = 2
-			show_hudmessage (id, "Вы нашли предмет: %s^n+10 к урону. -10 урона по вам. Шанс 1/2 возродится.",player_item_name[id])
-		}
-		case 99:
-		{
-			player_item_name[id] = "Hellspawn"
-			player_b_grenade[id] = 5
-			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/5 убить с НЕ гранаты.+%i к невидимости",player_item_name[id],255-player_b_inv[id])
-		}
-		case 100:
-		{
-			player_item_name[id] = "Shako"
-			player_b_damage[id] = 25
-			player_b_inv[id] = random_num(70,110)
-			show_hudmessage (id, "Вы нашли предмет: %s^n+25урона || +%i к невидимости",player_item_name[id],255-player_b_inv[id])
-		}
-		case 101:
-		{
-			player_item_name[id] = "Annihilus"
-			player_b_damage[id] = 15
-			player_b_vampire[id] = 50
-			show_hudmessage (id, "Вы нашли предмет: %s^n+15 к урону. Высасывает 50hp с каждого выстрела",player_item_name[id])
-		}
-		case 102:
-		{
-			player_item_name[id] = "Blizzard's Mystery"
-			player_b_damage[id] = 25
-			player_b_vampire[id] = 25
-			item_durability[id] = 100
-			show_hudmessage (id, "Вы нашли предмет: %s^n+25 к урону. Высасывает 25 HP с каждого выстрела",player_item_name[id])
-		}
-		case 103:
-		{
-			player_item_name[id] = "Mara's Kaleidoscope"
-			player_b_damage[id] = 25
-			player_b_inv[id] = random_num(190,200)
-			show_hudmessage (id, "Вы нашли предмет: %s^n+25 к урону. +%i к невидимости",player_item_name[id],255-player_b_inv[id])
-		}
-		case 104:
-		{
-			player_item_name[id] = "M4A1 Special"
-			item_durability[id] = 100
-			player_b_m4master[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M4A1",player_item_name[id],player_b_m4master[id])
-		}
-		case 105:
-		{
-			player_item_name[id] = "AK47 Special"
-			item_durability[id] = 100
-			player_b_akmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с AK47",player_item_name[id],player_b_akmaster[id])
-		}
-		case 106:
-		{
-			player_item_name[id] = "AWP Special"
-			item_durability[id] = 100
-			player_b_awpmaster[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с AWP",player_item_name[id],player_b_awpmaster[id])
-		}
-		case 107:
-		{
-			player_item_name[id] = "Deagle Special"
-			item_durability[id] = 100
-			player_b_dglmaster[id] = random_num(5,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с Deagle",player_item_name[id],player_b_dglmaster[id])
-		}
-		case 108:
-		{
-			player_item_name[id] = "M3 Special"
-			item_durability[id] = 100
-			player_b_m3master[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M3",player_item_name[id],player_b_m3master[id])
-		}
-		case 109:
-		{
-			player_item_name[id] = "Full Special"
-			item_durability[id] = 100
-			player_b_m3master[id] = random_num(3,8)
-			player_b_dglmaster[id] = random_num(5,8)
-			player_b_awpmaster[id] = random_num(3,8)
-			player_b_akmaster[id] = random_num(5,8)
-			player_b_m4master[id] = random_num(5,8)
-			player_b_grenade[id] = random_num(3,8)
-			player_b_sniper[id] = random_num(3,8)
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить с M3,1/%i с Deagle,1/%i с AWP,1/%i с AK47,1/%i с M4A1,1/%i с HE,1/%i с скаута",player_item_name[id],player_b_m3master[id],player_b_dglmaster[id],player_b_awpmaster[id],player_b_akmaster[id],player_b_m4master[id],player_b_grenade[id],player_b_sniper[id])
-		}
-		case 110:
-		{
-			player_item_name[id] = "Minesweeper Vigilance"
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
-		}
-		case 111:
-		{
-			player_item_name[id] = "Minesweeper Vigilance"
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
-		}
-		case 112:
-		{
-			player_item_name[id] = "Minesweeper Vigilance"
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
-		}
-		case 113:
-		{
-			player_item_name[id] = "Minesweeper Vigilance"
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
-		}
-		case 114:
-		{
-			player_item_name[id] = "Minesweeper Vigilance"
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
-		}
-		
-		case 115:
-		{
-			player_item_name[id] = "Minesweeper Vigilance"
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
-		}
-		case 116:
-		{
-			player_item_name[id] = "Diablo Shoes"
-			player_b_antyarchy[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от Arch angel", player_item_name[id], player_b_antyarchy[id])
-		}
-		case 117:
-		{
-			player_item_name[id] = "Minesweeper Vigilance"
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Meekstone", player_item_name[id], player_b_antymeek[id])
-		}
-		case 118:
-		{
-			player_item_name[id] = "Anti Explosion"
-			player_b_antyorb[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защитится от взрыва после убийства", player_item_name[id], player_b_antyorb[id])
-		}
-		case 119:
-		{
-			player_item_name[id] = "Anti HellFlare"
-			player_b_antyfs[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от огня", player_item_name[id], player_b_antyfs[id])
-		}
-		case 120:
-		{
-			player_item_name[id] = "Gheed's Fortune"
-			player_b_godmode[id] = random_num(4,10)
-			show_hudmessage(id, "Вы нашли предмет: %s^nВы становитесь бесмертным на %i секунд.", player_item_name[id], player_b_godmode[id])
-		}
-		case 121:
-		{
-			player_item_name[id] = "Winter Totem"
-			player_b_zamroztotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли предмет: %s^nЖмите Е чтобы установить замораживайщий тотем",player_item_name[id])	
-		}
-		case 122:
-		{
-			player_item_name[id] = "Cash Totem"
-			player_b_kasatotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который даёт вам и вашей команде деньги.",player_item_name[id])	
-		}
-		case 123:
-		{
-			player_item_name[id] = "Thief Totem"
-			player_b_kasaqtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который отнимает деньги врага(500$ в сек)",player_item_name[id])	
-		}
-		case 124:
-		{
-			player_item_name[id] = "Weapon Totem"
-			player_b_wywaltotem[id] = random_num(250,400)
-			show_hudmessage(id, "Вы нашли предмет: %s^nЖми E чтобы установить тотем который притягивает оружие противника.",player_item_name[id])	
-		}
-		case 125:
-		{
-			player_item_name[id] = "Flash Totem"
-			player_b_fleshujtotem[id] = random_num(250,400)
-			show_hudmessage(id, "Жми E чтобы установить тотем который ослепляет противника.",player_item_name[id])	
-		}
-
-	}
-	player_item_id[id] = item
-	BoostRing(id)
-}*/
-
 public native_set_player_model(plugin_id, num_params)
 {
 	new id = get_param(1)
@@ -16949,7 +16128,7 @@ public create_itm(vid,kid,id_item)
 	pev(kid,pev_origin,killerOrigin);
 	new entit=create_entity("info_target")
 	origins[2]-=32.0
-	if((abs(origins[0]-killerOrigin[0])<20.0) && (abs(origins[1]-killerOrigin[1])<20.0)) //модуль числа
+	if( (abs(origins[0] - killerOrigin[0]) < 20.0) && (abs(origins[1] - killerOrigin[1]) < 20.0) ) //модуль числа
 	{
 		origins[0]+=40
 		origins[1]+=40
@@ -17183,6 +16362,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					add_grenade_bonus(id,attacker_id,weapon)
 					add_theif_bonus(id,attacker_id)
 					add_bonus_blind(id,attacker_id,weapon,damage)
+					if(player_b_antyorb[id] == 1 && weapon == CSW_HEGRENADE) { return FMRES_SUPERCEDE; }
 					if(weapon != CSW_KNIFE) { add_bonus_redirect(id); }
 					add_bonus_necromancer(attacker_id,id)
 					add_bonus_scoutdamage(attacker_id,id,weapon)
@@ -18528,492 +17708,7 @@ public Effect_Fleshuj_Totem_Think(ent)
 public off_fleshuj(pid){
 	set_user_maxspeed(pid, 270.0)
 }
-/*public menum1(id) //o to ma pokazywac w switchu
-{
-        if(cs_get_user_team(id) == CS_TEAM_CT || cs_get_user_team(id) == CS_TEAM_T)
-        {
-                new menu = menu_create("\ySklep za mane","wybor_menum1")
-                
-                menu_additem(menu,"\yBronie")//,"0",0)
-                menu_additem(menu,"\yItemy","1",0)
-                menu_additem(menu,"\yInne","2",0)
-                menu_setprop(menu,MPROP_EXIT,MEXIT_ALL)
-                menu_setprop(menu,MPROP_EXITNAME,"Wyjscie")
-                menu_setprop(menu,MPROP_NEXTNAME,"Dalej")
-                menu_setprop(menu,MPROP_BACKNAME,"Wroc")
-                menu_display(id,menu,0)
-        }
-}
-public wybor_menum1(id,menu,item)
-{
-        
-        if(item==MENU_EXIT)
-        {
-                menu_destroy(menu)
-                return PLUGIN_HANDLED
-        }
-        
-        new data[6], iName[64]
-        new access, callback
-        
-        menu_item_getinfo(menu, item, access, data,5, iName, 63, callback);
-        
-        new key
-        
-        switch(key)
-        {
-                case 0: {
-                        mymenu(id)
-                }
-                case 1: {
-                        menum3(id)
-                }
 
-                case 2: {
-                        menum5(id)
-                }
-        }
-        return PLUGIN_HANDLED
-}
-public menum2(id)
-{
-        if(cs_get_user_team(id) == CS_TEAM_CT || cs_get_user_team(id) == CS_TEAM_T)
-        {
-                new menu = menu_create("\ySklep z bronia","wybor_menum2")
-                
-                menu_additem(menu,"\y M4A1 + Ammo \d[8 many]")//,"0",0)
-                menu_additem(menu,"\y AK47 + Ammo \d[7 many]","1",0)
-                menu_additem(menu,"\y AWP + Ammo \d[10 many]","2",0)
-                menu_additem(menu,"\y Famas + Ammo \d[5 many]","3",0)
-		menu_additem(menu,"\y Galil + Ammo \d[5 many]","4",0)
-		menu_additem(menu,"\y Krowa + Ammo \d[13 many]","5",0)
-		menu_additem(menu,"\y Mp5 + Ammo \d[4 many]","6",0)
-		menu_additem(menu,"\y Scout + Ammo \d[6 many]","7",0)
-		menu_additem(menu,"\y Wolna Pompa + Ammo \d[7 many]","8",0)
-		menu_additem(menu,"\y Szybka Pompa + Ammo \d[7 many]","9",0)
-		menu_additem(menu,"\y P90 + Ammo \d[4 many]","10",0)
-		menu_additem(menu,"\y Deagl + Ammo \d[2 many]","11",0)
-		menu_additem(menu,"\y Aug + Ammo \d[8 many]","12",0)
-		menu_additem(menu,"\y SG552 + Ammo \d[8 many]","13",0)
-		menu_additem(menu,"\y Noktowizor \d[5 many]","14",0)
-                menu_setprop(menu,MPROP_EXIT,MEXIT_ALL)
-                menu_setprop(menu,MPROP_EXITNAME,"Wyjscie")
-                menu_setprop(menu,MPROP_NEXTNAME,"Dalej")
-                menu_setprop(menu,MPROP_BACKNAME,"Wroc")
-                menu_display(id,menu,0)
-        }
-}
-public wybor_menum2(id,menu,item)
-{
-        
-        if(item==MENU_EXIT)
-        {
-                menu_destroy(menu)
-                return PLUGIN_HANDLED
-        }
-        
-        new data[6], iName[64]
-        new access, callback
-        
-        menu_item_getinfo(menu, item, access, data,5, iName, 63, callback);
-        
-        new key
-        
-        switch(key)
-        {
-		case 0:
-		{
-			new koszt = 4;
-			if (mana_gracza[id]<koszt)
-			{
-				ColorChat(id,GREEN,"[SKLEP]^x01 Nie masz wystarczajacej ilosci many.");
-				return PLUGIN_CONTINUE;
-			}
-			mana_gracza[id] -= koszt;
-			award_item(id,0)
-		}
-                case 1: {
-			show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 2: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 3: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 4: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 5: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 6: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 7: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 8: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 9: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 10: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 11: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 12: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 13: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 14: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-        }
-        return PLUGIN_HANDLED
-}
-public menum3(id)
-{
-        if(cs_get_user_team(id) == CS_TEAM_CT || cs_get_user_team(id) == CS_TEAM_T)
-        {
-                new menu = menu_create("\ySklep z itemami","wybor_menum3")
-                
-                menu_additem(menu,"\y Bojowe Berlo Wampira \d[10 many]","0",0)
-                menu_additem(menu,"\y Brazowa Szarfa \d[40 many]","1",0)
-                menu_additem(menu,"\y Srebna Szarfa \d[50 many]","2",0)
-                menu_additem(menu,"\y Zlota Szarfa \d[60 many]","3",0)
-		menu_additem(menu,"\y Skrzydla Aniola \d[100 many]","4",0)
-		menu_additem(menu,"\y Skrzydla Archaniola \d[130 many]","5",0)
-		menu_additem(menu,"\y Firerope \d[40 many]","6",0)
-		menu_additem(menu,"\y Ognisty Amulet \d[60 many]","7",0)
-		menu_additem(menu,"\y Pierscien Niewidzialnosci \d[140 many]","8",0)
-		menu_additem(menu,"\y Zlota Szkatulka \d[25 many]","9",0)
-		menu_additem(menu,"\y Totem Leczniczy \d[40 many]","10",0)
-		menu_additem(menu,"\y Wiekszy Totem Leczniczy \d[60 many]","11",0)
-		menu_additem(menu,"\y Szansa Szczescia \d[30 many]","12",0)
-		menu_additem(menu,"\y Miecz Boga Slonca \d[40 many]","13",0)
-		menu_additem(menu,"\y Pochodnia Piekielnego Ognia \d[85 many]","14",0)
-		menu_additem(menu,"\y Cichobiegi \d[10 many]","15",0)
-                menu_additem(menu,"\y Kamien Smierci \d[70 many]","16",0)
-                menu_additem(menu,"\y Skorzana Zbroja \d[50 many]","17",0)
-                menu_additem(menu,"\y Magiczny Noz \d[25 many]","18",0)
-		menu_additem(menu,"\y Wywazony Noz \d[45 many]","19",0)
-		menu_additem(menu,"\y Tajemnica Mlodszego Snajpera \d[70 many]","20",0)
-		menu_additem(menu,"\y Tajemnica Starszego Snajpera \d[100 many]","21",0)
-		menu_additem(menu,"\y Zmijowy Amulet \d[50 many]","22",0)
-		menu_additem(menu,"\y Pierscien Paladina \d[60 many]","23",0)
-		menu_additem(menu,"\y Pierscien Monka \d[80 many]","24",0)
-		menu_additem(menu,"\y Oko Kota \d[30 many]","25",0)
-		menu_additem(menu,"\y Oko Khalima \d[100 many]","26",0)
-		menu_additem(menu,"\y Hydrze Ostrze \d[80 many]","27",0)
-		menu_additem(menu,"\y Pierscien Expa \d[70 many]","28",0)
-		menu_additem(menu,"\y Aegis \d[90 many]","29",0)
-		menu_additem(menu,"\y Niebianski Kamien \d[70 many]","30",0)
-                menu_additem(menu,"\y Ropiejaca Esencja Destrukcji \d[140 many]","31",0)
-                menu_additem(menu,"\y Centurion \d[170 many]","32",0)
-                menu_additem(menu,"\y Dr House \d[100 many]","33",0)
-		menu_additem(menu,"\y Own Invisible \d[300 many]","34",0)
-		menu_additem(menu,"\y Mega Invisible \d[300 many]","35",0)
-		menu_additem(menu,"\y Mini Anty Special \d[30 many]","36",0)
-		menu_additem(menu,"\y Pierscien Zmarlego Rycerza \d[220 many]","37",0)
-		menu_additem(menu,"\y Pierscien Niewidzialnosci \d[140 many]","38",0)
-		menu_additem(menu,"\y Sakiewka Zlodzieja \d[150 many]","39",0)
-		menu_additem(menu,"\y Revival Ring \d[80 many]","40",0)
-		menu_additem(menu,"\y Assassin Demonow \d[170 many]","41",0)
-		menu_additem(menu,"\y Mystiqe \d[100 many]","42",0)
-		menu_additem(menu,"\y Apocalypse Anihilation \d[240 many]","43",0)
-		menu_additem(menu,"\y M4A1 Special \d[150 many]","44",0)
-		menu_additem(menu,"\y Ak47 Special \d[150 many]","45",0)
-		menu_additem(menu,"\y Awp Special \d[130 many]","46",0)
-                menu_additem(menu,"\y Deagle Special \d[140 many]","47",0)
-                menu_additem(menu,"\y M3 Special \d[145 many]","48",0)
-		menu_additem(menu,"\y Full Special \d[210 many]","49",0)
-		menu_additem(menu,"\y Full Anty Special \d[50 many]","50",0)
-		menu_additem(menu,"\y Fortuna Gheeda \d[148 many]","51",0)
-		menu_additem(menu,"\y Winter Totem \d[30 many]","52",0)
-		menu_additem(menu,"\y Cash Totem \d[40 many]","53",0)
-		menu_additem(menu,"\y Thief Totem \d[50 many]","54",0)
-		menu_additem(menu,"\y Weapon Totem \d[80 many]","55",0)
-		menu_additem(menu,"\y Flash Totem \d[80 many]","56",0)
-                menu_setprop(menu,MPROP_EXIT,MEXIT_ALL)
-                menu_setprop(menu,MPROP_EXITNAME,"Wyjscie")
-                menu_setprop(menu,MPROP_NEXTNAME,"Dalej")
-                menu_setprop(menu,MPROP_BACKNAME,"Wroc")
-                menu_display(id,menu,0)
-        }
-}
-public wybor_menum3(id,menu,item)
-{
-        
-        if(item==MENU_EXIT)
-        {
-                menu_destroy(menu)
-                return PLUGIN_HANDLED
-        }
-        
-        new data[6], iName[64]
-        new access, callback
-        
-        menu_item_getinfo(menu, item, access, data,5, iName, 63, callback);
-        
-        new key = str_to_num(data)
-        
-        switch(key)
-        {
-                case 0: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 1: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 2: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 3: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 4: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 5: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 6: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 7: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 8: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 9: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 10: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 11: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 12: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 13: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 14: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 15: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 16: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 17: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 18: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 19: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 20: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 21: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 22: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 23: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 24: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-		case 25: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 26: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 27: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 28: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 29: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 30: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 31: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 32: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 33: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 34: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-		case 35: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 36: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 37: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 38: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 39: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 40: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 41: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 42: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 43: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 44: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-		case 45: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 46: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 47: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 48: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 49: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 50: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-                case 51: {
-                        show_motd(id, "addons/data/lang/1.txt4")
-                }
-		case 52: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 53: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 54: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-		case 55: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-                case 56: {
-                        show_motd(id, "addons/data/lang/1.txt3")
-                }
-        }
-        return PLUGIN_HANDLED
-}
-public menum5(id)
-{
-        if(cs_get_user_team(id) == CS_TEAM_CT || cs_get_user_team(id) == CS_TEAM_T)
-        {
-                new menu = menu_create("\yInne","wybor_menum5")
-                
-                menu_additem(menu,"\wLosowy Item \d[10 many]","0",0)
-                menu_additem(menu,"\wUlepszenie Itemu \d[10 many]","1",0)
-                menu_setprop(menu,MPROP_EXIT,MEXIT_ALL)
-                menu_setprop(menu,MPROP_EXITNAME,"Wyjscie")
-                menu_setprop(menu,MPROP_NEXTNAME,"Dalej")
-                menu_setprop(menu,MPROP_BACKNAME,"Wroc")
-                menu_display(id,menu,0)
-        }
-}
-public wybor_menum5(id,menu,item)
-{
-        
-        if(item==MENU_EXIT)
-        {
-                menu_destroy(menu)
-                return PLUGIN_HANDLED
-        }
-        
-        new data[6], iName[64]
-        new access, callback
-        
-        menu_item_getinfo(menu, item, access, data,5, iName, 63, callback);
-        
-        new key = str_to_num(data)
-        
-        switch(key)
-        {
-                case 0: {
-                        show_motd(id, "addons/data/lang/1.txt")
-                }
-                case 1: {
-                        show_motd(id, "addons/data/lang/1.txt2")
-                }
-        }
-        return PLUGIN_HANDLED
-}
-public mymenu(id){
-	new MyMenu=menu_create("Test","cbMyMenu");
-	
-	menu_additem(MyMenu,"los");//item=0
-	menu_additem(MyMenu,"Czesc");//item=1
-	menu_additem(MyMenu,"Nq");//item=2
-	
-	menu_display(id, MyMenu,0);
-	return PLUGIN_HANDLED;
-}
-public cbMyMenu(id, menu, item){
-	switch(item){
-		case 0:
-		{
-			new koszt = 4;
-			if (mana_gracza[id]<koszt)
-			{
-				ColorChat(id,GREEN,"[SKLEP]^x01 Nie masz wystarczajacej ilosci many.");
-				return PLUGIN_CONTINUE;
-			}
-			mana_gracza[id] -= koszt;
-			award_item(id,0)
-		}
-		case 1:{
-			client_cmd(id, "say Czesc");
-		}
-		case 2:{
-			client_cmd(id, "say nq");
-		}
-	}
-	menu_destroy(menu);
-	return PLUGIN_HANDLED;
-}*/
 public mana1(id){
 	new mana1=menu_create("Магазин золота","mana1a");
 	
@@ -19303,810 +17998,7 @@ public mana2a(id, menu, item){
 	menu_destroy(menu);
 	return PLUGIN_HANDLED;
 }
-/*public mana3(id)
-{
-	new mana3=menu_create("Магазин Item","mana3a");
-	
-	menu_additem(mana3,"\y Vampyric Scepter \d[10 золота]")
-	menu_additem(mana3,"\y Small bronze bag \d[40 золота]")
-	menu_additem(mana3,"\y Medium silver bag \d[50 золота]")
-	menu_additem(mana3,"\y Large gold bag \d[60 золота]")
-	menu_additem(mana3,"\y Small angel wings \d[100 золота]")
-	menu_additem(mana3,"\y Arch angel wings \d[130 золота]")
-	menu_additem(mana3,"\y Firerope \d[40 золота]")
-	menu_additem(mana3,"\y Fire Amulet \d[60 золота]")
-	menu_additem(mana3,"\y Stalkers ring \d[140 золота]")
-	menu_additem(mana3,"\y Gold statue \d[25 золота]")
-	menu_additem(mana3,"\y Daylight Diamond \d[40 золота]")
-	menu_additem(mana3,"\y Blood Diamond \d[60 золота]")
-	menu_additem(mana3,"\y Wheel of Fortune \d[30 золота]")
-	menu_additem(mana3,"\y Sword of the sun \d[40 золота]")
-	menu_additem(mana3,"\y Fireshield \d[85 золота]")
-	menu_additem(mana3,"\y Stealth Shoes \d[10 золота]")
-	menu_additem(mana3,"\y Meekstone \d[70 золота]")
-	menu_additem(mana3,"\y Godly Armor \d[50 золота]")
-	menu_additem(mana3,"\y Knife Ruby \d[25 золота]")
-	menu_additem(mana3,"\y Sword \d[45 золота]")
-	menu_additem(mana3,"\y Scout Extender \d[70 золота]")
-	menu_additem(mana3,"\y Scout Amplifier \d[100 золота]")
-	menu_additem(mana3,"\y Iron Spikes \d[50 золота]")
-	menu_additem(mana3,"\y Paladin ring \d[60 золота]")
-	menu_additem(mana3,"\y Monk ring \d[80 золота]")
-	menu_additem(mana3,"\y Flashbang necklace \d[30 золота]")
-	menu_additem(mana3,"\y Khalim Eye \d[100 золота]")
-	menu_additem(mana3,"\y Hydra Blade \d[80 золота]")
-	menu_additem(mana3,"\y Exp Ring \d[70 золота]")
-	menu_additem(mana3,"\y Aegis \d[90 золота]")
-	menu_additem(mana3,"\y Heavenly Stone \d[70 золота]")
-	menu_additem(mana3,"\y Festering Essence of Destruction \d[140 золота]")
-	menu_additem(mana3,"\y Centurion \d[170 many]","32")
-	menu_additem(mana3,"\y Dr House \d[100 many]","33")
-	menu_additem(mana3,"\y Own Invisible \d[300 золота]")
-	menu_additem(mana3,"\y Mega Invisible \d[300 золота]")
-	menu_additem(mana3,"\y Bul'Kathos Shoes \d[30 золота]")
-	menu_additem(mana3,"\y Karik's Ring \d[220 золота]")
-	menu_additem(mana3,"\y Purse Thief \d[150 золота]")
-	menu_additem(mana3,"\y Revival Ring \d[80 золота]")
-	menu_additem(mana3,"\y Demon Assassin \d[170 many]","41")
-	menu_additem(mana3,"\y Mystiqe \d[100 many]","42")
-	menu_additem(mana3,"\y Apocalypse Anihilation \d[240 many]","43")
-	menu_additem(mana3,"\y M4A1 Special \d[150 золота]")
-	menu_additem(mana3,"\y Ak47 Special \d[150 золота]")
-	menu_additem(mana3,"\y AWP Special \d[130 золота]")
-	menu_additem(mana3,"\y Deagle Special \d[140 золота]")
-	menu_additem(mana3,"\y M3 Special \d[145 золота]")
-	menu_additem(mana3,"\y Full Special \d[210 золота]")
-	menu_additem(mana3,"\y Hellspawn \d[50 золота]")
-	menu_additem(mana3,"\y Gheed's Fortune \d[148 золота]")
-	menu_additem(mana3,"\y Winter Totem \d[30 золота]")
-	menu_additem(mana3,"\y Cash Totem \d[40 золота]")
-	menu_additem(mana3,"\y Thief Totem \d[50 золота]")
-	menu_additem(mana3,"\y Weapon Totem \d[80 золота]")
-	menu_additem(mana3,"\y Flash Totem \d[80 золота]")
-	menu_setprop(mana3,MPROP_EXIT,MEXIT_ALL)
-	menu_setprop(mana3,MPROP_EXITNAME,"Выход")
-	menu_setprop(mana3,MPROP_NEXTNAME,"Далее")
-	menu_setprop(mana3,MPROP_BACKNAME,"Назад")
-	
-	menu_display(id, mana3,0);
-	return PLUGIN_HANDLED;
-}
-public mana3a(id, menu, item){
-	switch(item){
-		case 0:
-		{
-			new koszt = 10;
-			if (mana_gracza[id]<koszt && player_item_id[id] != 0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,6)
-			}
-		}
-		case 1:{
-			new koszt = 40;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,7)
-			}
-		}
-		case 2:{
-			new koszt = 50;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,8)
-			}
-		}
-		case 3:{
-			new koszt = 60;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,9)
-			}
-		}
-		case 4:{
-			new koszt = 100;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,10)
-			}
-		}
-		case 5:{
-			new koszt = 130;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,11)
-			}
-		}
-		case 6:{
-			new koszt = 40;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,15)
-			}
-		}
-		case 7:{
-			new koszt = 60;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,16)
-			}
-		}
-		case 8:{
-			new koszt = 140;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,17)
-			}
-		}
-		case 9:{
-			new koszt = 25;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,23)
-			}
-		}
-		case 10:{
-			new koszt = 40;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,24)
-			}
-		}
-		case 11:{
-			new koszt = 60;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,25)
-			}
-		}
-		case 12:{
-			new koszt = 30;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,26)
-			}
-		}
-		case 13:{
-			new koszt = 40;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,29)
-			}
-		}
-		case 14:{
-			new koszt = 85;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,30)
-			}
-		}
-		case 15:{
-			new koszt = 10;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,31)
-			}
-		}
-		case 16:{
-			new koszt = 70;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,32)
-			}
-		}
-		case 17:{
-			new koszt = 50;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,37)
-			}
-		}
-		case 18:{
-			new koszt = 25;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,42)
-			}
-		}
-		case 19:{
-			new koszt = 45;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,44)
-			}
-		}
-		case 20:{
-			new koszt = 70;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,47)
-			}
-		}
-		case 21:{
-			new koszt = 100;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,48)
-			}
-		}
-		case 22:{
-			new koszt = 50;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,50)
-			}
-		}
-		case 23:{
-			new koszt = 60;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,62)
-			}
-		}
-		case 24:{
-			new koszt = 80;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,63)
-			}
-		}
-		case 25:{
-			new koszt = 30;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,65)
-			}
-		}
-		case 26:{
-			new koszt = 100;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,69)
-			}
-		}
-		case 27:{
-			new koszt = 80;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,74)
-			}
-		}
-		case 28:{
-			new koszt = 70;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,75)
-			}
-		}
-		case 29:{
-			new koszt = 90;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,76)
-			}
-		}
-		case 30:{
-			new koszt = 70;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,78)
-			}
-		}
-		case 31:{
-			new koszt = 140;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,79)
-			}
-		}
-		case 32:{
-			new koszt = 170;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,85)
-			}
-		}
-		case 33:{
-			new koszt = 100;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,87)
-			}
-		}
-		case 34:{
-			new koszt = 300;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,88)
-			}
-		}
-		case 35:{
-			new koszt = 300;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,89)
-			}
-		}
-		case 36:{
-			new koszt = 30;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,90)
-			}
-		}
-		case 37:{
-			new koszt = 220;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,91)
-			}
-		}
-		case 38:{
-			new koszt = 150;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,92)
-			}
-		}
-		case 39:{
-			new koszt = 80;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,94)
-			}
-		}
-		case 40:{
-			new koszt = 170;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,95)
-			}
-		}
-		case 41:{
-			new koszt = 100;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,96)
-			}
-		}
-		case 42:{
-			new koszt = 240;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,97)
-			}
-		}
-		case 43:{
-			new koszt = 150;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,104)
-			}
-		}
-		case 44:{
-			new koszt = 150;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,105)
-			}
-		}
-		case 45:{
-			new koszt = 130;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,106)
-			}
-		}
-		case 46:{
-			new koszt = 140;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,107)
-			}
-		}
-		case 47:{
-			new koszt = 145;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,108)
-			}
-		}
-		case 48:{
-			new koszt = 210;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,109)
-			}
-		}
-		case 49:{
-			new koszt = 50;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,99)
-			}
-		}
-		case 50:{
-			new koszt = 148;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,120)
-			}
-		}
-		case 51:{
-			new koszt = 30;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,121)
-			}
-		}
-		case 52:{
-			new koszt = 40;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,122)
-			}
-		}
-		case 53:{
-			new koszt = 50;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,123)
-			}
-		}
-		case 54:{
-			new koszt = 80;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,124)
-			}
-		}
-		case 55:{
-			new koszt = 80;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
-			{
-				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть item");
-				return PLUGIN_CONTINUE;
-			}
-			if (mana_gracza[id]>=koszt)
-			{
-			mana_gracza[id] -= koszt;
-			award_item(id,125)
-			}
-		}
-	}
-	menu_destroy(menu);
-	return PLUGIN_HANDLED;
-}
-*/
+
 public mana4(id){
 	new mana4=menu_create("Магазин","mana4a");
 	
