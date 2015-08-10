@@ -940,8 +940,10 @@ public plugin_init()
 	register_clcmd("say /who","cmd_who")	
 	register_clcmd("showskills", "showskills")
 	register_clcmd("say skills", "showskills")
-	register_clcmd("showmenu","showmenu") 
-	register_clcmd("say menu","showmenu")
+	register_clcmd("showmenu","showmenu")
+	register_clcmd("d2menu","showmenu")
+	register_clcmd("say menu","showmenu")	
+	register_clcmd("say d2","showmenu")
 	//register_clcmd("pomoc","helpme") 
 	//register_clcmd("say /rune","mana4") 
 	//register_clcmd("rune","mana4")
@@ -997,7 +999,7 @@ public plugin_init()
 	register_cvar("diablo_xp_multi2","2",0)
 	register_cvar("diablo_durability","5",0)
 	register_cvar("diablo_show_health","1")	
-	cvar_max_gold 	= register_cvar("diablo_maxgold","250") 
+	cvar_max_gold 	= register_cvar("diablo_maxgold","30") 
 	//register_cvar("SaveXP", "1")
 	set_msg_block ( gmsgDeathMsg, BLOCK_SET ) 
 	set_task(5.0, "Timed_Healing", 0, "", 0, "b")
@@ -3532,12 +3534,16 @@ public DeathMsg(id)
 					{
 						mana_gracza[kid]+=1
 					}
+					else
+					{
+						mana_gracza[kid]=get_pcvar_num(cvar_max_gold)
+					}
 				}
 				award_kill(kid,vid)
 			}
 		}
 	}
-	if(player_class[id] == Zakarum)
+	else if(player_class[id] == Zakarum)
 	{
 		if(on_knife[id])
 		{
@@ -3549,6 +3555,10 @@ public DeathMsg(id)
 					if((mana_gracza[kid]+1) < get_pcvar_num(cvar_max_gold))
 					{
 						mana_gracza[kid]+=1
+					}
+					else
+					{
+						mana_gracza[kid]=get_pcvar_num(cvar_max_gold)
 					}
 				}
 				award_kill(kid,vid)
@@ -3610,12 +3620,9 @@ public DeathMsg(id)
 			{
 				mana_gracza[kid]+=3
 			}
-		}
-		else
-		{
-			if((mana_gracza[kid]+1) < get_pcvar_num(cvar_max_gold))
+			else
 			{
-				mana_gracza[kid]+=1
+				mana_gracza[kid]=get_pcvar_num(cvar_max_gold)
 			}
 		}
 	
@@ -4646,6 +4653,15 @@ public award_kill(killer_id,victim_id)
 	}
 	
 	Give_Xp(killer_id,xp_award)
+	
+	if((mana_gracza[killer_id]+1) < get_pcvar_num(cvar_max_gold))
+	{
+		mana_gracza[killer_id]+=1
+	}
+	else
+	{
+		mana_gracza[killer_id]=get_pcvar_num(cvar_max_gold)
+	}
 
 	return PLUGIN_CONTINUE
 	
@@ -8727,7 +8743,7 @@ public showmenu(id)
 	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
 	
 	
-	format(text, 512, "\rДиабло меню\R^n^n\y1.\w Описание предмета^n\y2.\w Выкинуть текущий предмет^n\y3.\w Помощь^n\y4.\w Информация об игроках^n\y5.\w Магазин^n\y6.\w Мои навыки^n\y7.\w Сменить расу^n^n\y0.\w Выход") 
+	format(text, 512, "\rДиабло меню\R^n^n\y1.\w Описание предмета^n\y2.\w Выкинуть текущий предмет^n\y3.\w Помощь^n\y4.\w Информация об игроках^n\y5.\w Магазин Диабло^n\y6.\w Мои навыки^n\y7.\w Сменить расу^n^n\y0.\w Выход") 
 	
 	show_menu(id, keys, text, -1, "ShowMenu")
 	return PLUGIN_HANDLED  
@@ -8972,41 +8988,57 @@ switch(key)
 	{
 		player_newclass[id] = Mag
 		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Раса сменится в следующем раунде")
 	}
 	case 1: 
 	{
 		player_newclass[id] = Monk
 		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Раса сменится в следующем раунде")
 	}
 	case 2: 
 	{
 		player_newclass[id] =  Paladin
 		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Раса сменится в следующем раунде")
 	}
 	case 3: 
 	{
 		player_newclass[id] = Assassin
 		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Раса сменится в следующем раунде")
 	}
 	case 4: 
 	{
 		player_newclass[id] = Necromancer
 		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Раса сменится в следующем раунде")
 	}
 	case 5: 
 	{
 		player_newclass[id] = Barbarian
 		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Раса сменится в следующем раунде")
 	}
 	case 6: 
 	{
 		player_newclass[id] = Ninja
 		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Раса сменится в следующем раунде")
 	}
 	case 7: 
 	{
 		player_newclass[id] = Amazon
 		ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Раса сменится в следующем раунде")
 	}
 	case 9: 
 	{ 
@@ -9050,41 +9082,57 @@ public PressedKlasy(id, key)
 		{
 			player_newclass[id] = Fallen
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 1: 
 		{
 			player_newclass[id] = Duriel
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 2: 
 		{
 			player_newclass[id] = Mephisto
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 3: 
 		{
 			player_newclass[id] = Izual
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 4: 
 		{
 			player_newclass[id] = Diablo
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 5: 
 		{
 			player_newclass[id] = Baal
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 6: 
 		{
 			player_newclass[id] = BloodRaven	  
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 7: 
 		{
 			player_newclass[id] = Imp
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 9: 
 		{ 
@@ -9130,36 +9178,50 @@ public PokazZwierz( id, item )
 		{
 			player_newclass[id] = Zakarum
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 1: 
 		{
 			player_newclass[id] = Viper
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 2: 
 		{
 			player_newclass[id] = Mosquito
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 3: 
 		{
 			player_newclass[id] = Frozen
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 4: 
 		{
 			player_newclass[id] = Infidel
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 5: 
 		{
 			player_newclass[id] = GiantSpider
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 6: 
 		{
 			player_newclass[id] = SabreCat
 			ColorChat(id, GREEN, "Раса сменится в следующем раунде")
+			set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
+			show_hudmessage(id, "Раса сменится в следующем раунде")
 		}
 		case 9: 
 		{ 
@@ -14984,6 +15046,8 @@ public set_portal(id)
 	{
 		player_portal_infotrg_1[id] = g_ent;
 		player_portal_sprite_1[id] = g_ent2;
+		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 2.0, 2.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Установите второй портал")
 	}
 	if(player_portals[id] == 2)
 	{
@@ -16186,7 +16250,15 @@ public TTWin() {
 			if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_T) 
 			{
 				Give_Xp(id, xp);
-				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта за победу твоей команды в раунде", xp);
+				if((mana_gracza[id]+3) < get_pcvar_num(cvar_max_gold))
+				{
+					mana_gracza[id]+=3
+				}
+				else
+				{
+					mana_gracza[id]=get_pcvar_num(cvar_max_gold)
+				}
+				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта и 3 зол. за победу твоей команды в раунде", xp);
 			}
 		}
 }
@@ -16213,7 +16285,15 @@ public CTWin()
 			if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_CT) 
 			{
 				Give_Xp(id, xp);
-				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта за победу твоей команды в раунде", xp);
+				if((mana_gracza[id]+3) < get_pcvar_num(cvar_max_gold))
+				{
+					mana_gracza[id]+=3
+				}
+				else
+				{
+					mana_gracza[id]=get_pcvar_num(cvar_max_gold)
+				}
+				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта и 3 зол. за победу твоей команды в раунде", xp);
 			}
 		}
 }
@@ -18000,15 +18080,12 @@ public mana2a(id, menu, item){
 }
 
 public mana4(id){
-	new mana4=menu_create("Магазин","mana4a");
+	new mana4=menu_create("Магазин Диабло","mana4a");
 	
 	menu_additem(mana4,"\wОружие")
 	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
 	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
-	menu_additem(mana4,"\wСвиток портала \d[25 золота]")
-	menu_additem(mana4,"\dЗелье противоядия [золота]")
-	menu_additem(mana4,"\dЗелье оттаивания [золота]")
-	menu_additem(mana4,"\dЗелье охлаждения [золота]")
+	menu_additem(mana4,"\wСвиток портала \d[15 золота]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
@@ -18066,7 +18143,7 @@ public mana4a(id, menu, item)
 		}
 		case 3:
 		{
-			new koszt = 25;
+			new koszt = 15;
 			if (mana_gracza[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
@@ -18080,6 +18157,8 @@ public mana4a(id, menu, item)
 				player_portals[id] = 0;
 				ColorChat(id, NORMAL, "^x04НАВЕДИТЕ ПРИЦЕЛ на место размещения и установите");
 				ColorChat(id, NORMAL, "МЕНЮ ПОРТАЛА - наберите в чате ^x04portal");
+				set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 4.0, 5.0, 0.2, 0.3, 5)
+				show_hudmessage(id, "Навести прицел на стену. Нажать Установить")
 				cmd_place_portal(id);
 			}
 		}
