@@ -9118,7 +9118,7 @@ public ShowKlasy(id)
 {
 	new text2[512]
 	format(text2, 511,"\yДемоны: ^n\w1. \yПадший^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yДиабло^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yКровавый ворон^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
-	player_class_lvl[id][9],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][15],player_class_lvl[id][16])
+	player_class_lvl[id][15],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][9],player_class_lvl[id][16])
 
 	new szosta
 	szosta = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<7)|(1<<9)
