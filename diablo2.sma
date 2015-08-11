@@ -496,9 +496,6 @@ new bloodbow_VIEW[]  = "models/diablomod/v_ravenbow.mdl"
 new bloodbow_PLAYER[]= "models/diablomod/p_ravenbow.mdl" 
 //new bloodbow_MODEL[]  = "models/diablomod/Crossbow_bolt.mdl"
 
-new LeaderCT = -1
-new LeaderT = -1
-
 new JumpsLeft[33]
 new JumpsMax[33]
 
@@ -988,6 +985,8 @@ public plugin_init()
 	register_menucmd(register_menuid("Heroes"), 1023, "PokazMeni")
 	register_menucmd(register_menuid("Звери"), 1023, "PokazZwierz")
 	register_menucmd(register_menuid("Премиум"), 1023, "PokazPremium")
+	register_menucmd(register_menuid("ShowSkillInfo"), 1023, "showskills_menu")
+	register_menucmd(register_menuid("ShowHelp"), 1023, "helpme_menu")
 	gmsgDeathMsg = get_user_msgid("DeathMsg")
 	gmsgStatusText = get_user_msgid("StatusText")
 	gmsgBartimer = get_user_msgid("BarTime") 
@@ -4636,12 +4635,6 @@ public award_kill(killer_id,victim_id)
 	new Team[32]
 	get_user_team(killer_id,Team,31)
 	
-	if (LeaderCT > 0 && equal(Team,"CT") && !is_user_alive(LeaderCT))
-		xp_award-= get_cvar_num("diablo_xpbonus")/4
-	
-	if (LeaderT > 0 && equal(Team,"TERRORIST") && !is_user_alive(LeaderT))
-		xp_award-= get_cvar_num("diablo_xpbonus")/4
-	
 	if (player_xp[killer_id]<player_xp[victim_id]) 
 		xp_award+=get_cvar_num("diablo_xpbonus")/4
 		
@@ -5578,9 +5571,81 @@ public auto_help(id)
 
 public helpme(id)
 {	 
-	show_motd(id, "http://lpstrike.ru/diablo_help.html", "Помощь Diablo Mod")
+	new text[512] 
+		
+	format(text,511,"\yПомощь\w^n^n\y1.\w Введение^n\y2.\w Команды^n\y3.\w Описание рас^n^n^n\y0.\w \wНазад")
+	new keys
+	keys = (1<<0)|(1<<1)|(1<<2)|(1<<9)
+	
+	show_menu(id, keys, text, -1, "ShowHelp") 
+	return PLUGIN_HANDLED  
+} 
+
+
+public helpme_menu(id, key) 
+{ 
+	switch(key) 
+	{ 
+		case 0: 
+		{	
+			show_motd(id, "http://diablo.lpstrike.ru/motd_main.html", "Введение")
+		}
+		case 1: 
+		{	
+			show_motd(id, "http://diablo.lpstrike.ru/motd_commands.html", "Команды")
+		}
+		case 2: 
+		{	
+			raceDeskMenu(id)
+		}
+		case 9: 
+		{	
+			showmenu(id)
+		}
+	}
+	
+	return PLUGIN_HANDLED
 }
 
+public raceDeskMenu(id){
+	new mana4=menu_create("Описание рас","raceInfoMenu");
+	
+	menu_additem(mana4,"\Демоны")
+	menu_additem(mana4,"\wЗвери")
+	menu_additem(mana4,"\wЛюди")
+	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
+	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
+	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
+	menu_setprop(mana4,MPROP_BACKNAME,"Назад")
+	menu_setprop(mana4,MPROP_NUMBER_COLOR,"\y")
+	
+	menu_display(id, mana4,0);
+	return PLUGIN_HANDLED;
+}
+public raceInfoMenu(id, menu, item)
+{
+	switch(item)
+	{
+		case 0:
+		{
+
+		}
+		case 1:
+		{
+
+		}
+		case 2:
+		{
+
+		}
+		case 3:
+		{
+
+		}
+	}
+	menu_destroy(menu);
+	return PLUGIN_HANDLED;
+}
 /* ==================================================================================================== */
 
 public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[],itemcolor[],itemimage[],imagetype[])
@@ -9947,18 +10012,37 @@ public SelectBotRace(id)
 
 public showskills(id)
 {
-	new Skillsinfo[768]
-	format(Skillsinfo,767,"У вас %i Выносливости - это даёт тебе %i HP<br><br>У вас %i ловкость - увел. скорость на %i% и умен. урон от магии на %i%<br>У вас %i силы - Повышает щанс найти улучш. предмет и умен. урон на %0.0f%%<br><br>У вас %i интеллекта - увел. прочность и силу действия item<br>",
+	new text[512] 
+		
+	format(text,511,"\yИнфо о навыках\w^n^n\r%i выносливости\w +%i HP^n\r%i ловкости\w - увел. скорость на %i%^nи умен. магич. урон на %i%^n\r%i силы\w - щанс найти улучш. предмет^nи умен. физ. урон на %i^n\r%i интеллекта\w - увел. ваш магич. урон ^nи усилив. предметы^n^n\r1. \wНазад",
 	player_strength[id],
 	player_strength[id]*2,
 	player_dextery[id],
 	floatround(player_dextery[id]*1.3),
 	player_dextery[id]*3,
 	player_agility[id],
-	player_damreduction[id]*100,
+	floatround(player_damreduction[id])*100,
 	player_intelligence[id])
 	
-	showitem(id,"Способности","Нет","Нет", Skillsinfo,"","","")
+	new keys
+	keys = (1<<0)
+	
+	show_menu(id, keys, text, -1, "ShowSkillInfo") 
+	return PLUGIN_HANDLED  
+} 
+
+
+public showskills_menu(id, key) 
+{ 
+	switch(key) 
+	{ 
+		case 0: 
+		{	
+			showmenu(id)
+		}
+	}
+	
+	return PLUGIN_HANDLED
 }
 
 /* ==================================================================================================== */
@@ -18090,6 +18174,7 @@ public mana4(id){
 	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
 	menu_setprop(mana4,MPROP_BACKNAME,"Назад")
+	menu_setprop(mana4,MPROP_NUMBER_COLOR,"\y")
 	
 	menu_display(id, mana4,0);
 	return PLUGIN_HANDLED;
@@ -18117,7 +18202,6 @@ public mana4a(id, menu, item)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть предмет");
 				mana4(id)
-				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
@@ -18132,7 +18216,6 @@ public mana4a(id, menu, item)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				mana4(id)
-				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
@@ -18148,7 +18231,6 @@ public mana4a(id, menu, item)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				mana4(id)
-				return PLUGIN_CONTINUE;
 			}
 			if (mana_gracza[id]>=koszt)
 			{
