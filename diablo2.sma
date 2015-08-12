@@ -949,7 +949,7 @@ public plugin_init()
 	register_clcmd("say reset","reset_skill")
 	register_clcmd("reset_skill","reset_skill")
 	//register_clcmd("say /exp", "exp")
-	//register_clcmd("say exp", "exp")
+	register_clcmd("say xp", "exp")
 	//register_clcmd("reset","reset_skill")	 
 	//register_clcmd("/reset","reset_skill")
 	//register_clcmd("say /gold","mana1")
@@ -5573,7 +5573,7 @@ public helpme(id)
 {	 
 	new text[512] 
 		
-	format(text,511,"\yПомощь\w^n^n\y1.\w Введение^n\y2.\w Команды^n\y3.\w Описание рас^n^n^n\y0.\w \wНазад")
+	format(text,511,"\yПомощь\w^n^n\y1.\w Введение^n\y2.\w Команды^n\y3.\w Описание рас^n^n\y0.\w \wНазад в меню")
 	new keys
 	keys = (1<<0)|(1<<1)|(1<<2)|(1<<9)
 	
@@ -5589,10 +5589,12 @@ public helpme_menu(id, key)
 		case 0: 
 		{	
 			show_motd(id, "http://diablo.lpstrike.ru/motd_main.html", "Введение")
+			helpme(id)
 		}
 		case 1: 
 		{	
 			show_motd(id, "http://diablo.lpstrike.ru/motd_commands.html", "Команды")
+			helpme(id)
 		}
 		case 2: 
 		{	
@@ -5610,11 +5612,11 @@ public helpme_menu(id, key)
 public raceDeskMenu(id){
 	new mana4=menu_create("Описание рас","raceInfoMenu");
 	
-	menu_additem(mana4,"\Демоны")
+	menu_additem(mana4,"\wДемоны")
 	menu_additem(mana4,"\wЗвери")
 	menu_additem(mana4,"\wЛюди")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
-	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
+	menu_setprop(mana4,MPROP_EXITNAME,"Назад к помощи")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
 	menu_setprop(mana4,MPROP_BACKNAME,"Назад")
 	menu_setprop(mana4,MPROP_NUMBER_COLOR,"\y")
@@ -5622,25 +5624,242 @@ public raceDeskMenu(id){
 	menu_display(id, mana4,0);
 	return PLUGIN_HANDLED;
 }
+
 public raceInfoMenu(id, menu, item)
 {
 	switch(item)
 	{
 		case 0:
 		{
-
+			raceDeskMenuDeamons(id)
 		}
 		case 1:
 		{
-
+			raceDeskMenuAnimals(id)
 		}
 		case 2:
 		{
+			raceDeskMenuHeroes(id)
+		}
+		case MENU_EXIT:
+		{
+			helpme(id)
+		}
+	}
+	menu_destroy(menu);
+	return PLUGIN_HANDLED;
+}
 
+public raceDeskMenuDeamons(id){
+	new mana4=menu_create("Описание Демонов","raceDeskMenuDeamonsMenu");
+	
+	menu_additem(mana4,"\wПадший")
+	menu_additem(mana4,"\wДуриель")
+	menu_additem(mana4,"\wМефисто")
+	menu_additem(mana4,"\wИзуал")
+	menu_additem(mana4,"\wДиабло")
+	menu_additem(mana4,"\wБаал")
+	menu_additem(mana4,"\wКровавый ворон")
+	menu_additem(mana4,"\wБес")
+	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
+	menu_setprop(mana4,MPROP_EXITNAME,"Назад к классам")
+	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
+	menu_setprop(mana4,MPROP_BACKNAME,"Назад")
+	menu_setprop(mana4,MPROP_NUMBER_COLOR,"\y")
+	
+	menu_display(id, mana4,0);
+	return PLUGIN_HANDLED;
+}
+
+public raceDeskMenuDeamonsMenu(id, menu, item)
+{
+	switch(item)
+	{
+		case 0:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Fallen", "Падший")
+			raceDeskMenuDeamons(id)
+		}
+		case 1:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Duriel", "Дуриель")
+			raceDeskMenuDeamons(id)
+		}
+		case 2:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Mephisto", "Мефисто")
+			raceDeskMenuDeamons(id)
 		}
 		case 3:
 		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Izual", "Изуал")
+			raceDeskMenuDeamons(id)
+		}
+		case 4:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Diablo", "Диабло")
+			raceDeskMenuDeamons(id)
+		}
+		case 5:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Baal", "Баал")
+			raceDeskMenuDeamons(id)
+		}
+		case 6:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Bloodraven", "Кровавый ворон")
+			raceDeskMenuDeamons(id)
+		}
+		case 7:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Imp", "Бес")
+			raceDeskMenuDeamons(id)
+		}
+		case MENU_EXIT:
+		{
+			raceDeskMenu(id)
+		}
+	}
+	menu_destroy(menu);
+	return PLUGIN_HANDLED;
+}
 
+public raceDeskMenuAnimals(id){
+	new mana4=menu_create("Описание Зверей","raceDeskMenuAnimalsMenu");
+	
+	menu_additem(mana4,"\wЗакарум")
+	menu_additem(mana4,"\wСаламандра")
+	menu_additem(mana4,"\wГигантский комар")
+	menu_additem(mana4,"\wЛедяной ужас")
+	menu_additem(mana4,"\wИнфидель")
+	menu_additem(mana4,"\wГигантский паук")
+	menu_additem(mana4,"\wАдский кот")
+	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
+	menu_setprop(mana4,MPROP_EXITNAME,"Назад к классам")
+	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
+	menu_setprop(mana4,MPROP_BACKNAME,"Назад")
+	menu_setprop(mana4,MPROP_NUMBER_COLOR,"\y")
+	
+	menu_display(id, mana4,0);
+	return PLUGIN_HANDLED;
+}
+
+public raceDeskMenuAnimalsMenu(id, menu, item)
+{
+	switch(item)
+	{
+		case 0:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Zakarum", "Закарум")
+			raceDeskMenuAnimals(id)
+		}
+		case 1:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Viper", "Саламандра")
+			raceDeskMenuAnimals(id)
+		}
+		case 2:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Mosquito", "Гигантский комар")
+			raceDeskMenuAnimals(id)
+		}
+		case 3:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Frozzen", "Ледяной ужас")
+			raceDeskMenuAnimals(id)
+		}
+		case 4:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Infidel", "Инфидель")
+			raceDeskMenuAnimals(id)
+		}
+		case 5:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=GiantSpider", "Гигантский паук")
+			raceDeskMenuAnimals(id)
+		}
+		case 6:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=SabreCat", "Адский кот")
+			raceDeskMenuAnimals(id)
+		}
+		case MENU_EXIT:
+		{
+			raceDeskMenu(id)
+		}
+	}
+	menu_destroy(menu);
+	return PLUGIN_HANDLED;
+}
+
+public raceDeskMenuHeroes(id){
+	new mana4=menu_create("Описание Людей","raceDeskMenuHeroesMenu");
+	
+	menu_additem(mana4,"\wМаг")
+	menu_additem(mana4,"\wМонах")
+	menu_additem(mana4,"\wПаладин")
+	menu_additem(mana4,"\wАссассин")
+	menu_additem(mana4,"\wНекромант")
+	menu_additem(mana4,"\wВарвар")
+	menu_additem(mana4,"\wНиндзя")
+	menu_additem(mana4,"\wАмазонка")
+	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
+	menu_setprop(mana4,MPROP_EXITNAME,"Назад к классам")
+	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
+	menu_setprop(mana4,MPROP_BACKNAME,"Назад")
+	menu_setprop(mana4,MPROP_NUMBER_COLOR,"\y")
+	
+	menu_display(id, mana4,0);
+	return PLUGIN_HANDLED;
+}
+
+public raceDeskMenuHeroesMenu(id, menu, item)
+{
+	switch(item)
+	{
+		case 0:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Mag", "Маг")
+			raceDeskMenuHeroes(id)
+		}
+		case 1:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Monk", "Монах")
+			raceDeskMenuHeroes(id)
+		}
+		case 2:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Paladin", "Паладин")
+			raceDeskMenuHeroes(id)
+		}
+		case 3:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Assassin", "Ассассин")
+			raceDeskMenuHeroes(id)
+		}
+		case 4:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Necromancer", "Некромант")
+			raceDeskMenuHeroes(id)
+		}
+		case 5:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Barbarian", "Варвар")
+			raceDeskMenuHeroes(id)
+		}
+		case 6:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Ninja", "Ниндзя")
+			raceDeskMenuHeroes(id)
+		}
+		case 7:
+		{
+			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Amazon", "Амазонка")
+			raceDeskMenuHeroes(id)
+		}
+		case MENU_EXIT:
+		{
+			raceDeskMenu(id)
 		}
 	}
 	menu_destroy(menu);
@@ -8987,7 +9206,7 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 public select_class(id)
 {
 new text4[512]  
-format(text4, 511,"^n\wВаш общий уровень: %d^n^n\yВыбери класс: ^n^n\r1. \wДемоны^n\r2. \wЗвери^n\r3. \wЛюди^n^n^n\r4. \dОписание классов^n^n^n\dРазработал: hitmany^nСайт сервера:^nlpstrike.ru", player_TotalLVL[id]) 
+format(text4, 511,"^n\wВаш общий уровень: %d^n^n\yВыбери класс: ^n^n\r1. \wДемоны^n\r2. \wЗвери^n\r3. \wЛюди^n^n^n\r4. \wОписание классов^n^n^n\dРазработал: hitmany^nСайт сервера:^nlpstrike.ru", player_TotalLVL[id]) 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -9013,6 +9232,7 @@ public select_class_menu(id, key)
 		}
 		case 3:
 		{
+			raceDeskMenu(id)
 		}
 	}
 	
@@ -17924,7 +18144,7 @@ public mana2(id){
 	menu_additem(mana2,"\y SG552 + Патроны \d[8 золота]")
 	menu_additem(mana2,"\y Nightvision \d[5 золота]")
 	menu_setprop(mana2,MPROP_EXIT,MEXIT_ALL)
-	menu_setprop(mana2,MPROP_EXITNAME,"Выход")
+	menu_setprop(mana2,MPROP_EXITNAME,"Назад в магаз.")
 	menu_setprop(mana2,MPROP_NEXTNAME,"Далее")
 	menu_setprop(mana2,MPROP_BACKNAME,"Назад")
 	
@@ -18158,6 +18378,10 @@ public mana2a(id, menu, item){
 				fm_give_item(id, "item_nvgs")
 			}
 		}
+		case MENU_EXIT:
+		{
+			mana4(id)
+		}
 	}
 	menu_destroy(menu);
 	return PLUGIN_HANDLED;
@@ -18171,7 +18395,7 @@ public mana4(id){
 	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
 	menu_additem(mana4,"\wСвиток портала \d[15 золота]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
-	menu_setprop(mana4,MPROP_EXITNAME,"Выход")
+	menu_setprop(mana4,MPROP_EXITNAME,"Назад в меню")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
 	menu_setprop(mana4,MPROP_BACKNAME,"Назад")
 	menu_setprop(mana4,MPROP_NUMBER_COLOR,"\y")
@@ -18243,6 +18467,10 @@ public mana4a(id, menu, item)
 				show_hudmessage(id, "Навести прицел на стену. Нажать Установить")
 				cmd_place_portal(id);
 			}
+		}
+		case MENU_EXIT:
+		{
+			showmenu(id)
 		}
 	}
 	menu_destroy(menu);
