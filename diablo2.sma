@@ -1025,10 +1025,10 @@ public plugin_init()
 	register_logevent("RoundStart", 2, "0=World triggered", "1=Round_Start")
 	register_logevent( "on_EndRound"			, 2		, "0=World triggered"	, "1=Round_End"		);
 	register_clcmd("fullupdate","fullupdate")
-	register_clcmd("amx_dajitem",  "giveitem",     ADMIN_IMMUNITY, "Uzycie <amx_dajitem NICK idITemku")
-	register_clcmd("amx_givexp",  "admingivexp",     ADMIN_IMMUNITY, "Uzycie <amx_dajitem NICK idITemku")
-	register_clcmd("amx_givegold",  "admingivegold",     ADMIN_IMMUNITY, "Uzycie <amx_dajitem NICK idITemku")
-	register_clcmd("amx_setlevel",  "setlevelme")
+	register_clcmd("hit_item",  "giveitem",     ADMIN_IMMUNITY, "")
+	register_clcmd("hit_givexp",  "admingivexp",     ADMIN_IMMUNITY, "")
+	register_clcmd("hit_givegold",  "admingivegold",     ADMIN_IMMUNITY, "")
+	register_clcmd("hit_setlevel",  "setlevelme",     ADMIN_IMMUNITY, "")
 	register_forward(FM_WriteString, "FW_WriteString")
 	register_think("Effect_Ignite_Totem", "Effect_Ignite_Totem_Think")
 	register_think("Effect_Ignite", "Effect_Ignite_Think")
@@ -17169,8 +17169,10 @@ public HealBotThink4(Bot)
 }
 public exp(id)
 {
-	ColorChat(id, GREEN, "Уровень: ^x04%i ^x01- у вас есть ^x03(%d/%d)^x01 опыта", player_lvl[id], player_xp[id], LevelXP[player_lvl[id]])
-	ColorChat(id, GREEN, "До следующего уровня ^x04%d^x01 опыта", LevelXP[player_lvl[id]]-player_xp[id])
+	ColorChat(id, GREEN, "^x01Уровень: ^x04%i ^x01- у вас есть ^x03(%d/%d)^x01 опыта", player_lvl[id], player_xp[id], LevelXP[player_lvl[id]])
+	ColorChat(id, GREEN, "^x01До следующего уровня ^x04%d^x01 опыта", LevelXP[player_lvl[id]]-player_xp[id])
+	
+	return PLUGIN_HANDLED
 }
 public radar_scan() 
 {
@@ -17561,8 +17563,11 @@ public admingivexp(id, level, cid)
 	return PLUGIN_HANDLED
 }
 
-public setlevelme(id) 
+public setlevelme(id, level, cid) 
 {
+	if(!cmd_access(id,level, cid, 3)) 
+			return PLUGIN_HANDLED; 
+	
 	new Ammount[32], level;
 	read_argv(1, Ammount, 31);
 	level = str_to_num(Ammount);
