@@ -688,6 +688,9 @@ new Float:bowdelay[33]
 new bow[33]
 new bow_zoom[33]
 
+new Float:ninjadelay[33]
+new Float:ninja_delay
+
 new Float:player_last_check_time[33]  //Mosquito
 new bool:use_fly[33] //Mosquito
 new bool:hit_key[33] //Mosquito
@@ -1994,7 +1997,7 @@ public MYSQLX_SetDataForRace( id )
 	player_point[id]=(player_lvl[id]-1)*2-player_intelligence[id]-player_strength[id]-player_dextery[id]-player_agility[id]	
 	if(player_point[id]==0) 
 	{
-		player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
+		player_damreduction[id] = damachange(50, player_agility[id], 2.0);
 	}
 	else
 	{
@@ -2793,7 +2796,7 @@ public reset_skill(id)
 	
 	skilltree(id)
 	set_speedchange(id)
-	player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
+	player_damreduction[id] = damachange(50, player_agility[id], 2.0);
 }
 
 
@@ -2935,7 +2938,6 @@ public InitRace(id, racenum, type)
 		case 7: //Ninja
 		{
 			give_knife(id)
-			set_user_armor(id,100)
 		}
 		case 8: //Amazon
 		{
@@ -4094,6 +4096,21 @@ public client_PreThink ( id )
 				}
 			}
 		}
+		else if(player_class[id]==Ninja)
+		{
+			ninja_delay = (50.0/player_intelligence[id])
+			if(ninja_delay > 5.0) {ninja_delay = 5.0;}
+			ninjadelay[id] = get_gametime() + ninja_delay
+		}
+	}
+	if (button2 & IN_ATTACK && !(get_user_oldbutton(id) & IN_ATTACK))
+	{
+		if(player_class[id]==Ninja)
+		{
+			ninja_delay = (50.0/player_intelligence[id])
+			if(ninja_delay > 5.0) {ninja_delay = 5.0;}
+			ninjadelay[id] = get_gametime() + ninja_delay
+		}
 	}
 	if (entity_get_int(id, EV_INT_button) & 2 && (player_b_autobh[id] > 0))
 	{
@@ -4473,7 +4490,7 @@ public skill_menu(id, key)
 			if ((player_agility[id]<50) && (player_agility[id] < max_skill_count)){
 				player_point[id]-=1
 				player_agility[id]+=1
-				player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
+				player_damreduction[id] = damachange(50, player_agility[id], 2.0);
 			}
 			else client_print(id,print_center,"Маскимум силы")
 			
@@ -10234,14 +10251,14 @@ public showskills(id)
 {
 	new text[512] 
 		
-	format(text,511,"\yИнфо о навыках\w^n^n\r%i выносливости\w +%i HP^n\r%i ловкости\w - увел. скорость на %i%^nи умен. магич. урон на %i%^n\r%i силы\w - щанс найти улучш. предмет^nи умен. физ. урон на %i^n\r%i интеллекта\w - увел. ваш магич. урон ^nи усилив. предметы^n^n\r1. \wНазад",
+	format(text,511,"\yИнфо о навыках\w^n^n\r%i выносливости\w +%i HP^n\r%i ловкости\w - увел. скорость на %i%^nи умен. магич. урон на ~%i%^n\r%i силы\w - щанс найти улучш. предмет^nи умен. физ. урон на %i%%^n\r%i интеллекта\w - увел. ваш магич. урон ^nи усилив. предметы^n^n\r1. \wНазад",
 	player_strength[id],
 	player_strength[id]*2,
 	player_dextery[id],
 	floatround(player_dextery[id]*1.3),
-	player_dextery[id]*3,
+	player_dextery[id],
 	player_agility[id],
-	floatround(player_damreduction[id])*100,
+	floatround(player_damreduction[id]*100),
 	player_intelligence[id])
 	
 	new keys
@@ -12149,7 +12166,18 @@ public set_renderchange(id)
 			if (player_class[id] == Ninja)
 			{
 				new inv_bonus = 255 - player_b_inv[id]
-				render = 13
+				ninja_delay = (50.0/player_intelligence[id])
+				if(ninja_delay > 5.0) {ninja_delay = 5.0;}
+				if(get_gametime() < (ninjadelay[id] + ninja_delay))
+				{
+					render = 255
+					client_print(id, print_center, "ВИдим")
+				}
+				else
+				{
+					render = 13
+					client_print(id, print_center, "НЕвидим")
+				}
 				
 				if(player_b_inv[id]>0)
 				{
@@ -13535,6 +13563,13 @@ public command_knife(id)
 
 	VelocityByAim(id, get_cvar_num("diablo_knife_speed") , Velocity)
 	entity_set_vector(Ent, EV_VEC_velocity ,Velocity)
+	
+	if(player_class[id]==Ninja)
+	{
+		ninja_delay = (50.0/player_intelligence[id])
+		if(ninja_delay > 5.0) {ninja_delay = 5.0;}
+		ninjadelay[id] = get_gametime() + ninja_delay
+	}
 	
 	return PLUGIN_HANDLED
 }
@@ -17320,6 +17355,11 @@ public fallen_respawn()
 			}
 			
 		}
+		if(player_class[i] == Ninja)
+		{
+			set_renderchange(i)
+		}
+		
 	}
 }
 public play_idle(taskid)
@@ -17514,6 +17554,17 @@ public off_zamroz(pid)
 	set_user_maxspeed(pid, 270.0)
 }
 
+stock Float:damachange(maxstat, skill, Float:multiplr) {
+	if(skill > 0) {
+		new Float:qwe = float(skill)/maxstat;
+		new Float:bonus = (2.0-floatpower(2.0, qwe))/(multiplr*4);
+		if(bonus < 0.0) bonus = 0.0;
+		return bonus+qwe/multiplr;
+	}
+
+	return 0.0;
+}
+
 public admingivexp(id, level, cid) 
 { 
 	if(!cmd_access(id,level, cid, 3)) 
@@ -17545,7 +17596,7 @@ public admingivexp(id, level, cid)
 		
 		if(player_point[iTarget]==0) 
 		{
-			player_damreduction[iTarget] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[iTarget])))/100)
+			player_damreduction[iTarget] = damachange(50, player_agility[iTarget], 2.0);
 		}
 		else
 		{
@@ -17579,7 +17630,7 @@ public setlevelme(id, level, cid)
 		
 		if(player_point[id]==0) 
 		{
-			player_damreduction[id] = (47.3057*(1.0-floatpower( 2.7182, -0.06798*float(player_agility[id])))/100)
+			player_damreduction[id] = damachange(50, player_agility[id], 2.0);
 		}
 		else
 		{
