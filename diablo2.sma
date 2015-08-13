@@ -17101,9 +17101,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					set_user_hitzones(0, id, 0)
 				}
 				#endif
-				
-				new clip,ammo
-				new weapon = get_user_weapon(attacker_id,clip,ammo)
 					
 				/*if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Assassin)
 				{	
@@ -17112,26 +17109,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						set_task(1.5, "funcDemageVic3", id)
 					}
 				}*/
-				
-				if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Amazon)
-				{	
-					if(weapon == CSW_GLOCK18 || weapon == CSW_USP || weapon == CSW_P228 || weapon == CSW_DEAGLE || weapon == CSW_ELITE || weapon == CSW_FIVESEVEN)
-					{
-						new ori[3]
-						trace_bool[attacker]=id
-						get_user_origin(id,ori)
-						
-						new parms[5];
-						
-						for(new i=0;i<3;i++)
-						{
-							parms[i] = ori[i] 
-						}
-						parms[3]=attacker
-						parms[4]=id
-						set_task(0.5,"charge_amazon",attacker,parms,5)
-					}
-				}
 			}
 		}
 		if((player_class[victim] == GiantSpider) && (spider_hook_disabled[victim] == 0))
