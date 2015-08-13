@@ -4671,6 +4671,7 @@ public client_connect(id)
 	player_dextery[id] = 0
 	player_b_oldsen[id] = 0.0
 	player_class[id] = 0
+	player_newclass[id] = 0
 	player_damreduction[id] = 0.0
 	last_update_xp[id] = -1
 	player_item_name[id] = "Нет"
