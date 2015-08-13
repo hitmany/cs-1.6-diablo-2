@@ -416,8 +416,6 @@ new is_poisoned[33]
 new Float:is_touched[33]
 new cel // do pokazywania statusu
 new item_info[513] //id itemu  
-new player_artifact[33][4]
-new player_artifact_time[33][4]
 new const modelitem[]="models/winebottle.mdl" //tutaj zmieniacie model itemu
 new const gszSound[] = "diablo_lp/eleccast.wav";
 //Cvars
@@ -520,15 +518,14 @@ new Handle:g_DBConn;
 new gcvar_host, gcvar_user, gcvar_pass, gcvar_database;
 //new bool:bDBXPRetrieved[33];
 
-#define TOTAL_TABLES		5
+#define TOTAL_TABLES		4
 
 new const szTables[TOTAL_TABLES][] = 
 {
 	"CREATE TABLE IF NOT EXISTS `player` ( `id` int(8) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(33) NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'ON UPDATE CURRENT_TIMESTAMP', PRIMARY KEY (`id`), UNIQUE KEY `id` (`id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
 	"CREATE TABLE IF NOT EXISTS `extra` ( `id` int(8) unsigned NOT NULL, `gold` int(11) NOT NULL DEFAULT '0', `total_lvl` int(8) NOT NULL DEFAULT '0', PRIMARY KEY ( `id` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 	"CREATE TABLE IF NOT EXISTS `class` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `xp` int(8) NOT NULL DEFAULT '0', PRIMARY KEY ( `id`,`class` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
-	"CREATE TABLE IF NOT EXISTS `skill` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `str` int(2) NOT NULL, `agi_best` int(2) NOT NULL, `agi_dmg` int(2) NOT NULL, `sta` int(2) NOT NULL, `dur` int(2) NOT NULL, `int` int(2) NOT NULL, `dex_dmg` int(2) NOT NULL, `quest_cur` int(2) NOT NULL DEFAULT '0', `quest_count1` int(2) NOT NULL DEFAULT '0', `quest_count2` int(2) NOT NULL DEFAULT '0', PRIMARY KEY (`id`,`class`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
-	"CREATE TABLE IF NOT EXISTS `item`  ( `id` int(8) unsigned NOT NULL, `item` int(3) unsigned NOT NULL, `item_number` int(1) NOT NULL, `expire_time` int(14) NOT NULL, PRIMARY KEY (`id`,`item`,`item_number`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
+	"CREATE TABLE IF NOT EXISTS `skill` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `str` int(2) NOT NULL, `agi_best` int(2) NOT NULL, `agi_dmg` int(2) NOT NULL, `sta` int(2) NOT NULL, `dur` int(2) NOT NULL, `int` int(2) NOT NULL, `dex_dmg` int(2) NOT NULL, `quest_cur` int(2) NOT NULL DEFAULT '0', `quest_count1` int(2) NOT NULL DEFAULT '0', `quest_count2` int(2) NOT NULL DEFAULT '0', PRIMARY KEY (`id`,`class`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;"
 };
 
 enum { NONE = 0, Mag, Monk, Paladin, Assassin, Necromancer, Barbarian, Ninja, Amazon, BloodRaven, Duriel, Mephisto, Izual, Diablo, Baal, Fallen, Imp, Zakarum, Viper, Mosquito, Frozen, Infidel, GiantSpider, SabreCat, Griswold, TheSmith, Demonolog, VipCztery }
@@ -1724,40 +1721,6 @@ public MYSQLX_GetAllXP( id )
 		}
 	}
 
-	// Free the last handle!
-	SQL_FreeHandle( query );
-	
-	//Get all items
-	format(szQuery, 255, "SELECT `item`, `item_number`, `expire_time` FROM `item` WHERE `id` = '%d';", iUniqueID );
-	query = SQL_PrepareQuery( g_DBConn, szQuery );
-
-	if ( !SQL_Execute( query ) )
-	{
-		client_print( id, print_chat, "Error, unable to retrieve XP, please contact a server administrator");
-
-		MYSQLX_Error( query, szQuery, 6 );
-
-		return;
-	}
-
-	// Get the XP!
-	new iItem, iTime, iItemID;
-
-	// Loop through all of the records to give item
-	while ( SQL_MoreResults( query ) )
-	{
-		iItem	= SQL_ReadResult( query, 0 );
-		iItemID		= SQL_ReadResult( query, 1 );
-		iTime		= SQL_ReadResult( query, 2 );
-		
-		Give_Artefact(id, iItem, iTime, iItemID)
-
-		SQL_NextRow( query );
-	}
-
-	// Free the handle
-	SQL_FreeHandle( query );
-
 	// Call the function that will display the "select a race" menu
 	//D2_ChangeRaceShowMenu( id, g_iDBPlayerXPInfoStore[id] );
 	select_class(id)
@@ -1836,39 +1799,6 @@ public MYSQLX_Save( id )
 	
 			return;
 		}
-	}
-	format( szQuery, 511, "REPLACE INTO `item` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '1', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][1]);
-	query = SQL_PrepareQuery( g_DBConn, szQuery );
-
-	if ( !SQL_Execute( query ) )
-	{
-		client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
-
-		MYSQLX_Error( query, szQuery, 5 );
-
-		return;
-	}
-	format( szQuery, 511, "REPLACE INTO `item` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '2', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][2]);
-	query = SQL_PrepareQuery( g_DBConn, szQuery );
-
-	if ( !SQL_Execute( query ) )
-	{
-		client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
-
-		MYSQLX_Error( query, szQuery, 5 );
-
-		return;
-	}
-	format( szQuery, 511, "REPLACE INTO `item` (`id`, `item`, `item_number`, `expire_time`) VALUES ('%d', '%d', '3', '%d');", iUniqueID, player_artifact[id][1], player_artifact_time[id][3]);
-	query = SQL_PrepareQuery( g_DBConn, szQuery );
-
-	if ( !SQL_Execute( query ) )
-	{
-		client_print( id, print_chat, "Error, unable to save your gold, please contact a server administrator" );
-
-		MYSQLX_Error( query, szQuery, 5 );
-
-		return;
 	}
 	
 	return;
@@ -4723,40 +4653,6 @@ public Give_Xp(id,amount)
 	}
 }
 
-public Give_Artefact(id, iItem, iTime, iItemID)
-{
-	if(iItemID == 0)
-	{
-		if(player_artifact[id][1] == 0)
-		{
-			player_artifact[id][1] = iItem
-			player_artifact_time[id][1] = iTime
-		}
-		else if(player_artifact[id][2] == 0)
-		{
-			player_artifact[id][2] = iItem
-			player_artifact_time[id][2] = iTime
-		}
-		else if(player_artifact[id][3] == 0)
-		{
-			player_artifact[id][3] = iItem
-			player_artifact_time[id][3] = iTime
-		}
-		else
-		{
-			return 0;
-		}
-	}
-	else
-	{
-		player_artifact[id][iItemID] = iItem
-		player_artifact_time[id][iItemID] = iTime
-	}
-
-
-	return PLUGIN_CONTINUE;
-}
-
 /* ==================================================================================================== */
 public client_connect(id)
 {
@@ -4801,12 +4697,6 @@ public client_putinserver(id)
 	database_user_created[id]=0
 	count_jumps(id)
 	JumpsLeft[id]=JumpsMax[id]
-	player_artifact[id][1]=0
-	player_artifact[id][2]=0
-	player_artifact[id][3]=0
-	player_artifact_time[id][1]=0
-	player_artifact_time[id][2]=0
-	player_artifact_time[id][3]=0
 	player_portal[id] = 0
 	player_portal_infotrg_1[id] = 0
 	player_portal_sprite_1[id] = 0
