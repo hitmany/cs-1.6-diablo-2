@@ -371,6 +371,7 @@ new c_silent[33]
 new player_b_antyarchy[33]
 new c_antyarchy[33]
 new player_b_antymeek[33]
+new player_b_antysound[33]
 new c_antymeek[33]
 new player_b_antyorb[33]
 new c_antyorb[33]
@@ -5418,6 +5419,7 @@ public reset_item_skills(id)
 	player_b_mine[id] = 0
 	player_b_antyarchy[id] = 0
 	player_b_antymeek[id] = 0
+	player_b_antysound[id] = 0
 	player_b_antyorb[id] = 0
 	player_b_antyfs[id] = 0
 	player_b_autobh[id] = 0
@@ -7139,10 +7141,10 @@ public award_item(id, itemnum)
 		}
 		case 105:
 		{
-			player_item_name[id] = "Кольцо Тал Раша"
+			player_item_name[id] = "Кольцо Безмолвия"
 			player_item_id[id] = rannum
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
+			player_b_antysound[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nОтключает вопль Закарума и Падшего", player_item_name[id])
 		}
 		case 106:
 		{
@@ -15148,12 +15150,15 @@ public FallenShaman(id)
 			new Float:fl_iNewVelocity[3]
 			VelocityByAim(id, 800, fl_iNewVelocity)
 			entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
-			rndfsound = random(2);
-			switch(rndfsound)
+			if(player_b_antysound[id] == 0)
 			{
-				case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				rndfsound = random(2);
+				switch(rndfsound)
+				{
+					case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				}
 			}
 			emit_sound(ent, CHAN_VOICE, "diablo_lp/firelaunch2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 		}
@@ -16937,7 +16942,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					add_bonus_shake(attacker_id,id)
 					add_bonus_shaked(attacker_id,id)
 					item_take_damage(id,damage)
-					if(player_class[id] == Fallen)
+					if(player_class[id] == Fallen && player_b_antysound[id] == 0)
 					{
 						rndfsound = random(4);
 						if(player_lvl[id] < 50)
@@ -17466,7 +17471,7 @@ public fallen_respawn()
 						{
 							set_user_health(a,newhp)
 							get_user_name(i,revivername,31)
-							hudmsg2(a,1.0,"%s исцелил вас на %i HP",revivername, revivehp)
+							//hudmsg2(a,1.0,"%s исцелил вас на %i HP",revivername, revivehp)
 						}
 					}
 				}
@@ -17497,42 +17502,45 @@ public fallen_respawn()
 public play_idle(taskid)
 {
 	new TASK_BLOOD = taskid - 2000;
-	if(round_status==1 && player_class[TASK_BLOOD] == Fallen && is_user_alive(TASK_BLOOD))
+	if(player_b_antysound[TASK_BLOOD] == 0)
 	{
-		if(player_lvl[TASK_BLOOD] > 49)
+		if(round_status==1 && player_class[TASK_BLOOD] == Fallen && is_user_alive(TASK_BLOOD))
 		{
-			rndfsound = random(3);
-			switch(rndfsound)
+			if(player_lvl[TASK_BLOOD] > 49)
 			{
-				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				rndfsound = random(3);
+				switch(rndfsound)
+				{
+					case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				}
 			}
-		}
-		else
-		{
-			rndfsound = random(4);
-			switch(rndfsound)
+			else
 			{
-				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 4: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			}
-		} 
-	}
-	else if(round_status==1 && player_class[TASK_BLOOD] == Zakarum && is_user_alive(TASK_BLOOD))
-	{
-			rndfsound = random(3);
-			switch(rndfsound)
-			{
-				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				rndfsound = random(4);
+				switch(rndfsound)
+				{
+					case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 4: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				}
 			} 
+		}
+		else if(round_status==1 && player_class[TASK_BLOOD] == Zakarum && is_user_alive(TASK_BLOOD))
+		{
+				rndfsound = random(3);
+				switch(rndfsound)
+				{
+					case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				} 
+		}
 	}
 }
 
