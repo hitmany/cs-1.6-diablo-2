@@ -5455,23 +5455,23 @@ public auto_help(id)
 		}
 		if (rnd == 2)
 		{
-			show_hudmessage(id, "Чтобы сменить класс/герой набери в чате class,или say class в консоли")
+			show_hudmessage(id, "Чтобы сменить класс набери в чате class")
 		}
 		if (rnd == 3)
 		{
-			show_hudmessage(id, "Вы можете получить более подоробную информацию набери в консоли say help")
+			show_hudmessage(id, "Читай описание мода, набери в чате help")
 		}
 		if (rnd == 4)
 		{
-			show_hudmessage(id, "Главное меню мода say menu")
+			show_hudmessage(id, "Главное меню мода say d2")
 		}
 		if (rnd == 5)
 		{
-			show_hudmessage(id, "За золото можно купить предметы,телепорты,улучшить/починить предметы,оружие")
+			show_hudmessage(id, "За золото можно купить порталы,улучшить/починить предметы,оружие,опыт")
 		}
 		if (rnd == 6)
 		{
-			show_hudmessage(id, "Золото вы получаете за хедшоты,её можно собрать на ежедневных ивентах")
+			show_hudmessage(id, "Золото вы получаете за убийства")
 		}
 	}
 }
@@ -9184,7 +9184,7 @@ public showmenu(id)
 	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
 	
 	
-	format(text, 512, "\rДиабло меню\R^n^n\y1.\w Описание предмета^n\y2.\w Выкинуть текущий предмет^n\y3.\w Помощь^n\y4.\w Информация об игроках^n\y5.\w Магазин Диабло^n\y6.\w Мои навыки^n\y7.\w Сменить расу^n^n\y0.\w Выход") 
+	format(text, 512, "\rДиабло меню\R^n^n\y1.\w Сменить расу^n\y2.\w Описание предмета^n\y3.\w Магазин Диабло^n\y4.\w Выкинуть текущий предмет^n\y5.\w Мои навыки^n\y6.\w Информация об игроках^n\y7.\w Помощь^n^n\y0.\w Выход") 
 	
 	show_menu(id, keys, text, -1, "ShowMenu")
 	return PLUGIN_HANDLED  
@@ -9197,32 +9197,32 @@ public option_menu(id, key)
 	{ 
 		case 0: 
 		{	
-			iteminfo(id)
-			
+			changerace(id)			
 		}
 		case 1: 
 		{	
-			dropitem(id)
+			iteminfo(id)
+			
 		}
 		case 2: 
 		{	
-			helpme(id)
+			mana4(id)
 		}
 		case 3:
 		{
-			cmd_who(id)
+			dropitem(id)
 		}
 		case 4:
 		{
-			mana4(id)
+			showskills(id)
 		}
 		case 5:
 		{
-			showskills(id)
+			cmd_who(id)
 		}
 		case 6:
 		{
-			changerace(id)
+			helpme(id)
 		}
 		case 9:
 		{
@@ -18542,6 +18542,7 @@ public mana4(id){
 	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
 	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
 	menu_additem(mana4,"\wСвиток портала \d[15 золота]")
+	menu_additem(mana4,"\wСвиток опыта \d[10 золота]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Назад в меню")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
@@ -18614,6 +18615,22 @@ public mana4a(id, menu, item)
 				set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 4.0, 5.0, 0.2, 0.3, 5)
 				show_hudmessage(id, "Навести прицел на стену. Нажать Установить")
 				cmd_place_portal(id);
+			}
+		}
+		case 4:
+		{
+			new koszt = 10;
+			if (mana_gracza[id]<koszt)
+			{
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				mana4(id)
+			}
+			if (mana_gracza[id]>=koszt)
+			{
+				mana_gracza[id] -= koszt;
+				new xp = 50;
+				Give_Xp(id,xp)	
+				ColorChat(id, GREEN, "Выданно^x03 %i^x01 exp за покупку свитка опыта",xp)
 			}
 		}
 		case MENU_EXIT:
