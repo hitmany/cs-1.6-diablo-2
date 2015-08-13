@@ -406,7 +406,6 @@ new ilosc_rakiet_gracza[33];
 new ilosc_blyskawic[33]
 new Float:poprzednia_blyskawica[33];
 //new ilosc_dynamitow_gracza[33];
-new Float:g_wallorigin[33][3]
 new Float:falen_fires_time[33];
 new fallen_fires[33]
 new frozen_colds[33]
@@ -3999,8 +3998,6 @@ public client_PreThink ( id )
 		set_task(7.5, "un_rander", TASK_FLASH_LIGHT+index1, "", 0, "a", 1);
 }
 	}
-	if((button2 & IN_USE) && (player_class[id] == Paladin))
-		wallclimb(id, button2)
 	new body 
 	get_user_aiming(id, cel, body)
 	if( is_user_alive(id)) itminfo(id,cel)
@@ -15769,31 +15766,6 @@ public DotykRakiety(ent)
 	}
 	return PLUGIN_CONTINUE;
 }*/
-public wallclimb(id, button)
-{
-	static Float:origin[3]
-	pev(id, pev_origin, origin)
-
-	if(get_distance_f(origin, g_wallorigin[id]) > 25.0)
-			return FMRES_IGNORED  // if not near wall
-
-	if(fm_get_entity_flags(id) & FL_ONGROUND)
-			return FMRES_IGNORED
-			
-	if(button & IN_FORWARD)
-	{
-		static Float:velocity[3]
-		velocity_by_aim(id, 120, velocity)
-		fm_set_user_velocity(id, velocity)
-	}
-	else if(button & IN_BACK)
-	{
-		static Float:velocity[3]
-		velocity_by_aim(id, -120, velocity)
-		fm_set_user_velocity(id, velocity)
-	}
-	return FMRES_IGNORED
-}
 public make_hook(id)
 {
 	if(spider_hook_disabled[id] == 1)
@@ -17426,6 +17398,9 @@ public fallen_respawn()
 						get_user_name(player,name,31)
 						ExecuteHamB(Ham_CS_RoundRespawn, player)
 						hudmsg2(i,1.0,"Воскрешенн Падший ^nиз твоей команды:^n %s",name)
+						new xp = a_size * 4
+						Give_Xp(i,xp)	
+						ColorChat(i, GREEN, "Выданно^x03 %i^x01 exp за воскрешение падшего",xp)
 						player_fallen_tr[i]=1;
 						emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 						emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
