@@ -16986,15 +16986,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 				
 				new clip,ammo
 				new weapon = get_user_weapon(attacker_id,clip,ammo)
-			
-				if((attacker_id!=id)&&player_class[attacker] == Mag)
-				{	
-					if(weapon == CSW_GLOCK18 || weapon == CSW_USP || weapon == CSW_P228 || weapon == CSW_DEAGLE || weapon == CSW_ELITE || weapon == CSW_FIVESEVEN)
-					{			
-						agi=(BASE_SPEED / 2)
-						set_speedchange(id)
-					}
-				}
 					
 				/*if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Assassin)
 				{	
