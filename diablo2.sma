@@ -761,11 +761,11 @@ new g_boolsqlOK=0
 
 // SQL //
 //questy
-new quest_gracza[33];
-new ile_juz[33];
+//new quest_gracza[33];
+//new ile_juz[33];
 
 //przedzial , ile ,kogo , nagroda expa, vip 1 tak 0 nie
-new questy[][]={
+/*new questy[][]={
 	{1,2,Zakarum,500,0},
 	{1,3,Imp,1200,1},
 	{1,6,Fallen,2000,0},
@@ -808,7 +808,7 @@ new questy_zabil[][]={
 	"Paladin",
 	"Barbarian",
 	"Paladin"
-}
+}*/
 
 new mod_version[16] = "LP 2.0 beta"
 
@@ -1142,8 +1142,8 @@ public plugin_init()
 	_create_ThinkBot()
 	
 	register_forward(FM_TraceLine,"fw_traceline");
-	vault_questy = nvault_open("Questy");
-	vault_questy2 = nvault_open("Questy2");
+	//vault_questy = nvault_open("Questy");
+	//vault_questy2 = nvault_open("Questy2");
 	
 	//register_clcmd("quest","menu_questow")
 	//register_clcmd("say /quest","menu_questow")
@@ -1185,7 +1185,7 @@ bool:WC3_MapDisableCheck( szFileName[] )
 	return false;
 }
 
-public menu_questow(id){
+/*public menu_questow(id){
 	if(quest_gracza[id] == -1 || quest_gracza[id] == -2){
 		
 		new menu = menu_create("Меню Квестов","menu_questow_handle")
@@ -1317,7 +1317,7 @@ public menu_questow_handle2(id,menu,item)
 	quest_gracza[id] = wczytaj_aktualny_quest(id);
 	menu_destroy(menu);
 	return PLUGIN_CONTINUE;
-}
+}*/
 
 // Verifies that the database connection is ok
 bool:MYSQLX_Connection_Available()
@@ -2320,7 +2320,7 @@ public plugin_precache()
 	precache_sound("diablo_lp/fallen_1.wav");
 	precache_sound("diablo_lp/fallen_2.wav");
 	precache_sound("diablo_lp/levelup.wav");
-	precache_sound("diablo_lp/questdone.wav");
+	//precache_sound("diablo_lp/questdone.wav");
 	precache_sound("diablo_lp/identify.wav");
 	precache_sound("diablo_lp/itembroken.wav");
 	precache_sound("diablo_lp/repair.wav");
@@ -3576,7 +3576,7 @@ public DeathMsg(id)
 		refill_ammo(kid)
 		set_renderchange(kid)
 		//savexpcom(vid)
-		if(quest_gracza[kid] != -1)
+		/*if(quest_gracza[kid] != -1)
 		{
 			if(player_class[vid] == questy[quest_gracza[kid]][2])
 			{
@@ -3596,7 +3596,7 @@ public DeathMsg(id)
 			{
 				client_print(kid,print_chat,"Убито %i/%i %s",ile_juz[kid],questy[quest_gracza[kid]][1],questy_zabil[quest_gracza[kid]])
 			}
-		}
+		}*/
 	}
 }
 
@@ -6235,6 +6235,10 @@ public iteminfo(id)
 	if (player_b_smokehit[id] > 0)
 	{
 		add(itemEffect,399,"Ваши дымовые гранаты мгновенно убивают если они попали во врага<br>")
+	}
+	if (player_b_antysound[id] > 0)
+	{
+		add(itemEffect,399,"Отключает звуки Закарума и Падщего<br>")
 	}
 	if (player_b_extrastats[id] > 0)
 	{
@@ -16716,7 +16720,7 @@ public TTWin() {
 				{
 					mana_gracza[id]=get_pcvar_num(cvar_max_gold)
 				}
-				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта и 3 зол. за победу твоей команды в раунде", xp);
+				ColorChat(id, GREEN, "Полученно %i опыта и 3 зол. за победу твоей команды в раунде", xp);
 			}
 		}
 }
