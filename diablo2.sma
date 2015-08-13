@@ -1423,7 +1423,7 @@ public MYSQLX_UpdateTimestamp( id )
 	new szQuery[256];
 	format( szQuery, 255, "UPDATE `player` SET time = NOW() WHERE ( `id` = '%d' );", DB_GetUniqueID( id ) );
 
-	SQL_ThreadQuery( g_DBTuple, "_MYSQLX_UpdateTimestamp", szQuery );	
+	SQL_ThreadQuery( g_SqlTuple, "_MYSQLX_UpdateTimestamp", szQuery );	
 }
 
 public _MYSQLX_UpdateTimestamp( failstate, Handle:query, error[], errnum, data[], size )
@@ -1850,6 +1850,8 @@ public MYSQLX_Save_T( id )
 		format( szQuery, 511, "REPLACE INTO `extra` (`id`, `gold`, `total_lvl`) VALUES ('%d', '%d', '%d');", iUniqueID, mana_gracza[id], player_TotalLVL[id]);
 		SQL_ThreadQuery( g_SqlTuple, "_MYSQLX_Save_T", szQuery );
 	}
+	
+	MYSQLX_UpdateTimestamp( id )
 	
 	return;
 }
