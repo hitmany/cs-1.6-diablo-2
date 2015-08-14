@@ -3148,7 +3148,7 @@ public RoundStart(){
 			}
 		}
 		
-		if(player_vip[i] == 1)
+		if(player_vip[i] == 1 && player_class[i] != Ninja && player_class[i] != Infidel &&  player_class[i] != Mosquito)
 		{
 			fm_give_item(i, "weapon_hegrenade")
 			fm_give_item(i, "weapon_flashbang")
