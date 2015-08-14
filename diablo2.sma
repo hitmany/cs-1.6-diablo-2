@@ -302,6 +302,19 @@ new player_dextery[33]
 new player_gold[33]
 new player_TotalLVL[33]
 new player_vip[33]
+
+enum {
+    SCOREATTRIB_ARG_PLAYERID = 1,
+    SCOREATTRIB_ARG_FLAGS
+};
+
+enum ( <<= 1 ) {
+    SCOREATTRIB_FLAG_NONE = 0,
+    SCOREATTRIB_FLAG_DEAD = 1,
+    SCOREATTRIB_FLAG_BOMB,
+    SCOREATTRIB_FLAG_VIP
+};
+
 new Float:player_damreduction[33]
 new player_firstspawn[33]
 new player_newclass[33]		
@@ -859,6 +872,7 @@ public plugin_init()
 	g_MsgText 		= get_user_msgid("TextMsg")
 
 	register_message(g_msg_clcorpse, "message_clcorpse")
+	register_message( get_user_msgid( "ScoreAttrib" ), "MessageScoreAttrib" );
 	
 	register_event("HLTV", 		"event_hltv", 	"a", "1=0", "2=0")
 	
@@ -4810,6 +4824,16 @@ public client_disconnect(id)
 	//end of set user model
 }
 
+/* ==================================================================================================== */
+public MessageScoreAttrib( iMsgId, iDest, iReceiver ) 
+{
+	new iPlayer = get_msg_arg_int( SCOREATTRIB_ARG_PLAYERID );
+	
+	if( player_vip[iPlayer] == 1 ) 
+	{
+		set_msg_arg_int( SCOREATTRIB_ARG_FLAGS, ARG_BYTE, SCOREATTRIB_FLAG_VIP );
+	}
+}
 /* ==================================================================================================== */
 
 public write_hud(id)
