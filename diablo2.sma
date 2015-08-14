@@ -15554,6 +15554,15 @@ public set_portal(id)
 		return PLUGIN_CONTINUE;
 	}
 	
+	if(checkBombPlace(g_aim_origin))
+	{	
+		remove_entity(g_ent);
+		remove_entity(g_ent2);
+		client_print(id, print_center, "ОШИБКА: Поставьте портал подальше от места закладки бомбы");
+		cmd_place_portal(id)
+		return PLUGIN_CONTINUE;
+	}
+	
 	player_portals[id]++
 	
 	if(player_portals[id] == 1)
@@ -15993,6 +16002,41 @@ bool:traceToWall(const Float:fOrigin[3], const Float:fVec[3]){
 		
 		return false;
 	}
+
+stock bool:checkBombPlace(Float:fOrigin[3])
+{
+	new entitiesList[12];
+	new entitiesCount;
+
+	entitiesCount  = find_sphere_class(0, "func_bomb_target", 4096.0, entitiesList, sizeof entitiesList);
+	entitiesCount += find_sphere_class(0, "info_bomb_target", 4096.0, entitiesList[entitiesCount], sizeof entitiesList - entitiesCount);
+
+	new Trie:targetsList = TrieCreate();
+
+	for (new i, entity, targetName[32], Float:origin[3]; i < entitiesCount; ++i)
+	{
+		entity = entitiesList[i];
+		
+		pev(entity, pev_target, targetName, charsmax(targetName));
+		!TrieKeyExists(targetsList, targetName) && TrieSetCell(targetsList, targetName, true); 
+
+		get_brush_entity_origin(entity, origin);
+		new iDistance = get_distance( fOrigin, origin );
+		server_print("Found %s (%d) : %f %f %f. dist %d", targetName, entity, origin[0], origin[1], origin[2], iDistance);
+		if(iDistance < 300)
+		{
+			return false;
+		}
+	}
+		
+	//new bombSitesCount = TrieGetSize(targetsList); 
+
+	TrieDestroy(targetsList);
+		
+	//log_amx("Bomb site count = %d", bombSitesCount);
+	
+	return true;
+}
 
 stock bool:validWall(const Float:fOrigin[3], Float:fNormal[3], Float:width=56.0, Float:height = 84.0)
 {
