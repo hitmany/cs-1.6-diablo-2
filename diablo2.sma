@@ -301,6 +301,7 @@ new player_agility[33]
 new player_dextery[33]
 new mana_gracza[33]
 new player_TotalLVL[33]
+new player_vip[33]
 new Float:player_damreduction[33]
 new player_firstspawn[33]
 new player_newclass[33]		
@@ -1720,7 +1721,31 @@ public MYSQLX_GetAllXP( id )
 			mana_gracza[id] = get_pcvar_num(cvar_max_gold)
 		}
 	}
+	
+	// Free the last handle!
+	SQL_FreeHandle( query );
+		
+	//Get vip
+	format(szQuery, 255, "SELECT `period` FROM `vip` WHERE ( `id` = '%d' );", iUniqueID );
+	query = SQL_PrepareQuery( g_DBConn, szQuery );
 
+	if ( !SQL_Execute( query ) )
+	{
+		MYSQLX_Error( query, szQuery, 2 );
+
+		return;
+	}
+
+	// If no rows we need to insert!
+	if ( SQL_NumResults( query ) > 0 )
+	{
+		player_vip[id] = 1
+		client_print(id,print_console,"[VIP] Вы получили VIP привелегии")
+	}
+	
+	// Free the last handle!
+	SQL_FreeHandle( query );
+	
 	// Call the function that will display the "select a race" menu
 	//D2_ChangeRaceShowMenu( id, g_iDBPlayerXPInfoStore[id] );
 	select_class(id)
@@ -4615,6 +4640,7 @@ public Give_Xp(id,amount)
 	//if(zablokuj < 4 && amount < 200) return PLUGIN_CONTINUE;
 	//Перстень Леорика
 	if(player_item_id[id]==75) amount=amount*2;
+	if(player_vip[id]==1) amount=amount*2;
 	
 	if(player_class_lvl[id][player_class[id]]==player_lvl[id])
 	{
@@ -4706,6 +4732,7 @@ public client_putinserver(id)
 	player_portal_infotrg_2[id] = 0
 	player_portal_sprite_2[id] = 0
 	player_TotalLVL[id] = 0
+	player_vip[id] = 0
 	g_iDBPlayerUniqueID[id]=0
 	// Get the user's ID!
 	DB_FetchUniqueID( id );
