@@ -1726,7 +1726,7 @@ public MYSQLX_GetAllXP( id )
 	SQL_FreeHandle( query );
 		
 	//Get vip
-	format(szQuery, 255, "SELECT `period` FROM `vip` WHERE ( `id` = '%d' );", iUniqueID );
+	format(szQuery, 255, "SELECT `expired` FROM `vip` WHERE ( `id` = '%d' );", iUniqueID );
 	query = SQL_PrepareQuery( g_DBConn, szQuery );
 
 	if ( !SQL_Execute( query ) )
@@ -15508,6 +15508,10 @@ stock fm_get_aim_origin_normal(index, Float:origin[3], Float:normal[3])
 }
 public set_portal(id)
 {
+	if(!is_user_alive(id))
+	{
+		client_print(id, print_center, "ОШИБКА: Выйдите из зрителей.");
+	}
 	new g_ent,g_ent2
 	new Float:g_aim_origin[3]
 	new Float:g_ent_angles[3]
@@ -15530,7 +15534,7 @@ public set_portal(id)
 	{
 		remove_entity(g_ent);
 		remove_entity(g_ent2);
-		client_print(id, print_center, "ОШИБКА: Поставьте портал на ровной стене!^n Или порталу не хватает свободного места");
+		client_print(id, print_center, "ОШИБКА: Выйдите из зрителей.");
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
 	}
@@ -15545,7 +15549,7 @@ public set_portal(id)
 	normal[2] *= -1.0
 	vector_to_angle(normal, g_ent_angles)
 	
-	if(!validWall(g_aim_origin,g_ent_angles) || !checkPlace(g_aim_origin,id))
+	if(!checkPlace(g_aim_origin,id) || !validWall(g_aim_origin,g_ent_angles))
 	{	
 		remove_entity(g_ent);
 		remove_entity(g_ent2);
@@ -15554,11 +15558,13 @@ public set_portal(id)
 		return PLUGIN_CONTINUE;
 	}
 	
-	if(checkBombPlace(g_aim_origin))
+	new distToBomb = checkBombPlace(g_aim_origin)
+	if(distToBomb != -1)
 	{	
 		remove_entity(g_ent);
 		remove_entity(g_ent2);
-		client_print(id, print_center, "ОШИБКА: Поставьте портал подальше от места закладки бомбы");
+		set_hudmessage(255, 0, 0, -1.0, 0.40, 0, 2.0, 2.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "[ОШИБКА] Подальше от бомбы на %d",distToBomb)
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
 	}
@@ -16003,7 +16009,7 @@ bool:traceToWall(const Float:fOrigin[3], const Float:fVec[3]){
 		return false;
 	}
 
-stock bool:checkBombPlace(Float:fOrigin[3])
+stock checkBombPlace(Float:fOrigin[3])
 {
 	new entitiesList[12];
 	new entitiesCount;
@@ -16012,7 +16018,8 @@ stock bool:checkBombPlace(Float:fOrigin[3])
 	entitiesCount += find_sphere_class(0, "info_bomb_target", 4096.0, entitiesList[entitiesCount], sizeof entitiesList - entitiesCount);
 
 	new Trie:targetsList = TrieCreate();
-
+	
+	new Float:smalldistance = 100000.0
 	for (new i, entity, targetName[32], Float:origin[3]; i < entitiesCount; ++i)
 	{
 		entity = entitiesList[i];
@@ -16021,21 +16028,21 @@ stock bool:checkBombPlace(Float:fOrigin[3])
 		!TrieKeyExists(targetsList, targetName) && TrieSetCell(targetsList, targetName, true); 
 
 		get_brush_entity_origin(entity, origin);
-		new iDistance = get_distance( fOrigin, origin );
-		server_print("Found %s (%d) : %f %f %f. dist %d", targetName, entity, origin[0], origin[1], origin[2], iDistance);
-		if(iDistance < 300)
+		new Float:iDistance = get_distance_f( fOrigin, origin );
+		if(iDistance < smalldistance)
 		{
-			return false;
+			smalldistance = iDistance
 		}
 	}
-		
-	//new bombSitesCount = TrieGetSize(targetsList); 
+	
+	if(smalldistance < 1200.0)
+	{
+		return floatround(1200.0-smalldistance);
+	}
 
 	TrieDestroy(targetsList);
-		
-	//log_amx("Bomb site count = %d", bombSitesCount);
 	
-	return true;
+	return -1;
 }
 
 stock bool:validWall(const Float:fOrigin[3], Float:fNormal[3], Float:width=56.0, Float:height = 84.0)
@@ -18681,7 +18688,12 @@ public mana4a(id, menu, item)
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				mana4(id)
 			}
-			if (mana_gracza[id]>=koszt)
+			if(player_portal[id] == 1)
+			{
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 У вас уже есть портал");
+				cmd_place_portal(id);
+			}
+			else if (mana_gracza[id]>=koszt)
 			{
 				mana_gracza[id] -= koszt;
 				player_portal[id] = 1;
