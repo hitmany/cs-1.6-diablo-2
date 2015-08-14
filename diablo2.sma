@@ -299,7 +299,7 @@ new player_intelligence[33]
 new player_strength[33]
 new player_agility[33]
 new player_dextery[33]
-new mana_gracza[33]
+new player_gold[33]
 new player_TotalLVL[33]
 new player_vip[33]
 new Float:player_damreduction[33]
@@ -1714,11 +1714,11 @@ public MYSQLX_GetAllXP( id )
 	}
 	else
 	{
-		mana_gracza[id] = SQL_ReadResult( query, 0 );
+		player_gold[id] = SQL_ReadResult( query, 0 );
 		player_TotalLVL[id] = SQL_ReadResult( query, 1 );
-		if(mana_gracza[id] > get_pcvar_num(cvar_max_gold))
+		if(player_gold[id] > get_pcvar_num(cvar_max_gold))
 		{
-			mana_gracza[id] = get_pcvar_num(cvar_max_gold)
+			player_gold[id] = get_pcvar_num(cvar_max_gold)
 		}
 	}
 	
@@ -1811,9 +1811,9 @@ public MYSQLX_Save( id )
 		}
 	}
 	
-	if( (player_TotalLVL[id] > 0) || (mana_gracza[id] > 0) )
+	if( (player_TotalLVL[id] > 0) || (player_gold[id] > 0) )
 	{
-		format( szQuery, 511, "REPLACE INTO `extra` (`id`, `gold`, `total_lvl`) VALUES ('%d', '%d', '%d');", iUniqueID, mana_gracza[id], player_TotalLVL[id]);
+		format( szQuery, 511, "REPLACE INTO `extra` (`id`, `gold`, `total_lvl`) VALUES ('%d', '%d', '%d');", iUniqueID, player_gold[id], player_TotalLVL[id]);
 		query = SQL_PrepareQuery( g_DBConn, szQuery );
 	
 		if ( !SQL_Execute( query ) )
@@ -1870,9 +1870,9 @@ public MYSQLX_Save_T( id )
 		SQL_ThreadQuery( g_SqlTuple, "_MYSQLX_Save_T", szQuery );
 	}
 	
-	if( (player_TotalLVL[id] > 0) || (mana_gracza[id] > 0) )
+	if( (player_TotalLVL[id] > 0) || (player_gold[id] > 0) )
 	{
-		format( szQuery, 511, "REPLACE INTO `extra` (`id`, `gold`, `total_lvl`) VALUES ('%d', '%d', '%d');", iUniqueID, mana_gracza[id], player_TotalLVL[id]);
+		format( szQuery, 511, "REPLACE INTO `extra` (`id`, `gold`, `total_lvl`) VALUES ('%d', '%d', '%d');", iUniqueID, player_gold[id], player_TotalLVL[id]);
 		SQL_ThreadQuery( g_SqlTuple, "_MYSQLX_Save_T", szQuery );
 	}
 	
@@ -2475,21 +2475,21 @@ public SaveXP(id)
 			if(get_cvar_num("diablo_sql_save")==0)
 			{
 				new q_command[512]
-				format(q_command,511,"UPDATE `%s` SET `ip`='%s',`sid`='%s',`lvl`='%i',`exp`='%i',`str`='%i',`int`='%i',`dex`='%i',`agi`='%i',`man`='%i' WHERE `nick`='%s' AND `class`='%i' ",g_sqlTable,ip,sid,player_lvl[id],player_xp[id],player_strength[id],player_intelligence[id],player_dextery[id],player_agility[id],mana_gracza[id],name,player_class[id])
+				format(q_command,511,"UPDATE `%s` SET `ip`='%s',`sid`='%s',`lvl`='%i',`exp`='%i',`str`='%i',`int`='%i',`dex`='%i',`agi`='%i',`man`='%i' WHERE `nick`='%s' AND `class`='%i' ",g_sqlTable,ip,sid,player_lvl[id],player_xp[id],player_strength[id],player_intelligence[id],player_dextery[id],player_agility[id],player_gold[id],name,player_class[id])
 				
 				SQL_ThreadQuery(g_SqlTuple,"Save_xp_handle",q_command)
 			}
 			else if(get_cvar_num("diablo_sql_save")==1)
 			{
 				new q_command[512]
-				format(q_command,511,"UPDATE `%s` SET `nick`='%s',`sid`='%s',`lvl`='%i',`exp`='%i',`str`='%i',`int`='%i',`dex`='%i',`agi`='%i',`man`='%i' WHERE `ip`='%s' AND `class`='%i' ",g_sqlTable,name,sid,player_lvl[id],player_xp[id],player_strength[id],player_intelligence[id],player_dextery[id],player_agility[id],mana_gracza[id],ip,player_class[id])
+				format(q_command,511,"UPDATE `%s` SET `nick`='%s',`sid`='%s',`lvl`='%i',`exp`='%i',`str`='%i',`int`='%i',`dex`='%i',`agi`='%i',`man`='%i' WHERE `ip`='%s' AND `class`='%i' ",g_sqlTable,name,sid,player_lvl[id],player_xp[id],player_strength[id],player_intelligence[id],player_dextery[id],player_agility[id],player_gold[id],ip,player_class[id])
 				
 				SQL_ThreadQuery(g_SqlTuple,"Save_xp_handle",q_command)
 			}
 			else if(get_cvar_num("diablo_sql_save")==2)
 			{
 				new q_command[512]
-				format(q_command,511,"UPDATE `%s` SET `nick`='%s',`ip`='%s',`lvl`='%i',`exp`='%i',`str`='%i',`int`='%i',`dex`='%i',`agi`='%i',`man`='%i' WHERE `sid`='%s' AND `class`='%i' ",g_sqlTable,name,ip,player_lvl[id],player_xp[id],player_strength[id],player_intelligence[id],player_dextery[id],player_agility[id],mana_gracza[id],sid,player_class[id])
+				format(q_command,511,"UPDATE `%s` SET `nick`='%s',`ip`='%s',`lvl`='%i',`exp`='%i',`str`='%i',`int`='%i',`dex`='%i',`agi`='%i',`man`='%i' WHERE `sid`='%s' AND `class`='%i' ",g_sqlTable,name,ip,player_lvl[id],player_xp[id],player_strength[id],player_intelligence[id],player_dextery[id],player_agility[id],player_gold[id],sid,player_class[id])
 				
 				SQL_ThreadQuery(g_SqlTuple,"Save_xp_handle",q_command)
 			}
@@ -2603,7 +2603,7 @@ public Load_xp_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSize)
 		player_intelligence[id] = SQL_ReadResult(Query,SQL_FieldNameToNum(Query,"int"))
 		player_strength[id] = SQL_ReadResult(Query,SQL_FieldNameToNum(Query,"str")) 
 		player_agility[id] = SQL_ReadResult(Query,SQL_FieldNameToNum(Query,"agi")) 
-		mana_gracza[id] = SQL_ReadResult(Query,SQL_FieldNameToNum(Query,"man"))
+		player_gold[id] = SQL_ReadResult(Query,SQL_FieldNameToNum(Query,"man"))
 		player_dextery[id] = SQL_ReadResult(Query,SQL_FieldNameToNum(Query,"dex")) 
 		
 		player_point[id]=(player_lvl[id]-1)*2-player_intelligence[id]-player_strength[id]-player_dextery[id]-player_agility[id]	
@@ -3489,14 +3489,7 @@ public DeathMsg(id)
 				set_user_frags(kid, get_user_frags(kid) + 1)
 				if(headshot)
 				{
-					if((mana_gracza[kid]+1) < get_pcvar_num(cvar_max_gold))
-					{
-						mana_gracza[kid]+=1
-					}
-					else
-					{
-						mana_gracza[kid]=get_pcvar_num(cvar_max_gold)
-					}
+					Give_Gold(kid,1)
 				}
 				award_kill(kid,vid)
 			}
@@ -3511,14 +3504,7 @@ public DeathMsg(id)
 				set_user_frags(kid, get_user_frags(kid) + 1)
 				if(headshot)
 				{
-					if((mana_gracza[kid]+1) < get_pcvar_num(cvar_max_gold))
-					{
-						mana_gracza[kid]+=1
-					}
-					else
-					{
-						mana_gracza[kid]=get_pcvar_num(cvar_max_gold)
-					}
+					Give_Gold(kid,1)
 				}
 				award_kill(kid,vid)
 			}
@@ -3575,22 +3561,13 @@ public DeathMsg(id)
 		award_kill(kid,vid)
 		if(headshot)
 		{
-			if((mana_gracza[kid]+3) < get_pcvar_num(cvar_max_gold))
-			{
-				mana_gracza[kid]+=3
-			}
-			else
-			{
-				mana_gracza[kid]=get_pcvar_num(cvar_max_gold)
-			}
+			Give_Gold(kid,3)
 		}
 	
 		add_respawn_bonus(vid)
 		add_bonus_explode(vid)
 		add_barbarian_bonus(kid)
 		add_bonus_zakarum(vid)
-		//mana_gracza[kid]+=1
-		//mana_gracza[headshot]+=2
 		if (player_class[kid] == Barbarian)
 		refill_ammo(kid)
 		if (player_class[kid] == Griswold)
@@ -4620,14 +4597,7 @@ public award_kill(killer_id,victim_id)
 	
 	Give_Xp(killer_id,xp_award)
 	
-	if((mana_gracza[killer_id]+1) < get_pcvar_num(cvar_max_gold))
-	{
-		mana_gracza[killer_id]+=1
-	}
-	else
-	{
-		mana_gracza[killer_id]=get_pcvar_num(cvar_max_gold)
-	}
+	Give_Gold(killer_id,1)
 
 	return PLUGIN_CONTINUE
 	
@@ -4677,6 +4647,20 @@ public Give_Xp(id,amount)
 			}
 			write_hud(id)
 		}
+	}
+}
+
+public Give_Gold(id,amount)
+{
+	if(player_vip[id]==1) amount=amount*2;
+	
+	if((player_gold[id]+amount) < get_pcvar_num(cvar_max_gold))
+	{
+		player_gold[id]+=amount
+	}
+	else
+	{
+		player_gold[id]=get_pcvar_num(cvar_max_gold)
 	}
 }
 
@@ -4741,7 +4725,7 @@ public client_putinserver(id)
 		player_class_lvl[id][iRace] = 1
 		player_class_xp[id][iRace] = 0
 	}
-	mana_gracza[id] = 0
+	player_gold[id] = 0
 	asked_sql[id]=0
 	reset_item_skills(id) // Juz zaladowalo xp wiec juz nic nie zepsuje <lol2>
 	reset_player(id)
@@ -4861,7 +4845,7 @@ public write_hud(id)
 		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПрыжки: %i/%i^nПредмет: %s^nПрочность: %i^nЗолото: %i",
 		get_user_health(id), Racename, player_lvl[id],
 		floatround(perc,floatround_round),"%",JumpsLeft[id],JumpsMax[id],
-		player_item_name[id], item_durability[id],mana_gracza[id])
+		player_item_name[id], item_durability[id],player_gold[id])
 	}
 	else if(player_class[id]==Monk)
 	{
@@ -4869,14 +4853,14 @@ public write_hud(id)
 		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nЩит: %i^nПредмет: %s^nПрочность: %i^nЗолото: %i",
 		get_user_health(id), Racename, player_lvl[id],
 		floatround(perc,floatround_round),"%",monk_energy[id],
-		player_item_name[id], item_durability[id],mana_gracza[id])
+		player_item_name[id], item_durability[id],player_gold[id])
 	}
 	else
 	{
 		set_hudmessage(0, 255, 0, 0.03, 0.20, 0, 6.0, 1.0, 0.2, 0.3, 3)
 		show_hudmessage(id, "Жизни: %i^nКласс: %s^nУровень: %i (%i%s)^nПредмет: \
 		%s^nПрочность: %i^nЗолото: %i",get_user_health(id), Racename, player_lvl[id],
-		floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],mana_gracza[id])
+		floatround(perc,floatround_round),"%", player_item_name[id],item_durability[id],player_gold[id])
 	}
 	
 	message_begin(MSG_ONE,gmsgStatusText,{0,0,0}, id) 
@@ -4922,7 +4906,7 @@ public UpdateHUD()
 				format(Msg,511,"Жизни: %i^nУровень: %i^nКласс: %s^nПредмет: %s^nПрочность: %i^nЗолото: %i",
 				get_user_health(index),player_lvl[index],Racename,
 				player_item_name[index], item_durability[index],
-				mana_gracza[index])		
+				player_gold[index])		
 				show_hudmessage(id, Msg)
 				
 			}
@@ -15563,7 +15547,7 @@ public set_portal(id)
 	{	
 		remove_entity(g_ent);
 		remove_entity(g_ent2);
-		set_hudmessage(255, 0, 0, -1.0, 0.40, 0, 2.0, 2.0, 0.2, 0.3, 5)
+		set_hudmessage(0, 255, 0, -1.0, 0.40, 0, 2.0, 2.0, 0.2, 0.3, 5)
 		show_hudmessage(id, "[ОШИБКА] Подальше от бомбы на %d",distToBomb)
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
@@ -16790,14 +16774,7 @@ public TTWin() {
 			if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_T) 
 			{
 				Give_Xp(id, xp);
-				if((mana_gracza[id]+3) < get_pcvar_num(cvar_max_gold))
-				{
-					mana_gracza[id]+=3
-				}
-				else
-				{
-					mana_gracza[id]=get_pcvar_num(cvar_max_gold)
-				}
+				Give_Gold(id,3)
 				ColorChat(id, GREEN, "Полученно %i опыта и 3 зол. за победу твоей команды в раунде", xp);
 			}
 		}
@@ -16825,14 +16802,7 @@ public CTWin()
 			if(is_user_connected(id) && cs_get_user_team(id) == CS_TEAM_CT) 
 			{
 				Give_Xp(id, xp);
-				if((mana_gracza[id]+3) < get_pcvar_num(cvar_max_gold))
-				{
-					mana_gracza[id]+=3
-				}
-				else
-				{
-					mana_gracza[id]=get_pcvar_num(cvar_max_gold)
-				}
+				Give_Gold(id,3)
 				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта и 3 зол. за победу твоей команды в раунде", xp);
 			}
 		}
@@ -17837,14 +17807,7 @@ public admingivegold(id, level, cid)
 		new szItem[10], iItem;
 		read_argv(2, szItem, 9);
 		iItem=str_to_num(szItem);
-		if((mana_gracza[iTarget]+iItem) < get_pcvar_num(cvar_max_gold))
-		{
-			mana_gracza[iTarget]+=iItem
-		}
-		else
-		{
-			mana_gracza[iTarget]=get_pcvar_num(cvar_max_gold)
-		}
+		Give_Gold(id,iItem)
 	}
 	return PLUGIN_HANDLED
 }
@@ -18388,14 +18351,14 @@ public mana2a(id, menu, item){
 		case 0:
 		{
 			new koszt = 10;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id, "weapon_m4a1")
 				cs_set_user_bpammo(id, CSW_M4A1, 90)
 			}
@@ -18403,14 +18366,14 @@ public mana2a(id, menu, item){
 		case 1:
 		{
 			new koszt = 7;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_ak47")
 				cs_set_user_bpammo(id, CSW_AK47, 90)
 			}
@@ -18418,14 +18381,14 @@ public mana2a(id, menu, item){
 		case 2:
 		{
 			new koszt = 10;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_awp")
 				cs_set_user_bpammo(id, CSW_AWP, 30)
 			}
@@ -18433,14 +18396,14 @@ public mana2a(id, menu, item){
 		case 3:
 		{
 			new koszt = 5;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_famas")
 				cs_set_user_bpammo(id, CSW_FAMAS, 90)
 			}
@@ -18448,14 +18411,14 @@ public mana2a(id, menu, item){
 		case 4:
 		{
 			new koszt = 5;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_gali")
 				cs_set_user_bpammo(id, CSW_GALI, 90)
 			}
@@ -18463,14 +18426,14 @@ public mana2a(id, menu, item){
 		case 5:
 		{
 			new koszt = 13;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_m249")
 				cs_set_user_bpammo(id, CSW_M249, 200)
 			}
@@ -18478,14 +18441,14 @@ public mana2a(id, menu, item){
 		case 6:
 		{
 			new koszt = 4;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_mp5navy")
 				cs_set_user_bpammo(id, CSW_MP5NAVY, 120)
 			}
@@ -18493,14 +18456,14 @@ public mana2a(id, menu, item){
 		case 7:
 		{
 			new koszt = 6;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_scout")
 				cs_set_user_bpammo(id, CSW_SCOUT, 90)
 			}
@@ -18508,14 +18471,14 @@ public mana2a(id, menu, item){
 		case 8:
 		{
 			new koszt = 7;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_m3")
 				cs_set_user_bpammo(id, CSW_M3, 32)
 			}
@@ -18523,14 +18486,14 @@ public mana2a(id, menu, item){
 		case 9:
 		{
 			new koszt = 7;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_xm1014")
 				cs_set_user_bpammo(id, CSW_XM1014, 32)
 			}
@@ -18538,14 +18501,14 @@ public mana2a(id, menu, item){
 		case 10:
 		{
 			new koszt = 4;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_p90")
 				cs_set_user_bpammo(id, CSW_P90, 100)
 			}
@@ -18553,14 +18516,14 @@ public mana2a(id, menu, item){
 		case 11:
 		{
 			new koszt = 2;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_deagle")
 				cs_set_user_bpammo(id, CSW_DEAGLE, 35)
 			}
@@ -18568,14 +18531,14 @@ public mana2a(id, menu, item){
 		case 12:
 		{
 			new koszt = 8;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_aug")
 				cs_set_user_bpammo(id, CSW_AUG, 90)
 			}
@@ -18583,14 +18546,14 @@ public mana2a(id, menu, item){
 		case 13:
 		{
 			new koszt = 8;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id,"weapon_sg552")
 				cs_set_user_bpammo(id, CSW_SG550, 90)
 			}
@@ -18598,14 +18561,14 @@ public mana2a(id, menu, item){
 		case 14:
 		{
 			new koszt = 5;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				return PLUGIN_CONTINUE;
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				fm_give_item(id, "item_nvgs")
 			}
 		}
@@ -18654,36 +18617,36 @@ public mana4a(id, menu, item)
 		case 1:
 		{
 			new koszt = 10;
-			if (mana_gracza[id]<koszt && player_item_id[id]>0)
+			if (player_gold[id]<koszt && player_item_id[id]>0)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота или у вас уже есть предмет");
 				mana4(id)
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				award_item(id,0)
 			}
 		}
 		case 2:
 		{
 			new koszt = 2;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				mana4(id)
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
 				emit_sound(id,CHAN_STATIC,"diablo_lp/repair.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				upgrade_item(id)
 			}
 		}
 		case 3:
 		{
 			new koszt = 15;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				mana4(id)
@@ -18693,9 +18656,9 @@ public mana4a(id, menu, item)
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 У вас уже есть портал");
 				cmd_place_portal(id);
 			}
-			else if (mana_gracza[id]>=koszt)
+			else if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				player_portal[id] = 1;
 				player_portals[id] = 0;
 				ColorChat(id, NORMAL, "^x04НАВЕДИТЕ ПРИЦЕЛ на место размещения и установите");
@@ -18708,14 +18671,14 @@ public mana4a(id, menu, item)
 		case 4:
 		{
 			new koszt = 10;
-			if (mana_gracza[id]<koszt)
+			if (player_gold[id]<koszt)
 			{
 				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
 				mana4(id)
 			}
-			if (mana_gracza[id]>=koszt)
+			if (player_gold[id]>=koszt)
 			{
-				mana_gracza[id] -= koszt;
+				player_gold[id] -= koszt;
 				new xp = 50;
 				Give_Xp(id,xp)	
 				ColorChat(id, GREEN, "Выданно^x03 %i^x01 exp за покупку свитка опыта",xp)
