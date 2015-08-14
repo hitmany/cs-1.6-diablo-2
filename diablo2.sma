@@ -3148,6 +3148,15 @@ public RoundStart(){
 			}
 		}
 		
+		if(player_vip[i] == 1)
+		{
+			fm_give_item(i, "weapon_hegrenade")
+			fm_give_item(i, "weapon_flashbang")
+			fm_give_item(i, "weapon_flashbang")
+			fm_give_item(i, "weapon_smokegrenade")
+			ColorChat(i, GREEN, "[VIP] Вы получили премиум набор")
+		}
+		
 		set_renderchange(i)
 		
 		if(player_item_id[i]==66)
@@ -10320,7 +10329,17 @@ public Postthink_Doubeljump(id)
 public eventGrenade(id) 
 {
 	new id = read_data(1)
-	if (player_b_grenade[id] > 0 || player_b_smokehit[id] > 0 || player_class[id] == Diablo)
+	if(player_class[id] == Diablo)
+	{
+		new weapName[32]
+		get_weaponname(get_user_weapon(id), weapName, charsmax(weapName))
+		
+		if(equal( weapName, "weapon_hegrenade" ))
+		{
+			set_task(0.1, "makeGlow", id)
+		}
+	}
+	else if (player_b_grenade[id] > 0 || player_b_smokehit[id] > 0)
 	{
 		set_task(0.1, "makeGlow", id)
 	}
