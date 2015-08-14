@@ -371,6 +371,7 @@ new c_silent[33]
 new player_b_antyarchy[33]
 new c_antyarchy[33]
 new player_b_antymeek[33]
+new player_b_antysound[33]
 new c_antymeek[33]
 new player_b_antyorb[33]
 new c_antyorb[33]
@@ -405,7 +406,6 @@ new ilosc_rakiet_gracza[33];
 new ilosc_blyskawic[33]
 new Float:poprzednia_blyskawica[33];
 //new ilosc_dynamitow_gracza[33];
-new Float:g_wallorigin[33][3]
 new Float:falen_fires_time[33];
 new fallen_fires[33]
 new frozen_colds[33]
@@ -761,11 +761,11 @@ new g_boolsqlOK=0
 
 // SQL //
 //questy
-new quest_gracza[33];
-new ile_juz[33];
+//new quest_gracza[33];
+//new ile_juz[33];
 
 //przedzial , ile ,kogo , nagroda expa, vip 1 tak 0 nie
-new questy[][]={
+/*new questy[][]={
 	{1,2,Zakarum,500,0},
 	{1,3,Imp,1200,1},
 	{1,6,Fallen,2000,0},
@@ -808,7 +808,7 @@ new questy_zabil[][]={
 	"Paladin",
 	"Barbarian",
 	"Paladin"
-}
+}*/
 
 new mod_version[16] = "LP 2.0 beta"
 
@@ -1142,8 +1142,8 @@ public plugin_init()
 	_create_ThinkBot()
 	
 	register_forward(FM_TraceLine,"fw_traceline");
-	vault_questy = nvault_open("Questy");
-	vault_questy2 = nvault_open("Questy2");
+	//vault_questy = nvault_open("Questy");
+	//vault_questy2 = nvault_open("Questy2");
 	
 	//register_clcmd("quest","menu_questow")
 	//register_clcmd("say /quest","menu_questow")
@@ -1185,7 +1185,7 @@ bool:WC3_MapDisableCheck( szFileName[] )
 	return false;
 }
 
-public menu_questow(id){
+/*public menu_questow(id){
 	if(quest_gracza[id] == -1 || quest_gracza[id] == -2){
 		
 		new menu = menu_create("Меню Квестов","menu_questow_handle")
@@ -1317,7 +1317,7 @@ public menu_questow_handle2(id,menu,item)
 	quest_gracza[id] = wczytaj_aktualny_quest(id);
 	menu_destroy(menu);
 	return PLUGIN_CONTINUE;
-}
+}*/
 
 // Verifies that the database connection is ok
 bool:MYSQLX_Connection_Available()
@@ -2242,9 +2242,9 @@ public plugin_precache()
 	precache_model("models/bag.mdl")
 	precache_model(modelitem)
 	precache_model("models/zombie.mdl")
-	precache_model("addons/amxmodx/diablo/mine.mdl")
-	precache_model("addons/amxmodx/diablo/totem_ignite.mdl")
-	precache_model("addons/amxmodx/diablo/totem_heal.mdl")
+	precache_model("models/diablomod/mine.mdl")
+	precache_model("models/diablomod/totem_ignite.mdl")
+	precache_model("models/diablomod/totem_heal.mdl")
 	precache_model("models/player/arctic/arctic.mdl")
 	precache_model("models/player/leet/leet.mdl")
 	precache_model("models/player/guerilla/guerilla.mdl")
@@ -2277,7 +2277,7 @@ public plugin_precache()
 	precache_sound("weapons/xbow_fire1.wav")
 	sprite_blood_drop = precache_model("sprites/blood.spr")
 	sprite_blood_spray = precache_model("sprites/bloodspray.spr")
-	sprite_ignite = precache_model("addons/amxmodx/diablo/flame.spr")
+	sprite_ignite = precache_model("models/diablomod/flame.spr")
 	sprite_flame = precache_model("sprites/flame.spr")
 	sprite_smoke = precache_model("sprites/steam1.spr")
 	sprite_laser = precache_model("sprites/laserbeam.spr")
@@ -2320,7 +2320,7 @@ public plugin_precache()
 	precache_sound("diablo_lp/fallen_1.wav");
 	precache_sound("diablo_lp/fallen_2.wav");
 	precache_sound("diablo_lp/levelup.wav");
-	precache_sound("diablo_lp/questdone.wav");
+	//precache_sound("diablo_lp/questdone.wav");
 	precache_sound("diablo_lp/identify.wav");
 	precache_sound("diablo_lp/itembroken.wav");
 	precache_sound("diablo_lp/repair.wav");
@@ -3071,6 +3071,7 @@ public RoundStart(){
 			MYSQLX_SetDataForRace( i )
 			player_newclass[i] = 0
 			ColorChat(i, GREEN, "Вы сменили расу")
+			showRaceInfo( i )
 		}
 		else
 		{
@@ -3118,7 +3119,7 @@ public RoundStart(){
 			}
 			else
 			{
-				hudmsg(i,5.0,"На этой карте оружие не выдаётся!")
+				ColorChat(i, GREEN, "[Диабло] НА ЭТОЙ КАРТЕ ОРУЖИЕ НЕ ДАЕТСЯ")
 			}
 		}
 		
@@ -3575,7 +3576,7 @@ public DeathMsg(id)
 		refill_ammo(kid)
 		set_renderchange(kid)
 		//savexpcom(vid)
-		if(quest_gracza[kid] != -1)
+		/*if(quest_gracza[kid] != -1)
 		{
 			if(player_class[vid] == questy[quest_gracza[kid]][2])
 			{
@@ -3595,7 +3596,7 @@ public DeathMsg(id)
 			{
 				client_print(kid,print_chat,"Убито %i/%i %s",ile_juz[kid],questy[quest_gracza[kid]][1],questy_zabil[quest_gracza[kid]])
 			}
-		}
+		}*/
 	}
 }
 
@@ -3997,8 +3998,6 @@ public client_PreThink ( id )
 		set_task(7.5, "un_rander", TASK_FLASH_LIGHT+index1, "", 0, "a", 1);
 }
 	}
-	if((button2 & IN_USE) && (player_class[id] == Paladin))
-		wallclimb(id, button2)
 	new body 
 	get_user_aiming(id, cel, body)
 	if( is_user_alive(id)) itminfo(id,cel)
@@ -4672,6 +4671,7 @@ public client_connect(id)
 	player_dextery[id] = 0
 	player_b_oldsen[id] = 0.0
 	player_class[id] = 0
+	player_newclass[id] = 0
 	player_damreduction[id] = 0.0
 	last_update_xp[id] = -1
 	player_item_name[id] = "Нет"
@@ -5417,6 +5417,7 @@ public reset_item_skills(id)
 	player_b_mine[id] = 0
 	player_b_antyarchy[id] = 0
 	player_b_antymeek[id] = 0
+	player_b_antysound[id] = 0
 	player_b_antyorb[id] = 0
 	player_b_antyfs[id] = 0
 	player_b_autobh[id] = 0
@@ -5455,23 +5456,23 @@ public auto_help(id)
 		}
 		if (rnd == 2)
 		{
-			show_hudmessage(id, "Чтобы сменить класс/герой набери в чате class,или say class в консоли")
+			show_hudmessage(id, "Чтобы сменить класс набери в чате class")
 		}
 		if (rnd == 3)
 		{
-			show_hudmessage(id, "Вы можете получить более подоробную информацию набери в консоли say help")
+			show_hudmessage(id, "Читай описание мода, набери в чате help")
 		}
 		if (rnd == 4)
 		{
-			show_hudmessage(id, "Главное меню мода say menu")
+			show_hudmessage(id, "Главное меню мода say d2")
 		}
 		if (rnd == 5)
 		{
-			show_hudmessage(id, "За золото можно купить предметы,телепорты,улучшить/починить предметы,оружие")
+			show_hudmessage(id, "За золото можно купить порталы,улучшить/починить предметы,оружие,опыт")
 		}
 		if (rnd == 6)
 		{
-			show_hudmessage(id, "Золото вы получаете за хедшоты,её можно собрать на ежедневных ивентах")
+			show_hudmessage(id, "Золото вы получаете за убийства")
 		}
 	}
 }
@@ -6234,6 +6235,10 @@ public iteminfo(id)
 	if (player_b_smokehit[id] > 0)
 	{
 		add(itemEffect,399,"Ваши дымовые гранаты мгновенно убивают если они попали во врага<br>")
+	}
+	if (player_b_antysound[id] > 0)
+	{
+		add(itemEffect,399,"Отключает звуки Закарума и Падщего<br>")
 	}
 	if (player_b_extrastats[id] > 0)
 	{
@@ -7138,10 +7143,10 @@ public award_item(id, itemnum)
 		}
 		case 105:
 		{
-			player_item_name[id] = "Кольцо Тал Раша"
+			player_item_name[id] = "Кольцо Безмолвия"
 			player_item_id[id] = rannum
-			player_b_antymeek[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nШанс 1/%i защиты от Камня Смирения", player_item_name[id], player_b_antymeek[id])
+			player_b_antysound[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nОтключает вопль Закарума и Падшего", player_item_name[id])
 		}
 		case 106:
 		{
@@ -8919,6 +8924,254 @@ public Bot_Setup()
 }
 
 /* ==================================================================================================== */
+public showRaceInfo(id)
+{
+	switch(player_class[id])
+	{
+		case 1: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Маг^n\
+		Уровень: %d^n\
+		+10 HP^n\
+		фонарь видит невидимок,^n\
+		зарядка - выпускает огонь",player_lvl[id])
+		}
+		case 2: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Монах^n\
+		Уровень: %d^n\
+		скин врага^n\
+		энер. щит^n\
+		зарядка - ставит стенки блок. урон",player_lvl[id])
+		}
+		case 3: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Паладин^n\
+		Уровень: %d^n\
+		+30 HP^n\
+		longjump на CTRL+SPACE с ножом^n\
+		блок каждой 7 пули^n\
+		зарядка - +1 магич. пуля^n\
+		попадающая в голову",player_lvl[id])
+		}
+		case 4: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Ассасин^n\
+		Уровень: %d^n\
+		+40 HP^n\
+		метательные ножи на R с ножом^n\
+		бесшумные шаги^n\
+		зарядка - невидим. до смены оружия",player_lvl[id])
+		}
+		case 5: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Некромант^n\
+		Уровень: %d^n\
+		+10 HP^n\
+		удерживать E у трупа^n\
+		труп врага даст жизни,^n\
+		труп своей команды оживляет^n\
+		+1-3 HP при каждои попадании",player_lvl[id])
+		}
+		case 6: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Варвар^n\
+		Уровень: %d^n\
+		+20 HP^n\
+		после убийства 200 AP, 30 HP ^n\
+		+полные патроны текущего оружия,^n\
+		-10 к скорости^n\
+		зарядка - магическая броня,^n\
+		магич. броня блок. пули",player_lvl[id])
+		}
+		case 7: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Ниндзя^n\
+		Уровень: %d^n\
+		+40 HP^n\
+		невидим, только нож^n\
+		при метании и махании ножом,^n\
+		становится видимым^n\
+		и становится невидимым через 5-1 сек.^n\
+		+40 к скорости^n\
+		метательные ножи на R^n\
+		зарядка - +скорость",player_lvl[id])
+		}
+		case 8: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Амазонка^n\
+		Уровень: %d^n\
+		+40 HP^n\
+		гранаты-ловушки на ПКМ^n\
+		арбалет с ножом на R^n\
+		зарядка - +HE граната",player_lvl[id])
+		}
+		case 9: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Кровавый ворон^n\
+		Уровень: %d^n\
+		+10 HP^n\
+		лук на R с ножом^n\
+		ПКМ увел. обзор лука^n\
+		после смерти ударяет молнией врагов^n\
+		+30 к скорости^n\
+		зарядка - +взрывные стрелы",player_lvl[id])
+		}
+		case 10: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Дуриель^n\
+		Уровень: %d^n\
+		+20 HP^n\
+		шанс замедлить стрельбу^n\
+		при попадании в вас^n\
+		зарядка - +Ярость^n\
+		Ярость(с ножом на R)^n\
+		ускоряет вас,^n\
+		разбрасывая врагов, наносит урон^n\
+		выбрасывает их перв. оружие",player_lvl[id])
+		}
+		case 11: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Мефисто^n\
+		Уровень: %d^n\
+		+20 HP^n\
+		шанс пустить молнию^n\
+		при попадании в вас^n\
+		бесшумные шаги^n\
+		зарядка - стена огня",player_lvl[id])
+		}
+		case 12: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Изуал^n\
+		Уровень: %d^n\
+		+40 HP^n\
+		телепортация с ножом(ПКМ)^n\
+		шанс блокировать урон^n\
+		зарядка - +магическое кольцо^n\
+		актив. с ножом на R^n\
+		оно замораж. и наносит урон",player_lvl[id])
+		}
+		case 13: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Диабло^n\
+		Уровень: %d^n\
+		+50 HP^n\
+		бесшумные шаги^n\
+		все гранатаы-напалм^n\
+		в нач. раунда +грена^n\
+		+2 лимит покупки HE грен^n\
+		зарядка - +молния^n\
+		актив. с ножом на R",player_lvl[id])
+		}
+		case 14: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Баал^n\
+		Уровень: %d^n\
+		+30 HP^n\
+		телепортация с ножом(ПКМ)^n\
+		+20HP после убийства^n\
+		+40 к скорости^n\
+		зарядка - создает вашу копию",player_lvl[id])
+		}
+		case 15: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Падший^n\
+		Уровень: %d^n\
+		+30 HP^n\
+		шанс ослепить противника^n\
+		шанс потрясти экран^n\
+		иммун. к флешкам^n\
+		зарядка - +флешка^n\
+		после 50 уровня:^n\
+		пуск огня с ножом на R^n\
+		воскрешение своих Падших",player_lvl[id])
+		}
+		case 16: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Бес^n\
+		Уровень: %d^n\
+		+10 HP^n\
+		шанс переключить оружие на нож^n\
+		телепортация с ножом(ПКМ)^n\
+		пускает огонь с ножом на R",player_lvl[id])
+		}
+		case 17: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Закарум^n\
+		Уровень: %d^n\
+		коса увел. урон^n\
+		лечит своих Закарум^n\
+		молнии с ножом на R^n\
+		телепортация с ножом(ПКМ)^n\
+		зарядка - +к скорости",player_lvl[id])
+		}
+		case 18: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Саламандра^n\
+		Уровень: %d^n\
+		пускает газ с ножом на R,^n\
+		шанс увел. урон и заморозить^n\
+		при ударе с ножом,^n\
+		зарядка - пускат копье, наносит урон",player_lvl[id])
+		}
+		case 19: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Гигантский комар^n\
+		Уровень: %d^n\
+		только нож, летает^n\
+		подпрыгни и жми E для полета^n\
+		маленькая модель комара^n\
+		зарядка - +жало^n\
+		жало парализует, наносит урон",player_lvl[id])
+		}
+		case 20: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Ледяной ужас^n\
+		Уровень: %d^n\
+		бесшумные шаги^n\
+		защита от холода^n\
+		с ножом на R пускает холод^n\
+		после смерти взрываются льдом^n\
+		холод и лед наносит урон",player_lvl[id])
+		}
+		case 21: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Инфидель^n\
+		Уровень: %d^n\
+		+40 HP^n\
+		только 2 меча^n\
+		шанс *1.5 урона^n\
+		когда бижит невидим, стоит видим^n\
+		+40 к скорости^n\
+		пули не замедляют его^n\
+		зарядка - +50 к скорости",player_lvl[id])
+		}
+		case 22: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Гигантский паук^n\
+		Уровень: %d^n\
+		+15 HP^n\
+		паутина с ножом на R^n\
+		зарядка - ставит ловушку^n\
+		ловушка замор. врага на 3 сек.^n\
+		выбрас. первич. оружие^n\
+		и отображ. на радаре^n\
+		+HP если стоите на ловушке^n\
+		иммунитет к ловушкам.",player_lvl[id])
+		}
+		case 23: {
+		set_hudmessage(255, 255, 255, -1.0, 0.10, 0, 8.0, 8.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "Адский кот^n\
+		Уровень: %d^n\
+		+20 HP^n\
+		вместо дымовух, банки с ядом^n\
+		яд парализуем и наносит урон^n\
+		+30 к скорости^n\
+		зарядка - +банка яда.",player_lvl[id])
+		}
+	}
+}
+/* ==================================================================================================== */
 
 public host_killed(id)
 {
@@ -8936,7 +9189,7 @@ public showmenu(id)
 	new keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
 	
 	
-	format(text, 512, "\rДиабло меню\R^n^n\y1.\w Описание предмета^n\y2.\w Выкинуть текущий предмет^n\y3.\w Помощь^n\y4.\w Информация об игроках^n\y5.\w Магазин Диабло^n\y6.\w Мои навыки^n\y7.\w Сменить расу^n^n\y0.\w Выход") 
+	format(text, 512, "\rДиабло меню\R^n^n\y1.\w Сменить расу^n\y2.\w Описание предмета^n\y3.\w Магазин Диабло^n\y4.\w Выкинуть текущий предмет^n\y5.\w Мои навыки^n\y6.\w Информация об игроках^n\y7.\w Помощь^n^n\y0.\w Выход") 
 	
 	show_menu(id, keys, text, -1, "ShowMenu")
 	return PLUGIN_HANDLED  
@@ -8949,32 +9202,32 @@ public option_menu(id, key)
 	{ 
 		case 0: 
 		{	
-			iteminfo(id)
-			
+			changerace(id)			
 		}
 		case 1: 
 		{	
-			dropitem(id)
+			iteminfo(id)
+			
 		}
 		case 2: 
 		{	
-			helpme(id)
+			mana4(id)
 		}
 		case 3:
 		{
-			cmd_who(id)
+			dropitem(id)
 		}
 		case 4:
 		{
-			mana4(id)
+			showskills(id)
 		}
 		case 5:
 		{
-			showskills(id)
+			cmd_who(id)
 		}
 		case 6:
 		{
-			changerace(id)
+			helpme(id)
 		}
 		case 9:
 		{
@@ -10614,7 +10867,7 @@ stock Effect_Ignite_Totem(id,seconds)
 	set_pev(ent,pev_origin,origin)
 	set_pev(ent,pev_ltime, halflife_time() + seconds + 0.1)
 	
-	engfunc(EngFunc_SetModel, ent, "addons/amxmodx/diablo/totem_ignite.mdl")  	
+	engfunc(EngFunc_SetModel, ent, "models/diablomod/totem_ignite.mdl")  	
 	set_rendering ( ent, kRenderFxGlowShell, 250,150,0, kRenderFxNone, 255 ) 	
 	engfunc(EngFunc_DropToFloor,ent)
 	
@@ -11325,7 +11578,7 @@ public item_mine(id)
 	set_pev(ent,pev_origin,origin)
 	set_pev(ent,pev_solid,SOLID_BBOX)
 	
-	engfunc(EngFunc_SetModel, ent, "addons/amxmodx/diablo/mine.mdl")  
+	engfunc(EngFunc_SetModel, ent, "models/diablomod/mine.mdl")  
 	engfunc(EngFunc_SetSize,ent,Float:{-16.0,-16.0,0.0},Float:{16.0,16.0,2.0})
 	
 	drop_to_floor(ent)
@@ -11894,7 +12147,7 @@ public item_totemheal(id)
 	set_pev(ent,pev_origin,origin)
 	set_pev(ent,pev_ltime, halflife_time() + 7 + 0.1)
 	
-	engfunc(EngFunc_SetModel, ent, "addons/amxmodx/diablo/totem_heal.mdl")  	
+	engfunc(EngFunc_SetModel, ent, "models/diablomod/totem_heal.mdl")  	
 	set_rendering ( ent, kRenderFxGlowShell, 255,0,0, kRenderFxNone, 255 ) 	
 	engfunc(EngFunc_DropToFloor,ent)
 	
@@ -14899,12 +15152,15 @@ public FallenShaman(id)
 			new Float:fl_iNewVelocity[3]
 			VelocityByAim(id, 800, fl_iNewVelocity)
 			entity_set_vector(ent, EV_VEC_velocity, fl_iNewVelocity)
-			rndfsound = random(2);
-			switch(rndfsound)
+			if(player_b_antysound[id] == 0)
 			{
-				case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				rndfsound = random(2);
+				switch(rndfsound)
+				{
+					case 0: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 1: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 2: emit_sound(id,CHAN_STATIC, "diablo_lp/fallen_roar6.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				}
 			}
 			emit_sound(ent, CHAN_VOICE, "diablo_lp/firelaunch2.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 		}
@@ -15515,31 +15771,6 @@ public DotykRakiety(ent)
 	}
 	return PLUGIN_CONTINUE;
 }*/
-public wallclimb(id, button)
-{
-	static Float:origin[3]
-	pev(id, pev_origin, origin)
-
-	if(get_distance_f(origin, g_wallorigin[id]) > 25.0)
-			return FMRES_IGNORED  // if not near wall
-
-	if(fm_get_entity_flags(id) & FL_ONGROUND)
-			return FMRES_IGNORED
-			
-	if(button & IN_FORWARD)
-	{
-		static Float:velocity[3]
-		velocity_by_aim(id, 120, velocity)
-		fm_set_user_velocity(id, velocity)
-	}
-	else if(button & IN_BACK)
-	{
-		static Float:velocity[3]
-		velocity_by_aim(id, -120, velocity)
-		fm_set_user_velocity(id, velocity)
-	}
-	return FMRES_IGNORED
-}
 public make_hook(id)
 {
 	if(spider_hook_disabled[id] == 1)
@@ -16489,7 +16720,7 @@ public TTWin() {
 				{
 					mana_gracza[id]=get_pcvar_num(cvar_max_gold)
 				}
-				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта и 3 зол. за победу твоей команды в раунде", xp);
+				ColorChat(id, GREEN, "Полученно %i опыта и 3 зол. за победу твоей команды в раунде", xp);
 			}
 		}
 }
@@ -16688,7 +16919,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					add_bonus_shake(attacker_id,id)
 					add_bonus_shaked(attacker_id,id)
 					item_take_damage(id,damage)
-					if(player_class[id] == Fallen)
+					if(player_class[id] == Fallen && player_b_antysound[id] == 0)
 					{
 						rndfsound = random(4);
 						if(player_lvl[id] < 50)
@@ -16875,9 +17106,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					set_user_hitzones(0, id, 0)
 				}
 				#endif
-				
-				new clip,ammo
-				new weapon = get_user_weapon(attacker_id,clip,ammo)
 					
 				/*if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Assassin)
 				{	
@@ -16886,26 +17114,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						set_task(1.5, "funcDemageVic3", id)
 					}
 				}*/
-				
-				if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Amazon)
-				{	
-					if(weapon == CSW_GLOCK18 || weapon == CSW_USP || weapon == CSW_P228 || weapon == CSW_DEAGLE || weapon == CSW_ELITE || weapon == CSW_FIVESEVEN)
-					{
-						new ori[3]
-						trace_bool[attacker]=id
-						get_user_origin(id,ori)
-						
-						new parms[5];
-						
-						for(new i=0;i<3;i++)
-						{
-							parms[i] = ori[i] 
-						}
-						parms[3]=attacker
-						parms[4]=id
-						set_task(0.5,"charge_amazon",attacker,parms,5)
-					}
-				}
 			}
 		}
 		if((player_class[victim] == GiantSpider) && (spider_hook_disabled[victim] == 0))
@@ -17172,6 +17380,9 @@ public fallen_respawn()
 						get_user_name(player,name,31)
 						ExecuteHamB(Ham_CS_RoundRespawn, player)
 						hudmsg2(i,1.0,"Воскрешенн Падший ^nиз твоей команды:^n %s",name)
+						new xp = a_size * 4
+						Give_Xp(i,xp)	
+						ColorChat(i, GREEN, "Выданно^x03 %i^x01 exp за воскрешение падшего",xp)
 						player_fallen_tr[i]=1;
 						emit_sound(i,CHAN_STATIC, "diablo_lp/resurrectcast.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 						emit_sound(player,CHAN_STATIC, "diablo_lp/resurrect.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
@@ -17217,7 +17428,7 @@ public fallen_respawn()
 						{
 							set_user_health(a,newhp)
 							get_user_name(i,revivername,31)
-							hudmsg2(a,1.0,"%s исцелил вас на %i HP",revivername, revivehp)
+							//hudmsg2(a,1.0,"%s исцелил вас на %i HP",revivername, revivehp)
 						}
 					}
 				}
@@ -17248,42 +17459,45 @@ public fallen_respawn()
 public play_idle(taskid)
 {
 	new TASK_BLOOD = taskid - 2000;
-	if(round_status==1 && player_class[TASK_BLOOD] == Fallen && is_user_alive(TASK_BLOOD))
+	if(player_b_antysound[TASK_BLOOD] == 0)
 	{
-		if(player_lvl[TASK_BLOOD] > 49)
+		if(round_status==1 && player_class[TASK_BLOOD] == Fallen && is_user_alive(TASK_BLOOD))
 		{
-			rndfsound = random(3);
-			switch(rndfsound)
+			if(player_lvl[TASK_BLOOD] > 49)
 			{
-				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				rndfsound = random(3);
+				switch(rndfsound)
+				{
+					case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallens_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				}
 			}
-		}
-		else
-		{
-			rndfsound = random(4);
-			switch(rndfsound)
+			else
 			{
-				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 4: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			}
-		} 
-	}
-	else if(round_status==1 && player_class[TASK_BLOOD] == Zakarum && is_user_alive(TASK_BLOOD))
-	{
-			rndfsound = random(3);
-			switch(rndfsound)
-			{
-				case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-				case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				rndfsound = random(4);
+				switch(rndfsound)
+				{
+					case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 4: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/fallen_neutral5.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				}
 			} 
+		}
+		else if(round_status==1 && player_class[TASK_BLOOD] == Zakarum && is_user_alive(TASK_BLOOD))
+		{
+				rndfsound = random(3);
+				switch(rndfsound)
+				{
+					case 0: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 1: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral2.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 2: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral3.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+					case 3: emit_sound(TASK_BLOOD,CHAN_STATIC, "diablo_lp/zakarum_neutral4.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
+				} 
+		}
 	}
 }
 
@@ -17342,7 +17556,7 @@ public item_zamroz(id)
 	set_pev(ent,pev_origin,origin)
 	set_pev(ent,pev_ltime, halflife_time() + 15 + 0.1)
 	
-	engfunc(EngFunc_SetModel, ent, "addons/amxmodx/diablo/totem_heal.mdl")  	
+	engfunc(EngFunc_SetModel, ent, "models/diablomod/totem_heal.mdl")  	
 	set_rendering ( ent, kRenderFxGlowShell, 0,100,255, kRenderFxNone, 255 ) 	
 	engfunc(EngFunc_DropToFloor,ent)
 	
@@ -17599,7 +17813,7 @@ public item_kasa(id)
 	set_pev(ent,pev_origin,origin)
 	set_pev(ent,pev_ltime, halflife_time() + 15 + 0.1)
 	
-	engfunc(EngFunc_SetModel, ent, "addons/amxmodx/diablo/totem_heal.mdl")  	
+	engfunc(EngFunc_SetModel, ent, "models/diablomod/totem_heal.mdl")  	
 	set_rendering ( ent, kRenderFxGlowShell, 255,215,0, kRenderFxNone, 255 ) 	
 	engfunc(EngFunc_DropToFloor,ent)
 	
@@ -17711,7 +17925,7 @@ public item_kasaq(id)
 	set_pev(ent,pev_origin,origin)
 	set_pev(ent,pev_ltime, halflife_time() + 15 + 0.1)
 	
-	engfunc(EngFunc_SetModel, ent, "addons/amxmodx/diablo/totem_heal.mdl")  	
+	engfunc(EngFunc_SetModel, ent, "models/diablomod/totem_heal.mdl")  	
 	set_rendering ( ent, kRenderFxGlowShell, 138,43,226, kRenderFxNone, 255 ) 	
 	engfunc(EngFunc_DropToFloor,ent)
 	
@@ -17823,7 +18037,7 @@ public item_wywal(id)
 	set_pev(ent,pev_origin,origin)
 	set_pev(ent,pev_ltime, halflife_time() + 15 + 0.1)
 	
-	engfunc(EngFunc_SetModel, ent, "addons/amxmodx/diablo/totem_heal.mdl")  	
+	engfunc(EngFunc_SetModel, ent, "models/diablomod/totem_heal.mdl")  	
 	set_rendering ( ent, kRenderFxGlowShell, 139,69,19, kRenderFxNone, 255 ) 	
 	engfunc(EngFunc_DropToFloor,ent)
 	
@@ -17938,7 +18152,7 @@ public item_fleshuj(id)
 	set_pev(ent,pev_origin,origin)
 	set_pev(ent,pev_ltime, halflife_time() + 15 + 0.1)
 	
-	engfunc(EngFunc_SetModel, ent, "addons/amxmodx/diablo/totem_heal.mdl")  	
+	engfunc(EngFunc_SetModel, ent, "models/diablomod/totem_heal.mdl")  	
 	set_rendering ( ent, kRenderFxGlowShell, 255,255,250, kRenderFxNone, 255 ) 	
 	engfunc(EngFunc_DropToFloor,ent)
 	
@@ -18333,6 +18547,7 @@ public mana4(id){
 	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
 	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
 	menu_additem(mana4,"\wСвиток портала \d[15 золота]")
+	menu_additem(mana4,"\wСвиток опыта \d[10 золота]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Назад в меню")
 	menu_setprop(mana4,MPROP_NEXTNAME,"Далее")
@@ -18405,6 +18620,22 @@ public mana4a(id, menu, item)
 				set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 4.0, 5.0, 0.2, 0.3, 5)
 				show_hudmessage(id, "Навести прицел на стену. Нажать Установить")
 				cmd_place_portal(id);
+			}
+		}
+		case 4:
+		{
+			new koszt = 10;
+			if (mana_gracza[id]<koszt)
+			{
+				ColorChat(id,GREEN,"[МАГАЗИН]^x01 Не хватает золота.");
+				mana4(id)
+			}
+			if (mana_gracza[id]>=koszt)
+			{
+				mana_gracza[id] -= koszt;
+				new xp = 50;
+				Give_Xp(id,xp)	
+				ColorChat(id, GREEN, "Выданно^x03 %i^x01 exp за покупку свитка опыта",xp)
 			}
 		}
 		case MENU_EXIT:
