@@ -6580,7 +6580,7 @@ public award_item(id, itemnum)
 		}
 		case 20:
 		{
-			player_item_name[id] = "Кольцо Вольшебницы"
+			player_item_name[id] = "Кольцо Волшебницы"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = random_num(2,3)
 			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i воскреситься после смерти.",player_item_name[id],player_b_respawn[id])	
