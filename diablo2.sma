@@ -6893,7 +6893,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum	
 			player_b_grenade[id] = random_num(1,4)
 			player_b_heal[id] = random_num(20,35)
-			show_hudmessage(id, "Вы нашли предмет: %s^nУвиличивает урон наносимый гранатой. Восстанавливает здоровье",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nШанс убить с грены. Лечащий тотем на E. Реген. +20HP в 5 сек.",player_item_name[id])
 		}	
 		case 64:
 		{
