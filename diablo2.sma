@@ -6223,7 +6223,7 @@ public iteminfo(id)
 	
 	if (player_b_froglegs[id] > 0)
 	{
-		add(itemEffect,399,"Удерживайте назад +ПРИСЕСТЬ 3 секунды для длинного прыжка")
+		add(itemEffect,399,"Телепорт на ПКМ с ножа. Присесть - длинный прыжок")
 	}
 	if (player_b_dagon[id] > 0)
 	{
@@ -6853,7 +6853,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_blink[id] = floatround(halflife_time())
 			player_b_froglegs[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nНож позволяет вам телепортироваться каждые 3 секунды. Зажмите присесть для активации.",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nТелепорт на ПКМ с ножа. Присесть - длинный прыжок",player_item_name[id])
 		}
 		case 59:	
 		{
