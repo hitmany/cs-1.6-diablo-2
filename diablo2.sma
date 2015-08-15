@@ -6877,7 +6877,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(120,330)
 			player_ring[id]=2
-			show_hudmessage(id, "Вы нашли предмет: %s^nКогда вас убивают вы взрываетесь, нанося урон стоящим в близи врагам. +5 сила",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nКогда вас убивают вы взрываетесь, нанося урон рагам. +5 сила",player_item_name[id])
 		}
 		case 62:
 		{
