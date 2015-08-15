@@ -262,6 +262,15 @@ new const primaryWeapons[][] = {
 	"weapon_p90"
 }
 
+new const secondaryWeapons[][] = {
+    "weapon_p228",
+    "weapon_elite",
+    "weapon_fiveseven",
+    "weapon_usp",
+    "weapon_glock18",
+    "weapon_deagle"
+}
+
 new sprite_blood_drop = 0
 new sprite_blood_spray = 0
 new sprite_gibs = 0
@@ -18376,6 +18385,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id, "weapon_m4a1")
 				cs_set_user_bpammo(id, CSW_M4A1, 90)
 			}
@@ -18391,6 +18404,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_ak47")
 				cs_set_user_bpammo(id, CSW_AK47, 90)
 			}
@@ -18406,6 +18423,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_awp")
 				cs_set_user_bpammo(id, CSW_AWP, 30)
 			}
@@ -18421,6 +18442,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_famas")
 				cs_set_user_bpammo(id, CSW_FAMAS, 90)
 			}
@@ -18436,6 +18461,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_gali")
 				cs_set_user_bpammo(id, CSW_GALI, 90)
 			}
@@ -18451,6 +18480,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_m249")
 				cs_set_user_bpammo(id, CSW_M249, 200)
 			}
@@ -18466,6 +18499,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_mp5navy")
 				cs_set_user_bpammo(id, CSW_MP5NAVY, 120)
 			}
@@ -18481,6 +18518,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_scout")
 				cs_set_user_bpammo(id, CSW_SCOUT, 90)
 			}
@@ -18496,6 +18537,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_m3")
 				cs_set_user_bpammo(id, CSW_M3, 32)
 			}
@@ -18511,6 +18556,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_xm1014")
 				cs_set_user_bpammo(id, CSW_XM1014, 32)
 			}
@@ -18526,6 +18575,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_p90")
 				cs_set_user_bpammo(id, CSW_P90, 100)
 			}
@@ -18541,6 +18594,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof secondaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", secondaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_deagle")
 				cs_set_user_bpammo(id, CSW_DEAGLE, 35)
 			}
@@ -18556,6 +18613,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_aug")
 				cs_set_user_bpammo(id, CSW_AUG, 90)
 			}
@@ -18571,6 +18632,10 @@ public mana2a(id, menu, item){
 			if (player_gold[id]>=koszt)
 			{
 				player_gold[id] -= koszt;
+				for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+				{
+					engclient_cmd(id, "drop", primaryWeapons[wepCount])
+				}
 				fm_give_item(id,"weapon_sg552")
 				cs_set_user_bpammo(id, CSW_SG550, 90)
 			}
