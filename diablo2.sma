@@ -707,6 +707,7 @@ new Float:tossdelay[33]
 new Float:bowdelay[33]
 new bow[33]
 new bow_zoom[33]
+new bowloaded[33]
 
 new Float:player_last_check_time[33]  //Mosquito
 new bool:use_fly[33] //Mosquito
@@ -2922,6 +2923,7 @@ public InitRace(id, racenum, type)
 		case 8: //Amazon
 		{
 			g_GrenadeTrap[id] = 1
+			bowloaded[id] = 1
 		}
 		case 9: //BloodRaven
 		{
@@ -2929,6 +2931,7 @@ public InitRace(id, racenum, type)
 			{
 				emit_sound(id,CHAN_STATIC,"diablo_lp/bloodraventaunt1.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 			}
+			bowloaded[id] = 1
 		}
 		case 10: //Duriel
 		{
@@ -4102,7 +4105,14 @@ public client_PreThink ( id )
 	if (button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==Amazon || button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==Demonolog || button2 & IN_RELOAD && on_knife[id] && button[id]==0 && player_class[id]==BloodRaven){
 		bow[id]++
 		button[id] = 1;
-		command_bow(id,1)
+		if(bowloaded[id]==1)
+		{
+			command_bow(id,2)
+		}
+		else
+		{
+			command_bow(id,1)
+		}
 		if (cs_get_user_zoom(id)==CS_SET_AUGSG552_ZOOM)
 		{	
 			cs_set_user_zoom(id,CS_SET_NO_ZOOM,1)
@@ -4273,6 +4283,7 @@ public client_PreThink ( id )
 			if((floatround(bowdelay[id] + 4.25 - float(player_intelligence[id]/25),floatround_ceil))< get_gametime() && button2 & IN_ATTACK)
 			{
 				bowdelay[id] = get_gametime()
+				bowloaded[id] = 0
 				
 				message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
 				write_byte( 0 ) 
@@ -4293,6 +4304,10 @@ public client_PreThink ( id )
 			else if(!casting_bow[id])
 			{
 				do_casting_bow(id)
+			}
+			else if((floatround(bowdelay[id] + 4.25 - float(player_intelligence[id]/25),floatround_ceil))< get_gametime())
+			{
+				bowloaded[id] = 1
 			}
 			entity_set_int( id, EV_INT_button, entity_get_int(id,EV_INT_button) & ~IN_ATTACK );
 			entity_set_int( id, EV_INT_button, entity_get_int(id,EV_INT_button) & ~IN_ATTACK2 );
@@ -4336,6 +4351,7 @@ public do_casting_bow(id)
 	casting_bow[id] = 1
 	new Float:time_delay = 4.25 - float(player_intelligence[id]/25)
 	new bar_delay = floatround(time_delay,floatround_ceil)
+	bowloaded[id] = 0
 
 	message_begin( MSG_ONE, gmsgBartimer, {0,0,0}, id ) 
 	write_byte( bar_delay ) 
@@ -7392,13 +7408,13 @@ public add_damage_bonus(id,damage,attacker_id)
 {
 	if (player_b_damage[attacker_id] > 0 && get_user_health(id)>player_b_damage[attacker_id])
 	{
-		change_health(id,-player_b_damage[attacker_id],attacker_id,"damage bonus")
+		d2_damage( id, attacker_id, player_b_damage[attacker_id], "damage bonus")
 			
 		if (random_num(0,2) == 1) Effect_Bleed(id,248)
 	}
 	if (c_damage[attacker_id] > 0 && get_user_health(id)>player_b_damage[attacker_id])
 	{
-		change_health(id,-c_damage[attacker_id],attacker_id,"damage bonus")
+		d2_damage( id, attacker_id, c_damage[attacker_id], "damage bonus")
 			
 		if (random_num(0,2) == 1) Effect_Bleed(id,248)
 	}
@@ -14148,7 +14164,7 @@ public toucharrow(arrow, id)
 		
 		Effect_Bleed(id,248)
 
-		bowdelay[kid] -=  0.5 - floatround(player_intelligence[kid]/5.0)
+		//bowdelay[kid] -=  0.5 - floatround(player_intelligence[kid]/5.0)
 	
 		change_health(id,floatround(-dmg),kid,"arrow")
 		
