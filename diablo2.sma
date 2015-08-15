@@ -16970,6 +16970,10 @@ public fwHamPlayerSpawnPost(id)
 			Display_Icon(id ,0 ,"dmg_heat" ,0,0,0)
 		}
 		add_bonus_gamble(id)
+		if(HasFlag(id,Flag_Ignite))
+		{
+			RemoveFlag(id,Flag_Ignite)
+		}
 	}
 }
 
