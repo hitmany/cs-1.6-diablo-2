@@ -11357,7 +11357,6 @@ public add_bonus_stomp(id)
 	new entlist[513]
 	new numfound = find_sphere_class(id,"player",230.0+player_strength[id]*2,entlist,512)
 	
-
 	for (new i=0; i < numfound; i++)
 	{		
 		new pid = entlist[i]
@@ -11391,8 +11390,7 @@ public add_bonus_stomp(id)
 		write_short( 1<<12 );
 		write_short( 1<<14 );
 		message_end();
-		
-		change_health(pid,-dam,id,"stomp bonus")			
+		d2_damage( pid, id, dam, "arch angel")		
 	}
 		
 	return PLUGIN_CONTINUE
