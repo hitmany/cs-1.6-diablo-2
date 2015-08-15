@@ -16948,6 +16948,22 @@ public fwHamPlayerSpawnPost(id)
 	else
 	{
 		change_health(id,9999,0,"")
+		if(is_frozen[id] == 1)
+		{
+			is_frozen[id] = 0
+			Display_Icon(id ,0 ,"dmg_cold" ,0,0,0)
+			set_speedchange(id)
+		}
+		if(is_poisoned[id] == 1)
+		{
+			is_poisoned[id] = 0
+			Display_Icon(id ,0 ,"dmg_gas" ,0,0,0)
+		}
+		if(is_fired[id] == 1)
+		{
+			is_fired[id] = 0
+			Display_Icon(id ,0 ,"dmg_heat" ,0,0,0)
+		}
 	}
 }  
 
