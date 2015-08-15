@@ -472,6 +472,7 @@ new bool:g_bWeaponsDisabled = false; //disable give weapon skills
 /////////////////////////////////////////////////////////////////////
 new player_ultra_armor[33]
 new player_ultra_armor_left[33]
+new player_b_speed[33]
 /////////////////////////////////////////////////////////////////////
 
 new Float:player_b_oldsen[33]	//Players old sens
@@ -5031,11 +5032,12 @@ public dropitem(id)
 	player_ring[id]=0
 	
 	reset_item_skills(id)
+	set_renderchange(id)
+	set_speedchange(id)
+	set_gravitychange(id)
+	
 	set_task(3.0,"changeskin_id_1",id)
 	write_hud(id)
-	
-	set_renderchange(id)
-	set_gravitychange(id)
 	
 	if (player_b_oldsen[id] > 0.0) 
 	{
@@ -5476,6 +5478,7 @@ public reset_item_skills(id)
 	wear_sun[id] = 0
 	player_sword[id] = 0 
 	player_ultra_armor_left[id]=0
+	player_b_speed[id] = 0
 	player_ultra_armor[id]=0
 }
 
@@ -6958,7 +6961,8 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Наголенники Приспешника"
 			player_item_id[id] = rannum
 			player_b_silent[id] = 1
-			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/2)
+			player_b_speed[id] = 100
+			set_speedchange(id)
 			show_hudmessage (id, "Вы нашли предмет: %s^nБесшумный и быстрый бег",player_item_name[id],player_b_silent[id])
 		}
 		case 72:
@@ -6974,7 +6978,8 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Сапоги Скарабея"
 			player_item_id[id] = rannum
 			player_b_inv[id] = 95
-			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
+			player_b_speed[id] = 100
+			set_speedchange(id)
 			show_hudmessage (id, "Вы нашли предмет: %s^nВаш видимость снижается до 95. Быстрый бег.",player_item_name[id],player_b_inv[id])
 		}
 		case 74:
@@ -7013,7 +7018,8 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Небесный Камень"
 			player_item_id[id] = rannum
 			player_b_grenade[id] = random_num(1,3)
-			set_user_maxspeed(id, get_user_maxspeed(id)+get_user_maxspeed(id)/4)
+			player_b_speed[id] = 100
+			set_speedchange(id)
 			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i мгновенно убить HE гранаты и быстрый бег",player_item_name[id],player_b_grenade[id])
 		}
 		case 79:
@@ -12349,6 +12355,7 @@ public set_speedchange(id)
 		else if(player_class[id] == BloodRaven) speeds= 30 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Infidel) speeds= 40 + floatround(player_dextery[id]*1.3)
 		else speeds= floatround(player_dextery[id]*1.3)
+		if(player_b_speed[id] > 0) speeds+=player_b_speed[id]
 		set_user_maxspeed(id, agi + speeds)
 	}
 }
