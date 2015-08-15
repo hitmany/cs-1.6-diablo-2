@@ -6216,7 +6216,7 @@ public iteminfo(id)
 	if (player_b_windwalk[id] > 0) 
 	{
 		num_to_str(player_b_windwalk[id],TempSkill,10)
-		add(itemEffect,399,"Жми E чтобы стать невидимым,вы не можете атаковать и скорость увеличиться на ")
+		add(itemEffect,399,"Жми E чтобы стать невидимым,вы не можете атаковать и скорость увеличится на ")
 		add(itemEffect,399,TempSkill)
 		add(itemEffect,399," секунд.<br>")
 	}
@@ -6805,7 +6805,7 @@ public award_item(id, itemnum)
 		}
 		case 52:
 		{
-			player_item_name[id] = "Амулет Тотема"
+			player_item_name[id] = "Огненный Тотем"
 			player_item_id[id] = rannum
 			player_b_firetotem[id] = random_num(250,400)
 			show_hudmessage(id, "Вы нашли предмет: %s^nпри нажатии на Е ставит жёлтый тотем который через несколько секунд взрывается и поджигает всех в большом радиусе.",player_item_name[id])	
@@ -10152,7 +10152,7 @@ public add_bonus_scoutdamage(attacker_id,id,weapon)
 		
 		if (!is_user_alive(id))
 			return PLUGIN_HANDLED
-		
+			
 		if (random_num(1,player_b_sniper[attacker_id]) == 1)
 			UTIL_Kill(attacker_id,id,"scout")
 		
@@ -10900,7 +10900,7 @@ public item_firetotem(id)
 	else
 	{
 		used_item[id] = true
-		Effect_Ignite_Totem(id,7)
+		Effect_Ignite_Totem(id,3)
 	}
 }
 
@@ -10949,7 +10949,7 @@ public Effect_Ignite_Totem_Think(ent)
 			if (pid == id && is_user_alive(id))
 			{
 				Effect_Ignite(pid,id,4)
-				hudmsg(pid,3.0,"Дымовая завеса. Стреляй в кого-нибудь чтобы остановить!")
+				//hudmsg(pid,3.0,"Дымовая завеса. Стреляй в кого-нибудь чтобы остановить!")
 				continue
 			}
 			
@@ -10966,7 +10966,7 @@ public Effect_Ignite_Totem_Think(ent)
 			else
 				Effect_Ignite(pid,id,4)
 			
-			hudmsg(pid,3.0,"Дымовая завеса. Стреляй в кого-нибудь чтобы остановить!")
+			//hudmsg(pid,3.0,"Дымовая завеса. Стреляй в кого-нибудь чтобы остановить!")
 		}
 		
 		remove_entity(ent)
@@ -11089,7 +11089,7 @@ public Effect_Ignite_Think(ent)
 	
 	
 	//Do the actual damage
-	change_health(id,-damage,attacker,"ignite")
+	d2_damage( id, attacker, damage, "ignite")	
 	
 	set_pev(ent,pev_nextthink, halflife_time() + 1.5)
 	
@@ -17160,8 +17160,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 							change_health(id,-new_damage,attacker_id,"cold")				
 						}
 					}
-					if (HasFlag(attacker_id,Flag_Ignite))
-						RemoveFlag(attacker_id,Flag_Ignite)
 					
 					if((HasFlag(id,Flag_Illusion) || HasFlag(id,Flag_Teamshield))&& get_user_health(id) - damage > 0)
 					{
