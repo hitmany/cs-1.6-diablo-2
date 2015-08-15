@@ -14413,15 +14413,36 @@ public change_health(id,hp,attacker,weapon[])
 			new m_health = race_heal[player_class[id]]+player_strength[id]*2
 			if(player_item_id[id]==17 &&hp>0)
 			{
-				set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
+				if(hp+health>5)
+				{
+					set_user_health(id,5)
+				}
+				else
+				{
+					set_user_health(id,hp+health)
+				}
 			}
 			else if(player_item_id[id]==88 &&hp>0)
 			{
-				set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
+				if(hp+health>45)
+				{
+					set_user_health(id,45)
+				}
+				else
+				{
+					set_user_health(id,hp+health)
+				}
 			}
 			else if(player_item_id[id]==89 &&hp>0)
 			{
-				set_user_health(id,health+floatround(float(hp/10),floatround_floor)+1)
+				if(hp+health>10)
+				{
+					set_user_health(id,10)
+				}
+				else
+				{
+					set_user_health(id,hp+health)
+				}
 			}
 			else if (hp+health>m_health) set_user_health(id,m_health)
 			else set_user_health(id,get_user_health(id)+hp)
@@ -16917,8 +16938,7 @@ public fwHamPlayerSpawnPost(id)
 	}
 	else
 	{
-		new Float:m_health = float(race_heal[player_class[id]]+player_strength[id]*2)
-		set_pev(id, pev_health, m_health)
+		change_health(id,9999,0,"")
 	}
 }  
 
