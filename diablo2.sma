@@ -6674,14 +6674,14 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Лечебная Пуля"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли предмет: %s^nНажми E и наведи прицел на союзника. Его урон отражается, он лечится, вы получаете золото за отражение.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nНажми E и наведи прицел на союзника. Его урон отражается на %i, он лечится, вы получаете золото за отражение.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 34:
 		{
 			player_item_name[id] = "Лечебный Тотем"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(20,30)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. При нажатии Е активирует на члене команды щит который возвращает урон.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nnНажми E и наведи прицел на союзника. Его урон отражается на %i, он лечится, вы получаете золото за отражение.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 35:
 		{
@@ -12369,11 +12369,6 @@ public set_renderchange(id)
 					}
 				}
 				
-				if(player_b_usingwind[id]==1)
-				{
-					render/=2
-				}
-				
 				if(render<0) render=0
 				
 				if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target)) render*=2	
@@ -12443,6 +12438,12 @@ public set_renderchange(id)
 			{
 				render = 255 
 				if(player_b_inv[id]>0) render = player_b_inv[id]
+				
+				if(player_b_usingwind[id]==1)
+				{
+					render/=2
+				}
+				
 				
 				set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, render)
 			}
