@@ -6175,7 +6175,8 @@ public iteminfo(id)
 	{
 		num_to_str(player_b_teamheal[id],TempSkill,10)
 		add(itemEffect,399,"Жми E чтобы активировать защиту игрока.<br>")
-		add(itemEffect,399," Все повреждения отражаются. Вы умрёте если получите урон.<br>")
+		add(itemEffect,399,"Все повреждения отражаются врагу и лечит союзника.<br>")
+		add(itemEffect,399,"Вы получаете опыт в момент отражения.<br>")
 	}
 	if (player_b_redirect[id] > 0) 
 	{
@@ -6673,7 +6674,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Лечебная Пуля"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(10,20)
-			show_hudmessage(id, "Вы нашли предмет: %s^nПри атаке в сокомандника востанавливается %i хп. При нажатии Е активирует на члене команды щит который возвращает урон.",player_item_name[id],player_b_teamheal[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nНажми E и наведи прицел на союзника. Его урон отражается, он лечится, вы получаете золото за отражение.",player_item_name[id],player_b_teamheal[id])	
 		}
 		case 34:
 		{
@@ -11453,7 +11454,7 @@ public Effect_Rot_Think(ent)
 		//Rot him!
 		if (random_num(1,2) == 1) Display_Fade(id,1<<14,1<<14,1<<16,255,155,50,230)
 		
-		d2_damage( pid, id, 30, "fireshield")
+		d2_damage( pid, id, (player_intelligence[id] - player_dextery[pid])/2+30, "fireshield")
 		Effect_Bleed(pid,100)
 		Create_Slow(pid,3)
 		
@@ -17186,7 +17187,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						new weaponname[32]; get_weaponname( weapon, weaponname, 31 ); replace(weaponname, 31, "weapon_", "")
 						if (is_user_alive(owner))
 						{
-							change_health(attacker_id,-damage,owner,weaponname)				
+							d2_damage( attacker_id, owner, damage, "teamshield")							
 							change_health(id,damage/2,0,"")
 						}
 					}
