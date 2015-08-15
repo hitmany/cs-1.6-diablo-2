@@ -3243,7 +3243,6 @@ public RoundStart(){
 		if (player_point[i] > 0 ) skilltree(i)
 		if (player_class[i] == 0) D2_ChangeRaceStart( i )
 		
-		add_bonus_gamble(i)				//MUST be first
 		c4state[i] = 0
 		client_cmd(i,"hud_centerid 0")  
 		auto_help(i)
@@ -5017,7 +5016,7 @@ public dropitem(id)
 	else 
 	{
 		set_hudmessage(100, 200, 55, -1.0, 0.40, 0, 3.0, 3.0, 0.2, 0.3, 5)
-		show_hudmessage(id, "Предмет выброшенн")
+		show_hudmessage(id, "Предмет выброшен")
 		emit_sound(id,CHAN_STATIC,"diablo_lp/flippy.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
 	}
 	player_item_id[id] = 0
@@ -5503,7 +5502,7 @@ public auto_help(id)
 		set_hudmessage(0, 180, 0, -1.0, 0.70, 0, 10.0, 10.0, 0.1, 0.5, 11) 	
 		if (rnd == 1)
 		{
-			show_hudmessage(id, "Зеленные бутылочки,рядом с трупами - это предметы,их можно подобрать нажав кнопку присесть")
+			show_hudmessage(id, "Зеленые бутылочки,рядом с трупами - это предметы,их можно подобрать нажав кнопку присесть")
 		}
 		if (rnd == 2)
 		{
@@ -7530,18 +7529,8 @@ public add_respawn_bonus(id)
 		new roll = random_num(1,player_b_respawn[id])
 		if (roll == 1)
 		{
-			new maxpl,players[32]
-			get_players(players, maxpl) 
-			if (maxpl > 2)
-			{
-				cs_set_user_money(id,cs_get_user_money(id)+4000)
-				set_task(0.5,"respawn",0,svIndex,32) 		
-			}
-			else
-			{
-				set_hudmessage(220, 115, 70, -1.0, 0.40, 0, 3.0, 2.0, 0.2, 0.3, 5)
-				show_hudmessage(id, "Более 2 игроков, необходимо для возрождения")	
-			}
+			cs_set_user_money(id,cs_get_user_money(id)+4000)
+			set_task(0.5,"respawn",0,svIndex,32) 		
 			
 		}
 	}
@@ -11464,7 +11453,7 @@ public Effect_Rot_Think(ent)
 		//Rot him!
 		if (random_num(1,2) == 1) Display_Fade(id,1<<14,1<<14,1<<16,255,155,50,230)
 		
-		change_health(pid,-45,id,"rot")
+		d2_damage( pid, id, 30, "fireshield")
 		Effect_Bleed(pid,100)
 		Create_Slow(pid,3)
 		
@@ -16978,6 +16967,7 @@ public fwHamPlayerSpawnPost(id)
 			is_fired[id] = 0
 			Display_Icon(id ,0 ,"dmg_heat" ,0,0,0)
 		}
+		add_bonus_gamble(id)
 	}
 }
 
