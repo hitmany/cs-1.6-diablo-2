@@ -7455,22 +7455,22 @@ public add_money_bonus(id)
 
 /* ==================================================================================================== */
 
-public add_grenade_bonus(id,attacker_id,weapon)
+public add_grenade_bonus(id,attacker_id)
 {
-	if (player_b_grenade[attacker_id] > 0 && weapon == CSW_HEGRENADE && player_b_fireshield[id] == 0)	//Fireshield check
+	if (player_b_grenade[attacker_id] > 0 && player_b_fireshield[id] == 0)	//Fireshield check
 	{
 		new roll = random_num(1,player_b_grenade[attacker_id])
 		if (roll == 1)
 		{
-			UTIL_Kill( id, attacker_id, "grenade")
+			UTIL_Kill( attacker_id, id, "grenade")
 		}
 	}
-	if (c_grenade[attacker_id] > 0 && weapon == CSW_HEGRENADE && player_b_fireshield[id] == 0)	//Fireshield check
+	if (c_grenade[attacker_id] > 0 && player_b_fireshield[id] == 0)	//Fireshield check
 	{
 		new roll = random_num(1,c_grenade[attacker_id])
 		if (roll == 1)
 		{
-			UTIL_Kill( id, attacker_id, "grenade")
+			UTIL_Kill( attacker_id, id, "grenade")
 		}
 	}
 }
@@ -16979,7 +16979,15 @@ public fwHamPlayerSpawnPost(id)
 			Display_Icon(id ,0 ,"dmg_heat" ,0,0,0)
 		}
 	}
-}  
+}
+
+bool:IsGrenade ( i_Inflictor )
+{
+	static s_Classname[ 8 ];
+	pev ( i_Inflictor, pev_classname, s_Classname, charsmax ( s_Classname ) );
+	
+	return equal ( s_Classname, "grenade" ) ? true : false;
+}
 
 public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 {
@@ -16995,8 +17003,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 			{
 				pev(victim, pev_velocity, g_Knockback[victim])
 			}
-			if(get_user_attacker(id,weapon,bodypart)!=0)
-			{
+			weapon = get_user_weapon( attacker ,_,_)
 				new damage = floatround(damage2)
 				new attacker_id = attacker
 				if (is_user_connected(attacker_id) && attacker_id != id)
@@ -17005,7 +17012,10 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					
 					add_damage_bonus(id,damage,attacker_id)
 					add_vampire_bonus(id,damage,attacker_id)
-					add_grenade_bonus(id,attacker_id,weapon)
+					if ( IsGrenade ( inflictor ) )
+					{
+						add_grenade_bonus(id,attacker_id)
+					}
 					add_theif_bonus(id,attacker_id)
 					add_bonus_blind(id,attacker_id,weapon,damage)
 					if(player_b_antyorb[id] == 1 && weapon == CSW_HEGRENADE) { return FMRES_SUPERCEDE; }
@@ -17218,7 +17228,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						set_task(1.5, "funcDemageVic3", id)
 					}
 				}*/
-			}
+			//}
 		}
 		if((player_class[victim] == GiantSpider) && (spider_hook_disabled[victim] == 0))
 		{
