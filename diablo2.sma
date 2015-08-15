@@ -6201,7 +6201,7 @@ public iteminfo(id)
 	}
 	if(player_b_autobh[id] > 0)
 	{
-		add(itemEffect,399,"Даёт вам авто распрыжку. Удерживает в пространстве.<br>")
+		add(itemEffect,399,"Даёт вам авто распрыжку.<br>")
 	}
 	if (player_b_eye[id] > 0) 
 	{
@@ -6385,7 +6385,13 @@ public iteminfo(id)
 	}
 	if (player_ultra_armor[id]>0)
 	{
-		add(itemEffect,399,"У вас есть шанс отбрасывать пули от бронежелета<br>")
+		add(itemEffect,399,"Шанс 1/")
+		num_to_str(player_ultra_armor[id],TempSkill,10)
+		add(itemEffect,399,TempSkill)
+		add(itemEffect,399," отразить урон. Всего ")
+		num_to_str(player_ultra_armor[id],TempSkill,10)
+		add(itemEffect,399,TempSkill)
+		add(itemEffect,399," раз.")
 	}
 	if(player_b_silent[id] > 0)
 	{
@@ -6905,7 +6911,7 @@ public award_item(id, itemnum)
 		}	
 		case 65:
 		{
-			player_item_name[id] = "Ожерелье Флешки"	
+			player_item_name[id] = "Ожерелье Ясновидения"	
 			player_item_id[id] = rannum	
 			wear_sun[id] = 1
 			show_hudmessage (id, "Вы нашли предмет: %s^nИммунитет к ослепляющим гранатам",player_item_name[id])
@@ -6923,7 +6929,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = 67	
 			player_ultra_armor[id]=random_num(3,6)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли предмет: %s^nКаждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i отразить урон. Всего %i раз.",player_item_name[id],player_ultra_armor[id],player_ultra_armor[id])
 		}
 		case 68:
 		{
@@ -6931,7 +6937,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = 68	
 			player_ultra_armor[id]=random_num(7,11)
 			player_ultra_armor_left[id]=player_ultra_armor[id]
-			show_hudmessage (id, "Вы нашли предмет: %s^nКаждый раунд броня становится равной %i",player_item_name[id],player_ultra_armor[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nШанс 1/%i отразить урон. Всего %i раз.",player_item_name[id],player_ultra_armor[id],player_ultra_armor[id])
 		}
 		case 69:
 		{
@@ -6945,7 +6951,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Кольцо Прыгуна"
 			player_item_id[id] = rannum
 			player_b_autobh[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^nДаёт вам авто распрыжку. Удерживает в пространстве.", player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nДаёт вам авто распрыжку.", player_item_name[id])
 		}
 		case 71:
 		{
