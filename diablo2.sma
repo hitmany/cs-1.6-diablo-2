@@ -699,9 +699,6 @@ new Float:bowdelay[33]
 new bow[33]
 new bow_zoom[33]
 
-new Float:ninjadelay[33]
-new Float:ninja_delay
-
 new Float:player_last_check_time[33]  //Mosquito
 new bool:use_fly[33] //Mosquito
 new bool:hit_key[33] //Mosquito
@@ -1037,7 +1034,7 @@ public plugin_init()
         CreateHealBot3();
 	register_think("HealBot4", "HealBotThink4");
         CreateHealBot4();
-	register_logevent("RoundStart", 2, "0=World triggered", "1=Round_Start")
+	register_event("HLTV", "RoundStart", "a", "1=0", "2=0") 
 	register_logevent( "on_EndRound"			, 2		, "0=World triggered"	, "1=Round_End"		);
 	register_clcmd("fullupdate","fullupdate")
 	register_clcmd("hit_item",  "giveitem",     ADMIN_IMMUNITY, "")
@@ -1910,6 +1907,9 @@ public _MYSQLX_Save_T( failstate, Handle:query, error[], errnum, data[], size )
 
 public MYSQLX_SetDataForRace( id )
 {
+	new name[32]
+	get_user_name(id,name,31)
+	//client_print(0, print_console, "%s загружаю из базы %s", name,Race[player_newclass[id]])
 	// Make sure our connection is working
 	if ( !MYSQLX_Connection_Available() )
 	{
@@ -2833,7 +2833,7 @@ public ResetRace(id)
 	//niewidka[id]=0
 	zmiana_skinu[id]=0
 	
-	CurWeapon(id)
+	//CurWeapon(id)
 	give_knife(id)
 	//quest_gracza[id] = wczytaj_aktualny_quest(id);
 	changeskin(id,1)
@@ -3060,6 +3060,7 @@ public InitRace(id, racenum, type)
 
 public RoundStart(){
 	// Everu round we refresh this time, used for detecting if the buytime has passed
+	//client_print(0, print_chat, "Раунд начался")
 	gF_starttime = get_gametime()
 	kill_all_entity("przedmiot")
 	kill_all_entity("saber_smoke3")
@@ -3071,11 +3072,15 @@ public RoundStart(){
 	fallens_ct=0
 	
 	new Players[32], playerCount, i
-	get_players(Players, playerCount) 
+	get_players(Players, playerCount, "h") 
 	
 	for (new countP=0; i<playerCount; countP++) 
 	{
-		i = Players[countP] 
+		i = Players[countP]
+		new name[32]
+		get_user_name(i,name,31)
+		//client_print(0, print_console, "%s 3081 %s", name,Race[player_newclass[i]])
+		if(!is_user_connected(i)) return PLUGIN_CONTINUE;
 		if(player_portals[i] > 0)
 		{
 			if(get_user_team(i) == 1)
@@ -3101,13 +3106,16 @@ public RoundStart(){
 				}
 			}
 		}
-		
+		//client_print(0, print_console, "%s 3107 %s", name,Race[player_newclass[i]])
 		ResetRace(i)
+		//client_print(0, print_console, "%s 3109 %s", name,Race[player_newclass[i]])
 		if(player_newclass[i] > 0)
 		{
 			ResetItemsXPAndETC(i)
+			//client_print(0, print_console, "%s 3112 %s", name,Race[player_newclass[i]])
 			player_class[i] = player_newclass[i]
 			MYSQLX_SetDataForRace( i )
+			//client_print(0, print_console, "%s 3115 %s", name,Race[player_newclass[i]])
 			player_newclass[i] = 0
 			ColorChat(i, GREEN, "Вы сменили расу")
 			showRaceInfo( i )
@@ -3115,7 +3123,9 @@ public RoundStart(){
 		else
 		{
 			InitRace(i, player_class[i], 2)
+			//client_print(0, print_console, "%s 3123 %s", name,Race[player_newclass[i]])
 		}
+		//client_print(0, print_console, "%s 3126 %s m_health %f", name,Race[player_newclass[i]],m_health)
 		
 		//ResetParams
 		//HERE
@@ -3149,34 +3159,20 @@ public RoundStart(){
 
 		if(player_class[i] == Diablo)
 		{
-			if(!g_bWeaponsDisabled)
-			{
-				if ( !user_has_weapon( i , CSW_HEGRENADE ) )
-				{
-					fm_give_item(i, "weapon_hegrenade")
-				}
-			}
-			else
-			{
-				ColorChat(i, GREEN, "[Диабло] НА ЭТОЙ КАРТЕ ОРУЖИЕ НЕ ДАЕТСЯ")
-			}
-		}
-		
-		if(!g_bWeaponsDisabled)
-		{		
-			if(player_vip[i] == 1 && player_class[i] != Ninja && player_class[i] != Infidel &&  player_class[i] != Mosquito)
+			if ( !user_has_weapon( i , CSW_HEGRENADE ) )
 			{
 				fm_give_item(i, "weapon_hegrenade")
-				fm_give_item(i, "weapon_flashbang")
-				fm_give_item(i, "weapon_flashbang")
-				fm_give_item(i, "weapon_smokegrenade")
-				ColorChat(i, GREEN, "[VIP] Вы получили премиум набор")
-			}		
+			}
 		}
-		else
+			
+		if(player_vip[i] == 1 && player_class[i] != Ninja && player_class[i] != Infidel &&  player_class[i] != Mosquito)
 		{
-			ColorChat(i, GREEN, "[VIP] НА ЭТОЙ КАРТЕ ОРУЖИЕ НЕ ДАЕТСЯ")
-		}
+			fm_give_item(i, "weapon_hegrenade")
+			fm_give_item(i, "weapon_flashbang")
+			fm_give_item(i, "weapon_flashbang")
+			fm_give_item(i, "weapon_smokegrenade")
+			ColorChat(i, GREEN, "[VIP] Вы получили премиум набор")
+		}		
 		
 		set_renderchange(i)
 		
@@ -3200,7 +3196,7 @@ public RoundStart(){
 		//niewidka[i] = 0
 		/*=========== FROM ResetHUD ============*/
 		remove_task(i+GLUTON)
-		change_health(i,9999,0,"")	
+		//change_health(i,9999,0,"")	
 		
 		
 		if (c4fake[i] > 0)
@@ -3247,12 +3243,12 @@ public RoundStart(){
 		if (gRestart[i])
 		{
 			gRestart[i] = false
-			return
+			//return
 		}
 		if (gUpdate[i])
 		{
 			gUpdate[i] = false
-			return
+			//return
 		}
 		if (gHooked[i])
 		{
@@ -3263,12 +3259,15 @@ public RoundStart(){
 			gHooksUsed[i] = 0
 			statusMsg(0, "[Паутина] 0 из %d паутин использованно.", get_pcvar_num(pMaxHooks))
 		}
+		//client_print(0, print_console, "%s 3274 %s", name,Race[player_newclass[i]])
 		/*===============================*/
 	}
 	
 	Bot_Setup()		
 	ghost_check = false
 	use_addtofullpack = false
+	
+	return PLUGIN_CONTINUE
 }
 
 #if defined CHEAT
@@ -3331,7 +3330,7 @@ public CurWeapon(id)
 	if (is_user_connected(id))
 	{
 
-		if (player_item_id[id] == 17 || player_b_usingwind[id] == 1 || player_item_id[id] == 88 || player_item_id[id] == 89) engclient_cmd(id,"weapon_knife") 	
+		//if (player_item_id[id] == 17 || player_b_usingwind[id] == 1 || player_item_id[id] == 88 || player_item_id[id] == 89) engclient_cmd(id,"weapon_knife") 	
 				
 		if(player_sword[id] == 1)
 		{
@@ -3576,7 +3575,7 @@ public DeathMsg(id)
 			// Get distance in b/t target and caster
 			iDistance = get_distance( origin, vTargetOrigin );
 			
-			dmg = (player_intelligence[vid] - player_dextery[iTargetID])/2.0
+			dmg = (player_intelligence[vid] - player_dextery[iTargetID])/2.0 + 60.0
 			
 			if ( iDistance < br_range && iTeam != get_user_team( iTargetID ) && dmg > 0.0)
 			{
@@ -4059,21 +4058,6 @@ public client_PreThink ( id )
 				}
 			}
 		}
-		else if(player_class[id]==Ninja)
-		{
-			ninja_delay = (50.0/player_intelligence[id])
-			if(ninja_delay > 5.0) {ninja_delay = 5.0;}
-			ninjadelay[id] = get_gametime() + ninja_delay
-		}
-	}
-	if (button2 & IN_ATTACK && !(get_user_oldbutton(id) & IN_ATTACK))
-	{
-		if(player_class[id]==Ninja)
-		{
-			ninja_delay = (50.0/player_intelligence[id])
-			if(ninja_delay > 5.0) {ninja_delay = 5.0;}
-			ninjadelay[id] = get_gametime() + ninja_delay
-		}
 	}
 	if (entity_get_int(id, EV_INT_button) & 2 && (player_b_autobh[id] > 0))
 	{
@@ -4469,25 +4453,31 @@ public skill_menu(id, key)
 		}
 		case 4: 
 		{	
-			while((player_intelligence[id]<50) && (player_intelligence[id] < max_skill_count))
-			{
-				player_point[id]-=1
-				player_intelligence[id]+=1
-			}
-			while((player_strength[id]<50) && (player_strength[id] < max_skill_count))
-			{
-				player_point[id]-=1
-				player_strength[id]+=1
-			}
-			while((player_agility[id]<50) && (player_agility[id] < max_skill_count))
-			{
-				player_point[id]-=1
-				player_agility[id]+=1
-			}
+			new skillCount = 1
 			while(player_point[id] > 0)
 			{
-				player_point[id]-=1
-				player_dextery[id]+=1
+				if(skillCount == 1)
+				{
+					player_point[id]-=1
+					player_intelligence[id]+=1
+				}
+				if(skillCount == 2)
+				{
+					player_point[id]-=1
+					player_strength[id]+=1
+				}
+				if(skillCount == 3)
+				{
+					player_point[id]-=1
+					player_agility[id]+=1
+				}
+				if(skillCount == 4)
+				{
+					player_point[id]-=1
+					player_dextery[id]+=1
+					skillCount=0
+				}
+				skillCount++
 			}
 		}
 	}
@@ -5066,7 +5056,7 @@ public pfn_touch ( ptr, ptd )
 		{
 			new Float:origin[3]
 			pev(ptd,pev_origin,origin)
-			Explode_Origin(owner,origin,player_intelligence[owner],125,1)
+			Explode_Origin(owner,origin,player_intelligence[owner]+50,200,1)
 			remove_entity(ptd)
 		}
 	}
@@ -5303,7 +5293,7 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 	{
 		write_short(sprite_boom)
 	}
-	write_byte(50)
+	write_byte(300)
 	write_byte(15)
 	write_byte(TE_EXPLFLAG_NOSOUND)
 	message_end()
@@ -5318,39 +5308,24 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 	
 	
 	new Players[32], playerCount, a
-	get_players(Players, playerCount, "ah") 
+	get_players(Players, playerCount, "h") 
 	
 	for (new i=0; i<playerCount; i++) 
 	{
 		a = Players[i] 
+		if(!is_user_alive(a)) continue
 		
 		new Float:aOrigin[3]
 		pev(a,pev_origin,aOrigin)
 				
-		if (get_user_team(id) != get_user_team(a) && get_distance_f(aOrigin,origin) < dist+0.0)
+		if (get_user_team(id) != get_user_team(a) && get_distance_f(aOrigin,origin) < float(dist))
 		{
 			if(index == 2 && player_b_antyorb[a] == 1) continue
 			if(index == 1 && player_b_antyfs[a] == 1) continue
 			new dam
-			if(player_class[id] != Fallen)
-			{
-				dam = damage-player_dextery[a]
-			}
-			else
-			{
-				new Float:dexterity = float(player_dextery[a])/4
-				dam = damage - floatround(dexterity)
-			}
-			new total = get_user_health(a)-dam
-			if (total < 5)
-			{
-				UTIL_Kill(id,a,"fire explode")
-			}
-			else
-			{
-				set_user_health(a,total)
-				Effect_Bleed(a,248)		
-			}	
+			dam = damage-player_dextery[a]
+			d2_damage( a, id, dam, "explode")
+			Effect_Bleed(a,248)			
 		}		
 	}
 }
@@ -7120,7 +7095,7 @@ public award_item(id, itemnum)
 		}
 		case 95:
 		{
-			player_item_name[id] = "Кольцо Нафалемов"
+			player_item_name[id] = "Кольцо Нефалемов"
 			player_item_id[id] = rannum
 			player_b_heal[id] = random_num(30,55)
 			player_b_damage[id] = 50
@@ -7584,6 +7559,7 @@ public d2_damage( iVictim, iAttacker, iDamage, iWeapon[])
 	{
 		set_user_health( iVictim, iHealth - iDamage );
 	}
+	//client_print(0, print_chat, "damage %d", iDamage)
 	
 	if(iVictim!=iAttacker) 
 	{
@@ -9041,9 +9017,6 @@ public showRaceInfo(id)
 		Уровень: %d^n\
 		+40 HP^n\
 		невидим, только нож^n\
-		при метании и махании ножом,^n\
-		становится видимым^n\
-		и становится невидимым через 5-1 сек.^n\
 		+40 к скорости^n\
 		метательные ножи на R^n\
 		зарядка - +скорость",player_lvl[id])
@@ -12372,18 +12345,7 @@ public set_renderchange(id)
 			if (player_class[id] == Ninja)
 			{
 				new inv_bonus = 255 - player_b_inv[id]
-				ninja_delay = (50.0/player_intelligence[id])
-				if(ninja_delay > 5.0) {ninja_delay = 5.0;}
-				if(get_gametime() < (ninjadelay[id] + ninja_delay))
-				{
-					render = 255
-					client_print(id, print_center, "ВИдим")
-				}
-				else
-				{
 					render = 13
-					client_print(id, print_center, "НЕвидим")
-				}
 				
 				if(player_b_inv[id]>0)
 				{
@@ -13770,13 +13732,6 @@ public command_knife(id)
 	VelocityByAim(id, get_cvar_num("diablo_knife_speed") , Velocity)
 	entity_set_vector(Ent, EV_VEC_velocity ,Velocity)
 	
-	if(player_class[id]==Ninja)
-	{
-		ninja_delay = (50.0/player_intelligence[id])
-		if(ninja_delay > 5.0) {ninja_delay = 5.0;}
-		ninjadelay[id] = get_gametime() + ninja_delay
-	}
-	
 	return PLUGIN_HANDLED
 }
 
@@ -14193,7 +14148,8 @@ public toucharrow(arrow, id)
 			fire_bows[kid]--
 			new Float:origin[3]
 			pev(arrow,pev_origin,origin)
-			Explode_Origin(kid,origin,player_intelligence[kid],125,1)
+			new damage = player_intelligence[kid]+50
+			Explode_Origin(kid,origin,damage,300,1)
 		}
 				
 		message_begin(MSG_ONE,get_user_msgid("ScreenShake"),{0,0,0},id); 
@@ -14224,7 +14180,8 @@ public touchWorld2(arrow, world)
 		fire_bows[owner]--
 		new Float:origin[3]
 		pev(arrow,pev_origin,origin)
-		Explode_Origin(owner,origin,player_intelligence[owner],125,1)
+		new damage = player_intelligence[owner]+50
+		Explode_Origin(owner,origin,damage,300,1)
 	}
 	remove_entity(arrow)
 }
@@ -14820,7 +14777,7 @@ public call_cast(id)
 				if(losowe_itemy[id] > 3) 
 				{
 					losowe_itemy[id] = 3
-					show_hudmessage(id, "[Griswold] Полученно предметов - %i", losowe_itemy[id])
+					show_hudmessage(id, "[Griswold] Получено предметов - %i", losowe_itemy[id])
 				}
 				else
 				{
@@ -14840,7 +14797,7 @@ public call_cast(id)
 				if(losowe_itemy[id] > 3) 
 				{
 					losowe_itemy[id] = 3
-					show_hudmessage(id, "[The Smith] Полученно предметов - %i", losowe_itemy[id])
+					show_hudmessage(id, "[The Smith] Получено предметов - %i", losowe_itemy[id])
 				}
 				else
 				{
@@ -14860,7 +14817,7 @@ public call_cast(id)
 				if(losowe_itemy[id] > 3) 
 				{
 					losowe_itemy[id] = 3
-					show_hudmessage(id, "[Demonolog] Полученно предметов - %i", losowe_itemy[id])
+					show_hudmessage(id, "[Demonolog] Получено предметов - %i", losowe_itemy[id])
 				}
 				else
 				{
@@ -14870,28 +14827,14 @@ public call_cast(id)
 		}
 		case Amazon: 
 		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(id, "weapon_hegrenade")
-				show_hudmessage(id, "[Амазонка] Вы получили HE гранату")
-			}
-			else
-			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-			}
+			fm_give_item(id, "weapon_hegrenade")
+			show_hudmessage(id, "[Амазонка] Вы получили HE гранату")
 		}
 		case Fallen: 
 		{
-			if(!g_bWeaponsDisabled)
-			{
-				fm_give_item(id, "weapon_flashbang")
-				fm_give_item(id, "weapon_flashbang")
-				show_hudmessage(id, "[Падший] Вы получили 2 Flash гранаты")
-			}
-			else
-			{
-				hudmsg(id,5.0,"На этой карте оружие не выдаётся!")
-			}
+			fm_give_item(id, "weapon_flashbang")
+			fm_give_item(id, "weapon_flashbang")
+			show_hudmessage(id, "[Падший] Вы получили 2 Flash гранаты")
 		}
 		case SabreCat: 
 		{
@@ -15416,32 +15359,31 @@ public diablo_lght(id)
 	if (is_user_alive(id))
 	{
 		can_cast[id] = 0
-		new players[32], numberofplayers, origin[3];
+		new Float:origin[3];
 		get_user_origin( id, origin );
-		get_players( players, numberofplayers, "h" );
 		
-		new i, iTargetID, vTargetOrigin[3], iDistance, Float:dmg;
+		new Float:vTargetOrigin[3], Float:iDistance, Float:dmg;
 		new iTeam = get_user_team( id );
 		
-		new br_range = 600
+		new Float:br_range = 600.0
 		new targets
 		
-		for ( i = 0; i < numberofplayers; i++ )
+		for ( new i = 0; i < 32; i++ )
 		{
 		
-			iTargetID = players[i];
+			if(!is_user_alive(i)) continue;
 			
 			// Get origin of target
-			get_user_origin( iTargetID, vTargetOrigin );
+			get_user_origin( i, vTargetOrigin );
 
 			// Get distance in b/t target and caster
-			iDistance = get_distance( origin, vTargetOrigin );
+			iDistance = get_distance_f( origin, vTargetOrigin );
 			
-			dmg = (player_intelligence[id] - player_dextery[iTargetID])/2.0
+			dmg = (player_intelligence[id] - player_dextery[i])/2.0 + 40.0
 			
-			if ( iDistance < br_range && iTeam != get_user_team( iTargetID ) && dmg > 0.0 && is_user_alive(iTargetID))
+			if ( iDistance < br_range && iTeam != get_user_team( i ) && dmg > 0.0 && is_user_alive(i))
 			{
-				puscBlyskawice(id, iTargetID, dmg);
+				puscBlyskawice(id, i, dmg);
 				targets++
 			}
 		}
@@ -16825,7 +16767,7 @@ public TTWin() {
 			{
 				Give_Xp(id, xp);
 				Give_Gold(id,3)
-				ColorChat(id, GREEN, "Полученно %i опыта и 3 зол. за победу твоей команды в раунде", xp);
+				ColorChat(id, GREEN, "Получено %i опыта и 3 зол. за победу твоей команды в раунде", xp);
 			}
 		}
 }
@@ -16853,7 +16795,7 @@ public CTWin()
 			{
 				Give_Xp(id, xp);
 				Give_Gold(id,3)
-				ColorChat(id, GREEN, "Полученно^x03 %i^x01 опыта и 3 зол. за победу твоей команды в раунде", xp);
+				ColorChat(id, GREEN, "Получено^x03 %i^x01 опыта и 3 зол. за победу твоей команды в раунде", xp);
 			}
 		}
 }
@@ -16972,6 +16914,11 @@ public fwHamPlayerSpawnPost(id)
 	{
 		MYSQLX_GetAllXP(id)
 		player_firstspawn[id] = 0
+	}
+	else
+	{
+		new Float:m_health = float(race_heal[player_class[id]]+player_strength[id]*2)
+		set_pev(id, pev_health, m_health)
 	}
 }  
 
@@ -17190,7 +17137,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						new Float:chance = random_float(0.0, 1.0 )
 						if( chance <= imp_chance )
 						{
-							client_cmd(id, "weapon_knife")
+							engclient_cmd(id, "weapon_knife")
 						}
 					}
 				}
