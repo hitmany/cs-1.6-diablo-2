@@ -6117,7 +6117,7 @@ public iteminfo(id)
 	if (player_b_theif[id] > 0) 
 	{
 		num_to_str(player_b_theif[id],TempSkill,10)
-		add(itemEffect,399,"Шанс 1/7 украсть $")
+		add(itemEffect,399,"Шанс 1/5 украсть $")
 		add(itemEffect,399,TempSkill)
 		add(itemEffect,399," каждый раз когда вы атакуете противника. Вы также можете нажать E чтобы конвертировать 1000$ в 15 хп<br>")
 	}
@@ -6569,7 +6569,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Персидские Сапоги"
 			player_item_id[id] = rannum
 			player_b_theif[id] = random_num(500,1000)
-			show_hudmessage(id, "Вы нашли предмет: %s^nс каждым выстрелом высасывает с противника деньги, в зависимости от урона",player_item_name[id],player_b_theif[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^nс шанс 1/5 украсть деньги при выстреле. ^nНа E конвертиурет деньги в HP",player_item_name[id],player_b_theif[id])	
 		}
 		case 19:
 		{
