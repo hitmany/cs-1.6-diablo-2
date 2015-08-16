@@ -3096,31 +3096,7 @@ public RoundStart(){
 		get_user_name(i,name,31)
 		//client_print(0, print_console, "%s 3081 %s", name,Race[player_newclass[i]])
 		if(!is_user_connected(i)) return PLUGIN_CONTINUE;
-		if(player_portals[i] > 0)
-		{
-			if(get_user_team(i) == 1)
-			{
-				if(player_portal_sprite_1[i] > 0)
-				{
-					engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_tt.spr")
-				}
-				if(player_portal_sprite_2[i] > 0)
-				{
-					engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_tt.spr")
-				}
-			}
-			else if(get_user_team(i) == 2)
-			{
-				if(player_portal_sprite_1[i] > 0)
-				{
-					engfunc(EngFunc_SetModel, player_portal_sprite_1[i], "sprites/diablo_lp/portal_ct.spr")
-				}
-				if(player_portal_sprite_2[i] > 0)
-				{
-					engfunc(EngFunc_SetModel, player_portal_sprite_2[i], "sprites/diablo_lp/portal_ct.spr")
-				}
-			}
-		}
+		
 		//client_print(0, print_console, "%s 3107 %s", name,Race[player_newclass[i]])
 		ResetRace(i)
 		//client_print(0, print_console, "%s 3109 %s", name,Race[player_newclass[i]])
@@ -3151,12 +3127,7 @@ public RoundStart(){
 		used_item[i] = false
 		naswietlony[i] = 0;
 		losowe_itemy[i] = 0
-		JumpsLeft[i]=JumpsMax[i]		
-		is_frozen[i] = 0
-		is_poisoned[i] = 0
-		is_touched[i] = 0.0
-		hit_key[i] = false
-		use_fly[i] = false
+		JumpsLeft[i]=JumpsMax[i]
 		lustrzany_pocisk[i]=0
 		
 		//RESET OBJECTS
@@ -3174,31 +3145,9 @@ public RoundStart(){
 		message_begin(MSG_BROADCAST, SVC_TEMPENTITY);
 		write_byte(TE_KILLBEAM);
 		write_short(i);
-		message_end();
-
-		if(player_class[i] == Diablo)
-		{
-			if ( !user_has_weapon( i , CSW_HEGRENADE ) )
-			{
-				fm_give_item(i, "weapon_hegrenade")
-			}
-		}
-			
-		if(player_vip[i] == 1 && player_class[i] != Ninja && player_class[i] != Infidel &&  player_class[i] != Mosquito)
-		{
-			fm_give_item(i, "weapon_hegrenade")
-			fm_give_item(i, "weapon_flashbang")
-			fm_give_item(i, "weapon_flashbang")
-			fm_give_item(i, "weapon_smokegrenade")
-			ColorChat(i, GREEN, "[VIP] Вы получили премиум набор")
-		}		
+		message_end();	
 		
 		set_renderchange(i)
-		
-		if(player_item_id[i]==66)
-		{
-			changeskin(i,0) 
-		}
 		
 		/*if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
 		else if(player_class[i] == Demonolog) ilosc_rakiet_gracza[i]=3
@@ -4223,9 +4172,9 @@ public client_PreThink ( id )
 			else if(player_class[id] == Paladin) time_delay*=1.4
 			else if(player_class[id] == SabreCat) time_delay*=2.0
 			else if(player_class[id] == Infidel) time_delay*=2.0
-			else if(player_class[id] == Duriel) time_delay*=4.0
+			else if(player_class[id] == Duriel) time_delay*=2.0
 			else if(player_class[id] == Izual) time_delay*=2.0
-			else if(player_class[id] == Diablo) time_delay*=4.5
+			else if(player_class[id] == Diablo) time_delay*=2.0
 			
 			cast_end[id]=halflife_time()+time_delay
 			
@@ -16961,6 +16910,54 @@ public fwHamPlayerSpawnPost(id)
 		if(player_b_skin[id] > 0)
 		{
 			changeskin(id,0)
+		}
+		if(player_class[id] == Diablo)
+		{
+			if ( !user_has_weapon( id , CSW_HEGRENADE ) )
+			{
+				fm_give_item(id, "weapon_hegrenade")
+			}
+		}
+			
+		if(player_vip[id] == 1 && player_class[id] != Ninja && player_class[id] != Infidel &&  player_class[id] != Mosquito)
+		{
+			fm_give_item(id, "weapon_hegrenade")
+			fm_give_item(id, "weapon_flashbang")
+			fm_give_item(id, "weapon_flashbang")
+			fm_give_item(id, "weapon_smokegrenade")
+			ColorChat(id, GREEN, "[VIP] Вы получили премиум набор")
+		}
+		if(player_portals[id] > 0)
+		{
+			if(get_user_team(id) == 1)
+			{
+				if(player_portal_sprite_1[id] > 0)
+				{
+					engfunc(EngFunc_SetModel, player_portal_sprite_1[id], "sprites/diablo_lp/portal_tt.spr")
+				}
+				if(player_portal_sprite_2[id] > 0)
+				{
+					engfunc(EngFunc_SetModel, player_portal_sprite_2[id], "sprites/diablo_lp/portal_tt.spr")
+				}
+			}
+			else if(get_user_team(id) == 2)
+			{
+				if(player_portal_sprite_1[id] > 0)
+				{
+					engfunc(EngFunc_SetModel, player_portal_sprite_1[id], "sprites/diablo_lp/portal_ct.spr")
+				}
+				if(player_portal_sprite_2[id] > 0)
+				{
+					engfunc(EngFunc_SetModel, player_portal_sprite_2[id], "sprites/diablo_lp/portal_ct.spr")
+				}
+			}
+		}
+		is_touched[i] = 0.0
+		hit_key[i] = false
+		use_fly[i] = false
+		if(player_item_id[i]==66)
+		{
+			changeskin(i,0) 
 		}
 	}
 }
