@@ -770,6 +770,11 @@ new invisible_cast[33]
 
 new cvar_max_gold
 
+new bool:g_bRestoreVel
+new Float:g_vecVel[3]
+new g_fmPlayerPreThink
+new g_fmPlayerPreThink_Post
+
 //SabreCat smoke
 //new const g_SabreSmokeClassname[] = "colored_smokenade";
 
@@ -1068,7 +1073,9 @@ public plugin_init()
 	register_event("SendAudio","freeze_over1","b","2=%!MRAD_GO","2=%!MRAD_MOVEOUT","2=%!MRAD_LETSGO","2=%!MRAD_LOCKNLOAD")
 	register_event("SendAudio","freeze_begin1","a","2=%!MRAD_terwin","2=%!MRAD_ctwin","2=%!MRAD_rounddraw")
 
-	register_forward(FM_PlayerPreThink, "Forward_FM_PlayerPreThink")
+	g_fmPlayerPreThink = register_forward(FM_PlayerPreThink, "onPlayerPreThink")
+	g_fmPlayerPreThink_Post = register_forward(FM_PlayerPreThink, "onPlayerPreThink_Post", 1)
+	
 	register_forward(FM_SetModel, "fw_SetModel") //SabreCat W_ model
 	
 	//register_cvar("diablo_dir", "addons/amxmodx/diablo/")
@@ -8699,6 +8706,11 @@ public plugin_end()
 {
 	DB_SaveAll(1);
 	MYSQLX_Close();
+	
+	if(g_fmPlayerPreThink)
+		unregister_forward(FM_PlayerPreThink, g_fmPlayerPreThink)
+	if(g_fmPlayerPreThink_Post)
+		unregister_forward(FM_PlayerPreThink, g_fmPlayerPreThink_Post, 1)
 }
 
 /* ==================================================================================================== */
@@ -14710,8 +14722,8 @@ public call_cast(id)
 		}
 		case Infidel:
 		{
-			show_hudmessage(id, "[Инфидель] Временное увеличение скорости") 
 			set_user_maxspeed(id,get_user_maxspeed(id)+50.0)
+			show_hudmessage(id, "[Инфидель] +50 к скорости (%d)",floatround(get_user_maxspeed(id))) 
 		}
 		case Barbarian:
 		{
@@ -16876,6 +16888,60 @@ stock fm_get_weapon_ent_owner(ent)
 	return get_pdata_cbase(ent, 41, 4);
 }
 
+//-----------------INFIDEL------------------------------------------------------------
+public onPlayerPreThink(id)
+{
+	if(player_class[id] == Infidel)
+	{
+		if(pev_valid(id) && is_user_alive(id) 
+		&& (FL_ONGROUND & pev(id, pev_flags)))
+		{
+			pev(id, pev_velocity, g_vecVel)
+			g_bRestoreVel = true
+		}
+		
+		return FMRES_HANDLED
+	}
+	
+	return FMRES_IGNORED
+}
+//-----------------------------------------------------------------------------
+public onPlayerPreThink_Post(id)
+{
+	if(g_bRestoreVel)
+	{
+		g_bRestoreVel = false
+
+		if(!(FL_ONTRAIN & pev(id, pev_flags)))
+		{
+			// NOTE: within DLL PlayerPreThink Jump() function is called;
+			// there is a conveyor velocity addiction we should care of
+
+			static iGEnt
+			
+			iGEnt = pev(id, pev_groundentity)
+			if(pev_valid(iGEnt) && (FL_CONVEYOR & pev(iGEnt, pev_flags)))
+			{
+				static Float:vecTemp[3]
+				
+				pev(id, pev_basevelocity, vecTemp)
+				
+				g_vecVel[0] += vecTemp[0]
+				g_vecVel[1] += vecTemp[1]
+				g_vecVel[2] += vecTemp[2]
+			}				
+
+			set_pev(id, pev_velocity, g_vecVel)
+			
+			return FMRES_HANDLED
+		}
+	}
+
+	return FMRES_IGNORED
+}
+//-----------------------------------------------------------------------------
+
+
 public fwHamPlayerSpawnPost(id)
 {
 	if (is_user_alive(id) && player_firstspawn[id] == 1) 
@@ -16980,10 +17046,10 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 			new weapon
 			new bodypart
 			// Engine Knockback disabled
-			if(player_class[victim] == Infidel)
-			{
-				pev(victim, pev_velocity, g_Knockback[victim])
-			}
+			//if(player_class[victim] == Infidel)
+			//{
+			//	pev(victim, pev_velocity, g_Knockback[victim])
+			//}
 			weapon = get_user_weapon( attacker ,_,_)
 				new damage = floatround(damage2)
 				new attacker_id = attacker
@@ -17014,6 +17080,11 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					add_bonus_shake(attacker_id,id)
 					add_bonus_shaked(attacker_id,id)
 					item_take_damage(id,damage)
+					if(player_class[id] == Infidel)
+					{
+						set_pdata_float(id, 108, 1.0)
+						return HAM_HANDLED
+					}
 					if(player_class[id] == Fallen && player_b_antysound[id] == 0)
 					{
 						rndfsound = random(4);
