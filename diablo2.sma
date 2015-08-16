@@ -5941,12 +5941,12 @@ public iteminfo(id)
 		{
 			itemimage = "armor"
 		}
-		case 17,19,20,28,58,59,60,61,62,63,64,70,91,94,95,104,105,106,107,108,109,110,111,112,113,114,115,117:
+		case 17,19,20,28,58,59,60,61,62,63,64,70,91,94,95,104:
 		{
 			itemimage = "wing"
 			imagetype = "square"
 		}
-		case 18,31,72,73,75,116:
+		case 18,31,72,73,75,105:
 		{
 			itemimage = "boots"
 		}
@@ -5959,7 +5959,7 @@ public iteminfo(id)
 			itemimage = "diamond"
 			imagetype = "square"
 		}
-		case 26,27,120:
+		case 26,27:
 		{
 			itemimage = "random"
 			imagetype = "square"
@@ -5973,7 +5973,7 @@ public iteminfo(id)
 			itemimage = "meekstone"
 			imagetype = "square"
 		}
-		case 34,52,121,122,123,124,125:
+		case 34,52,109,110,111,112,113:
 		{
 			itemimage = "totem"
 		}
