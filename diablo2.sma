@@ -16952,12 +16952,12 @@ public fwHamPlayerSpawnPost(id)
 				}
 			}
 		}
-		is_touched[i] = 0.0
-		hit_key[i] = false
-		use_fly[i] = false
-		if(player_item_id[i]==66)
+		is_touched[id] = 0.0
+		hit_key[id] = false
+		use_fly[id] = false
+		if(player_item_id[id]==66)
 		{
-			changeskin(i,0) 
+			changeskin(id,0) 
 		}
 	}
 }
