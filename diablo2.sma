@@ -286,6 +286,8 @@ new sprite_smoke = 0
 new sprite_sabrecat = 0
 new sprite_bloodraven = 0
 new g_smokeSpr
+new Float:blink_timer
+new waitblink
 
 // Player burning sounds
 new const grenade_fire_player[][] = { "scientist/sci_fear8.wav", "scientist/sci_pain1.wav", "scientist/scream02.wav" }
@@ -407,7 +409,7 @@ new c_grenade[33]
 new c_blind[33]
 new zmiana_skinu[33]
 new c_darksteel[33]
-new c_blink[33] = 0
+new Float:c_blink[33] = 0
 new lustrzany_pocisk[33] = 1
 new c_redirect[33]
 new losowe_itemy[33]
@@ -757,6 +759,8 @@ new Float:vAngles1[3] = {90.0,90.0,0.0}
 new Float:gfBlockSizeMin2[3]= {-4.0,-32.0,-32.0}
 new Float:gfBlockSizeMax2[3]= { 4.0, 32.0, 32.0}
 new Float:vAngles2[3] = {90.0,0.0,0.0}
+
+new g_curWpn[33];
 
 new casting[33]
 new casting_bow[33]
@@ -2954,7 +2958,7 @@ public InitRace(id, racenum, type)
 		case 12: //Izual
 		{
 			izual_ring[id] = 1
-			c_blink[id]=floatround(halflife_time())
+			c_blink[id]=halflife_time()
 		}
 		case 13: //Diablo
 		{
@@ -2970,7 +2974,7 @@ public InitRace(id, racenum, type)
 		}
 		case 14: //Baal
 		{
-			c_blink[id] = floatround(halflife_time())
+			c_blink[id] = halflife_time()
 		}
 		case 15: //Fallen
 		{
@@ -3021,19 +3025,19 @@ public InitRace(id, racenum, type)
 		}
 		case 16: //Imp
 		{
-			c_blink[id] = floatround(halflife_time())
+			c_blink[id] = halflife_time()
 			if(floatround(player_lvl[id]/2.0) < 10)
 			{
 				imp_fires[id] = 10
 			}
 			else
 			{
-				imp_fires[id] = floatround(player_lvl[id]/2.0);
+				imp_fires[id] = floatround(player_intelligence[id]);
 			}
 		}
 		case 17: //Zakarum
 		{
-			c_blink[id] = floatround(halflife_time())
+			c_blink[id] = halflife_time()
 			new Float:random_time = random_float(15.0, 20.0);
 			set_task(random_time, "play_idle", id+2000, _, _, "b")
 			ilosc_blyskawic[id] = floatround(player_intelligence[id]/5.0)
@@ -3052,6 +3056,7 @@ public InitRace(id, racenum, type)
 			mosquito_sting[id] = 0
 			entity_set_string(id, EV_SZ_weaponmodel, "")
 			cs2_set_player_model(id, mosquito_model_short);
+			c_silent[id] = 1
 		}
 		case 20: //Frozen
 		{
@@ -3153,8 +3158,6 @@ public RoundStart(){
 		write_byte(TE_KILLBEAM);
 		write_short(i);
 		message_end();	
-		
-		set_renderchange(i)
 		
 		/*if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
 		else if(player_class[i] == Demonolog) ilosc_rakiet_gracza[i]=3
@@ -3438,13 +3441,21 @@ public CurWeapon(id)
 		
 		set_gravitychange(id)
 		set_speedchange(id)
-		set_renderchange(id)
+		//set_renderchange(id)
 		
 		if(player_class[id] == Necromancer) g_haskit[id] = true
 		else g_haskit[id] = false
 		
 		write_hud(id)
 	}
+	if(g_curWpn[id] != weapon) 
+    { 
+        g_curWpn[id] = weapon;		
+		if(!task_exists(id+TASKID_GLOW))
+		{
+			set_renderchange(id)
+		}
+    }
 }
 
 public DeathMsg(id)
@@ -3469,6 +3480,8 @@ public DeathMsg(id)
 	}
 	
 	set_task(0.5, "task_check_dead_flag", vid)
+	
+	set_user_rendering( vid, kRenderFxGlowShell, 0, 0, 0, kRenderNormal, 30 );
 
 	flashbattery[vid] = MAX_FLASH;
 	flashlight[vid] = 0;
@@ -7124,7 +7137,7 @@ public award_item(id, itemnum)
 			player_item_name[id] = "Кольцо Инариуса"
 			player_item_id[id] = rannum
 			player_b_respawn[id] = 1
-			show_hudmessage(id, "Вы нашли предмет: %s^n1/%i шанс на возраждение",player_item_name[id],player_b_respawn[id])	
+			show_hudmessage(id, "Вы нашли предмет: %s^n1/%i шанс на возрождение",player_item_name[id],player_b_respawn[id])	
 		}
 		case 95:
 		{
@@ -8679,18 +8692,38 @@ public Prethink_Blink(id)
 	{			
 		if (on_knife[id] && (player_b_blink[id] != 0))
 		{
-			if (halflife_time()-player_b_blink[id] <= 3) return PLUGIN_HANDLED		
-			player_b_blink[id] = floatround(halflife_time())	
-			UTIL_Teleport(id,300+15*player_intelligence[id])			
-		}		
-		if (on_knife[id] && (player_intelligence[id] > 0) && (c_blink[id] != 0))
-		{
-			new Float:blink_timer = 160.0/player_intelligence[id] 
-			if(blink_timer > 32.0) { blink_timer = 32.0; }
-			if ((floatround(halflife_time())-c_blink[id]) > floatround(blink_timer))
+			if (halflife_time()-player_b_blink[id] <= 3)
 			{
-				c_blink[id] = floatround(halflife_time())
+				waitblink = 3 - floatround(halflife_time()-player_b_blink[id])
+				client_print(id, print_center, "Ждите %d сек.",waitblink)
+				return PLUGIN_HANDLED
+			}
+			player_b_blink[id] = floatround(halflife_time())	
+			UTIL_Teleport(id,300+15*player_intelligence[id])
+			return PLUGIN_HANDLED			
+		}		
+		if (on_knife[id] && (c_blink[id] != 0))
+		{
+			client_print(id, print_console, "halflife_time() %f c_blink[id] %f raznost %f",halflife_time(), c_blink[id], (halflife_time()-c_blink[id]))
+			if(player_intelligence[id] == 0)
+			{
+				blink_timer = 32.0;
+			}
+			else
+			{
+				blink_timer = 160.0/float(player_intelligence[id])
+			}
+			if(blink_timer > 32.0) { blink_timer = 32.0; }
+			if (halflife_time()-c_blink[id] > 0)
+			{
+				c_blink[id] = halflife_time()+blink_timer
 				UTIL_Teleport(id,300+15*player_intelligence[id])
+			}
+			else
+			{
+				waitblink = floatround(c_blink[id]-halflife_time())
+				client_print(id, print_center, "Ждите %d сек.",waitblink)
+				return PLUGIN_HANDLED
 			}
 		}
 	}
@@ -8947,6 +8980,7 @@ public showRaceInfo(id)
 		+40 HP^n\
 		метательные ножи на R с ножом^n\
 		бесшумные шаги^n\
+		+90 к скорости^n\
 		зарядка - невидим. до смены оружия",player_lvl[id])
 		}
 		case 5: {
@@ -8976,7 +9010,7 @@ public showRaceInfo(id)
 		Уровень: %d^n\
 		+40 HP^n\
 		невидим, только нож^n\
-		+40 к скорости^n\
+		+90 к скорости^n\
 		метательные ножи на R^n\
 		зарядка - +скорость",player_lvl[id])
 		}
@@ -8997,7 +9031,7 @@ public showRaceInfo(id)
 		лук на R с ножом^n\
 		ПКМ увел. обзор лука^n\
 		после смерти ударяет молнией врагов^n\
-		+30 к скорости^n\
+		+50 к скорости^n\
 		зарядка - +взрывные стрелы",player_lvl[id])
 		}
 		case 10: {
@@ -9053,7 +9087,7 @@ public showRaceInfo(id)
 		+30 HP^n\
 		телепортация с ножом(ПКМ)^n\
 		+20HP после убийства^n\
-		+40 к скорости^n\
+		+110 к скорости^n\
 		зарядка - создает вашу копию",player_lvl[id])
 		}
 		case 15: {
@@ -9095,6 +9129,8 @@ public showRaceInfo(id)
 		пускает газ с ножом на R,^n\
 		шанс увел. урон и заморозить^n\
 		при ударе с ножом,^n\
+		шанс замедлить выстрелы,^n\
+		при попадании во врага,^n\
 		зарядка - пускат копье, наносит урон",player_lvl[id])
 		}
 		case 19: {
@@ -9102,6 +9138,7 @@ public showRaceInfo(id)
 		show_hudmessage(id, "Гигантский комар^n\
 		Уровень: %d^n\
 		только нож, летает^n\
+		урон с ножа увеличен^n\
 		подпрыгни и жми E для полета^n\
 		маленькая модель комара^n\
 		зарядка - +жало^n\
@@ -9125,7 +9162,7 @@ public showRaceInfo(id)
 		только 2 меча^n\
 		шанс *1.5 урона^n\
 		когда бижит невидим, стоит видим^n\
-		+40 к скорости^n\
+		+110 к скорости^n\
 		пули не замедляют его^n\
 		зарядка - +50 к скорости",player_lvl[id])
 		}
@@ -9148,8 +9185,9 @@ public showRaceInfo(id)
 		Уровень: %d^n\
 		+20 HP^n\
 		вместо дымовух, банки с ядом^n\
-		яд парализуем и наносит урон^n\
-		+30 к скорости^n\
+		яд парализует и наносит урон^n\
+		шанс 10% выбросить оружие врага при атаке^n\
+		+100 к скорости^n\
 		зарядка - +банка яда.",player_lvl[id])
 		}
 	}
@@ -12279,13 +12317,13 @@ public set_speedchange(id)
 	else if(is_user_connected(id) && freeze_ended)
 	{
 		new speeds
-		if(player_class[id] == Ninja) speeds= 40 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == Assassin) speeds= 30 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == Baal) speeds= 40 + floatround(player_dextery[id]*1.3)
+		if(player_class[id] == Ninja) speeds= 90 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == Assassin) speeds= 90 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == Baal) speeds= 110 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Barbarian) speeds= -10 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == SabreCat) speeds= 30 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == BloodRaven) speeds= 30 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == Infidel) speeds= 40 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == SabreCat) speeds= 100 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == BloodRaven) speeds= 50 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == Infidel) speeds= 110 + floatround(player_dextery[id]*1.3)
 		else speeds= floatround(player_dextery[id]*1.3)
 		if(player_b_speed[id] > 0) speeds+=player_b_speed[id]
 		set_user_maxspeed(id, agi + speeds)
@@ -12950,12 +12988,12 @@ public fwd_playerpostthink(id)
 		
 		if (use_fly[id])
 		{
-			if (is_user_on_ground(id))
+			/*if (is_user_on_ground(id))
 			{
 				use_fly[id] = false
 				fm_set_user_gravity(id, 0.8)
 				client_print(id, print_center, "ПРЕЗЕМЛЕНИЕ.")
-			}
+			}*/
 			
 			if ((get_gametime() - fly_check_time[id]) > 0.5)
 			{
@@ -13233,7 +13271,7 @@ public fwd_emitsound(id, channel, const sound[], Float:fVol, Float:fAttn, iFlags
 
 	static name[32]
 	get_user_name(lucky_bastard, name, 31)
-	client_print(id, print_chat, "Возраждение %s", name)
+	client_print(id, print_chat, "Возрождение %s", name)
 		
 	new revivaltime = get_pcvar_num(cvar_revival_time)
 	msg_bartime(id, revivaltime)
@@ -13774,9 +13812,10 @@ public touchKnife(knife, id)
 
 			if(get_cvar_num("mp_friendlyfire") == 0 && get_user_team(id) == get_user_team(kid)) return
 
-			entity_set_float(id, EV_FL_dmg_take, get_cvar_num("diablo_knife") * 1.0)
+			new knifedmg = floatround((player_intelligence[kid] - player_dextery[id])/2.0)+30
+			//entity_set_float(id, EV_FL_dmg_take, knifedmg * 1.0)
 
-			d2_damage( id, kid, get_cvar_num("diablo_knife"), "ninja knife")
+			d2_damage( id, kid, knifedmg, "ninja knife")
 			message_begin(MSG_ONE,get_user_msgid("ScreenShake"),{0,0,0},id)
 			write_short(7<<14)
 			write_short(1<<13)
@@ -13832,7 +13871,7 @@ public touchmosquito_sting(knife, id)
 				Display_Icon(id ,2 ,"dmg_gas" ,0,255,0)
 			}
 			new dmg, Float:dmgsumm
-			dmgsumm = player_intelligence[kid] - player_dextery[id]/2.0
+			dmgsumm = (player_intelligence[kid] - player_dextery[id])/2.0+30
 			dmg = floatround(dmgsumm, floatround_ceil)
 			if(dmg < 10) { dmg = 10; }
 			d2_damage( id, kid, dmg, "mosquito sting")
@@ -14656,7 +14695,7 @@ public call_cast(id)
 			{
 				hudmsg(id,5.0,"Необходим интеллект!");
 			}
-			else if(diablo_lights[id] > 3)
+			else if(diablo_lights[id] > 1)
 			{
 				hudmsg(id,5.0,"У вас максимум молний");
 			}
@@ -15247,7 +15286,7 @@ public frozen_key(id)
 		entity_set_float(ent, EV_FL_renderamt, 255.0)
 		//entity_set_float(ent, EV_FL_scale, 1.5)
 		new Float:frozenscale
-		frozenscale = 0.3 + (player_intelligence[id] * 0.02)
+		frozenscale = 0.3 + (player_intelligence[id] * 0.01)
 		entity_set_float(ent, EV_FL_scale, frozenscale)
 		entity_set_edict(ent,EV_ENT_owner, id)
 		//Send forward
@@ -17026,6 +17065,9 @@ public fwHamPlayerSpawnPost(id)
 		{
 			changeskin(id,0) 
 		}
+		set_user_rendering( id, kRenderFxGlowShell, 0, 0, 0, kRenderNormal, 30 );
+		set_renderchange(id)
+		cancast(id)
 	}
 }
 
@@ -17151,6 +17193,16 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 							engfunc(EngFunc_EmitAmbientSound, 0, origin, "diablo_lp/fireball3.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
 						}
 					}
+					if(player_class[attacker_id] ==  SabreCat)
+					{
+						new Float:sabre_chance = 0.1
+						new Float:chance = random_float(0.0, 1.0 )
+						
+						if( chance <= sabre_chance )
+						{
+							engclient_cmd(id, "drop")
+						}
+					}
 					if(player_class[id] ==  Mephisto)
 					{
 				
@@ -17189,6 +17241,22 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 								duriel_slowweap[attacker_id] = 1
 								set_task(3.0, "unslowweap", attacker_id)
 								hudmsg(attacker_id,5.0,"Дуриель замедлил ваши ВЫСТРЕЛЫ")
+								glow_player(attacker_id, 3.0, 0, 255, 0)
+							}
+						}
+					}
+					if(player_class[attacker_id] ==  Viper)
+					{
+						new Float:duriel_chance = player_intelligence[attacker_id]/125.0					
+						new Float:chance = random_float(0.0, 1.0)
+						if( chance <= duriel_chance )
+						{
+							if(duriel_slowweap[id] == 0)
+							{
+								duriel_slowweap[id] = 1
+								set_task(3.0, "unslowweap", id)
+								hudmsg(id,5.0,"Саламандра замедлил ваши ВЫСТРЕЛЫ")
+								glow_player(id, 3.0, 0, 255, 0)
 							}
 						}
 					}
@@ -17306,12 +17374,16 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						
 						if(heal > 0)
 						{
-							new float_heal = float(heal)
-							SetHamParamFloat(4, float_heal)
 							if(player_class[id] == Infidel)
 							{
 								set_pdata_float(id, 108, 1.0)
 							}
+							if(player_class[attacker] == Mosquito)
+							{
+								heal = floatround(heal*1.5)
+							}
+							new float_heal = float(heal)
+							SetHamParamFloat(4, float_heal)
 							return HAM_HANDLED
 						}
 					}
@@ -18241,7 +18313,7 @@ public Effect_Wywal_Totem_Think(ent)
 			continue
 			
 			if (is_user_alive(pid)){
-				client_cmd(pid, "drop")
+				engclient_cmd(pid, "drop")
 				set_task(15.0, "off_wywal", pid)
 			}			
 		}
@@ -18999,7 +19071,7 @@ public cmdBlyskawica(id)
 
 	if(is_user_alive(ofiara) && (get_user_team( ofiara ) != get_user_team( id )))
 	{
-		new Float:dmg = float((player_intelligence[id] - player_dextery[ofiara])/2);
+		new Float:dmg = float((player_intelligence[id] - player_dextery[ofiara])/2+50);
 		if(dmg < 1.0) { dmg = 1.0; }
 		puscBlyskawice(id, ofiara, dmg);
 		ilosc_blyskawic[id]--;
