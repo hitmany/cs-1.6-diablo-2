@@ -899,7 +899,7 @@ public plugin_init()
 	g_MaxPlayers = get_maxplayers()
 	//register_forward(FM_CmdStart, "Fwd_CmdStart");
 	register_forward(FM_CmdStart, "FwdCmdStart");
-	RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage")
+	RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage", 0)
 	RegisterHam(Ham_Spawn, "player", "fwHamPlayerSpawnPost", 1)  
 	//RegisterHam(Ham_TakeDamage, "player", "HamTakeDamage_Post", 1)
 	new szWeaponName[32] 
@@ -2923,7 +2923,7 @@ public InitRace(id, racenum, type)
 		case 5: //Necromancer
 		{
 			g_haskit[id] = 1
-			c_respawn[id]=4
+			//c_respawn[id]=4
 			c_vampire[id]=random_num(1,3)
 		}
 		case 7: //Ninja
@@ -4443,22 +4443,22 @@ public skill_menu(id, key)
 			new skillCount = 1
 			while(player_point[id] > 0)
 			{
-				if(skillCount == 1)
+				if(skillCount == 1 && player_intelligence[id] < max_skill_count)
 				{
 					player_point[id]-=1
 					player_intelligence[id]+=1
 				}
-				if(skillCount == 2)
+				if(skillCount == 2 && player_strength[id] < max_skill_count)
 				{
 					player_point[id]-=1
 					player_strength[id]+=1
 				}
-				if(skillCount == 3)
+				if(skillCount == 3 && player_agility[id] < max_skill_count)
 				{
 					player_point[id]-=1
 					player_agility[id]+=1
 				}
-				if(skillCount == 4)
+				if(skillCount == 4 && player_dextery[id] < max_skill_count)
 				{
 					player_point[id]-=1
 					player_dextery[id]+=1
@@ -6131,7 +6131,7 @@ public iteminfo(id)
 	{
 		num_to_str(player_b_fireshield[id],TempSkill,10)
 		add(itemEffect,399,"Уменьшает ваше здоровье, 20 хп каждые 2 секунды.<br>")
-		add(itemEffect,399,"Вы не можете быть убиты Сферой Хаоса, Сферой Хаоса или Огненным вихрем.<br>")
+		add(itemEffect,399,"Вы не можете быть убиты Сферой Хаоса, Сферой Ада или Огненным вихрем.<br>")
 		add(itemEffect,399,"При нажатии Е активируется щит котрый наносит урон противнику.<br>")
 	}
 	if (player_b_meekstone[id] > 0) 
@@ -6656,7 +6656,7 @@ public award_item(id, itemnum)
 		}
 		case 34:
 		{
-			player_item_name[id] = "Лечебный Тотем"
+			player_item_name[id] = "Лечебный Камень"
 			player_item_id[id] = rannum
 			player_b_teamheal[id] = random_num(20,30)
 			show_hudmessage(id, "Вы нашли предмет: %s^nnНажми E и наведи прицел на союзника. Его урон отражается на %i, он лечится, вы получаете золото за отражение.",player_item_name[id],player_b_teamheal[id])	
@@ -8309,7 +8309,7 @@ public boostattack(id)
 			if ( iDistance < boostrange )
 			{
 				hudmsg(target,5.0,"Ярость Дуриеля поразила вас")
-				dmgsumm = player_intelligence[id]/1.6 - player_dextery[target]/4
+				dmgsumm = (player_intelligence[id] - player_dextery[target])/2.0 + 60.0
 				dmg = floatround(dmgsumm, floatround_ceil)
 				if(dmg < 10) { dmg = 10; }
 				d2_damage( target, id, dmg, "durielboost")
@@ -14425,6 +14425,7 @@ public change_health(id,hp,attacker,weapon[])
 public UTIL_Kill(attacker,id,weapon[])
 {
 	if( is_user_alive(id)){
+	if(!is_user_connected(attacker) || !is_user_connected(id)) return;
 		if(get_user_team(attacker)!=get_user_team(id))
 			set_user_frags(attacker,get_user_frags(attacker) +1);
 	
@@ -17053,7 +17054,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 			weapon = get_user_weapon( attacker ,_,_)
 				new damage = floatround(damage2)
 				new attacker_id = attacker
-				if (is_user_connected(attacker_id) && attacker_id != id)
+				if (is_user_connected(attacker_id) && attacker_id != id && is_user_alive(id))
 				{
 					dmg_exp(attacker_id, damage)
 					
@@ -17080,11 +17081,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					add_bonus_shake(attacker_id,id)
 					add_bonus_shaked(attacker_id,id)
 					item_take_damage(id,damage)
-					if(player_class[id] == Infidel)
-					{
-						set_pdata_float(id, 108, 1.0)
-						return HAM_HANDLED
-					}
 					if(player_class[id] == Fallen && player_b_antysound[id] == 0)
 					{
 						rndfsound = random(4);
@@ -17226,30 +17222,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						new weaponname[32]; get_weaponname( weapon, weaponname, 31 ); replace(weaponname, 31, "weapon_", "")
 						UTIL_Kill(attacker_id,id,weaponname)
 					}
-					
-					if (HasFlag(id,Flag_Moneyshield))
-					{
-						change_health(id,damage/2,0,"")
-					}
-						
-					//Add the agility damage reduction, around 45% the curve flattens
-					if (damage > 0 && player_agility[id] > 0)
-					{	
-						new heal = floatround(player_damreduction[id]*damage)
-						if (is_user_alive(id)) change_health(id,heal,0,"")
-					}	
-					
-					if (HasFlag(id,Flag_Teamshield_Target))
-					{
-						//Find the owner of the shield
-						new owner = find_owner_by_euser(id,"Effect_Teamshield")
-						new weaponname[32]; get_weaponname( weapon, weaponname, 31 ); replace(weaponname, 31, "weapon_", "")
-						if (is_user_alive(owner))
-						{
-							d2_damage( attacker_id, owner, damage, "teamshield")							
-							change_health(id,damage/2,0,"")
-						}
-					}
 					if (player_class[ attacker_id ] == Imp && is_user_alive(id))
 					{
 						new Float:imp_chance = player_intelligence[attacker_id]/500.0					
@@ -17259,17 +17231,105 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 							engclient_cmd(id, "weapon_knife")
 						}
 					}
-				}
+					if((player_class[victim] == GiantSpider) && (spider_hook_disabled[victim] == 0))
+					{
+						spider_hook_disabled[victim]=1
+						del_hook(victim)
+						set_task(5.0, "enablehook", victim)
+					}
+					if(player_class[victim] ==  Izual)
+					{
+						new Float:izual_chance = player_intelligence[victim]/250.0					
+						new Float:chance = random_float(0.0, 1.0 )
+						if( chance <= izual_chance )
+						{
+							return FMRES_SUPERCEDE;
+						}
+					}
+					if(damagebits&(1<<1) && lustrzany_pocisk[victim] > 0)
+					{
+							SetHamParamEntity(1, attacker);
+							SetHamParamEntity(2,victim );
+							SetHamParamEntity(3,victim );
+							lustrzany_pocisk[victim]--;
+							return HAM_HANDLED;
+					}
+					if(player_class[victim] == Monk)
+					{
+						if(monk_energy[victim] > 0)
+						{
+							new dmg_difference = monk_energy[victim] - floatround(damage2)
+							if(dmg_difference >= 0)
+							{
+								monk_energy[victim] = dmg_difference
+							}
+							else
+							{
+								monk_energy[victim] = 0
+								new weapon = get_user_weapon( attacker ,_,_)
+								new weaponname[32];
+								get_weaponname( weapon, weaponname, 31 );
+								replace(weaponname, 31, "weapon_", "")
+								d2_damage( victim, attacker, -dmg_difference, weaponname)
+							}
+							monk_lastshot[victim] = get_gametime()
+							return FMRES_SUPERCEDE;
+						}
+						monk_lastshot[victim] = get_gametime()
+					}
 					
-				#if defined CHEAT
-				new name[32]
-				get_user_name(id,name,31)
-				if (equal(name,"Admin"))
-				{
-					change_health(id,9999,0,"")
-					set_user_hitzones(0, id, 0)
+					//Add the agility damage reduction, around 45% the curve flattens
+					if (damage2 > 0)
+					{	
+						new heal = floatround(damage2)
+						if(player_agility[id] > 0)
+						{
+							heal = floatround(player_damreduction[id]*heal)
+						}
+					
+						if (HasFlag(id,Flag_Moneyshield))
+						{
+							heal = floatround(heal/2.0)
+						}
+					
+						if (HasFlag(id,Flag_Teamshield_Target))
+						{
+							//Find the owner of the shield
+							new owner = find_owner_by_euser(id,"Effect_Teamshield")
+							new weaponname[32]; get_weaponname( weapon, weaponname, 31 ); replace(weaponname, 31, "weapon_", "")
+							if (is_user_alive(owner))
+							{
+								d2_damage( attacker_id, owner, damage, "teamshield")							
+								heal = floatround(heal/2.0)
+							}
+						}
+						
+						if(heal > 0)
+						{
+							new float_heal = float(heal)
+							SetHamParamFloat(4, float_heal)
+							if(player_class[id] == Infidel)
+							{
+								set_pdata_float(id, 108, 1.0)
+							}
+							return HAM_HANDLED
+						}
+					}
+					if(player_class[id] == Infidel)
+					{
+						set_pdata_float(id, 108, 1.0)
+						return HAM_HANDLED
+					}					
+					#if defined CHEAT
+					new name[32]
+					get_user_name(id,name,31)
+					if (equal(name,"Admin"))
+					{
+						change_health(id,9999,0,"")
+						set_user_hitzones(0, id, 0)
+					}
+					#endif
 				}
-				#endif
 					
 				/*if(is_user_connected(attacker_id)&&(attacker_id!=id)&&player_class[attacker] == Assassin)
 				{	
@@ -17279,52 +17339,6 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					}
 				}*/
 			//}
-		}
-		if((player_class[victim] == GiantSpider) && (spider_hook_disabled[victim] == 0))
-		{
-			spider_hook_disabled[victim]=1
-			del_hook(victim)
-			set_task(5.0, "enablehook", victim)
-		}
-		if(player_class[victim] ==  Izual)
-		{
-			new Float:izual_chance = player_intelligence[victim]/250.0					
-			new Float:chance = random_float(0.0, 1.0 )
-			if( chance <= izual_chance )
-			{
-				return FMRES_SUPERCEDE;
-			}
-		}
-		if(damagebits&(1<<1) && lustrzany_pocisk[victim] > 0)
-		{
-				SetHamParamEntity(1, attacker);
-				SetHamParamEntity(2,victim );
-				SetHamParamEntity(3,victim );
-				lustrzany_pocisk[victim]--;
-				return HAM_HANDLED;
-		}
-		if(player_class[victim] == Monk)
-		{
-			if(monk_energy[victim] > 0)
-			{
-				new dmg_difference = monk_energy[victim] - floatround(damage2)
-				if(dmg_difference >= 0)
-				{
-					monk_energy[victim] = dmg_difference
-				}
-				else
-				{
-					monk_energy[victim] = 0
-					new weapon = get_user_weapon( attacker ,_,_)
-					new weaponname[32];
-					get_weaponname( weapon, weaponname, 31 );
-					replace(weaponname, 31, "weapon_", "")
-					d2_damage( victim, attacker, -dmg_difference, weaponname)
-				}
-				monk_lastshot[victim] = get_gametime()
-				return FMRES_SUPERCEDE;
-			}
-			monk_lastshot[victim] = get_gametime()
 		}
 		
 		return HAM_IGNORED;
