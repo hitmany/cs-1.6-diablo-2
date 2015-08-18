@@ -1933,7 +1933,7 @@ public MYSQLX_SetDataForRace( id )
 {
 	new name[32]
 	get_user_name(id,name,31)
-	//client_print(0, print_console, "%s загружаю из базы %s", name,Race[player_newclass[id]])
+	//client_print(0, print_console, "%s (%d) загружаю из базы %s", name,id,Race[player_newclass[id]])
 	// Make sure our connection is working
 	if ( !MYSQLX_Connection_Available() )
 	{
@@ -3097,148 +3097,6 @@ public RoundStart(){
 	kill_all_entity("throwing_knife")
 	fallens_tt=0
 	fallens_ct=0
-	
-	new Players[32], playerCount, i
-	get_players(Players, playerCount, "h") 
-	
-	for (new countP=0; i<playerCount; countP++) 
-	{
-		i = Players[countP]
-		new name[32]
-		get_user_name(i,name,31)
-		//client_print(0, print_console, "%s 3081 %s", name,Race[player_newclass[i]])
-		if(!is_user_connected(i)) return PLUGIN_CONTINUE;
-		
-		//client_print(0, print_console, "%s 3107 %s", name,Race[player_newclass[i]])
-		ResetRace(i)
-		//client_print(0, print_console, "%s 3109 %s", name,Race[player_newclass[i]])
-		if(player_newclass[i] > 0)
-		{
-			ResetItemsXPAndETC(i)
-			//client_print(0, print_console, "%s 3112 %s", name,Race[player_newclass[i]])
-			player_class[i] = player_newclass[i]
-			MYSQLX_SetDataForRace( i )
-			//client_print(0, print_console, "%s 3115 %s", name,Race[player_newclass[i]])
-			player_newclass[i] = 0
-			ColorChat(i, GREEN, "Вы сменили расу")
-			showRaceInfo( i )
-		}
-		else
-		{
-			InitRace(i, player_class[i], 2)
-			//client_print(0, print_console, "%s 3123 %s", name,Race[player_newclass[i]])
-		}
-		if(player_b_fireball[i] > 0)
-		{
-			player_b_fireball_next[i] = player_b_fireball[i]
-		}
-		//client_print(0, print_console, "%s 3126 %s m_health %f", name,Race[player_newclass[i]],m_health)
-		
-		//ResetParams
-		//HERE
-		used_item[i] = false
-		naswietlony[i] = 0;
-		losowe_itemy[i] = 0
-		JumpsLeft[i]=JumpsMax[i]
-		lustrzany_pocisk[i]=0
-		
-		//RESET OBJECTS
-		//baal
-		if(task_exists(i+TASK_REMOVE_BAAL))
-		{
-			remove_task(i+TASK_REMOVE_BAAL)
-			baal_copyed[i] = 0
-		}
-		if(player_b_mine[i] > 1)
-		{
-			player_b_mine[i] = 1
-			player_b_mine_seted[i] = 0
-		}
-		message_begin(MSG_BROADCAST, SVC_TEMPENTITY);
-		write_byte(TE_KILLBEAM);
-		write_short(i);
-		message_end();	
-		
-		/*if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
-		else if(player_class[i] == Demonolog) ilosc_rakiet_gracza[i]=3
-		if(player_class[i] == TheSmith)
-		{
-			ilosc_blyskawic[i]=3;
-			poprzednia_blyskawica[i]=get_gametime()
-		}*/
-		//else ilosc_rakiet_gracza[i]=0
-		
-		//else if(player_class[i] == TheSmith) ilosc_dynamitow_gracza[i]=1
-		//else ilosc_rakiet_gracza[i]=0
-		//Smith to init
-		//niewidka[i] = 0
-		/*=========== FROM ResetHUD ============*/
-		remove_task(i+GLUTON)
-		//change_health(i,9999,0,"")	
-		
-		
-		if (c4fake[i] > 0)
-		{
-			remove_entity(c4fake[i])
-			c4fake[i] = 0
-		}
-		SubtractStats(i,player_b_extrastats[i])
-		SubtractRing(i)
-		if ((player_intelligence[i]+player_strength[i]+player_agility[i]+player_dextery[i])>(player_lvl[i]*2)) reset_skill(i)
-		
-		BoostStats(i,player_b_extrastats[i])
-		BoostRing(i)
-		
-		fired[i] = 0
-		fired_viper[i] = 0
-		
-		player_ultra_armor_left[i]=player_ultra_armor[i]
-		
-		player_b_dagfired[i] = false
-		ghoststate[i] = 0
-		earthstomp[i] = 0
-		
-		if (player_b_blink[i] > 0)
-			player_b_blink[i] = 1
-		
-		if (player_b_usingwind[i] > 0) 
-		{
-			player_b_usingwind[i] = 0
-		}
-		
-		if (player_point[i] > 0 ) skilltree(i)
-		if (player_class[i] == 0) D2_ChangeRaceStart( i )
-		
-		c4state[i] = 0
-		client_cmd(i,"hud_centerid 0")  
-		auto_help(i)
-		add_money_bonus(i)
-		set_gravitychange(i)
-		add_redhealth_bonus(i)
-		SelectBotRace(i)
-		set_renderchange(i)
-		if (gRestart[i])
-		{
-			gRestart[i] = false
-			//return
-		}
-		if (gUpdate[i])
-		{
-			gUpdate[i] = false
-			//return
-		}
-		if (gHooked[i])
-		{
-			remove_hook(i)
-		}
-		if (get_pcvar_num(pMaxHooks) > 0)
-		{
-			gHooksUsed[i] = 0
-			statusMsg(0, "[Паутина] 0 из %d паутин использованно.", get_pcvar_num(pMaxHooks))
-		}
-		//client_print(0, print_console, "%s 3274 %s", name,Race[player_newclass[i]])
-		/*===============================*/
-	}
 	
 	Bot_Setup()		
 	ghost_check = false
@@ -16986,11 +16844,146 @@ public fwHamPlayerSpawnPost(id)
 {
 	if (is_user_alive(id) && player_firstspawn[id] == 1) 
 	{
-		MYSQLX_GetAllXP(id)
 		player_firstspawn[id] = 0
+		MYSQLX_GetAllXP(id)
 	}
-	else
+	else if(is_user_alive(id))
 	{
+		new i = id
+		new name[32]
+		get_user_name(i,name,31)
+		//client_print(0, print_console, "%s 3081 %s", name,Race[player_newclass[i]])
+		
+		//client_print(0, print_console, "%s 3107 %s", name,Race[player_newclass[i]])
+		//D2_Log( false, "%s roundstart)", name);
+		ResetRace(i)
+		//client_print(0, print_console, "%s 3109 %s", name,Race[player_newclass[i]])
+		if(player_newclass[i] > 0)
+		{
+			//D2_Log( false, "%s id %d newclass > 0 (%d)", name, i, player_newclass[i] );
+			ResetItemsXPAndETC(i)
+			//client_print(0, print_console, "%s 3112 %s", name,Race[player_newclass[i]])
+			player_class[i] = player_newclass[i]
+			MYSQLX_SetDataForRace( i )
+			//client_print(0, print_console, "%s 3115 %s", name,Race[player_newclass[i]])
+			player_newclass[i] = 0
+			ColorChat(i, GREEN, "Вы сменили расу")
+			showRaceInfo( i )
+		}
+		else
+		{
+			InitRace(i, player_class[i], 2)
+			//D2_Log( false, "%s id %d newclass = 0 (%d)", name, i, player_newclass[i] );
+			//client_print(0, print_console, "%s 3123 %s", name,Race[player_newclass[i]])
+		}
+		if(player_b_fireball[i] > 0)
+		{
+			player_b_fireball_next[i] = player_b_fireball[i]
+		}
+		//client_print(0, print_console, "%s 3126 %s m_health %f", name,Race[player_newclass[i]],m_health)
+		
+		//ResetParams
+		//HERE
+		used_item[i] = false
+		naswietlony[i] = 0;
+		losowe_itemy[i] = 0
+		JumpsLeft[i]=JumpsMax[i]
+		lustrzany_pocisk[i]=0
+		
+		//RESET OBJECTS
+		//baal
+		if(task_exists(i+TASK_REMOVE_BAAL))
+		{
+			remove_task(i+TASK_REMOVE_BAAL)
+			baal_copyed[i] = 0
+		}
+		if(player_b_mine[i] > 1)
+		{
+			player_b_mine[i] = 1
+			player_b_mine_seted[i] = 0
+		}
+		message_begin(MSG_BROADCAST, SVC_TEMPENTITY);
+		write_byte(TE_KILLBEAM);
+		write_short(i);
+		message_end();	
+		
+		/*if(player_class[i] == Griswold) ilosc_rakiet_gracza[i]=2
+		else if(player_class[i] == Demonolog) ilosc_rakiet_gracza[i]=3
+		if(player_class[i] == TheSmith)
+		{
+			ilosc_blyskawic[i]=3;
+			poprzednia_blyskawica[i]=get_gametime()
+		}*/
+		//else ilosc_rakiet_gracza[i]=0
+		
+		//else if(player_class[i] == TheSmith) ilosc_dynamitow_gracza[i]=1
+		//else ilosc_rakiet_gracza[i]=0
+		//Smith to init
+		//niewidka[i] = 0
+		/*=========== FROM ResetHUD ============*/
+		remove_task(i+GLUTON)
+		//change_health(i,9999,0,"")	
+		
+		
+		if (c4fake[i] > 0)
+		{
+			remove_entity(c4fake[i])
+			c4fake[i] = 0
+		}
+		SubtractStats(i,player_b_extrastats[i])
+		SubtractRing(i)
+		if ((player_intelligence[i]+player_strength[i]+player_agility[i]+player_dextery[i])>(player_lvl[i]*2)) reset_skill(i)
+		
+		BoostStats(i,player_b_extrastats[i])
+		BoostRing(i)
+		
+		fired[i] = 0
+		fired_viper[i] = 0
+		
+		player_ultra_armor_left[i]=player_ultra_armor[i]
+		
+		player_b_dagfired[i] = false
+		ghoststate[i] = 0
+		earthstomp[i] = 0
+		
+		if (player_b_blink[i] > 0)
+			player_b_blink[i] = 1
+		
+		if (player_b_usingwind[i] > 0) 
+		{
+			player_b_usingwind[i] = 0
+		}
+		
+		if (player_point[i] > 0 ) skilltree(i)
+		if (player_class[i] == 0) D2_ChangeRaceStart( i )
+		
+		c4state[i] = 0
+		client_cmd(i,"hud_centerid 0")  
+		auto_help(i)
+		add_money_bonus(i)
+		set_gravitychange(i)
+		add_redhealth_bonus(i)
+		SelectBotRace(i)
+		set_renderchange(i)
+		if (gRestart[i])
+		{
+			gRestart[i] = false
+			//return
+		}
+		if (gUpdate[i])
+		{
+			gUpdate[i] = false
+			//return
+		}
+		if (gHooked[i])
+		{
+			remove_hook(i)
+		}
+		if (get_pcvar_num(pMaxHooks) > 0)
+		{
+			gHooksUsed[i] = 0
+			statusMsg(0, "[Паутина] 0 из %d паутин использованно.", get_pcvar_num(pMaxHooks))
+		}
 		change_health(id,9999,0,"")
 		if(is_frozen[id] == 1)
 		{
