@@ -6871,7 +6871,7 @@ public award_item(id, itemnum)
 			player_item_id[id] = rannum
 			player_b_explode[id] = random_num(120,330)
 			player_ring[id]=2
-			show_hudmessage(id, "Вы нашли предмет: %s^nКогда вас убивают вы взрываетесь, нанося урон рагам. +5 сила",player_item_name[id])
+			show_hudmessage(id, "Вы нашли предмет: %s^nКогда вас убивают вы взрываетесь, нанося урон рагам. +5 выносливости",player_item_name[id])
 		}
 		case 62:
 		{
@@ -8704,7 +8704,7 @@ public Prethink_Blink(id)
 		}		
 		if (on_knife[id] && (c_blink[id] != 0))
 		{
-			client_print(id, print_console, "halflife_time() %f c_blink[id] %f raznost %f",halflife_time(), c_blink[id], (halflife_time()-c_blink[id]))
+			//client_print(id, print_console, "halflife_time() %f c_blink[id] %f raznost %f",halflife_time(), c_blink[id], (halflife_time()-c_blink[id]))
 			if(player_intelligence[id] == 0)
 			{
 				blink_timer = 32.0;
@@ -17352,7 +17352,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						new heal = floatround(damage2)
 						if(player_agility[id] > 0)
 						{
-							heal = floatround(player_damreduction[id]*heal)
+							//heal = floatround(player_damreduction[id]*heal)
 						}
 					
 						if (HasFlag(id,Flag_Moneyshield))
