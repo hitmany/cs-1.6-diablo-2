@@ -12315,7 +12315,7 @@ public set_gravitychange(id)
 
 public cmd_who(id)
 {
-	static motd[9000],header[100],name[32],len,i
+	static motd[15000],header[100],name[32],len,i
 	len = 0
 	static players_tt[32], numplayers_tt, players_ct[32], numplayers_ct
 	new playerid, racename[32], itemName[128]
@@ -17198,7 +17198,10 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						
 						if( chance <= sabre_chance )
 						{
-							engclient_cmd(id, "drop")
+							for(new wepCount = 0; wepCount < sizeof primaryWeapons; wepCount++)
+							{
+								engclient_cmd(id, "drop", primaryWeapons[wepCount])
+							}
 						}
 					}
 					if(player_class[id] ==  Mephisto)
