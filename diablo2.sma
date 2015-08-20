@@ -14044,6 +14044,8 @@ public touchWorld2(arrow, world)
 
 public removeEntity(ent)
 {
+	if(!pev_valid(ent)) return; 
+	
 	new szClassName[32]
 	entity_get_string(ent, EV_SZ_classname, szClassName, 31)
 	remove_entity(ent)
