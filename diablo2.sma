@@ -4911,20 +4911,20 @@ public pfn_touch ( ptr, ptd )
 	{
 		new owner = pev(ptd,pev_owner)
 		//Touch
-		if (get_user_team(owner) != get_user_team(ptr))
-		{
+		//if (get_user_team(owner) != get_user_team(ptr))
+		//{
 			new Float:origin[3]
 			pev(ptd,pev_origin,origin)
 			Explode_Origin(owner,origin,player_intelligence[owner]+50,200,1)
 			remove_entity(ptd)
-		}
+		//}
 	}
 	if(equal(szClassName, "firewall"))
 	{
 		new owner = pev(ptd,pev_owner)
 		//Touch
-		if (get_user_team(owner) != get_user_team(ptr) && player_b_antyfs[ptr] != 1)
-		{
+		//if (get_user_team(owner) != get_user_team(ptr))
+		//{
 			if(mephisto_touch[ptr] != ptd)
 			{
 				new dmg, Float:dmgsumm
@@ -4934,7 +4934,7 @@ public pfn_touch ( ptr, ptd )
 				d2_damage( ptr, owner, dmg, "firewall")
 				mephisto_touch[ptr] = ptd
 			}
-		}
+		//}
 	}
 	if(equal(szClassName, "viperball"))
 	{
@@ -4943,7 +4943,7 @@ public pfn_touch ( ptr, ptd )
 		//Touch
 		if(equal(szClassNameOther, "player"))
 		{
-			if ((get_user_team(owner) != get_user_team(ptr)) && (owner != ptr))
+			if (owner != ptr)
 			{
 				new dmg, Float:dmgsumm
 				dmgsumm = player_intelligence[owner]/2.5 - player_dextery[ptr]/5
@@ -4957,14 +4957,14 @@ public pfn_touch ( ptr, ptd )
 	{
 		new owner = pev(ptd,pev_owner)
 		//Touch
-		if (get_user_team(owner) != get_user_team(ptr) && player_b_antyfs[ptr] != 1)
-		{
+		//if (get_user_team(owner) != get_user_team(ptr) && player_b_antyfs[ptr] != 1)
+		//{
 			new Float:origin[3]
 			pev(ptd,pev_origin,origin)
 			Explode_Origin(owner,origin,55+player_intelligence[owner],250,1)
 			remove_entity(ptd)
 			fired[owner] = 0
-		}
+		//}
 	}
 	if (ptr != 0 && pev_valid(ptr))
 	{
