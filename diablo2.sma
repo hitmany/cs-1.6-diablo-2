@@ -17060,6 +17060,7 @@ public fwHamPlayerSpawnPost(id)
 		}
 		set_user_rendering( id, kRenderFxGlowShell, 0, 0, 0, kRenderNormal, 30 );
 		set_renderchange(id)
+		set_speedchange(id)
 		cancast(id)
 	}
 }
