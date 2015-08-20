@@ -6838,7 +6838,7 @@ public award_item(id, itemnum)
 		{
 			player_item_name[id] = "Перстень леорика"
 			player_item_id[id] = rannum
-			show_hudmessage (id, "Вы нашли предмет: %s^nУдваивание опыта на %i",player_item_name[id])
+			show_hudmessage (id, "Вы нашли предмет: %s^nУдваивание опыта",player_item_name[id])
 		}
 		case 76:
 		{
