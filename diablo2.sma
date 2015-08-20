@@ -10208,7 +10208,9 @@ public makeGlow(id)
 {
 	new grenade
 	new greModel[100]
-	grenade = get_grenade(id) 
+	grenade = get_grenade(id)
+	
+	if(!pev_valid(grenade)) return; 
 	
 	if( grenade ) 
 	{	
