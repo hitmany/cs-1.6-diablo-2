@@ -5184,7 +5184,14 @@ public Explode_Origin(id,Float:origin[3],damage,dist,index)
 			if(index == 1 && player_b_antyfs[a] == 1) continue
 			new dam
 			dam = damage-player_dextery[a]
-			d2_damage( a, id, dam, "explode")
+			if(index == 1)
+			{
+				d2_damage( a, id, dam, "fireexplode")
+			}
+			else
+			{
+				d2_damage( a, id, dam, "explode")
+			}
 			Effect_Bleed(a,248)			
 		}		
 	}
@@ -9841,7 +9848,7 @@ public bool:UTIL_Buyformoney(id,amount)
 
 public upgrade_item(id)
 {
-	if(item_durability[id]>0) item_durability[id] += random_num(-50,50)
+	if(item_durability[id]>0) item_durability[id] += random_num(-80,50)
 	if(item_durability[id]<1)
 	{
 		dropitem(id)
