@@ -371,6 +371,7 @@ new player_b_usingwind[33] = 1	//Is player using windwalk
 new player_b_froglegs[33] = 1	//Ability to hold down duck for 4 sec to frog-jump
 new player_b_silent[33]	= 1	//Is player silent
 new player_b_dagon[33] = 1	//Ability to nuke an opponent
+new player_b_flashlight[33] = 1 //Flashlight item
 new player_b_sniper[33] = 1	//Ability to kill in 1/sniper with scout
 new c_awp[33] = 1
 new player_b_m3master[33] = 1
@@ -3829,7 +3830,7 @@ public client_PreThink ( id )
 			} 
 	}
 	
-	if(flashlight[id] && flashbattery[id] && (get_cvar_num("flashlight_custom")) && (player_class[id] == Mag)) {
+	if(flashlight[id] && flashbattery[id] && (get_cvar_num("flashlight_custom")) && (player_class[id] == Mag || player_b_flashlight[id] == 1)) {
 		new num1, num2, num3
 		num1=random_num(0,2)
 		num2=random_num(-1,1)
@@ -4791,7 +4792,7 @@ public UpdateHUD()
 				{
 					Racename = "Падший шаман"
 				}
-				format(Msg,511,"Жизни: %i^nУровень: %i^nКласс: %s^nПредмет: %s^nПрочность: %i^nЗолото: %i",
+				format(Msg,511,"Жизни: %i^nУровень: %i^nКласс: %s^nПредмет: %s^nПрочность: %i^nЗолото: %i^nСайт: lpstrike.ru",
 				get_user_health(index),player_lvl[index],Racename,
 				player_item_name[index], item_durability[index],
 				player_gold[index])		
@@ -5291,6 +5292,7 @@ public reset_item_skills(id)
 	player_b_froglegs[id] = 0
 	player_b_silent[id] = 0
 	player_b_dagon[id] = 0		//Abliity to nuke opponents
+	player_b_flashlight[id] = 0
 	player_b_sniper[id] = 0		//Ability to kill faster with scout
 	player_b_jumpx[id] = 0
 	player_b_smokehit[id] = 0
@@ -5793,7 +5795,7 @@ public iteminfo(id)
 	
 	switch(player_item_id[id])
 	{
-		case 4,77:
+		case 4,47,77:
 		{
 			itemimage = "staff"
 		}
@@ -6082,6 +6084,12 @@ public iteminfo(id)
 		add(itemEffect,399,TempSkill)
 		add(itemEffect,399," множитель")
 		num_to_str(player_b_dagon[id],TempSkill,10)
+		add(itemEffect,399,TempSkill)
+	}
+	if (player_b_flashlight[id] > 0)
+	{
+		num_to_str(300+player_intelligence[id]*10,TempSkill,10)
+		add(itemEffect,399,"Фонарь подсвечивает невидимок.")
 		add(itemEffect,399,TempSkill)
 	}
 	if (player_b_sniper[id] > 0) 
@@ -6627,10 +6635,10 @@ public award_item(id, itemnum)
 		}
 		case 47:
 		{
-			player_item_name[id] = "Малый Усилетель Scout"
+			player_item_name[id] = "Посох Мага"
 			player_item_id[id] = rannum
-			player_b_sniper[id] = random_num(3,4)
-			show_hudmessage(id, "Вы нашли предмет: %s^nшанс 1/%i мгновенно убить из мухи(Scout).",player_item_name[id],player_b_sniper[id])	
+			player_b_flashlight[id] = 1
+			show_hudmessage(id, "Вы нашли предмет: %s^nФонарь подсвечивает невидимок.",player_item_name[id])	
 		}
 		case 48:
 		{
@@ -16597,17 +16605,17 @@ public create_itm(vid,kid,id_item)
 	pev(kid,pev_origin,killerOrigin);
 	new entit=create_entity("info_target")
 	origins[2]-=32.0
-	if( (abs(origins[0] - killerOrigin[0]) < 20.0) && (abs(origins[1] - killerOrigin[1]) < 20.0) ) //модуль числа
+	/*if( (abs(origins[0] - killerOrigin[0]) < 20.0) && (abs(origins[1] - killerOrigin[1]) < 20.0) ) //модуль числа
 	{
 		origins[0]+=40
 		origins[1]+=40
-	}
+	}*/
 	set_pev(entit,pev_origin,origins)
 	entity_set_model(entit,modelitem)
 	set_pev(entit,pev_classname,"przedmiot");
 
 	dllfunc(DLLFunc_Spawn, entit); 
-	set_pev(entit,pev_solid,SOLID_BBOX); 
+	set_pev(entit,pev_solid,SOLID_TRIGGER); 
 	set_pev(entit,pev_movetype,MOVETYPE_FLY);
 
 	engfunc(EngFunc_SetSize,entit,{-1.1, -1.1, -1.1},{1.1, 1.1, 1.1});
