@@ -2005,6 +2005,7 @@ public MYSQLX_SetDataForRace( id )
 			player_agility[id] = 0
 			player_dextery[id] = 0
 		}
+		player_damreduction[id] = damachange(50, player_agility[id], 2.0);
 		skilltree(id)
 	}
 
@@ -9861,7 +9862,7 @@ public bool:UTIL_Buyformoney(id,amount)
 
 public upgrade_item(id)
 {
-	if(item_durability[id]>0) item_durability[id] += random_num(-80,50)
+	if(item_durability[id]>0) item_durability[id] += random_num(-60,50)
 	if(item_durability[id]<1)
 	{
 		dropitem(id)
@@ -17373,7 +17374,8 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						new heal = floatround(damage2)
 						if(player_agility[id] > 0)
 						{
-							//heal = floatround(player_damreduction[id]*heal)
+							new reduce = floatround(player_damreduction[id]*float(heal))
+							if(reduce > 0) {heal=reduce;}
 						}
 					
 						if (HasFlag(id,Flag_Moneyshield))
@@ -17927,7 +17929,14 @@ stock Float:damachange(maxstat, skill, Float:multiplr) {
 		new Float:qwe = float(skill)/maxstat;
 		new Float:bonus = (2.0-floatpower(2.0, qwe))/(multiplr*4);
 		if(bonus < 0.0) bonus = 0.0;
-		return bonus+qwe/multiplr;
+		if(skill == maxstat)
+		{
+			return 0.5
+		}
+		else
+		{
+			return bonus+qwe/multiplr;
+		}		
 	}
 
 	return 0.0;
