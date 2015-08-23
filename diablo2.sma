@@ -5905,6 +5905,11 @@ public iteminfo(id)
 	
 	new TempSkill[11]					//There must be a smarter way
 	emit_sound(id,CHAN_STATIC,"diablo_lp/identify.wav", 1.0, ATTN_NORM, 0, PITCH_NORM)
+	if (player_item_id[id] == 75)
+	{
+		num_to_str(player_b_vampire[id],TempSkill,10)
+		add(itemEffect,399,"Удваивает ваш опыт.")
+	}
 	if (player_b_vampire[id] > 0) 
 	{
 		num_to_str(player_b_vampire[id],TempSkill,10)
@@ -6010,9 +6015,9 @@ public iteminfo(id)
 	if (player_b_fireshield[id] > 0) 
 	{
 		num_to_str(player_b_fireshield[id],TempSkill,10)
-		add(itemEffect,399,"Уменьшает ваше здоровье, 20 хп каждые 2 секунды.<br>")
-		add(itemEffect,399,"Вы не можете быть убиты Сферой Хаоса, Сферой Ада или Огненным вихрем.<br>")
 		add(itemEffect,399,"При нажатии Е активируется щит котрый наносит урон противнику.<br>")
+		add(itemEffect,399,"При активации вы теряете 10HP/сек.<br>")
+		add(itemEffect,399,"Вы не можете быть убиты Сферой Хаоса, Сферой Ада или Огненным вихрем.<br>")
 	}
 	if (player_b_meekstone[id] > 0) 
 	{
@@ -6851,7 +6856,7 @@ public award_item(id, itemnum)
 		}
 		case 75:
 		{
-			player_item_name[id] = "Перстень леорика"
+			player_item_name[id] = "Перстень Леорика"
 			player_item_id[id] = rannum
 			show_hudmessage (id, "Вы нашли предмет: %s^nУдваивание опыта",player_item_name[id])
 		}
