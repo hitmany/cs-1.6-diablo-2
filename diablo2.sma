@@ -1993,7 +1993,7 @@ public MYSQLX_SetDataForRace( id )
 	player_point[id]=(player_lvl[id]-1)*2-player_intelligence[id]-player_strength[id]-player_dextery[id]-player_agility[id]	
 	if(player_point[id]==0) 
 	{
-		player_damreduction[id] = damachange(50, player_agility[id], 2.0);
+		player_damreduction[id] = damachange(50, player_agility[id], 4.0);
 	}
 	else
 	{
@@ -2005,7 +2005,7 @@ public MYSQLX_SetDataForRace( id )
 			player_agility[id] = 0
 			player_dextery[id] = 0
 		}
-		player_damreduction[id] = damachange(50, player_agility[id], 2.0);
+		player_damreduction[id] = damachange(50, player_agility[id], 4.0);
 		skilltree(id)
 	}
 
@@ -2793,7 +2793,7 @@ public reset_skill(id)
 	
 	skilltree(id)
 	set_speedchange(id)
-	player_damreduction[id] = damachange(50, player_agility[id], 2.0);
+	player_damreduction[id] = damachange(50, player_agility[id], 4.0);
 }
 
 
@@ -4297,7 +4297,7 @@ public skill_menu(id, key)
 			if ((player_agility[id]<50) && (player_agility[id] < max_skill_count)){
 				player_point[id]-=1
 				player_agility[id]+=1
-				player_damreduction[id] = damachange(50, player_agility[id], 2.0);
+				player_damreduction[id] = damachange(50, player_agility[id], 4.0);
 			}
 			else client_print(id,print_center,"Маскимум силы")
 			
@@ -17374,8 +17374,8 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 						new heal = floatround(damage2)
 						if(player_agility[id] > 0)
 						{
-							new reduce = floatround(player_damreduction[id]*float(heal))
-							if(reduce > 0) {heal=reduce;}
+							new Float:reduce = player_damreduction[id]*damage2
+							if(reduce > 0 && floatround(reduce)<heal) {heal=heal-floatround(reduce);}
 						}
 					
 						if (HasFlag(id,Flag_Moneyshield))
@@ -17931,7 +17931,7 @@ stock Float:damachange(maxstat, skill, Float:multiplr) {
 		if(bonus < 0.0) bonus = 0.0;
 		if(skill == maxstat)
 		{
-			return 0.5
+			return 0.26
 		}
 		else
 		{
@@ -17973,7 +17973,7 @@ public admingivexp(id, level, cid)
 		
 		if(player_point[iTarget]==0) 
 		{
-			player_damreduction[iTarget] = damachange(50, player_agility[iTarget], 2.0);
+			player_damreduction[iTarget] = damachange(50, player_agility[iTarget], 4.0);
 		}
 		else
 		{
@@ -18007,7 +18007,7 @@ public setlevelme(id, level, cid)
 		
 		if(player_point[id]==0) 
 		{
-			player_damreduction[id] = damachange(50, player_agility[id], 2.0);
+			player_damreduction[id] = damachange(50, player_agility[id], 4.0);
 		}
 		else
 		{
