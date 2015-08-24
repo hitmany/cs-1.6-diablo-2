@@ -1752,9 +1752,16 @@ public MYSQLX_GetAllXP( id )
 	{
 		player_gold[id] = SQL_ReadResult( query, 0 );
 		player_TotalLVL[id] = SQL_ReadResult( query, 1 );
-		if(player_gold[id] > get_pcvar_num(cvar_max_gold))
+		
+		new max_gold = get_pcvar_num(cvar_max_gold)
+		if(player_vip[id]==1)
 		{
-			player_gold[id] = get_pcvar_num(cvar_max_gold)
+			max_gold=100
+		}
+		
+		if(player_gold[id] > max_gold)
+		{
+			player_gold[id] = max_gold
 		}
 	}
 	
@@ -4532,15 +4539,20 @@ public Give_Xp(id,amount)
 
 public Give_Gold(id,amount)
 {
-	if(player_vip[id]==1) amount=amount*2;
+	new max_gold = get_pcvar_num(cvar_max_gold)
+	if(player_vip[id]==1)
+	{
+		amount=amount*2;
+		max_gold=100
+	}
 	
-	if((player_gold[id]+amount) < get_pcvar_num(cvar_max_gold))
+	if((player_gold[id]+amount) < max_gold)
 	{
 		player_gold[id]+=amount
 	}
 	else
 	{
-		player_gold[id]=get_pcvar_num(cvar_max_gold)
+		player_gold[id]=max_gold
 	}
 }
 
