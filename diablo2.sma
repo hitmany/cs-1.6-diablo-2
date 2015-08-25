@@ -12234,7 +12234,7 @@ public set_renderchange(id)
 			if (player_class[id] == Ninja)
 			{
 				new inv_bonus = 255 - player_b_inv[id]
-					render = 13
+					render = 20
 				
 				if(player_b_inv[id]>0)
 				{
@@ -18887,7 +18887,7 @@ public mana4(id){
 	menu_additem(mana4,"\wОружие")
 	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
 	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
-	menu_additem(mana4,"\wСвиток портала \d[15 золота]")
+	//menu_additem(mana4,"\wСвиток портала \d[15 золота]")
 	menu_additem(mana4,"\wСвиток опыта \d[10 золота]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Назад в меню")
@@ -18943,7 +18943,7 @@ public mana4a(id, menu, item)
 				upgrade_item(id)
 			}
 		}
-		case 3:
+		/*case 3:
 		{
 			new koszt = 15;
 			if (player_gold[id]<koszt)
@@ -18967,8 +18967,8 @@ public mana4a(id, menu, item)
 				show_hudmessage(id, "Навести прицел на стену. Нажать Установить")
 				cmd_place_portal(id);
 			}
-		}
-		case 4:
+		}*/
+		case 3:
 		{
 			new koszt = 10;
 			if (player_gold[id]<koszt)
