@@ -4342,7 +4342,10 @@ public skill_menu(id, key)
 				{
 					player_point[id]-=1
 					player_dextery[id]+=1
-					skillCount=0
+				}
+				if(skillCount == 4)
+				{
+					skillCount = 0
 				}
 				skillCount++
 			}
@@ -12211,11 +12214,11 @@ public set_speedchange(id)
 	{
 		new speeds
 		if(player_class[id] == Ninja) speeds= 90 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == Assassin) speeds= 90 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == Baal) speeds= 110 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == Assassin) speeds= 50 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == Baal) speeds= 40 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Barbarian) speeds= -10 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == SabreCat) speeds= 100 + floatround(player_dextery[id]*1.3)
-		else if(player_class[id] == BloodRaven) speeds= 50 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == SabreCat) speeds= 40 + floatround(player_dextery[id]*1.3)
+		else if(player_class[id] == BloodRaven) speeds= 40 + floatround(player_dextery[id]*1.3)
 		else if(player_class[id] == Infidel) speeds= 110 + floatround(player_dextery[id]*1.3)
 		else speeds= floatround(player_dextery[id]*1.3)
 		if(player_b_speed[id] > 0) speeds+=player_b_speed[id]
@@ -12335,9 +12338,9 @@ public set_gravitychange(id)
 	{
 		if(player_class[id] == Ninja)
 		{
-			if(player_b_gravity[id]>6) set_user_gravity(id, 0.17)
-			else if(player_b_gravity[id]>3) set_user_gravity(id, 0.2)
-			else set_user_gravity(id, 0.25)
+			if(player_b_gravity[id]>6) set_user_gravity(id, 0.27)
+			else if(player_b_gravity[id]>3) set_user_gravity(id, 0.32)
+			else set_user_gravity(id, 0.35)
 		}
 		else
 		{
