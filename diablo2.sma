@@ -15280,34 +15280,28 @@ public diablo_lght(id)
 		new Float:origin[3];
 		get_user_origin( id, origin );
 		
-		new Float:vTargetOrigin[3], Float:iDistance, Float:dmg;
+		new Float:vTargetOrigin[3], Float:dmg;
 		new iTeam = get_user_team( id );
 		
-		new Float:br_range = 600.0
+		new br_range = 600
 		new targets
 		
-		for ( new i = 0; i < 32; i++ )
-		{
-		
-			if(!is_user_alive(i)) continue;
-			
-			// Get origin of target
-			get_user_origin( i, vTargetOrigin );
+		new victim , iBody; 
+		get_user_aiming( id , victim , iBody, br_range ); 
 
-			// Get distance in b/t target and caster
-			iDistance = get_distance_f( origin, vTargetOrigin );
-			
-			dmg = (player_intelligence[id] - player_dextery[i])/2.0 + 40.0
-			
-			if ( iDistance < br_range && iTeam != get_user_team( i ) && dmg > 0.0 && is_user_alive(i))
+		if ( 0 < victim <= g_MaxPlayers ) 
+		{ 			
+			if((cs_get_user_team(id) != cs_get_user_team(victim)))
 			{
-				puscBlyskawice(id, i, dmg);
-				targets++
+			
+				dmg = (player_intelligence[id] - player_dextery[victim])/2.0 + 40.0
+				
+				if ( dmg > 0.0 && is_user_alive(victim))
+				{
+					puscBlyskawice(id, victim, dmg);
+					diablo_lights[id]--
+				}
 			}
-		}
-		if(targets > 0 )
-		{
-			diablo_lights[id]--
 		}
 		else
 		{
