@@ -120,6 +120,24 @@ new round_status
 #define MAXPLAYERS 32
 #define MODELNAME_MAXLENGTH 32
 
+//portals
+#define xs_1_neg(%1)				%1 = -%1
+#define pev_normal					pev_vuser1
+#define pev_portal					pev_euser1
+#define PORTAL_WIDTH				65.0
+#define PORTAL_HEIGHT				85.0
+#define SURFACE_CHECK_NUM			5
+#define ADDITIONAL_DIVIDER			2.0
+#define	HULL_SHIFT					50.0
+#define ADD_UNITS					1.0
+#define TOUCHEBLE_WIDTH				3.0
+#define VEC_FLOOR					Float:{0.0, 0.0, 1.0}
+#define VEC_CEILING					Float:{0.0, 0.0, -1.0}
+#define IGNORE_ANGLE_DEG_FL			75.0
+#define IGNORE_ANGLE_DEG_CE			50.0
+#define IGNORE_SPEED				300.0
+#define WALL_CHECKER_DEBUG_LEVEL 	0
+
 new amxbasedir[64]
 new configsbasedir[64]
 
@@ -333,12 +351,44 @@ new player_class[33]
 new Float:player_huddelay[33]
 new player_premium[33] = 0  //Holds players premium
 new player_fallen_tr[33] = 0  //fallen shaman
+//portal
 new player_portal[33] = 0 //has portal
 new player_portals[33] = 0 //how much portals setted
 new player_portal_infotrg_1[33] = 0 //portal1
 new player_portal_infotrg_2[33] = 0 //portal2
 new player_portal_sprite_1[33] = 0
 new player_portal_sprite_2[33] = 0
+new Float:Invalid_Enitites[2048]
+new const Invalid_Entities_Names[][] = 
+{
+	"func_wall",
+	"func_door",
+	"func_door_rotating",
+	"func_breakable",
+	"func_ladder",
+	"func_conveyor",
+	"info_target"
+}
+enum _:Portal_Properties
+{
+	Portal_Start,
+	Portal_End,
+	Portal_Start_Color,
+	Portal_End_Color
+}
+enum _:Is_Portal_Approximate_Origin
+{
+	Portal_On_Floor = 1,
+	Portal_On_Ceiling
+}
+new const Float:fUnstuckSize[][3] = {
+	{0.0, 0.0, 2.0}, {0.0, 0.0, -2.0}, {0.0, 2.0, 0.0}, {0.0, -2.0, 0.0}, {2.0, 0.0, 0.0}, {-2.0, 0.0, 0.0}, {-2.0, 2.0, 2.0}, {2.0, 2.0, 2.0}, {2.0, -2.0, 2.0}, {2.0, 2.0, -2.0}, {-2.0, -2.0, 2.0}, {2.0, -2.0, -2.0}, {-2.0, 2.0, -2.0}, {-2.0, -2.0, -2.0},
+	{0.0, 0.0, 4.0}, {0.0, 0.0, -4.0}, {0.0, 4.0, 0.0}, {0.0, -4.0, 0.0}, {4.0, 0.0, 0.0}, {-4.0, 0.0, 0.0}, {-4.0, 4.0, 4.0}, {4.0, 4.0, 4.0}, {4.0, -4.0, 4.0}, {4.0, 4.0, -4.0}, {-4.0, -4.0, 4.0}, {4.0, -4.0, -4.0}, {-4.0, 4.0, -4.0}, {-4.0, -4.0, -4.0},
+	{0.0, 0.0, 6.0}, {0.0, 0.0, -6.0}, {0.0, 6.0, 0.0}, {0.0, -6.0, 0.0}, {6.0, 0.0, 0.0}, {-6.0, 0.0, 0.0}, {-6.0, 6.0, 6.0}, {6.0, 6.0, 6.0}, {6.0, -6.0, 6.0}, {6.0, 6.0, -6.0}, {-6.0, -6.0, 6.0}, {6.0, -6.0, -6.0}, {-6.0, 6.0, -6.0}, {-6.0, -6.0, -6.0},
+	{0.0, 0.0, 8.0}, {0.0, 0.0, -8.0}, {0.0, 8.0, 0.0}, {0.0, -8.0, 0.0}, {8.0, 0.0, 0.0}, {-8.0, 0.0, 0.0}, {-8.0, 8.0, 8.0}, {8.0, 8.0, 8.0}, {8.0, -8.0, 8.0}, {8.0, 8.0, -8.0}, {-8.0, -8.0, 8.0}, {8.0, -8.0, -8.0}, {-8.0, 8.0, -8.0}, {-8.0, -8.0, -8.0},
+	{0.0, 0.0, 10.0}, {0.0, 0.0, -10.0}, {0.0, 10.0, 0.0}, {0.0, -10.0, 0.0}, {10.0, 0.0, 0.0}, {-10.0, 0.0, 0.0}, {-10.0, 10.0, 10.0}, {10.0, 10.0, 10.0}, {10.0, -10.0, 10.0}, {10.0, 10.0, -10.0}, {-10.0, -10.0, 10.0}, {10.0, -10.0, -10.0}, {-10.0, 10.0, -10.0}, {-10.0, -10.0, -10.0}
+}
+//
 new player_infidel[33]
 new Float:g_Knockback[33][3] // velocity from your knockback position
 
@@ -1187,6 +1237,9 @@ public plugin_init()
 	server_cmd("exec %s/diablo/main.cfg", configsbasedir) 
 	sql_start()
 	//set_task(1.0, "AutoCheck_Afk", 0, "", 0, "b")
+	
+	//portal
+	set_task(0.5, "check_invalid_entities")
 	
 	return PLUGIN_CONTINUE  
 }
@@ -4320,34 +4373,28 @@ public skill_menu(id, key)
 		}
 		case 4: 
 		{	
-			new skillCount = 1
 			while(player_point[id] > 0)
 			{
-				if(skillCount == 1 && player_intelligence[id] < max_skill_count)
+				if(player_intelligence[id] < max_skill_count)
 				{
 					player_point[id]-=1
 					player_intelligence[id]+=1
 				}
-				if(skillCount == 2 && player_strength[id] < max_skill_count)
+				if((player_strength[id] < max_skill_count) && (player_point[id] > 0))
 				{
 					player_point[id]-=1
 					player_strength[id]+=1
 				}
-				if(skillCount == 3 && player_agility[id] < max_skill_count)
+				if((player_agility[id] < max_skill_count) && (player_point[id] > 0))
 				{
 					player_point[id]-=1
 					player_agility[id]+=1
 				}
-				if(skillCount == 4 && player_dextery[id] < max_skill_count)
+				if((player_dextery[id] < max_skill_count) && (player_point[id] > 0))
 				{
 					player_point[id]-=1
 					player_dextery[id]+=1
 				}
-				if(skillCount == 4)
-				{
-					skillCount = 0
-				}
-				skillCount++
 			}
 		}
 	}
@@ -13520,7 +13567,7 @@ stock bool:findemptyloc(ent, Float:radius)
 	
 	while(num <= 100)
 	{
-		if(is_hull_vacant(origin))
+		if(is_hull_vacant(origin, HULL_HUMAN, owner))
 		{
 			g_body_origin[owner][0] = origin[0]
 			g_body_origin[owner][1] = origin[1]
@@ -13539,16 +13586,6 @@ stock bool:findemptyloc(ent, Float:radius)
 		}
 	}
 	return found
-}
-
-stock bool:is_hull_vacant(const Float:origin[3])
-{
-	new tr = 0
-	engfunc(EngFunc_TraceHull, origin, origin, 0, HULL_HUMAN, 0, tr)
-	if(!get_tr2(tr, TR_StartSolid) && !get_tr2(tr, TR_AllSolid) && get_tr2(tr, TR_InOpen))
-		return true
-	
-	return false
 }
  
 
@@ -15399,16 +15436,60 @@ public set_portal(id)
 	if(!is_user_alive(id))
 	{
 		client_print(id, print_center, "ОШИБКА: Выйдите из зрителей.");
+		return PLUGIN_CONTINUE;
 	}
 	new g_ent,g_ent2
 	new Float:g_aim_origin[3]
 	new Float:g_ent_angles[3]
 	
-	set_pev(g_ent, pev_scale, 1.0 )
-	g_ent = create_entity("info_target")
-	g_ent2 = create_entity("env_sprite")
-	entity_set_string(g_ent, EV_SZ_classname, "iportal")
+	static Float:normal[3]
+	fm_get_aim_origin_normal(id, g_aim_origin, normal)
+	normal[0] *= -1.0
+	normal[1] *= -1.0
+	//normal[2] *= -1.0
+	vector_to_angle(normal, g_ent_angles)
+	
+	new Float:fOrigin[3], Float:fNormal[3], Float:fMins[3], Float:fMaxs[3]
+	if(!get_corrected_portal_origin(id, fOrigin, fNormal, fMins, fMaxs))
+	{
+		client_print(id, print_center, "ОШИБКА: Портал нельзя здесь ставить.");
+		cmd_place_portal(id)
+		return PLUGIN_CONTINUE;
+	}
+	
+	g_ent = engfunc(EngFunc_CreateNamedEntity, engfunc(EngFunc_AllocString, "info_target"))
+	set_pev(g_ent, pev_classname, "iportal")
 	engfunc(EngFunc_SetModel, g_ent, "models/portal/portal.mdl")
+	set_pev(g_ent, pev_solid, SOLID_TRIGGER)
+	set_pev(g_ent, pev_movetype, MOVETYPE_FLY)
+	set_pev(g_ent, pev_portal, 1)
+	
+	new ent = -1
+	while((ent = find_ent_in_sphere(ent, fOrigin, floatmax(PORTAL_HEIGHT, PORTAL_WIDTH)/2.0)))
+	{
+		if(pev(ent, pev_portal) && (ent != player_portal_infotrg_1[id] || ent != player_portal_infotrg_2[id] ))
+		{
+			client_print(id, print_center, "ОШИБКА: Портал нельзя здесь ставить.");
+			cmd_place_portal(id)
+			return PLUGIN_CONTINUE;
+		}
+	}
+	
+	set_pev(g_ent, pev_normal, fNormal)
+	
+	vector_to_angle(fNormal, fNormal)
+	
+	engfunc(EngFunc_SetSize, g_ent, fMins, fMaxs)
+	set_pev(g_ent, pev_origin, fOrigin)
+	set_pev(g_ent, pev_angles, fNormal)
+	set_pev(g_ent, pev_skin, 1)
+	
+	
+	//set_pev(g_ent, pev_scale, 1.0 )
+	//g_ent = create_entity("info_target")
+	g_ent2 = create_entity("env_sprite")
+	//entity_set_string(g_ent, EV_SZ_classname, "iportal")
+	//engfunc(EngFunc_SetModel, g_ent, "models/portal/portal.mdl")
 	entity_set_string(g_ent2, EV_SZ_classname, "2iportal")
 	if(get_user_team(id) == 1)
 	{
@@ -15426,33 +15507,35 @@ public set_portal(id)
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
 	}
-	set_pev(g_ent,pev_solid,SOLID_TRIGGER)
-	set_pev(g_ent,pev_movetype,MOVETYPE_FLY)
-	set_pev(g_ent,pev_skin,1)
+	//set_pev(g_ent,pev_solid,SOLID_TRIGGER)
+	//set_pev(g_ent,pev_movetype,MOVETYPE_FLY)
+	//set_pev(g_ent,pev_skin,1)
 	
-	static Float:normal[3]
-	fm_get_aim_origin_normal(id, g_aim_origin, normal)
-	normal[0] *= -1.0
-	normal[1] *= -1.0
-	normal[2] *= -1.0
-	vector_to_angle(normal, g_ent_angles)
-	
-	if(!checkPlace(g_aim_origin,id) || !validWall(g_aim_origin,g_ent_angles))
+	/*if(!checkPlace(g_aim_origin,id) || !validWall(g_aim_origin,g_ent_angles))
 	{	
 		remove_entity(g_ent);
 		remove_entity(g_ent2);
 		client_print(id, print_center, "ОШИБКА: Поставьте портал на ровной стене!^n Или порталу не хватает свободного места");
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
-	}
+	}*/
 	
-	new distToBomb = checkBombPlace(g_aim_origin)
+	new distToBomb = checkBombPlace(fOrigin)
 	if(distToBomb != -1)
 	{	
 		remove_entity(g_ent);
 		remove_entity(g_ent2);
 		set_hudmessage(0, 255, 0, -1.0, 0.40, 0, 2.0, 2.0, 0.2, 0.3, 5)
 		show_hudmessage(id, "[ОШИБКА] Подальше от бомбы на %d",distToBomb)
+		cmd_place_portal(id)
+		return PLUGIN_CONTINUE;
+	}
+	if(checkSpawn(fOrigin) != -1)
+	{	
+		remove_entity(g_ent);
+		remove_entity(g_ent2);
+		set_hudmessage(0, 255, 0, -1.0, 0.40, 0, 2.0, 2.0, 0.2, 0.3, 5)
+		show_hudmessage(id, "[ОШИБКА] Подальше от Спавна")
 		cmd_place_portal(id)
 		return PLUGIN_CONTINUE;
 	}
@@ -15471,8 +15554,8 @@ public set_portal(id)
 		player_portal_infotrg_2[id] = g_ent;
 		player_portal_sprite_2[id] = g_ent2;
 	}
-	engfunc(EngFunc_SetOrigin, g_ent, g_aim_origin)
-	set_pev(g_ent, pev_angles, g_ent_angles)
+	//engfunc(EngFunc_SetOrigin, g_ent, g_aim_origin)
+	//set_pev(g_ent, pev_angles, g_ent_angles)
 	engfunc(EngFunc_SetOrigin, g_ent2, g_aim_origin)
 	set_pev(g_ent2, pev_angles, g_ent_angles)
 	set_rendering(g_ent, kRenderFxNone, 0, 0, 0, kRenderTransAlpha, 0 )
@@ -15484,29 +15567,38 @@ public set_portal(id)
 	set_pev(g_ent2, pev_angles, g_ent_angles)
 	entity_set_edict(g_ent,EV_ENT_owner, id)
 	entity_set_edict(g_ent2,EV_ENT_owner, id)
-	entity_set_string(g_ent, EV_SZ_classname, "iportal")
+	//entity_set_string(g_ent, EV_SZ_classname, "iportal")
 	set_pev(g_ent,pev_owner,id);
 	set_pev(g_ent2,pev_owner,id);
 	
-	new Float:fOldNormal[3];
-	xs_vec_copy(g_ent_angles, fOldNormal);
-	vector_to_angle(g_ent_angles, g_ent_angles);
-	set_pev(g_ent2, pev_vuser1, fOldNormal);
+	//new Float:fOldNormal[3];
+	//xs_vec_copy(g_ent_angles, fOldNormal);
+	//vector_to_angle(g_ent_angles, g_ent_angles);
+	//set_pev(g_ent2, pev_vuser1, fOldNormal);
 	emit_sound(g_ent, CHAN_VOICE, "diablo_lp/portalcast.wav", VOL_NORM, ATTN_NORM, 0, PITCH_NORM)
-	new Float:fMins[3],Float:fMaxs[3];
-	pev(g_ent, pev_mins, fMins)
-	pev(g_ent, pev_maxs, fMaxs)
-	fMins[0] = fMins[0] + 0.15;
-	fMins[1] = fMins[1] + 0.15;
-	fMins[2] = fMins[2] + 0.15;
+	//pev(g_ent, pev_mins, fMins)
+	//pev(g_ent, pev_maxs, fMaxs)
+	//fMins[0] = fMins[0] + 0.15;
+	//fMins[1] = fMins[1] + 0.15;
+	//fMins[2] = fMins[2] + 0.15;
 	
-	fMaxs[0] = fMaxs[0] + 0.15;
-	fMaxs[1] = fMaxs[1] + 0.15;
-	fMaxs[2] = fMaxs[2] + 0.15;
-	engfunc(EngFunc_SetSize, g_ent,fMins, fMaxs)
+	//fMaxs[0] = fMaxs[0] + 0.15;
+	//fMaxs[1] = fMaxs[1] + 0.15;
+	//fMaxs[2] = fMaxs[2] + 0.15;
+	//engfunc(EngFunc_SetSize, g_ent,fMins, fMaxs)
 	
 	
 	return PLUGIN_CONTINUE;
+}
+
+public check_invalid_entities()
+{
+	for(new i; i<sizeof Invalid_Entities_Names; i++)
+	{
+		new ent = -1
+		while((ent = find_ent_by_class(ent, Invalid_Entities_Names[i])))
+			Invalid_Enitites[ent] = 1.0
+	}
 }
 
 parseAngle(id, in, out)
@@ -15805,9 +15897,38 @@ public Restart()
 	}
 }
 
-public portal_touch(ptr,id)
+public portal_touch(portal_id, toucher)
 {
-	if(is_user_alive(id))
+	static classname[32]
+	
+	if(Invalid_Enitites[toucher] || Invalid_Enitites[portal_id] > get_gametime() || toucher == 0)
+		return HAM_IGNORED
+	
+	pev(portal_id, pev_classname, classname, charsmax(classname))
+	if(equali(classname, "iportal"))
+	{
+		Invalid_Enitites[portal_id] = get_gametime()+0.01
+		
+		static portal_out
+		if(player_portal_infotrg_1[toucher] == portal_id)
+		{
+			portal_out = player_portal_infotrg_2[toucher]
+		}
+		if(player_portal_infotrg_1[toucher] == portal_id)
+		{
+			portal_out = player_portal_infotrg_1[toucher]
+		}
+		if(portal_out == 0)
+		{
+			return HAM_IGNORED
+		}
+
+		if(~pev(portal_out,pev_effects) & EF_NODRAW)
+			send_to(toucher,portal_out,portal_id)
+	}
+	
+        return HAM_IGNORED
+	/*if(is_user_alive(id))
 	{
 		static szClassName[32]
 		pev(ptr, pev_classname, szClassName, sizeof szClassName - 1)
@@ -15876,7 +15997,180 @@ public portal_touch(ptr,id)
 			}
 		}
 	}
-	return PLUGIN_HANDLED
+	return PLUGIN_HANDLED*/
+}
+
+public checkstuck(id, Float:fVelocity[3])
+{
+	new
+	Float:origin[3], Float:mins[3], Float:vec[3],
+	hull, i
+
+	pev(id, pev_origin, origin)
+	hull = pev(id, pev_flags) & FL_DUCKING ? HULL_HEAD : HULL_HUMAN
+	if(!is_hull_vacant(origin, hull, id) && pev(id, pev_movetype) != MOVETYPE_NOCLIP && ~(pev(id, pev_solid) & SOLID_NOT))
+	{
+		pev(id, pev_mins, mins)
+		vec[2] = origin[2]
+		for(i=0; i < sizeof fUnstuckSize; ++i)
+		{
+			vec[0] = origin[0] - mins[0] * fUnstuckSize[i][0]
+			vec[1] = origin[1] - mins[1] * fUnstuckSize[i][1]
+			vec[2] = origin[2] - mins[2] * fUnstuckSize[i][2]
+			if(is_hull_vacant(vec, hull, id))
+			{
+				set_pev(id, pev_origin, vec)
+				set_pev(id, pev_velocity, fVelocity)
+				break
+			}
+		}
+	}
+}
+
+// Функция расчёта местоположения, углов и ускорения энтитии после прохождения через портал
+public send_to(id, entPortalOut, entPortalIn)
+{
+	// ----------------------------- эти переменные не перезаписываются на протяжении выполнения функции --------------------------------
+	new Float:fPortalAngles[Portal_Properties][3],
+		Float:fPortalNormal[Portal_Properties][3],
+		Float:fPortalEndOrigin[3],
+		bitPortalAprxmOrig[Portal_Properties],
+		Float:fEntAngles[3],
+		Float:fEntVelocity[3]
+	
+	pev(entPortalIn,	pev_angles, fPortalAngles[Portal_Start])
+	pev(entPortalOut,	pev_angles, fPortalAngles[Portal_End])
+	pev(entPortalIn,	pev_normal, fPortalNormal[Portal_Start])
+	pev(entPortalOut,	pev_normal, fPortalNormal[Portal_End])
+	pev(entPortalOut,	pev_origin, fPortalEndOrigin)
+	pev(id, pev_v_angle, fEntAngles)
+	pev(id, pev_velocity, fEntVelocity)
+	
+	if(xs_vec_angle(VEC_FLOOR, fPortalNormal[Portal_Start]) < IGNORE_ANGLE_DEG_FL)	bitPortalAprxmOrig[Portal_Start] |= Portal_On_Floor	// [0] портал на вход примерно на полу
+	if(xs_vec_angle(VEC_CEILING, fPortalNormal[Portal_Start]) < IGNORE_ANGLE_DEG_CE)bitPortalAprxmOrig[Portal_Start] |= Portal_On_Ceiling
+	if(xs_vec_angle(VEC_FLOOR, fPortalNormal[Portal_End]) < IGNORE_ANGLE_DEG_FL)	bitPortalAprxmOrig[Portal_End] |= Portal_On_Floor	// [1] портал на выход премерно на потолке
+	if(xs_vec_angle(VEC_CEILING, fPortalNormal[Portal_End]) < IGNORE_ANGLE_DEG_CE)	bitPortalAprxmOrig[Portal_End] |= Portal_On_Ceiling
+	// -----------------------------------------------------------------------------------------------------------------------------------
+	
+	//------------------------------ Расчёт местоположения ------------------------
+	
+	new Float:fAddVec[3]
+	if(fPortalAngles[Portal_End][0] > 0)
+		angle_vector(fPortalAngles[Portal_End], ANGLEVECTOR_UP, fAddVec)
+	else 
+	{
+		angle_vector(fPortalAngles[Portal_End], ANGLEVECTOR_FORWARD, fAddVec)
+		xs_vec_mul_scalar(fAddVec, 45.0, fAddVec)
+	}
+	
+	new Float:fOutOrigin[3]
+	xs_vec_add(fAddVec, fPortalEndOrigin, fOutOrigin)
+	
+	if(fPortalAngles[Portal_End][0] > 0)
+	{
+		if(fPortalAngles[Portal_End][0] > 180)
+			fOutOrigin[2] -= 77.0 + TOUCHEBLE_WIDTH
+		else
+			fOutOrigin[2] += 77.0 + TOUCHEBLE_WIDTH
+	}
+	else
+		fOutOrigin[2] += 5.0 + TOUCHEBLE_WIDTH
+	
+	set_pev(id, pev_origin, fOutOrigin)
+
+	//-------------------------------- Теперь углы ---------------------------------
+	
+	new Float:fOutAngles[3], Float:fSpeed = vector_length(fEntVelocity)
+	
+	if(bitPortalAprxmOrig[Portal_End] & (Portal_On_Floor | Portal_On_Ceiling) && fSpeed > IGNORE_SPEED && !xs_vec_equal(fPortalNormal[Portal_End], VEC_FLOOR) && !xs_vec_equal(fPortalNormal[Portal_End], VEC_CEILING))
+	{
+		fOutAngles[0] = fEntAngles[0]
+		fOutAngles[1] = fPortalAngles[Portal_End][1]
+		fOutAngles[2] = fPortalAngles[Portal_End][2]
+	}
+	else if((bitPortalAprxmOrig[Portal_Start] & (Portal_On_Floor | Portal_On_Ceiling) && bitPortalAprxmOrig[Portal_End] & (Portal_On_Floor | Portal_On_Ceiling)) ||
+			(~bitPortalAprxmOrig[Portal_Start] && bitPortalAprxmOrig[Portal_End] & (Portal_On_Floor | Portal_On_Ceiling)))
+		xs_vec_copy(fEntAngles, fOutAngles)
+	else if(bitPortalAprxmOrig[Portal_Start] & (Portal_On_Floor | Portal_On_Ceiling) && ~bitPortalAprxmOrig[Portal_End])
+		xs_vec_copy(fPortalAngles[Portal_End], fOutAngles)
+	else
+	{
+		fOutAngles[0] = fEntAngles[0]
+		fOutAngles[1] = fEntAngles[1] + 180.0 + fPortalAngles[Portal_End][1] - fPortalAngles[Portal_Start][1]
+		fOutAngles[2] = fEntAngles[2]
+	}
+	
+	set_pev(id, pev_angles, fOutAngles)
+	set_pev(id, pev_v_angle, fOutAngles)
+	set_pev(id, pev_fixangle, 1)
+	
+	//---------------------------- Ну и конечно же ускорение -----------------------
+	
+	new Float:fOutVelocity[3]
+	
+	if(	(bitPortalAprxmOrig[Portal_Start] & Portal_On_Floor && bitPortalAprxmOrig[Portal_End] & Portal_On_Ceiling) ||
+		(bitPortalAprxmOrig[Portal_Start] & Portal_On_Ceiling && bitPortalAprxmOrig[Portal_End] & Portal_On_Floor) )
+	{
+		xs_vec_copy(fEntVelocity, fOutVelocity)
+		set_pev(id, pev_velocity, fOutVelocity)
+		checkstuck(id, fOutVelocity)
+		return
+	}
+	
+	if(	(bitPortalAprxmOrig[Portal_Start] & Portal_On_Floor && bitPortalAprxmOrig[Portal_End] & Portal_On_Floor) || 
+		(bitPortalAprxmOrig[Portal_Start] & Portal_On_Ceiling && bitPortalAprxmOrig[Portal_End] & Portal_On_Ceiling))
+	{
+		if(fSpeed < IGNORE_SPEED)
+		{
+			xs_vec_copy(fEntVelocity, fOutVelocity)
+			xs_1_neg(fOutVelocity[2])
+		}
+		else
+			xs_vec_mul_scalar(fPortalNormal[Portal_End], fSpeed, fOutVelocity)
+		set_pev(id, pev_velocity, fOutVelocity)
+		checkstuck(id, fOutVelocity)
+		return
+	}
+	else if(bitPortalAprxmOrig[Portal_Start] & (Portal_On_Floor | Portal_On_Ceiling) && ~bitPortalAprxmOrig[Portal_End])
+	{
+		xs_vec_mul_scalar(fPortalNormal[Portal_End], fSpeed, fOutVelocity)
+		set_pev(id, pev_velocity, fOutVelocity)
+		checkstuck(id, fOutVelocity)
+		return
+	}
+	else if(bitPortalAprxmOrig[Portal_End] & (Portal_On_Floor | Portal_On_Ceiling) && ~bitPortalAprxmOrig[Portal_Start])
+	{
+		if(fSpeed < IGNORE_SPEED)
+			xs_vec_copy(fEntVelocity, fOutVelocity)
+		else
+			xs_vec_mul_scalar(fPortalNormal[Portal_End], fSpeed, fOutVelocity)
+		set_pev(id, pev_velocity, fOutVelocity)
+		checkstuck(id, fOutVelocity)
+		return
+	}
+	
+	new Float:fNormalVelocity[3]
+	xs_vec_normalize(fEntVelocity, fNormalVelocity)
+	
+	new Float:fReflectNormal[3]
+	xs_vec_add(fPortalNormal[Portal_Start], fPortalNormal[Portal_End], fReflectNormal)
+	
+	xs_vec_normalize(fReflectNormal, fReflectNormal)
+	xs_vec_reflect(fNormalVelocity, fReflectNormal, fOutVelocity)
+	xs_1_neg(fOutVelocity[2])
+	xs_vec_neg(fOutVelocity, fOutVelocity)
+	xs_vec_reflect(fOutVelocity, fPortalNormal[Portal_End], fOutVelocity)
+	
+	if(vector_length(fOutVelocity) <= 0)
+		xs_vec_copy(fNormalVelocity, fOutVelocity)
+	
+	xs_vec_mul_scalar(fOutVelocity, fSpeed, fOutVelocity)
+	
+	if(vector_length(fOutVelocity) <= 0)			// Анти "PM Got a NaN velocity i"
+		xs_vec_set(fOutVelocity, 0.1, 0.1, 0.1)
+	
+	set_pev(id, pev_velocity, fOutVelocity)
+	checkstuck(id, fOutVelocity)
 }
 
 bool:traceToWall(const Float:fOrigin[3], const Float:fVec[3]){
@@ -15933,48 +16227,344 @@ stock checkBombPlace(Float:fOrigin[3])
 	return -1;
 }
 
-stock bool:validWall(const Float:fOrigin[3], Float:fNormal[3], Float:width=56.0, Float:height = 84.0)
+stock checkSpawn(Float:fOrigin[3])
 {
-		new Float:fInvNormal[3];
-		xs_vec_neg(fNormal, fInvNormal);
+	new entitiesList[12];
+	new entitiesCount;
+	new entsFound[2];
+
+	if(find_sphere_class(0, "info_player_start", 1000.0, entsFound, 1, fOrigin ) > 0)
+	{
+		return 1;
+	}
+	if(find_sphere_class(0, "info_player_deathmatch", 1000.0, entsFound, 1, fOrigin ) > 0)
+	{
+		return 1;
+	}
+	
+	
+	return -1;
+}
+
+// wall checker
+public get_corrected_portal_origin(id, Float:fOutPointFSet[3], Float:fOrigWallNormal[3], Float:fMinsO[3], Float:fMaxsO[3])//, Float:fSize[3])
+{
+	new Float:fWallNormal[3]
+	get_wall_normal(id, fWallNormal)
+	xs_vec_copy(fWallNormal, fOrigWallNormal)
+	
+	new Float:fWallAngles[3]
+	vector_to_angle(fWallNormal, fWallAngles)
+	
+	new Float:fUpNormal[3], Float:fRightNormal[3]
+	angle_vector(fWallAngles, ANGLEVECTOR_UP, fUpNormal)
+	angle_vector(fWallAngles, ANGLEVECTOR_RIGHT, fRightNormal)
+	
+	new Float:fAimOrigin[3]
+	fm_get_aim_origin(id, fAimOrigin)
+	xs_vec_copy(fAimOrigin, fOutPointFSet)
+	
+	new Float:fAddUnits[3]
+	xs_vec_mul_scalar(fOrigWallNormal, 1.0, fAddUnits)
+	xs_vec_add(fAddUnits, fAimOrigin, fAimOrigin)
+	
+	xs_1_neg(fUpNormal[2])
+	
+	new Float:fUpLeftPoint[3], Float:fUpRightPoint[3], Float:fDownLeftPoint[3], Float:fDownRightPoint[3]
+	xs_vec_mul_scalar(fUpNormal, PORTAL_HEIGHT/2, fUpNormal)
+	xs_vec_mul_scalar(fRightNormal, PORTAL_WIDTH/2, fRightNormal)
+	
+	//1
+	xs_vec_add(fUpNormal, fRightNormal, fUpRightPoint)
+	xs_vec_add(fUpRightPoint, fAimOrigin, fUpRightPoint)
+	
+	//2
+	xs_vec_neg(fRightNormal, fRightNormal)
+	xs_vec_add(fUpNormal, fRightNormal, fUpLeftPoint)
+	xs_vec_add(fUpLeftPoint, fAimOrigin, fUpLeftPoint)
+	
+	//3
+	xs_vec_neg(fUpNormal, fUpNormal)
+	xs_vec_add(fUpNormal, fRightNormal, fDownLeftPoint)
+	xs_vec_add(fDownLeftPoint, fAimOrigin, fDownLeftPoint)
+	
+	//4
+	xs_vec_neg(fRightNormal, fRightNormal)
+	xs_vec_add(fUpNormal, fRightNormal, fDownRightPoint)
+	xs_vec_add(fDownRightPoint, fAimOrigin, fDownRightPoint)
+	//
+	
+	xs_vec_neg(fWallNormal, fWallNormal)
+	
+	new isUpRightPoint, isUpLeftPoint, isDownLeftPoint, isDownRightPoint
+	isUpRightPoint = trace_to_wall(fUpRightPoint, fWallNormal)
+	isUpLeftPoint = trace_to_wall(fUpLeftPoint, fWallNormal)
+	isDownLeftPoint = trace_to_wall(fDownLeftPoint, fWallNormal)
+	isDownRightPoint = trace_to_wall(fDownRightPoint, fWallNormal)
+	
+	if(isUpRightPoint && isUpLeftPoint && isDownLeftPoint && isDownRightPoint){	}
+	else if(isUpRightPoint && isUpLeftPoint && !isDownLeftPoint && !isDownRightPoint)
+	{
+		new Float:check_step = (PORTAL_HEIGHT/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		xs_vec_normalize(fUpNormal, fUpNormal)	// down
+		xs_vec_neg(fUpNormal, fUpNormal)		// up
 		
-		new Float:fPoint[3];
-		xs_vec_add(fOrigin, fNormal, fPoint);
+		if(!check_wall_in_a_cycle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fUpNormal, fWallNormal, check_step))
+			return 0
+	}
+	else if(!isUpRightPoint && !isUpLeftPoint && isDownLeftPoint && isDownRightPoint)
+	{
+		new Float:check_step = (PORTAL_HEIGHT/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		xs_vec_normalize(fUpNormal, fUpNormal)	// down
 		
-		new Float:fNormalUp[3];
-		new Float:fNormalRight[3];
-		vector_to_angle(fNormal, fNormalUp);
+		if(!check_wall_in_a_cycle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fUpNormal, fWallNormal, check_step))
+			return 0
+	}
+	else if(isUpRightPoint && isDownRightPoint && !isUpLeftPoint && !isDownLeftPoint)
+	{
+		new Float:check_step = (PORTAL_WIDTH/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		xs_vec_normalize(fRightNormal, fRightNormal)	// right
 		
-		fNormalUp[0] = -fNormalUp[0];
+		if(!check_wall_in_a_cycle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fRightNormal, fWallNormal, check_step))
+			return 0
+	}
+	else if(!isUpRightPoint && !isDownRightPoint && isUpLeftPoint && isDownLeftPoint)
+	{
+		new Float:check_step = (PORTAL_WIDTH/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		xs_vec_normalize(fRightNormal, fRightNormal)	// right
+		xs_vec_neg(fRightNormal, fRightNormal)			// left
 		
-		angle_vector(fNormalUp, ANGLEVECTOR_RIGHT, fNormalRight);
-		angle_vector(fNormalUp, ANGLEVECTOR_UP, fNormalUp);
+		check_wall_in_a_cycle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fRightNormal, fWallNormal, check_step)
+	}
+	else if((!isUpRightPoint && isDownRightPoint && !isUpLeftPoint && !isDownLeftPoint) ||
+			(isUpRightPoint && isDownRightPoint && !isUpLeftPoint && isDownLeftPoint))
+	{
+		new Float:check_step_n1 = (PORTAL_WIDTH/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		new Float:check_step_n2 = (PORTAL_HEIGHT/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
 		
-		xs_vec_mul_scalar(fNormalUp, height/2, fNormalUp);
-		xs_vec_mul_scalar(fNormalRight, width/2, fNormalRight);
+		xs_vec_normalize(fRightNormal, fRightNormal)	// right
+		xs_vec_normalize(fUpNormal, fUpNormal)			// down
 		
-		new Float:fPoint2[3];
-		xs_vec_add(fPoint, fNormalUp, fPoint2);
-		xs_vec_add(fPoint2, fNormalRight, fPoint2);
-		if(!traceToWall(fPoint2, fInvNormal))
-		return false;
+		if(!check_wall_in_a_cycle_double(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fRightNormal, fUpNormal, fWallNormal, check_step_n1, check_step_n2))
+			return 0
+	}
+	else if((!isUpRightPoint && !isDownRightPoint && !isUpLeftPoint && isDownLeftPoint) ||
+			(!isUpRightPoint && isDownRightPoint && isUpLeftPoint && isDownLeftPoint))
+	{
+		new Float:check_step_n1 = (PORTAL_WIDTH/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		new Float:check_step_n2 = (PORTAL_HEIGHT/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
 		
-		xs_vec_add(fPoint, fNormalUp, fPoint2);
-		xs_vec_sub(fPoint2, fNormalRight, fPoint2);
-		if(!traceToWall(fPoint2, fInvNormal))
-		return false;
+		xs_vec_normalize(fRightNormal, fRightNormal)	// right
+		xs_vec_neg(fRightNormal, fRightNormal)			// left
+		xs_vec_normalize(fUpNormal, fUpNormal)			// down
 		
-		xs_vec_sub(fPoint, fNormalUp, fPoint2);
-		xs_vec_sub(fPoint2, fNormalRight, fPoint2);
-		if(!traceToWall(fPoint2, fInvNormal))
-		return false;
+		if(!check_wall_in_a_cycle_double(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fRightNormal, fUpNormal, fWallNormal, check_step_n1, check_step_n2))
+			return 0
+	}
+	else if((!isUpRightPoint && !isDownRightPoint && isUpLeftPoint && !isDownLeftPoint) ||
+			(isUpRightPoint && !isDownRightPoint && isUpLeftPoint && isDownLeftPoint))
+	{
+		new Float:check_step_n1 = (PORTAL_WIDTH/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		new Float:check_step_n2 = (PORTAL_HEIGHT/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
 		
-		xs_vec_sub(fPoint, fNormalUp, fPoint2);
-		xs_vec_add(fPoint2, fNormalRight, fPoint2);
-		if(!traceToWall(fPoint2, fInvNormal))
-		return false;
+		xs_vec_normalize(fRightNormal, fRightNormal)	// right
+		xs_vec_neg(fRightNormal, fRightNormal)			// left
+		xs_vec_normalize(fUpNormal, fUpNormal)			// down
+		xs_vec_neg(fUpNormal, fUpNormal)				// up
 		
-		return true;
+		if(!check_wall_in_a_cycle_double(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fRightNormal, fUpNormal, fWallNormal, check_step_n1, check_step_n2))
+			return 0
+	}
+	else if((isUpRightPoint && !isDownRightPoint && !isUpLeftPoint && !isDownLeftPoint) ||
+			(isUpRightPoint && isDownRightPoint && isUpLeftPoint && !isDownLeftPoint))
+	{
+		new Float:check_step_n1 = (PORTAL_WIDTH/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		new Float:check_step_n2 = (PORTAL_HEIGHT/ADDITIONAL_DIVIDER)/SURFACE_CHECK_NUM
+		
+		xs_vec_normalize(fRightNormal, fRightNormal)	// right
+		xs_vec_normalize(fUpNormal, fUpNormal)			// down
+		xs_vec_neg(fUpNormal, fUpNormal)				// up
+		
+		if(!check_wall_in_a_cycle_double(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fRightNormal, fUpNormal, fWallNormal, check_step_n1, check_step_n2))
+			return 0
+	}
+	else return 0
+	
+	#if WALL_CHECKER_DEBUG_LEVEL > 0
+	create_rectangle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, 'g', 50)
+	#endif
+	
+	angle_vector(fWallAngles, ANGLEVECTOR_UP, fUpNormal)
+	angle_vector(fWallAngles, ANGLEVECTOR_RIGHT, fRightNormal)
+	
+	xs_1_neg(fUpNormal[2])
+	
+	xs_vec_mul_scalar(fRightNormal, PORTAL_WIDTH/2, fRightNormal)
+	xs_vec_mul_scalar(fUpNormal, PORTAL_HEIGHT/2, fUpNormal)
+	
+	new Float:fTmpVec[3]
+	xs_vec_add(fDownLeftPoint, fRightNormal, fTmpVec)
+	xs_vec_add(fTmpVec, fUpNormal, fOutPointFSet)
+	
+	xs_vec_mul_scalar(fOrigWallNormal, HULL_SHIFT, fTmpVec)
+	xs_vec_add(fTmpVec, fOutPointFSet, fTmpVec)
+	
+	if(!is_hull_vacant(fTmpVec, HULL_HUMAN, id))
+	{
+		#if WALL_CHECKER_DEBUG_LEVEL > 0
+		client_print(id, print_center, "hull not vacant")
+		#endif
+		return 0
+	}
+	
+	new Float:fFwNormal[3]
+	angle_vector(fWallAngles, ANGLEVECTOR_FORWARD, fFwNormal)
+	xs_1_neg(fFwNormal[2])
+	xs_vec_copy(fUpLeftPoint, fMinsO)
+	xs_vec_copy(fDownRightPoint, fMaxsO)
+	xs_vec_mul_scalar(fFwNormal, TOUCHEBLE_WIDTH, fFwNormal)
+	xs_vec_add(fMaxsO, fFwNormal, fMaxsO)
+	
+	xs_vec_sub(fOutPointFSet, fMinsO, fMinsO)
+	xs_vec_sub(fOutPointFSet, fMaxsO, fMaxsO)
+	
+	fMaxsO[0] = floatabs(fMaxsO[0])
+	fMaxsO[1] = floatabs(fMaxsO[1])
+	fMaxsO[2] = floatabs(fMaxsO[2])
+	
+	fMinsO[0] = -floatabs(fMinsO[0])
+	fMinsO[1] = -floatabs(fMinsO[1])
+	fMinsO[2] = -floatabs(fMinsO[2])
+	
+	return 1
+}
+
+check_wall_in_a_cycle(Float:fUpRightPoint[3], Float:fUpLeftPoint[3], Float:fDownLeftPoint[3], Float:fDownRightPoint[3],
+	Float:fNormal[3], Float:fWallNormal[3], Float:check_step)
+{
+	new Float:fTmpVec[3]
+	xs_vec_mul_scalar(fNormal, check_step, fTmpVec)
+	
+	for(new i=1; i<=SURFACE_CHECK_NUM; i++)
+	{
+		xs_vec_add(fUpRightPoint, fTmpVec, fUpRightPoint)
+		xs_vec_add(fUpLeftPoint, fTmpVec, fUpLeftPoint)
+		xs_vec_add(fDownLeftPoint, fTmpVec, fDownLeftPoint)
+		xs_vec_add(fDownRightPoint, fTmpVec, fDownRightPoint)
+		
+		if(check_wall(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fWallNormal))
+		{
+			#if WALL_CHECKER_DEBUG_LEVEL == 2
+			create_rectangle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, 'r', 50)
+			#endif
+			return 1
+		}
+		
+		#if WALL_CHECKER_DEBUG_LEVEL == 2
+		create_rectangle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, 'b', 25)
+		#endif
+	}
+	
+	return 0
+}
+
+check_wall_in_a_cycle_double(Float:fUpRightPoint[3], Float:fUpLeftPoint[3], Float:fDownLeftPoint[3], Float:fDownRightPoint[3],
+	Float:fNormal1[3], Float:fNormal2[3], Float:fWallNormal[3], Float:check_step1, Float:check_step2)
+{
+	new Float:fTmpVec1[3]
+	xs_vec_mul_scalar(fNormal1, check_step1, fTmpVec1)
+	
+	new Float:fTmpVec2[3]
+	xs_vec_mul_scalar(fNormal2, check_step2, fTmpVec2)
+	
+	for(new i=1; i<=SURFACE_CHECK_NUM; i++)
+	{
+		xs_vec_add(fUpRightPoint, fTmpVec1, fUpRightPoint)
+		xs_vec_add(fUpRightPoint, fTmpVec2, fUpRightPoint)
+		xs_vec_add(fUpLeftPoint, fTmpVec1, fUpLeftPoint)
+		xs_vec_add(fUpLeftPoint, fTmpVec2, fUpLeftPoint)
+		xs_vec_add(fDownLeftPoint, fTmpVec1, fDownLeftPoint)
+		xs_vec_add(fDownLeftPoint, fTmpVec2, fDownLeftPoint)
+		xs_vec_add(fDownRightPoint, fTmpVec1, fDownRightPoint)
+		xs_vec_add(fDownRightPoint, fTmpVec2, fDownRightPoint)
+		
+		if(check_wall(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, fWallNormal))
+		{
+			#if WALL_CHECKER_DEBUG_LEVEL == 2
+			create_rectangle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, 'r', 50)
+			#endif
+			return 1
+		}
+		
+		#if WALL_CHECKER_DEBUG_LEVEL == 2
+		create_rectangle(fUpRightPoint, fUpLeftPoint, fDownLeftPoint, fDownRightPoint, 'b', 25)
+		#endif
+	}
+	
+	return 0
+}
+
+check_wall(Float:fUpRightPoint[3], Float:fUpLeftPoint[3], Float:fDownLeftPoint[3], Float:fDownRightPoint[3], Float:fWallNormal[3])
+{
+	if(
+	trace_to_wall(fUpRightPoint, fWallNormal)	&&
+	trace_to_wall(fUpLeftPoint, fWallNormal)	&&
+	trace_to_wall(fDownLeftPoint, fWallNormal)	&&
+	trace_to_wall(fDownRightPoint, fWallNormal)) return 1
+	
+	return 0
+}
+
+get_wall_normal(id, Float:fNormal[3])
+{
+	new Float:fOrigin[3]
+	pev(id, pev_origin, fOrigin)
+	
+	new Float:fAngles[3]
+	pev(id, pev_v_angle, fAngles)
+	angle_vector(fAngles, ANGLEVECTOR_FORWARD, fAngles)
+	xs_vec_mul_scalar(fAngles, 9999.0, fAngles)
+	
+	new Float:fEndPos[3]
+	xs_vec_add(fAngles, fOrigin, fEndPos)
+	
+	new ptr = create_tr2()	
+	engfunc(EngFunc_TraceLine, fOrigin, fEndPos, IGNORE_MISSILE | IGNORE_MONSTERS | IGNORE_GLASS, id, ptr)
+	
+	new Float:vfNormal[3]
+	get_tr2(ptr, TR_vecPlaneNormal, vfNormal)
+	
+	xs_vec_copy(vfNormal, fNormal)
+}
+
+trace_to_wall(Float:fOrigin[3], Float:fVec[3])
+{
+	new Float:fOrigin2[3]
+	xs_vec_mul_scalar(fVec, ADD_UNITS, fOrigin2)
+	xs_vec_add(fOrigin2, fOrigin, fOrigin2)
+	xs_vec_add(fOrigin2, fVec, fOrigin2)
+	
+	new ptr = create_tr2()
+	engfunc(EngFunc_TraceLine, fOrigin, fOrigin2, IGNORE_MISSILE | IGNORE_MONSTERS | IGNORE_GLASS, 0, ptr)
+	
+	new Float:fFrac
+	get_tr2(ptr, TR_flFraction, fFrac)
+	
+	free_tr2(ptr)
+	
+	if(fFrac == 1.0)
+		return 0
+	
+	return 1
+}
+
+is_hull_vacant(Float:fOrigin[3], hull, id)
+{
+	new tr
+	engfunc(EngFunc_TraceHull, fOrigin, fOrigin, 0, hull, id, tr)
+	if (!get_tr2(tr, TR_StartSolid) || !get_tr2(tr, TR_AllSolid))
+		return 1
+	return 0
 }
 
 bool:checkPlace(Float:fOrigin[3],id){
@@ -18884,7 +19474,7 @@ public mana4(id){
 	menu_additem(mana4,"\wОружие")
 	menu_additem(mana4,"\wСлучайный предмет \d[10 золота]")
 	menu_additem(mana4,"\wУлучшить предмет \d[2 золота]")
-	//menu_additem(mana4,"\wСвиток портала \d[15 золота]")
+	menu_additem(mana4,"\wСвиток портала \d[15 золота]")
 	menu_additem(mana4,"\wСвиток опыта \d[10 золота]")
 	menu_setprop(mana4,MPROP_EXIT,MEXIT_ALL)
 	menu_setprop(mana4,MPROP_EXITNAME,"Назад в меню")
@@ -18940,7 +19530,7 @@ public mana4a(id, menu, item)
 				upgrade_item(id)
 			}
 		}
-		/*case 3:
+		case 3:
 		{
 			new koszt = 15;
 			if (player_gold[id]<koszt)
@@ -18964,8 +19554,8 @@ public mana4a(id, menu, item)
 				show_hudmessage(id, "Навести прицел на стену. Нажать Установить")
 				cmd_place_portal(id);
 			}
-		}*/
-		case 3:
+		}
+		case 4:
 		{
 			new koszt = 10;
 			if (player_gold[id]<koszt)
