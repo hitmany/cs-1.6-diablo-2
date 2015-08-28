@@ -15909,12 +15909,12 @@ public portal_touch(portal_id, toucher)
 	{
 		Invalid_Enitites[portal_id] = get_gametime()+0.01
 		
-		static portal_out
+		new portal_out
 		if(player_portal_infotrg_1[toucher] == portal_id)
 		{
 			portal_out = player_portal_infotrg_2[toucher]
 		}
-		if(player_portal_infotrg_1[toucher] == portal_id)
+		if(player_portal_infotrg_2[toucher] == portal_id)
 		{
 			portal_out = player_portal_infotrg_1[toucher]
 		}
