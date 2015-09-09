@@ -1026,6 +1026,7 @@ public plugin_init()
 	register_clcmd("d2menu","showmenu")
 	register_clcmd("say menu","showmenu")	
 	register_clcmd("say d2","showmenu")
+	register_clcmd("say /d2","showmenu")
 	//register_clcmd("pomoc","helpme") 
 	//register_clcmd("say /rune","mana4") 
 	//register_clcmd("rune","mana4")
@@ -12299,7 +12300,7 @@ public set_renderchange(id)
 				
 				if(HasFlag(id,Flag_Moneyshield)||HasFlag(id,Flag_Rot)||HasFlag(id,Flag_Teamshield_Target)) render*=2	
 				
-				set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, 15)
+				set_user_rendering(id, kRenderFxGlowShell, 0, 0, 0, kRenderTransColor, render)
 			}
 			else if (player_class[id] == Infidel)
 			{
@@ -13604,7 +13605,7 @@ public count_jumps(id)
 public give_knife(id)
 {
 	new knifes = 0
-	if(player_class[id] == Ninja) knifes = 10 + floatround ( player_intelligence[id]/10.0 , floatround_floor )
+	if(player_class[id] == Ninja) knifes = 5 + floatround ( player_intelligence[id]/10.0 , floatround_floor )
 	else if(player_class[id] == Assassin) knifes = 1 + floatround ( player_intelligence[id]/20.0 , floatround_floor )
 	
 	max_knife[id] = knifes
@@ -13745,7 +13746,9 @@ public touchKnife(knife, id)
 
 			if(get_cvar_num("mp_friendlyfire") == 0 && get_user_team(id) == get_user_team(kid)) return
 
-			new knifedmg = floatround((player_intelligence[kid] - player_dextery[id])/2.0)+30
+			new knifedmg = floatround(float(player_intelligence[kid] - player_dextery[id])/2.0)+10
+			//client_print(0,print_chat,"(%d - %d)/2+10 = %d dmg",player_intelligence[kid],player_dextery[id],knifedmg)
+			if(knifedmg < 0) {knifedmg=10;}
 			//entity_set_float(id, EV_FL_dmg_take, knifedmg * 1.0)
 
 			d2_damage( id, kid, knifedmg, "ninja knife")
