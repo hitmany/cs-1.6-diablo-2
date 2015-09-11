@@ -9984,7 +9984,11 @@ public upgrade_item(id)
 	if(player_b_teamheal[id]>0) player_b_teamheal[id] += random_num(0,5)
 	
 	if(player_b_redirect[id]>0) player_b_redirect[id]+= random_num(0,2)
-	if(player_b_fireball[id]>0) player_b_fireball[id]+= random_num(0,5)
+	if(player_b_fireball[id]>0) 
+	{
+		player_b_fireball[id]+= random_num(0,5)
+		if(player_b_fireball[id] > 10) player_b_fireball[id] = 10
+	}
 	if(player_b_ghost[id]>0) player_b_ghost[id]+= random_num(0,1)
 	if(player_b_windwalk[id]>0) player_b_windwalk[id] += random_num(0,1)
 
