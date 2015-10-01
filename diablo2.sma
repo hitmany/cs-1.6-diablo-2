@@ -8393,7 +8393,7 @@ public izualring(id)
 				{
 					new Float:colddelay
 					colddelay = player_intelligence[id] * 0.06
-					if(colddelay < 4.0) { colddelay = 4.0; }
+					if(colddelay < 0.1) { colddelay = 0.1; }
 					glow_player(target, colddelay, 0, 0, 255)
 					set_user_maxspeed(target, 100.0)
 					set_task(colddelay, "unfreeze", target, "", 0, "a", 1)
