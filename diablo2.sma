@@ -8361,7 +8361,7 @@ public izualring(id)
 	izual_ring[id]--
 	new players[MAXPLAYERS], vTargetOrigin[3], pOrigin[3];
 	new target, iDistance, dmg, Float:dmgsumm, num;
-	static range = 600
+	static range = 300
 	get_user_origin( id, pOrigin );
 	
 	// Create an implosion effect
@@ -8392,7 +8392,7 @@ public izualring(id)
 				if(is_frozen[target] == 0)
 				{
 					new Float:colddelay
-					colddelay = player_intelligence[id] * 0.2
+					colddelay = player_intelligence[id] * 0.06
 					if(colddelay < 4.0) { colddelay = 4.0; }
 					glow_player(target, colddelay, 0, 0, 255)
 					set_user_maxspeed(target, 100.0)
