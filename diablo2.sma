@@ -17711,14 +17711,13 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 		new id = victim
 		if (is_user_connected(id))
 		{
-			new weapon
-			new bodypart
+			new bodypart, weapon
 			// Engine Knockback disabled
 			//if(player_class[victim] == Infidel)
 			//{
 			//	pev(victim, pev_velocity, g_Knockback[victim])
 			//}
-			weapon = get_user_weapon( attacker ,_,_)
+			weapon = get_user_weapon( inflictor ,_,_)
 				new damage = floatround(damage2)
 				new attacker_id = attacker
 				if (is_user_connected(attacker_id) && attacker_id != id && is_user_alive(id))
@@ -17727,7 +17726,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 					
 					add_damage_bonus(id,damage,attacker_id)
 					add_vampire_bonus(id,damage,attacker_id)
-					if ( IsGrenade ( inflictor ) )
+					if ( IsGrenade ( weapon ) )
 					{
 						add_grenade_bonus(id,attacker_id)
 					}
