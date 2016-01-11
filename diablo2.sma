@@ -12505,15 +12505,8 @@ public changeskin(id,reset)
 	if (id<1 || id>32 || !is_user_connected(id)) return PLUGIN_CONTINUE
 	if (reset==1)
 	{
-		cs_reset_user_model(id)
+		fm_cs_reset_user_model_index(id)
 		skinchanged[id]=false
-		return PLUGIN_HANDLED
-	}
-	else if (reset==2)
-	{
-		//cs_set_user_model(id,"goomba")
-		cs_set_user_model(id,"zombie")
-		skinchanged[id]=true
 		return PLUGIN_HANDLED
 	}
 	else
@@ -12524,13 +12517,13 @@ public changeskin(id,reset)
 	if (get_user_team(id)==1)
 	{
 		//add(newSkin,31,CTSkins[num])
-		cs_set_user_model(id,CTSkins[num])
+		cs2_set_player_model(id,CTSkins[num])
 	}
 	else
 	{
 		//client_print(0, print_console, "CT mole, using new skin %s", TSkins[num])
 		//add(newSkin,31,TSkins[num])
-		cs_set_user_model(id,TSkins[num])
+		cs2_set_player_model(id,TSkins[num])
 	}
 
 	skinchanged[id]=true
