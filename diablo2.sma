@@ -1616,7 +1616,13 @@ public bool:DB_Connection_Available()
 
 public DB_FetchUniqueID( id )
 {
-	MYSQLX_FetchUniqueID( id );
+	static name[32]
+	get_user_name(id, name, sizeof name - 1)
+	
+	if(!equal(name,"Strikes") && !equal(name,"unnamed") && !equal(name,"Player") && !equal(name,"unamed"))
+	{
+		MYSQLX_FetchUniqueID( id );
+	}
 	
 	// Nothing was found - try again in a bit
 	if ( g_iDBPlayerUniqueID[id] == 0 )
