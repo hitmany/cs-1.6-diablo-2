@@ -1778,55 +1778,6 @@ public MYSQLX_GetAllXP( id )
 
 	// Free the handle
 	SQL_FreeHandle( query );
-	
-	//Get total lvl and gold
-	format(szQuery, 255, "SELECT `gold`, `total_lvl` FROM `extra` WHERE ( `id` = '%d' );", iUniqueID );
-	query = SQL_PrepareQuery( g_DBConn, szQuery );
-
-	if ( !SQL_Execute( query ) )
-	{
-		MYSQLX_Error( query, szQuery, 2 );
-
-		return;
-	}
-
-	// If no rows we need to insert!
-	if ( SQL_NumResults( query ) == 0 )
-	{
-		// Free the last handle!
-		SQL_FreeHandle( query );
-
-		// Insert this player!
-		new szQuery[512];
-		format( szQuery, 511, "INSERT INTO `extra` ( `id`) VALUES ( '%d' );", iUniqueID );
-		new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
-
-		if ( !SQL_Execute( query ) )
-		{
-			MYSQLX_Error( query, szQuery, 3 );
-
-			return;
-		}
-	}
-	else
-	{
-		player_gold[id] = SQL_ReadResult( query, 0 );
-		player_TotalLVL[id] = SQL_ReadResult( query, 1 );
-		
-		new max_gold = get_pcvar_num(cvar_max_gold)
-		if(player_vip[id]==1)
-		{
-			max_gold=100
-		}
-		
-		if(player_gold[id] > max_gold)
-		{
-			player_gold[id] = max_gold
-		}
-	}
-	
-	// Free the last handle!
-	SQL_FreeHandle( query );
 		
 	//Get vip
 	format(szQuery, 255, "SELECT `expired` FROM `vip` WHERE ( `id` = '%d' );", iUniqueID );
@@ -2075,6 +2026,55 @@ public MYSQLX_SetDataForRace( id )
 		player_damreduction[id] = damachange(50, player_agility[id], 4.0);
 		skilltree(id)
 	}
+	
+	//Get total lvl and gold
+	format(szQuery, 255, "SELECT `gold`, `total_lvl` FROM `extra` WHERE ( `id` = '%d' );", iUniqueID );
+	query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+	if ( !SQL_Execute( query ) )
+	{
+		MYSQLX_Error( query, szQuery, 2 );
+
+		return;
+	}
+
+	// If no rows we need to insert!
+	if ( SQL_NumResults( query ) == 0 )
+	{
+		// Free the last handle!
+		SQL_FreeHandle( query );
+
+		// Insert this player!
+		new szQuery[512];
+		format( szQuery, 511, "INSERT INTO `extra` ( `id`) VALUES ( '%d' );", iUniqueID );
+		new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
+
+		if ( !SQL_Execute( query ) )
+		{
+			MYSQLX_Error( query, szQuery, 3 );
+
+			return;
+		}
+	}
+	else
+	{
+		player_gold[id] = SQL_ReadResult( query, 0 );
+		player_TotalLVL[id] = SQL_ReadResult( query, 1 );
+		
+		new max_gold = get_pcvar_num(cvar_max_gold)
+		if(player_vip[id]==1)
+		{
+			max_gold=100
+		}
+		
+		if(player_gold[id] > max_gold)
+		{
+			player_gold[id] = max_gold
+		}
+	}
+	
+	// Free the last handle!
+	SQL_FreeHandle( query );
 
 	InitRace(id, player_newclass[id], 1)
 	// This user's XP has been set + retrieved! We can save now
