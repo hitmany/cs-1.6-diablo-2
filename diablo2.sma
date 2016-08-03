@@ -971,7 +971,7 @@ public plugin_init()
 	RegisterHam(Ham_Think, "grenade", "fw_ThinkGrenade",0)
 	RegisterHam(Ham_Touch, "player", "fw_TouchPlayer")
 	
-	register_plugin("DiabloMod","2.0","hitmany") 
+	register_plugin("DiabloMod","2.0","N1ghtmr1, Miczu, GuTeK, Onyke, Feanaro, hitmany") 
 	register_cvar("diablomod_version",mod_version,FCVAR_SERVER)
 	
 	register_cvar("flashlight_custom","1");
@@ -1040,7 +1040,6 @@ public plugin_init()
 	//register_clcmd("/reset","reset_skill")
 	//register_clcmd("say /gold","mana1")
 	//register_clcmd("say /g","mana1")		
-	register_clcmd("mod","mod_info")
 	//register_concmd("dynamit","PolozDynamit")
 	//register_concmd("paladin","check_palek")
 	//register_concmd("setmine","item_mine")
@@ -4862,7 +4861,7 @@ public UpdateHUD()
 				{
 					Racename = "Падший шаман"
 				}
-				format(Msg,511,"Жизни: %i^nУровень: %i^nКласс: %s^nПредмет: %s^nПрочность: %i^nЗолото: %i^nСайт: lpstrike.ru",
+				format(Msg,511,"Жизни: %i^nУровень: %i^nКласс: %s^nПредмет: %s^nПрочность: %i^nЗолото: %i",
 				get_user_health(index),player_lvl[index],Racename,
 				player_item_name[index], item_durability[index],
 				player_gold[index])		
@@ -9337,7 +9336,7 @@ public select_class_handle(FailState,Handle:Query,Error[],Errcode,Data[],DataSiz
 public select_class(id)
 {
 new text4[512]  
-format(text4, 511,"^n\wВаш общий уровень: %d^n^n\yВыбери класс: ^n^n\r1. \wДемоны^n\r2. \wЗвери^n\r3. \wЛюди^n^n^n\r4. \wОписание классов^n^n^n\dРазработал: hitmany^nСайт сервера:^nlpstrike.ru", player_TotalLVL[id]) 
+format(text4, 511,"^n\wВаш общий уровень: %d^n^n\yВыбери класс: ^n^n\r1. \wДемоны^n\r2. \wЗвери^n\r3. \wЛюди^n^n^n\r4. \wОписание классов^n^n^n\dРазработал: hitmany", player_TotalLVL[id]) 
 
 new keys
 keys = (1<<0)|(1<<1)|(1<<2)|(1<<3)
@@ -9468,7 +9467,7 @@ return PLUGIN_HANDLED
 public ShowKlasy(id) 
 {
 	new text2[512]
-	format(text2, 511,"\yДемоны: ^n\w1. \yПадший^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yДиабло^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yКровавый ворон^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text2, 511,"\yДемоны: ^n\w1. \yПадший^t\wУровень: \r%i^n\w2. \yДуриель^t\wУровень: \r%i^n\w3. \yМефисто^t\wУровень: \r%i^n\w4. \yИзуал^t\wУровень: \r%i^n\w5. \yДиабло^t\wУровень: \r%i^n\w6. \yБаал^t\wУровень: \r%i^n\w7. \yКровавый ворон^t\wУровень: \r%i^n\w8. \yБес^t\wУровень: \r%i^n^n\w0. \yВыход",
 	player_class_lvl[id][15],player_class_lvl[id][10],player_class_lvl[id][11],player_class_lvl[id][12],player_class_lvl[id][13],player_class_lvl[id][14],player_class_lvl[id][9],player_class_lvl[id][16])
 
 	new szosta
@@ -9566,7 +9565,7 @@ public PokazZwierze(id)
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w3. \yГигантский комар^t\wУровень: \r%i^n\w4. \yЛедяной ужас^t\wУровень: \r%i^n",player_class_lvl[id][19],player_class_lvl[id][20]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w5. \yИнфидель^t\wУровень: \r%i^n\w6. \yГигантский паук^t\wУровень: \r%i^n",player_class_lvl[id][21],player_class_lvl[id][22]);
 	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w7. \yАдский кот^t\wУровень: \r%i^n^n",player_class_lvl[id][23]);
-	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера");
+	iLen += format(text5[iLen], charsmax(text5) - iLen, "\w0. \yВыход");
 	
 	static key
 	key = (1<<0)|(1<<1)|(1<<2)|(1<<3)|(1<<4)|(1<<5)|(1<<6)|(1<<9)
@@ -9651,7 +9650,7 @@ public PokazZwierz( id, item )
 public PokazPremiumy(id)
 {
 	new text6[512]
-	format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\rДоступ к премиум классам.^n\rкупить на lpstrike.ru",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
+	format(text6, 511,"\yПремиум: ^n\w1. \yGriswold^t\wУровень: \r%i^n\w2. \yTheSmith^t\wУровень: \r%i^n\w3. \yDemonolog^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\rДоступ к премиум классам.",player_class_lvl[id][24],player_class_lvl[id][25],player_class_lvl[id][26],player_class_lvl[id][27])
 
 	new usma
 	usma = (1<<0)|(1<<1)|(1<<2)|(1<<9)
@@ -13942,17 +13941,6 @@ public removeBaalcopy(taskid)
 		iEnt = find_ent_by_owner(-1,"baalcopyweap",id,0);		
 	}
 	baal_copyed[id]=0
-}
-////////////////////////////////////////////////////////////////////////////////
-//                             koniec z nozami                                //
-////////////////////////////////////////////////////////////////////////////////
-public mod_info(id)
-{
-	client_print(id,print_console,"Добро пожаловать в Diablo Mod от HiTmAnY")
-	client_print(id,print_console,"     Читай инфо о моде на сайте")
-	client_print(id,print_console,"        http://lpstrike.ru")
-	client_print(id,print_console,"        Текущая версия %s",mod_version)
-	return PLUGIN_HANDLED
 }
 ////////////////////////////////////////////////////////////////////////////////
 //                             Amazon part code                               //

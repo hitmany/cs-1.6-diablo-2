@@ -1,0 +1,154 @@
+body {
+    background-color: #191814;
+}
+@font-face {
+    font-family: 'otmedium';
+    src: url('exocet-blizzard-light.eot');
+    src: url('exocet-blizzard-light.ttf') format('truetype');
+}
+.header-2 {
+font: normal 42px/100% "otmedium","Palatino Linotype", "Times", serif;
+letter-spacing: -1.5px;
+text-transform: uppercase;
+}
+.d3-color-blue, .d3-color-blue a {
+color: #6969ff!important;
+}
+ul { list-style-type: none; }
+.db-detail-box { background: #252017 url("images/box-bg.jpg") no-repeat; position: relative; border: 1px solid #382f1f; box-shadow: inset 0 0 20px #18150e;width:731px;margin: 0 auto;}
+.db-detail-box .subheader-2 { margin-top: 0; margin-bottom: 0; font-size: 28px; }
+.db-detail-box .corner { position: absolute; width: 38px; height: 41px; background: url("images/box-corners-2.png") no-repeat; }
+.db-detail-box .corner.tl { top: -5px; left: -9px; }
+.db-detail-box .corner.tr { top: -5px; right: -9px; background-position: -37px 0; }
+.db-detail-box .corner.bl { bottom: -5px; left: -9px; background-position: 0 -41px; }
+.db-detail-box .corner.br { bottom: -5px; right: -9px; background-position: -37px -41px; }
+.item-detail-box { padding: 25px 0 25px 0; }
+.item-detail-box .detail-icon { position: absolute; left: 0; top: 0; width: 150px; }
+.item-detail-box .detail-icon .d3-icon-item { margin-left: 30px; margin-top: 30px; }
+
+.item-detail-box .d3-icon-item .icon-item-inner { position: relative; }
+.item-detail-box .d3-icon-item .max-stacks { position: absolute; bottom: 2px; right: 4px; color: #fff; font-weight: bold; font-size: 18px;
+	text-shadow: 1px 1px 1px #000, -1px 1px 1px #000, 1px -1px 1px #000, -1px -1px 1px #000, 0 0 5px #000; }
+.item-detail-box .d3-icon-item .tip { border-bottom: 0; }
+
+.icon-size-default .detail-text { margin-left: 90px; min-height: 127px; }
+
+/* main item box */
+.item-detail-box .header-2{ width: 600px; font-size: 28px; }
+.item-detail-box .detail-text { width: 600px; position: relative; z-index: 3; }
+
+.item-detail-box .d3-item-properties { font-size: 15px; }
+.item-detail-box .d3-item-properties a { color: #CFB991; }
+.item-detail-box .d3-item-properties .item-type { margin-top: 5px; }
+
+/*
+	CSS code shared between the D3 Community Site and the Tooltip Script.
+
+	Note: All global styles should be prefixed with d3- to avoid affecting 3rd party sites.
+*/
+
+/* item properties (shared between item detail page, item browsing, and item tooltips */
+.d3-item-properties ul,
+.d3-item-properties div { margin-top: 10px; }
+.d3-item-properties ul ul { margin-top: 0; }
+.d3-item-properties ul li { margin: 1px 0; }
+.d3-item-properties ul li.bump { margin-top: 10px; }
+.d3-item-properties p { margin: 0 !important; }
+.d3-item-properties .indent { padding-left: 18px; }
+.d3-item-properties .value { color: #ded2ab; }
+.d3-item-properties .big .value { font-size: 300%; line-height: 100%; font-family: "Palatino Linotype", "Times", serif; text-shadow: 0 0 5px black, 0 0 5px black, 0 0 5px black; }
+.d3-item-properties .d3-color-lightblue .value { color: #99bbff !important; }
+.d3-item-properties .d3-color-blue .value { color: #bda6db !important; }
+.d3-item-properties .d3-color-gold .value { color: white !important; }
+.d3-item-properties .item-type,
+.d3-item-properties .item-type-right { margin-top: 0; }
+.d3-item-properties .item-type-right { float: right; text-align: right; }
+.d3-item-properties .item-type { color: white; }
+.d3-item-properties .item-low-dps { color: #909090; }
+.d3-item-properties .item-low-dps .value { color: #CB0000; }
+.d3-item-properties .item-armor-weapon li { color: #909090; }
+.d3-item-properties .item-armor-weapon .value { color: white; }
+
+
+/* icons */
+.d3-icon { display: inline-block; overflow: hidden; background: 50% 50% no-repeat; font-size: 1px; }
+
+.d3-icon-item,
+.d3-icon-skill { box-shadow: 0 0 5px #000; }
+
+	/* items */
+.d3-icon-item { border: 1px solid black; background: no-repeat 50% 100%; border-radius: 4px; }
+.d3-icon-item .icon-item-gradient { display: block; border-radius: 4px;
+background-image: url("images/gradient.png");
+background-image: -webkit-linear-gradient(top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+background-image:    -moz-linear-gradient(top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+background-image:     -ms-linear-gradient(top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+background-image:      -o-linear-gradient(top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+background-image:         linear-gradient(top, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0));
+}
+.d3-icon-item .icon-item-inner { display: block; padding: 1px; background: no-repeat center center; font-size: 1px; line-height: normal; text-align: center; border-radius: 4px; overflow: hidden; }
+a:hover .d3-icon-item .icon-item-inner,
+.hover .d3-icon-item .icon-item-inner,
+.icon-active .d3-icon-item .icon-item-inner { background-color: rgba(255, 255, 255, 0.05); } /* brighter */
+
+.d3-icon-item-large .icon-item-default { width: 64px; height: 128px; }
+.d3-icon-item-large .icon-item-square  { width: 64px; height: 64px; }
+.d3-icon-item-large .icon-item-big     { width: 82px; height: 164px; }
+
+/* gray */
+.d3-icon-item-gray { border-color: #513f2e; background-image: url("images/brown.png"); background-color: #2a2017; }
+a:hover .d3-icon-item-gray,
+.hover .d3-icon-item-gray,
+.icon-active .d3-icon-item-gray { border-color: #7a5f45; }
+
+/* white */
+.d3-icon-item-default { border-color: #513f2e; background-image: url("images/brown.png"); background-color: #2a2017; }
+a:hover .d3-icon-item-white,
+.hover .d3-icon-item-white,
+.icon-active .d3-icon-item-white { border-color: #7a5f45; }
+
+/* blue */
+.d3-icon-item-blue { border-color: #6091a6; background-image: url("images/blue.png"); background-color: #232227; }
+a:hover .d3-icon-item-blue,
+.hover .d3-icon-item-blue,
+.icon-active .d3-icon-item-blue { border-color: #90c8d3; }
+
+/* yellow */
+.d3-icon-item-yellow { border-color: #9b8e3c; background-image: url("images/yellow.png"); background-color: #322914; }
+a:hover .d3-icon-item-yellow,
+.hover .d3-icon-item-yellow,
+.icon-active .d3-icon-item-yellow { border-color: #cdc75a; }
+
+/* orange */
+.d3-icon-item-orange { border-color: #b07b38; background-image: url("images/orange.png"); background-color: #332314; }
+a:hover .d3-icon-item-orange,
+.hover .d3-icon-item-orange,
+.icon-active .d3-icon-item-orange { border-color: #d8b954; }
+
+/* green */
+.d3-icon-item-green { border-color: #748e3d; background-image: url("images/green.png"); background-color: #262f14; }
+a:hover .d3-icon-item-green,
+.hover .d3-icon-item-green,
+.icon-active .d3-icon-item-green { border-color: #aec75c; }
+
+/* general */
+.d3-color-default, .d3-color-default a { color: #fff !important; }
+.d3-color-blue, .d3-color-blue a { color: #6969ff !important; }
+.d3-color-gray, .d3-color-gray a { color: #909090 !important; }
+.d3-color-gold, .d3-color-gold a { color: #c7b377 !important; }
+.d3-color-green, .d3-color-green a { color: #00ff00 !important; }
+.d3-color-orange, .d3-color-orange a { color: #bf642f !important; }
+.d3-color-purple, .d3-color-purple a { color: #a335ee !important; }
+.d3-color-red, .d3-color-red a { color: #ff0000 !important; }
+.d3-color-white, .d3-color-white a { color: #fff !important; }
+.d3-color-yellow, .d3-color-yellow a { color: #ffff00 !important; }
+
+a.d3-color-blue:hover, .d3-color-blue a:hover, a:hover .d3-color-blue,
+a.d3-color-gray:hover, .d3-color-gray a:hover, a:hover .d3-color-gray,
+a.d3-color-gold:hover, .d3-color-gold a:hover, a:hover .d3-color-gold,
+a.d3-color-green:hover, .d3-color-green a:hover, a:hover .d3-color-green,
+a.d3-color-orange:hover, .d3-color-orange a:hover, a:hover .d3-color-orange,
+a.d3-color-purple:hover, .d3-color-purple a:hover, a:hover .d3-color-purple,
+a.d3-color-red:hover, .d3-color-red a:hover, a:hover .d3-color-red,
+a.d3-color-white:hover, .d3-color-white a:hover, a:hover .d3-color-white,
+a.d3-color-yellow:hover, .d3-color-yellow a:hover a:hover .d3-color-yellow { color: #fff !important; }
