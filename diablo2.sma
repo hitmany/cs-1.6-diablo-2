@@ -189,6 +189,8 @@ new g_MsgText
 new cvar_revival_time
 new cvar_revival_health
 new cvar_revival_dis
+new cvar_heroes_path
+new cvar_motd_path
 
 new attacker
 new flashlight[33]
@@ -933,6 +935,9 @@ public plugin_init()
 	cvar_revival_time 	= register_cvar("amx_revkit_time", 	"3")
 	cvar_revival_health	= register_cvar("amx_revkit_health", 	"25")
 	cvar_revival_dis 	= register_cvar("amx_revkit_distance", 	"70.0")
+	
+	cvar_heroes_path	= register_cvar("diablo_heroes_path", 	"http://diablo.lpstrike.ru/classes")
+	cvar_motd_path 	= register_cvar("diablo_motd_path", 	"http://motdfiles.d2.diablomod.ru/server")
 	
 	g_msg_bartime	= get_user_msgid("BarTime")
 	g_msg_clcorpse	= get_user_msgid("ClCorpse")
@@ -5550,45 +5555,55 @@ public raceDeskMenuDeamons(id){
 
 public raceDeskMenuDeamonsMenu(id, menu, item)
 {
+	new path_string[150]
+	get_pcvar_string(cvar_heroes_path, path_string, 150)
 	switch(item)
 	{
 		case 0:
 		{
+			format(path_string,149,"%s/class.php?class=Fallen",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Fallen", "Падший")
 			raceDeskMenuDeamons(id)
 		}
 		case 1:
 		{
+			format(path_string,149,"%s/class.php?class=Duriel",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Duriel", "Дуриель")
 			raceDeskMenuDeamons(id)
 		}
 		case 2:
 		{
+			format(path_string,149,"%s/class.php?class=Mephisto",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Mephisto", "Мефисто")
 			raceDeskMenuDeamons(id)
 		}
 		case 3:
 		{
+			format(path_string,149,"%s/class.php?class=Izual",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Izual", "Изуал")
 			raceDeskMenuDeamons(id)
 		}
 		case 4:
 		{
+			format(path_string,149,"%s/class.php?class=Diablo",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Diablo", "Диабло")
 			raceDeskMenuDeamons(id)
 		}
 		case 5:
 		{
+			format(path_string,149,"%s/class.php?class=Baal",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Baal", "Баал")
 			raceDeskMenuDeamons(id)
 		}
 		case 6:
 		{
+			format(path_string,149,"%s/class.php?class=Bloodraven",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Bloodraven", "Кровавый ворон")
 			raceDeskMenuDeamons(id)
 		}
 		case 7:
 		{
+			format(path_string,149,"%s/class.php?class=Imp",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Imp", "Бес")
 			raceDeskMenuDeamons(id)
 		}
@@ -5623,41 +5638,51 @@ public raceDeskMenuAnimals(id){
 
 public raceDeskMenuAnimalsMenu(id, menu, item)
 {
+	new path_string[150]
+	get_pcvar_string(cvar_heroes_path, path_string, 150)
 	switch(item)
 	{
 		case 0:
 		{
-			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Zakarum", "Закарум")
+			
+			format(path_string,149,"%s/class.php?class=Zakarum",path_string)
+			show_motd(id, path_string, "Закарум")
 			raceDeskMenuAnimals(id)
 		}
 		case 1:
 		{
-			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Viper", "Саламандра")
+			format(path_string,149,"%s/class.php?class=Viper",path_string)
+			show_motd(id, path_string, "Саламандра")
 			raceDeskMenuAnimals(id)
 		}
 		case 2:
 		{
-			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Mosquito", "Гигантский комар")
+			format(path_string,149,"%s/class.php?class=Mosquito",path_string)
+			show_motd(id, path_string, "Гигантский комар")
 			raceDeskMenuAnimals(id)
 		}
 		case 3:
 		{
-			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Frozzen", "Ледяной ужас")
+			format(path_string,149,"%s/class.php?class=Frozzen",path_string)
+			show_motd(id, path_string, "Ледяной ужас")
 			raceDeskMenuAnimals(id)
 		}
 		case 4:
 		{
-			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Infidel", "Инфидель")
+			format(path_string,149,"%s/class.php?class=Infidel",path_string)
+			show_motd(id, path_string, "Инфидель")
 			raceDeskMenuAnimals(id)
 		}
 		case 5:
 		{
-			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=GiantSpider", "Гигантский паук")
+			format(path_string,149,"%s/class.php?class=GiantSpider",path_string)
+			show_motd(id, path_string, "Гигантский паук")
 			raceDeskMenuAnimals(id)
 		}
 		case 6:
 		{
-			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=SabreCat", "Адский кот")
+			format(path_string,149,"%s/class.php?class=SabreCat",path_string)
+			show_motd(id, path_string, "Адский кот")
 			raceDeskMenuAnimals(id)
 		}
 		case MENU_EXIT:
@@ -5692,45 +5717,55 @@ public raceDeskMenuHeroes(id){
 
 public raceDeskMenuHeroesMenu(id, menu, item)
 {
+	new path_string[150]
+	get_pcvar_string(cvar_heroes_path, path_string, 150)
 	switch(item)
 	{
 		case 0:
 		{
+			format(path_string,149,"%s/class.php?class=Mag",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Mag", "Маг")
 			raceDeskMenuHeroes(id)
 		}
 		case 1:
 		{
+			format(path_string,149,"%s/class.php?class=Monk",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Monk", "Монах")
 			raceDeskMenuHeroes(id)
 		}
 		case 2:
 		{
+			format(path_string,149,"%s/class.php?class=Paladin",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Paladin", "Паладин")
 			raceDeskMenuHeroes(id)
 		}
 		case 3:
 		{
+			format(path_string,149,"%s/class.php?class=Assassin",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Assassin", "Ассассин")
 			raceDeskMenuHeroes(id)
 		}
 		case 4:
 		{
+			format(path_string,149,"%s/class.php?class=Necromancer",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Necromancer", "Некромант")
 			raceDeskMenuHeroes(id)
 		}
 		case 5:
 		{
+			format(path_string,149,"%s/class.php?class=Barbarian",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Barbarian", "Варвар")
 			raceDeskMenuHeroes(id)
 		}
 		case 6:
 		{
+			format(path_string,149,"%s/class.php?class=Ninja",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Ninja", "Ниндзя")
 			raceDeskMenuHeroes(id)
 		}
 		case 7:
 		{
+			format(path_string,149,"%s/class.php?class=Amazon",path_string)
 			show_motd(id, "http://diablo.lpstrike.ru/classes/class.php?class=Amazon", "Амазонка")
 			raceDeskMenuHeroes(id)
 		}
@@ -5766,11 +5801,14 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[],itemcolor[],
 	
 	new Data[2000]
 	
+	new path_string[150]
+	get_pcvar_string(cvar_motd_path, path_string, 150)
+	
 	//Format
 	format(Data,1999,"<meta http-equiv='content-type' content='text/html; charset=UTF-8'>")
 	write_file(g_ItemFile,Data,-1)
 	//CSS
-	format(Data,1999,"<link rel='stylesheet' href='http://motdfiles.d2.diablomod.ru/server/iteminfo.css' type='text/css' charset='utf-8'><style type='text/css'></style>")
+	format(Data,1999,"<link rel='stylesheet' href='%s/iteminfo.css' type='text/css' charset='utf-8'><style type='text/css'></style>",path_string)
 	write_file(g_ItemFile,Data,-1)
 	
 	//Body
@@ -5781,7 +5819,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[],itemcolor[],
 	write_file(g_ItemFile,Data,-1)
 	
 	//Item image
-	format(Data,1999,"<span class='icon-item-inner icon-item-%s' style='background-image: url(http://motdfiles.d2.diablomod.ru/server/images/items/%s.png);'></span>",imagetype,itemimage)
+	format(Data,1999,"<span class='icon-item-inner icon-item-%s' style='background-image: url(%s/images/items/%s.png);'></span>",imagetype,path_string,itemimage)
 	write_file(g_ItemFile,Data,-1)
 	
 	format(Data,1999,"</span></span></div><div class='detail-text'><div class='d3-item-properties'><ul class='item-type'>")
@@ -9374,7 +9412,7 @@ public PokazKlasy(id)
 	//new flags[28]
 	//get_cvar_string("diablo_classes",flags,27) //<--- tu, gdzie jest 16 wpisz liczbк swoich klas
 	new text3[512]
-	format(text3, 512,"\yЛюди: ^n\w1. \yМаг^t\wУровень: \r%i^n\w2. \yМонах^t\wУровень: \r%i^n\w3. \yПаладин^t\wУровень: \r%i^n\w4. \yАссассин^t\wУровень: \r%i^n\w5. \yНекромант^t\wУровень: \r%i^n\w6. \yВарвар^t\wУровень: \r%i^n\w7. \yНиндзя^t\wУровень: \r%i^n\w8. \yАмазонка^t\wУровень: \r%i^n^n\w0. \yВыход^n^n\dlpstrike.ru^n\dСайт сервера",
+	format(text3, 512,"\yЛюди: ^n\w1. \yМаг^t\wУровень: \r%i^n\w2. \yМонах^t\wУровень: \r%i^n\w3. \yПаладин^t\wУровень: \r%i^n\w4. \yАссассин^t\wУровень: \r%i^n\w5. \yНекромант^t\wУровень: \r%i^n\w6. \yВарвар^t\wУровень: \r%i^n\w7. \yНиндзя^t\wУровень: \r%i^n\w8. \yАмазонка^t\wУровень: \r%i^n^n\w0. \yВыход",
 	player_class_lvl[id][1],player_class_lvl[id][2],player_class_lvl[id][3],player_class_lvl[id][4],player_class_lvl[id][5],player_class_lvl[id][6],player_class_lvl[id][7],player_class_lvl[id][8])
 
 	new keyspiata
