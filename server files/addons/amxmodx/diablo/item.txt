@@ -1,0 +1,11 @@
+<meta http-equiv='content-type' content='text/html; charset=UTF-8'>
+<link rel='stylesheet' href='http://motdfiles.d2.diablomod.ru/server/iteminfo.css' type='text/css' charset='utf-8'><style type='text/css'></style>
+<body scroll='yes'>
+<div class='db-detail-box colors-subtle item-detail-box icon-size-default'><div class='detail-icon '><span class='d3-icon d3-icon-item d3-icon-item-large d3-icon-item-blue'><span class='icon-item-gradient'>
+<span class='icon-item-inner icon-item-square' style='background-image: url(http://motdfiles.d2.diablomod.ru/server/images/items/default.png);'></span>
+</span></span></div><div class='detail-text'><div class='d3-item-properties'><ul class='item-type'>
+<div class='header-2 d3-color-blue'>Сердце Халима</div>
+<li><span class='d3-color-blue'>Легендарный</span></li></ul>
+<ul class='item-armor-weapon'><li class='big'><span class='value'>250</span></li><li>прочности</li></ul>
+<ul class='item-armor-weapon item-weapon-damage'><li class='d3-color-blue'>Вы устойчивы к взрывам<br></li></ul>
+</div></div><span class='corner tl'></span><span class='corner tr'></span><span class='corner bl'></span><span class='corner br'></span></div>
