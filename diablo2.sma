@@ -5467,16 +5467,20 @@ public helpme(id)
 
 public helpme_menu(id, key) 
 { 
+	new path_string[150]
+	get_pcvar_string(cvar_motd_path, path_string, 150)
 	switch(key) 
 	{ 
 		case 0: 
 		{	
-			show_motd(id, "http://diablo.lpstrike.ru/motd_main.html", "Введение")
+			format(path_string,149,"%s/motd_main.html",path_string)
+			show_motd(id, path_string, "Введение")
 			helpme(id)
 		}
 		case 1: 
 		{	
-			show_motd(id, "http://diablo.lpstrike.ru/motd_commands.html", "Команды")
+			format(path_string,149,"%s/motd_commands.html",path_string)
+			show_motd(id, path_string, "Команды")
 			helpme(id)
 		}
 		case 2: 
