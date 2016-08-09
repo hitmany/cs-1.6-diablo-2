@@ -596,14 +596,14 @@ new g_iDBPlayerSavedBy[33];
 // SQLX
 new Handle:g_DBTuple;
 new Handle:g_DBConn;
-new gcvar_host, gcvar_user, gcvar_pass, gcvar_database;
+new gcvar_host, gcvar_user, gcvar_pass, gcvar_save, gcvar_database;
 //new bool:bDBXPRetrieved[33];
 
 #define TOTAL_TABLES		5
 
 new const szTables[TOTAL_TABLES][] = 
 {
-	"CREATE TABLE IF NOT EXISTS `player` ( `id` int(8) unsigned NOT NULL AUTO_INCREMENT, `name` varchar(33) NOT NULL, `time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'ON UPDATE CURRENT_TIMESTAMP', PRIMARY KEY (`id`), UNIQUE KEY `id` (`id`)) ENGINE=MyISAM DEFAULT CHARSET=utf8 AUTO_INCREMENT=1;",
+	"CREATE TABLE IF NOT EXISTS `player` (`id` int(8) unsigned NOT NULL AUTO_INCREMENT,`name` varchar(33) NOT NULL,`steamid` varchar(33) NOT NULL,`time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT 'ON UPDATE CURRENT_TIMESTAMP',PRIMARY KEY (`id`), UNIQUE KEY `id` (`id`), KEY `id_2` (`id`)) ENGINE=MyISAM  DEFAULT CHARSET=utf8;",
 	"CREATE TABLE IF NOT EXISTS `extra` ( `id` int(8) unsigned NOT NULL, `gold` int(11) NOT NULL DEFAULT '0', `total_lvl` int(8) NOT NULL DEFAULT '0', PRIMARY KEY ( `id` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 	"CREATE TABLE IF NOT EXISTS `class` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `xp` int(8) NOT NULL DEFAULT '0', PRIMARY KEY ( `id`,`class` )) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
 	"CREATE TABLE IF NOT EXISTS `skill` ( `id` int(8) unsigned NOT NULL, `class` int(2) unsigned NOT NULL, `str` int(2) NOT NULL, `agi_best` int(2) NOT NULL, `agi_dmg` int(2) NOT NULL, `sta` int(2) NOT NULL, `dur` int(2) NOT NULL, `int` int(2) NOT NULL, `dex_dmg` int(2) NOT NULL, `quest_cur` int(2) NOT NULL DEFAULT '0', `quest_count1` int(2) NOT NULL DEFAULT '0', `quest_count2` int(2) NOT NULL DEFAULT '0', PRIMARY KEY (`id`,`class`)) ENGINE=MyISAM DEFAULT CHARSET=utf8;",
@@ -915,6 +915,7 @@ public plugin_init()
 	gcvar_host = register_cvar("diablo_sql_host","localhost",FCVAR_PROTECTED)
 	gcvar_user = register_cvar("diablo_sql_user","root",FCVAR_PROTECTED)
 	gcvar_pass = register_cvar("diablo_sql_pass","",FCVAR_PROTECTED)
+	gcvar_save = register_cvar("diablo_sql_save","0",FCVAR_PROTECTED)
 	gcvar_database = register_cvar("diablo_sql_database","dbmod",FCVAR_PROTECTED)
 	
 	//register_cvar("diablo_sql_table","dbmod_table222",FCVAR_PROTECTED)
@@ -1655,10 +1656,25 @@ public MYSQLX_FetchUniqueID( id )
 	// Remember how we got this ID
 	g_iDBPlayerSavedBy[id] = 2;
 
-	new szQuery[512], szName[70];
+	new szQuery[512], szName[70], szSteamID[33];
 	get_user_name( id, szName, 69 );
+	get_user_authid( id, szSteamID, 32 );
 	replace_all(szName, 99, "'", "\'")
-	format( szQuery, 511, "SELECT `id` FROM `player` WHERE `name` = ^"%s^";", szName);
+	switch( get_pcvar_num( gcvar_save ) )
+	{
+		case 0:
+		{
+			format( szQuery, 511, "SELECT `id` FROM `player` WHERE `name` = ^"%s^";", szName);
+		}
+		case 1:
+		{
+			format( szQuery, 511, "SELECT `id` FROM `player` WHERE `steamid` = ^"%s^";", szSteamID);
+		}
+		default:
+		{
+			format( szQuery, 511, "SELECT `id` FROM `player` WHERE `name` = ^"%s^";", szName);
+		}
+	}
 	new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
 
 	if ( !SQL_Execute( query ) )
@@ -1676,7 +1692,7 @@ public MYSQLX_FetchUniqueID( id )
 
 		// Insert this player!
 		new szQuery[512];
-		format( szQuery, 511, "INSERT INTO `player` ( `id` , `name` , `time` ) VALUES ( NULL , '%s', NOW() );", szName );
+		format( szQuery, 511, "INSERT INTO `player` ( `id` , `name` , `steamid` , `time` ) VALUES ( NULL , '%s', '%s', NOW() );", szName, szSteamID );
 		new Handle:query = SQL_PrepareQuery( g_DBConn, szQuery );
 
 		if ( !SQL_Execute( query ) )
