@@ -17755,7 +17755,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 		if(get_user_team(victim) == get_user_team(attacker)) return HAM_IGNORED;
 		if(attacker == 0 || victim == 0 || !is_user_connected(victim) || !is_user_connected(attacker)) return HAM_IGNORED;
 		new id = victim
-		if (is_user_connected(id))
+		if ((1 <= id <= MAXPLAYERS) && (1 <= attacker <= MAXPLAYERS))
 		{
 			new bodypart, weapon
 			// Engine Knockback disabled
@@ -17763,7 +17763,7 @@ public HamTakeDamage(victim, inflictor, attacker, Float:damage2, damagebits)
 			//{
 			//	pev(victim, pev_velocity, g_Knockback[victim])
 			//}
-			weapon = get_user_weapon( inflictor ,_,_)
+			weapon = get_user_weapon( attacker ,_,_)
 				new damage = floatround(damage2)
 				new attacker_id = attacker
 				if (is_user_connected(attacker_id) && attacker_id != id && is_user_alive(id))
