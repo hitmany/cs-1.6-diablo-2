@@ -5829,7 +5829,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[],itemcolor[],
 	format(Data,1999,"<meta http-equiv='content-type' content='text/html; charset=UTF-8'>")
 	write_file(g_ItemFile,Data,-1)
 	//CSS
-	format(Data,1999,"<link rel='stylesheet' href='%s/iteminfo.css' type='text/css' charset='utf-8'><style type='text/css'></style>",path_string)
+	format(Data,1999,"<link rel='stylesheet' href='%s/server/iteminfo.css' type='text/css' charset='utf-8'><style type='text/css'></style>",path_string)
 	write_file(g_ItemFile,Data,-1)
 	
 	//Body
@@ -5840,7 +5840,7 @@ public showitem(id,itemname[],itemvalue[],itemeffect[],Durability[],itemcolor[],
 	write_file(g_ItemFile,Data,-1)
 	
 	//Item image
-	format(Data,1999,"<span class='icon-item-inner icon-item-%s' style='background-image: url(%s/images/items/%s.png);'></span>",imagetype,path_string,itemimage)
+	format(Data,1999,"<span class='icon-item-inner icon-item-%s' style='background-image: url(%s/server/images/items/%s.png);'></span>",imagetype,path_string,itemimage)
 	write_file(g_ItemFile,Data,-1)
 	
 	format(Data,1999,"</span></span></div><div class='detail-text'><div class='d3-item-properties'><ul class='item-type'>")
